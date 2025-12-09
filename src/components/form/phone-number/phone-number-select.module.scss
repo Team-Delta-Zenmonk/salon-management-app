@@ -1,0 +1,95 @@
+.selectComponent {
+    cursor: pointer;
+    gap: 2px;
+    padding-left: 14px;
+    height: 40px;
+    user-select: none;
+    margin-right: 2px;
+    color: var(--secondary-800);
+  }
+  
+  .selectedCountryText {
+    width: 30px;
+    text-overflow: ellipsis;
+    text-align: center;
+    overflow: hidden;
+  }
+  
+  .selectedCountryTextDisabled {
+    width: 30px;
+    text-overflow: ellipsis;
+    text-align: center;
+    overflow: hidden;
+    color: var(--secondary-400);
+  }
+  
+  .input {
+    background-color: white;
+    height: 48px;
+  }
+  
+  .label {
+    top: -2px;
+  }
+  
+  .shrunkLabel {
+    top: 0;
+  }
+  
+  .selectIcon {
+    right: 8px;
+    position: absolute;
+    color: var(--secondary-600);
+  }
+  
+  .phoneNumberForm {
+    min-width: 60px;
+  }
+  
+  .phoneCodeMenu {
+    min-height: auto;
+    gap: 8px;
+  }
+  
+  .phoneNumberSelectMenu {
+    max-height: 400px;
+  }
+  
+  .textDanger {
+    color: var(--error);
+  }
+  
+  .phoneNumberSelect {
+    height: 48px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+  
+  .popper {
+    border: 1px solid var(--secondary-200);
+    background-color: #fff;
+    border-radius: calc(var(--border-radius) * 1px);
+    width: 300px;
+    z-index: 1301;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.20), 0 9px 10px 0 rgba(0, 0, 0, 0.14), 0 5px 14px 0 rgba(0, 0, 0, 0.12);
+  }
+  
+  .listBox {
+    border-radius: 0 0 4px 4px;
+    z-index: 1301;
+  }
+  
+  .textField {
+    padding: 10px;
+    width: 100%;
+  
+    input {
+      border-radius: calc(var(--border-radius) * 1px);
+      height: 100%;
+      background-color: var(--white);
+      border: 1px solid var(--secondary-500);
+      padding: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+  }

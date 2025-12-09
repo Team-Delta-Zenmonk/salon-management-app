@@ -1,0 +1,30 @@
+import type { ChangeEvent, FocusEvent } from "react";
+import type { Control, FieldValues, Path } from "react-hook-form";
+import type { SvgIconProps } from "@mui/material";
+
+export type CustomTextFieldProps<T extends FieldValues> = {
+  type: string;
+  placeholder?: string;
+  pattern?: RegExp;
+  handleChange?: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleBlur?: (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>) => void;
+  handleFocus?: (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>) => void;
+  name: Path<T>;
+  control: Control<T>;
+  label?: string;
+  disabled?: boolean;
+  maxLength?: number;
+  rules?: Record<string, string[]>;
+  identifier: string;
+  loading?: boolean;
+  endAdornment?: React.ReactElement<SvgIconProps>;
+  startAdornment?: React.ReactElement<SvgIconProps>;
+  endAdornmentClassName?: string;
+  endAdornmentToolTipText?: string;
+  onEndAdornmentClick?: (value: string) => void;
+  inputPropsClassName?: string;
+  showError?: boolean;
+  highlightPrimaryIconButton?: boolean;
+  processChange?: (e: string) => string;
+  extraSpacesNotAllowed?: boolean
+};

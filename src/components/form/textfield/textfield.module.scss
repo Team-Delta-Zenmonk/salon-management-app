@@ -1,0 +1,83 @@
+.input {
+  padding: 0px 0px 0px 16px;
+  height: 100%;
+}
+
+.inputWithStartAdornment {
+  padding: 14px 12px 14px 0px;
+  text-overflow: ellipsis;
+}
+
+.label {
+  padding-right: 0;
+}
+
+.textfieldInput {
+  background-color: var(--white);
+  padding-right: 12px;
+  height: 40px;
+}
+
+.textfieldWithEndAdornment {
+  .label {
+    padding-right: 35px;
+  }
+}
+
+.startAdornment {
+  padding-left: "12px";
+}
+
+.endAdornment {
+  padding-right: 0px;
+}
+
+.inputPlaceholder::placeholder {
+  color: var(--error);
+  opacity: 1;
+}
+
+.placeholder:disabled::placeholder {
+  -webkit-text-fill-color: var(--secondary-400);
+  font-size: 14px;
+}
+
+.squareBtn {
+  border-left: 1px solid var(--secondary-400);
+  padding: 24px 2px;
+
+  > button {
+    padding: 10px;
+  }
+}
+
+.endAdornmentError {
+  border-left: 1px solid var(--error);
+  padding: 24px 2px;
+}
+
+.disabledLabel {
+  color: var(--secondary-400);
+}
+
+.textfield {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+.highlightPrimaryIconButton {
+  border-radius: 0px 8px 8px 0px;
+  background-color: var(--primary-900);
+  padding: 10px;
+}
+
+.disabledIconButton {
+  background-color: var(--secondary-300);
+}
