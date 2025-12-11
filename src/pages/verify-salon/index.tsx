@@ -7,18 +7,21 @@ import { VerifyEmailSchema, type VerifyEmailForm } from "./schema/verify-email.s
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import OTPInput from "../../components/form/otp-input";
 import { useLocation, useNavigate } from "react-router-dom";
-import { verifyEmail } from "../../features/salon-onboarding/verify-email/verify-email.service";
 import { resendOTP } from "../../features/salon-onboarding/resend-otp/resend-otp.service";
 import { callSnack } from "../../components/snackbar";
+import { useAppDispatch } from "../../store/hooks";
+import { verifySalonAction } from "../../features/auth/verify-salon/verify-salon.action";
 
 export default function VerifyEmail() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [resendLoading, setResendLoading] = useState<boolean>(false);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
+
 
   const methods = useForm<VerifyEmailForm>({
     resolver: zodResolver(VerifyEmailSchema),
@@ -29,30 +32,35 @@ export default function VerifyEmail() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsLoading(true);
-      await verifyEmail({ otp: data.otp, email: email! });
-      callSnack("Email verified successfully","success")
-      navigate("/salon-onboarding");
+      await dispatch(verifySalonAction({ otp: data.otp, email: email! })).unwrap();
+      callSnack("Email verified successfully", "success");
+      navigate("/salon-onboarding", { replace: true });
     } catch (err: any) {
       if (err.response?.data?.includes("OTP expired")) {
-        callSnack("OTP expired. Please request a new one.","error")
+        callSnack("OTP expired. Please request a new one.", "error");
       } else {
-        callSnack("Internal server error","error")
+        callSnack("Internal server error", "error");
       }
     } finally {
       setIsLoading(false);
     }
   });
 
+  if (!email) {
+    navigate("/unauthorized", { replace: true });
+    return null;
+  }
+
   const handleResend = async () => {
     try {
       setResendLoading(true);
       await resendOTP(email);
-      callSnack("OTP resent successfully","success")
+      callSnack("OTP resent successfully", "success");
       reset({ otp: "" });
       setTimer(60);
       setCanResend(false);
     } catch (err: any) {
-      callSnack("Failed to resend OTP","error")
+      callSnack("Failed to resend OTP", "error");
     } finally {
       setResendLoading(false);
     }
@@ -87,7 +95,9 @@ export default function VerifyEmail() {
                 {canResend ? (
                   <Button
                     variant="outlined"
-                    startIcon={<ShieldOutlinedIcon className="text-(--primary-900)!" />}
+                    startIcon={
+                      <ShieldOutlinedIcon className={isLoading || resendLoading ? "text-gray-400" : "text-(--primary-900)!"}/>
+                    }
                     onClick={handleResend}
                     disabled={isLoading || resendLoading}
                   >
@@ -99,7 +109,7 @@ export default function VerifyEmail() {
               </Box>
             </Box>
             <Box>
-              <Button type="submit" className="w-full" disabled={isLoading} variant="contained">
+              <Button type="submit" className="w-full" disabled={isLoading || resendLoading} variant="contained">
                 Verify & Continue
               </Button>
             </Box>

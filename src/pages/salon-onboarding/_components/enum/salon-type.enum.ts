@@ -1,5 +1,5 @@
 export const SalonType = {
-  MALE: "MALE",
-  FEMALE: "FEMALE",
-  UNISEX: "UNISEX"
+  MALE: "male",
+  FEMALE: "female",
+  UNISEX: "unisex"
 } as const;

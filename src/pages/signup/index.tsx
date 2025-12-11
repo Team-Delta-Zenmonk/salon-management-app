@@ -36,7 +36,7 @@ export default function SignUp() {
       } else if (result?.message?.includes("OTP sent to your email")) {
         callSnack("OTP sent to your email", "success");
       }
-      navigate("/verify-email", { state: { email: data.email } });
+      navigate("/verify-salon", { state: { email: data.email } });
     } catch (err: any) {
       const backendMessage = err?.response?.data?.message || err?.response?.data;
 

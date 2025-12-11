@@ -4,12 +4,14 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import { Box, Button, LinearProgress } from "@mui/material";
-import OwnerStep from "./_components/steps/owner-step";
-import SalonStep from "./_components/steps/salon-step";
-import AddressStep from "./_components/steps/address-step";
+import OwnerStep from "./_components/onboarding-steps/owner-step";
+import SalonStep from "./_components/onboarding-steps/salon-step";
+import AddressStep from "./_components/onboarding-steps/address-step";
 import { callSnack } from "../../components/snackbar";
 import { SalonOnboardingSchema, type SalonOnboardingForm } from "./schema/salon-onboarding.schema";
 import { updateSalon } from "../../features/salon-onboarding/update-salon/update-salon.service";
+import { useAppDispatch } from "../../store/hooks";
+import { completeOnboarding } from "../../features/auth/auth.slice";
 
 const TOTAL_STEPS = 3;
 
@@ -17,17 +19,16 @@ export default function SalonOnboarding() {
   const [activeStep, setActiveStep] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const methods = useForm<SalonOnboardingForm>({
     resolver: zodResolver(SalonOnboardingSchema),
     mode: "all",
     defaultValues: {
-      owner: {
-        owner_name: "",
-      },
+      owner: { owner_name: "" },
       salon: {
         type: "",
-        logo: "",
+        logo: null,
         salon_images: [],
       },
       address: {
@@ -59,24 +60,24 @@ export default function SalonOnboarding() {
       return;
     }
     const data = getValues();
-    console.log("data", data);
-
     try {
       setIsLoading(true);
       await updateSalon({
-        owner_name: data.owner.owner_name,
-        type: data.salon.type,
-        logo: data.salon.logo,
-        // salon_images: data.salon.salon_images,
-        address: data.address.address,
-        map_link: data.address.map_link,
+        owner_name: data.owner?.owner_name,
+        type: data.salon?.type,
+        logo: data.salon?.logo?.url,
+        // salon_images: data.salon.salon_images.map(img => img.url),
+        latitude: String(data?.address?.latitude),
+        longitude: String(data?.address?.longitude),
+        address: data?.address?.address,
+        map_link: data?.address?.map_link,
       });
+      dispatch(completeOnboarding());
       callSnack("Onboarding completed", "success");
       navigate("/dashboard");
     } catch {
       callSnack("Failed to save salon details", "error");
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   };
@@ -89,7 +90,7 @@ export default function SalonOnboarding() {
   return (
     <FormProvider {...methods}>
       <Box className="flex items-center justify-center min-h-screen p-4">
-        <Box className="w-full max-w-[45%] p-6 flex flex-col gap-6 rounded-xl border border-[#e5e5e5]">
+        <Box className="w-full max-w-lg p-6 flex flex-col gap-6 rounded-xl border border-[#e5e5e5]">
           <Box className="flex flex-col items-center mb-2">
             <Box className="w-16 h-16 bg-(--primary-900) rounded-lg flex items-center justify-center mb-4">
               <ContentCutIcon className="text-white!" />

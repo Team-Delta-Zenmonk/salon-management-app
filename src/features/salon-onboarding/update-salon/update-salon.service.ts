@@ -7,6 +7,8 @@ export interface UpdateSalonPayload {
   salon_images?: string[];
   address?: string;
   map_link?: string;
+  latitude?: string;
+  longitude?: string;
 }
 
 export const updateSalon = async (payload: UpdateSalonPayload) => {

@@ -26,10 +26,13 @@ export default function Login() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsLoading(true);
-      await dispatch(loginSalonAction({ email: data.email, password: data.password })).unwrap();
+      const result = await dispatch(loginSalonAction({ email: data.email, password: data.password })).unwrap();
       callSnack("Welcome to salon dashboard", "success");
-      setIsLoading(false);
-      navigate("/dashboard");
+       if (result?.salon?.isOnboardingComplete) {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/salon-onboarding", { replace: true });
+      }
     } catch (err: any) {
       const code = err?.code;
 

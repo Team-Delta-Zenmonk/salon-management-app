@@ -1,0 +1,1 @@
+export const verifySalonType = "auth/verifySalon";

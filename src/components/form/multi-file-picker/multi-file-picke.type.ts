@@ -1,4 +1,5 @@
 import type { Control, FieldValues, Path } from "react-hook-form";
+import type { CloudinaryFile } from "../../../common/cloudinary.schema";
 
 export type FileMultiPickerProps<T extends FieldValues> = {
   label: string;
@@ -8,5 +9,5 @@ export type FileMultiPickerProps<T extends FieldValues> = {
   disabled?: boolean;
   accept?: string;
   maxSizeBytes?: number;
-  uploadFn: (file: File) => Promise<string>;
+  uploadFn: (file: File) => Promise<CloudinaryFile>;
 };

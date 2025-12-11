@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import type { SalonOnboardingForm } from "../../../schema/salon-onboarding.schema";
 import TextField from "../../../../../components/form/textfield";
-import LocationMap from "../../../../../components/map/map-picker";
+import LocationMap from "../../../../../components/map";
 
 export default function AddressStep() {
   const { control, setValue, clearErrors } = useFormContext<SalonOnboardingForm>();
@@ -25,7 +25,7 @@ export default function AddressStep() {
       <Box>
         <TextField
           type="text"
-          label="Maps Link"
+          label="Map Link"
           name="address.map_link"
           control={control}
           identifier="salon-map-link"

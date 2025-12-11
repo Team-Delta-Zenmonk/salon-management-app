@@ -5,19 +5,10 @@ import Select from "../../../../../components/form/select";
 import { TypeOfSalon } from "../../constants/salon.type";
 import FilePicker from "../../../../../components/form/file-picker";
 import FileMultiPicker from "../../../../../components/form/multi-file-picker";
+import { uploadImages } from "../../../../../features/upload-images/upload-images.service";
 
 export default function SalonStep() {
   const { control } = useFormContext<SalonOnboardingForm>();
-  const uploadLogo = async (file: File): Promise<string> => {
-    // const formData = new FormData();
-    // formData.append("file", file);
-    // const res = await axiosInstance.post("/uploads/logo", formData, {
-    //   withCredentials: true,
-    // });
-    // return res.data.url;
-    return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s";
-  };
-
   return (
     <Box className="space-y-6">
       <Box>
@@ -40,7 +31,7 @@ export default function SalonStep() {
             control={control}
             identifier="salon-logo"
             label="Salon Logo"
-            uploadFn={uploadLogo}
+            uploadFn={uploadImages}
           />
         </Box>
         <Box>
@@ -49,7 +40,7 @@ export default function SalonStep() {
             control={control}
             identifier="salon-photos"
             label="Salon Photos"
-            uploadFn={uploadLogo}
+            uploadFn={uploadImages}
           />
         </Box>
       </Box>

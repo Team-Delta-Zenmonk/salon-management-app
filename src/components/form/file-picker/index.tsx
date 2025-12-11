@@ -33,7 +33,7 @@ const FilePicker = <T extends FieldValues>({
     if (!disabled && !loading && !hasValue) inputRef.current?.click();
   };
 
-  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>, onChange: (value: string | null) => void) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>, onChange: (value: any) => void) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setLoading(true);
@@ -46,8 +46,8 @@ const FilePicker = <T extends FieldValues>({
     }
 
     try {
-      const url = await uploadFn(file);
-      onChange(url);
+      const result = await uploadFn(file);
+      onChange(result);
     } catch {
       callSnack("Failed to upload file", "error");
     } finally {
@@ -80,7 +80,7 @@ const FilePicker = <T extends FieldValues>({
               error={Boolean(error)}
               onClick={(e: MouseEvent<HTMLDivElement>) => openFilePicker(e, Boolean(value))}
               label={label}
-              value={value ?? ""}
+              value={value?.filename ?? ""}
               className={styles.inputField}
               data-test-id={`text-input-${identifier}`}
               inputProps={{

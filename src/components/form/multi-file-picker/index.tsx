@@ -15,7 +15,7 @@ import { useRef, useState, type ChangeEvent, type MouseEvent } from "react";
 import { Controller, type FieldValues } from "react-hook-form";
 import { callSnack } from "../../snackbar";
 import type { FileMultiPickerProps } from "./multi-file-picke.type";
-import styles from "./multi-file-picker.module.scss"
+import styles from "./multi-file-picker.module.scss";
 
 const FileMultiPicker = <T extends FieldValues>({
   label,
@@ -37,8 +37,8 @@ const FileMultiPicker = <T extends FieldValues>({
 
   const handleFileChange = async (
     event: ChangeEvent<HTMLInputElement>,
-    onChange: (value: string[]) => void,
-    current: string[]
+    onChange: (value: Array<{ url: string; filename: string }>) => void,
+    current: Array<{ url: string; filename: string }>
   ) => {
     const files = event.target.files;
     if (!files || !files.length) return;
@@ -54,12 +54,12 @@ const FileMultiPicker = <T extends FieldValues>({
     }
 
     try {
-      const uploadedUrls: string[] = [];
+      const uploadedData: Array<{ url: string; filename: string }> = [];
       for (const file of Array.from(files)) {
-        const url = await uploadFn(file);
-        uploadedUrls.push(url);
+        const result = await uploadFn(file);
+        uploadedData.push(result);
       }
-      onChange([...current, ...uploadedUrls]);
+      onChange([...current, ...uploadedData]);  
     } catch {
       callSnack("Failed to upload files", "error");
     } finally {
@@ -67,13 +67,17 @@ const FileMultiPicker = <T extends FieldValues>({
     }
   };
 
-  const clearAll = (onChange: (value: string[]) => void) => {
+  const clearAll = (onChange: (value: Array<{ url: string; filename: string }>) => void) => {
     onChange([]);
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  const removeOne = (url: string, current: string[], onChange: (value: string[]) => void) => {
-    onChange(current.filter((u) => u !== url));
+  const removeOne = (
+    url: string,
+    current: Array<{ url: string; filename: string }>,
+    onChange: (value: Array<{ url: string; filename: string }>) => void
+  ) => {
+    onChange(current.filter((u) => u.url !== url));
   };
 
   return (
@@ -151,8 +155,13 @@ const FileMultiPicker = <T extends FieldValues>({
 
             {arr.length > 0 && (
               <Box mt={1} display="flex" gap={1} flexWrap="wrap">
-                {arr.map((url) => (
-                  <Chip key={url} label={url} size="small" onDelete={() => removeOne(url, arr, onChange)} />
+                {arr.map((item: any, index: number) => (
+                  <Chip
+                    key={`${item.url}-${index}`}
+                    label={item.filename}
+                    size="small"
+                    onDelete={() => removeOne(item.url, arr, onChange)}
+                  />
                 ))}
               </Box>
             )}
