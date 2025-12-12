@@ -28,7 +28,7 @@ export default function Login() {
       setIsLoading(true);
       const result = await dispatch(loginSalonAction({ email: data.email, password: data.password })).unwrap();
       callSnack("Welcome to salon dashboard", "success");
-       if (result?.salon?.isOnboardingComplete) {
+       if (result?.salon?.is_onboarded) {
         navigate("/dashboard", { replace: true });
       } else {
         navigate("/salon-onboarding", { replace: true });

@@ -14,6 +14,7 @@ import { Controller, type FieldValues } from "react-hook-form";
 import type { FilePickerProps } from "./file-picker.type";
 import styles from "./file-picker.module.scss";
 import { callSnack } from "../../snackbar";
+import { ALLOWED_IMAGE_TYPES } from "../../../common/allowed-images.type";
 
 const FilePicker = <T extends FieldValues>({
   label,
@@ -45,6 +46,13 @@ const FilePicker = <T extends FieldValues>({
       return;
     }
 
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
+      callSnack("Invalid file type. Only images are allowed.", "error");
+      setLoading(false);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+    
     try {
       const result = await uploadFn(file);
       onChange(result);

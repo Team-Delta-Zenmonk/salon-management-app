@@ -4,12 +4,14 @@ import type { Persistor } from "redux-persist";
 import { persistReducer, persistStore } from "redux-persist";
 import createWebStorage from "redux-persist/es/storage/createWebStorage";
 import authReducer from "../features/auth/auth.slice";
+import categoryReducer from "../features/category/category.slice";
 
 
 const storage = createWebStorage("local");
 
 const rootReducer = combineSlices({
   auth: authReducer,
+  category: categoryReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

@@ -730,6 +730,18 @@ const theme = createTheme({
         },
       },
     },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          borderBottom: "1px solid",
+          borderColor: "var(--secondary-300)",
+          backgroundColor: "transparent",
+          paddingLeft: "24px",
+          paddingTop: "8px",
+          paddingBottom: "8px",
+        },
+      },
+    },
   },
 });
 

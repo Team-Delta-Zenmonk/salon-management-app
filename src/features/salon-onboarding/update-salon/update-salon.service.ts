@@ -9,6 +9,7 @@ export interface UpdateSalonPayload {
   map_link?: string;
   latitude?: string;
   longitude?: string;
+  is_onboarded?: boolean;
 }
 
 export const updateSalon = async (payload: UpdateSalonPayload) => {

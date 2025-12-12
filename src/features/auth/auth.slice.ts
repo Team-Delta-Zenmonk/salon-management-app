@@ -2,6 +2,25 @@ import { createSlice } from "@reduxjs/toolkit";
 import { loginSalonAction } from "./login/login.action";
 import { verifySalonAction } from "./verify-salon/verify-salon.action";
 
+export interface Salon {
+  id: number;
+  uuid: string;
+  name?: string;
+  email: string;
+  owner_name?: string;
+  phone?: string;
+  latitude?: string;
+  longitude?: string;
+  address?: string;
+  map_link?: string;
+  about?: string;
+  logo?: string;
+  type?: string;
+  is_onboarded: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export type AuthState = {
   salon: any | null;
   isAuthenticated: boolean;
@@ -21,15 +40,15 @@ export const authSlice = createSlice({
     logout(state) {
       state.salon = null;
       state.isAuthenticated = false;
-      state.isOnboardingComplete = false;
     },
     setsalon(state, { payload }) {
       state.salon = payload;
       state.isAuthenticated = !!payload;
-      state.isOnboardingComplete = payload?.isOnboardingComplete || false;
     },
-    completeOnboarding(state) {
-      state.isOnboardingComplete = true;
+    completeOnboarding(state, { payload }) {
+      if (state.salon) {
+        state.salon = { ...state.salon, ...payload, is_onboarded: true };
+      }
     },
   },
   extraReducers: (builder) => {

@@ -62,7 +62,7 @@ export default function SalonOnboarding() {
     const data = getValues();
     try {
       setIsLoading(true);
-      await updateSalon({
+      const result = await updateSalon({
         owner_name: data.owner?.owner_name,
         type: data.salon?.type,
         logo: data.salon?.logo?.url,
@@ -71,10 +71,13 @@ export default function SalonOnboarding() {
         longitude: String(data?.address?.longitude),
         address: data?.address?.address,
         map_link: data?.address?.map_link,
+        is_onboarded: true,
       });
-      dispatch(completeOnboarding());
-      callSnack("Onboarding completed", "success");
-      navigate("/dashboard");
+      if (result?.message?.[0] === 1) {
+        dispatch(completeOnboarding({}));
+        callSnack("Onboarding completed", "success");
+        navigate("/dashboard");
+      }
     } catch {
       callSnack("Failed to save salon details", "error");
     } finally {

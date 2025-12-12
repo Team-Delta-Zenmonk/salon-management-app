@@ -16,6 +16,7 @@ import { Controller, type FieldValues } from "react-hook-form";
 import { callSnack } from "../../snackbar";
 import type { FileMultiPickerProps } from "./multi-file-picke.type";
 import styles from "./multi-file-picker.module.scss";
+import { ALLOWED_IMAGE_TYPES } from "../../../common/allowed-images.type";
 
 const FileMultiPicker = <T extends FieldValues>({
   label,
@@ -43,6 +44,14 @@ const FileMultiPicker = <T extends FieldValues>({
     const files = event.target.files;
     if (!files || !files.length) return;
 
+    const invalidFile = Array.from(files).find((file) => !ALLOWED_IMAGE_TYPES.includes(file.type as any));
+
+    if (invalidFile) {
+      callSnack("Invalid file type. Only images are allowed.", "error");
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
     setLoading(true);
 
     const tooBig = Array.from(files).some((file) => file.size > maxSizeBytes);
@@ -59,7 +68,7 @@ const FileMultiPicker = <T extends FieldValues>({
         const result = await uploadFn(file);
         uploadedData.push(result);
       }
-      onChange([...current, ...uploadedData]);  
+      onChange([...current, ...uploadedData]);
     } catch {
       callSnack("Failed to upload files", "error");
     } finally {
