@@ -1,4 +1,3 @@
-// src/pages/categories/_components/list-categories.tsx
 import { useState } from "react";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -48,9 +47,7 @@ export default function ListCategories({ categories }: ListCategoriesProps) {
 
   return (
     <Box>
-      <Box className="text-(--primary-900) mb-4">
-        Categories List ({categories.length})
-      </Box>
+      <Box className="text-(--primary-900) mb-4">Categories List ({categories.length})</Box>
 
       <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category) => (
@@ -61,28 +58,18 @@ export default function ListCategories({ categories }: ListCategoriesProps) {
             <Box className="flex items-start justify-between mb-4">
               <Box className="flex items-center gap-4">
                 <Box>
-                  <img
-                    src={category.logo}
-                    alt={category.name}
-                    className="w-15 h-15 rounded-full object-cover"
-                  />
+                  <img src={category.logo} alt={category.name} className="w-15 h-15 rounded-full object-cover" />
                 </Box>
                 <Box>
-                  <Typography className="text-(--primary-900)">
-                    {category.name}
-                  </Typography>
+                  <Typography className="text-(--primary-900)">{category.name}</Typography>
                 </Box>
               </Box>
             </Box>
 
-            <Box className="text-gray-600 mb-4">
-              {category.description}
-            </Box>
+            <Box className="text-gray-600 mb-4">{category.description}</Box>
 
             <Box className="flex items-center justify-between pt-4 border-t border-blue-100">
-              <Box className="text-gray-500">
-                Created On: {dayjs(category.created_at).format("MMM DD, YYYY")}
-              </Box>
+              <Box className="text-gray-500">Created On: {dayjs(category.created_at).format("MMM DD, YYYY")}</Box>
               <Box className="flex gap-2">
                 <IconButton
                   aria-label="edit"
@@ -106,17 +93,12 @@ export default function ListCategories({ categories }: ListCategoriesProps) {
 
       {categories.length === 0 && (
         <Box className="bg-gray-200 border border-gray-400 rounded-lg p-8 text-center">
-          <Typography>Create your first category...</Typography>
+          <Typography>Create your first category</Typography>
         </Box>
       )}
 
       {updateCategory && (
-        <CategoryDialog
-          open={editOpen}
-          onClose={handleCloseEdit}
-          mode="update"
-          category={updateCategory}
-        />
+        <CategoryDialog open={editOpen} onClose={handleCloseEdit} mode="update" category={updateCategory} />
       )}
     </Box>
   );

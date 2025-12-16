@@ -14,9 +14,7 @@ export default function Categories() {
         </Box>
         <CreateCategory />
       </Box>
-      <Box>
-        <SearchCategories />
-      </Box>
+      <SearchCategories />
     </Box>
   );
 }

@@ -5,13 +5,14 @@ import { persistReducer, persistStore } from "redux-persist";
 import createWebStorage from "redux-persist/es/storage/createWebStorage";
 import authReducer from "../features/auth/auth.slice";
 import categoryReducer from "../features/category/category.slice";
-
+import serviceReducer from "../features/service/service.slice";
 
 const storage = createWebStorage("local");
 
 const rootReducer = combineSlices({
   auth: authReducer,
   category: categoryReducer,
+  service: serviceReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
@@ -19,7 +20,7 @@ export type RootState = ReturnType<typeof rootReducer>;
 const persistConfig = {
   key: "root",
   storage,
-}
+};
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

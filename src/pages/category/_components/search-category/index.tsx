@@ -26,7 +26,7 @@ const SearchCategories = () => {
   return (
     <Box className="space-y-6">
       <Box>
-        <SearchBar onSearch={setSearchQuery} />
+        <SearchBar onSearch={setSearchQuery} placeholder="Search Category" />
       </Box>
       <ListCategories categories={filteredCategories} />
     </Box>

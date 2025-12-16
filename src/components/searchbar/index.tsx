@@ -6,9 +6,10 @@ import { useDebouncedCallback } from "use-debounce";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
+  placeholder?: string;
 }
 
-const SearchBar = ({ onSearch }: SearchBarProps) => {
+const SearchBar = ({ onSearch, placeholder }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const debouncedSearch = useDebouncedCallback((query: string) => {
@@ -37,7 +38,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
     <TextField
       size="medium"
       sx={{ maxWidth: "700px !important", width: "100%" }}
-      placeholder="Search ..."
+      placeholder={placeholder}
       value={searchQuery}
       onChange={handleOnChange}
       slotProps={{
