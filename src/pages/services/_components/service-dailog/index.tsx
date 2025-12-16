@@ -28,20 +28,20 @@ import type { RootState } from "../../../../store/store";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { createServiceService } from "../../../../features/service/create-service/create-service.service";
 import { updateServiceAction } from "../../../../features/service/update-service/update-service.action";
-import { listServicesAction } from "../../../../features/service/list-services/list-service.action";
-
 interface ServiceDialogProps {
   open: boolean;
   onClose: () => void;
   mode: "create" | "update";
   service?: any;
+  parentService?: any;
+  onCreated?: () => void;
 }
 
-export default function ServiceDialog({ open, onClose, mode, service }: ServiceDialogProps) {
+export default function ServiceDialog({ open, onClose, mode, service, parentService, onCreated }: ServiceDialogProps) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
-
   const categories = useAppSelector((state: RootState) => state.category.categories);
+  const isCreatingSubService = mode === "create" && Boolean(parentService);
 
   const methods = useForm<ServiceForm>({
     resolver: zodResolver(serviceSchema),
@@ -55,6 +55,11 @@ export default function ServiceDialog({ open, onClose, mode, service }: ServiceD
       const logoUrl = data.logo?.url || (mode === "update" ? service?.logo : undefined);
 
       if (mode === "create") {
+        if (!isCreatingSubService && !data.category_id) {
+          callSnack("Category is required", "error");
+          return;
+        }
+
         await createServiceService({
           name: data.name,
           description: data.description,
@@ -64,11 +69,23 @@ export default function ServiceDialog({ open, onClose, mode, service }: ServiceD
           is_active: data.is_active ?? false,
           is_popular: data.is_popular ?? false,
           logo: logoUrl,
-          category_id: data.category_id,
+          ...(isCreatingSubService
+            ? {
+                parent_id: parentService.uuid,
+                category_id: undefined,
+              }
+            : {
+                category_id: data.category_id,
+              }),
+
           ...(data.discount !== undefined && data.discount !== null ? { discount: Number(data.discount) } : {}),
           ...(data.discount_type ? { discount_type: data.discount_type } : {}),
         });
-        callSnack("Service created successfully", "success");
+        callSnack(
+          isCreatingSubService ? "Sub-service created successfully" : "Service created successfully",
+          "success"
+        );
+        onCreated?.();
       } else {
         await dispatch(
           updateServiceAction({
@@ -84,12 +101,12 @@ export default function ServiceDialog({ open, onClose, mode, service }: ServiceD
               is_active: data.is_active ?? false,
               is_popular: data.is_popular ?? false,
               logo: logoUrl,
-              category_id: data.category_id,
+              ...(data.category_id ? { category_id: data.category_id } : {}),
             },
           })
         ).unwrap();
-
         callSnack("Service updated successfully", "success");
+        onCreated?.();
       }
 
       onClose();
@@ -99,12 +116,29 @@ export default function ServiceDialog({ open, onClose, mode, service }: ServiceD
       setIsLoading(false);
     }
   });
+
   useEffect(() => {
     dispatch(listCategoriesAction());
   }, [dispatch]);
 
   useEffect(() => {
-    if (mode === "update" && service) {
+    if (!open) return;
+
+    if (mode === "create") {
+      reset({
+        name: "",
+        description: "",
+        logo: null,
+        category_id: undefined,
+        gender: undefined,
+        price_type: undefined,
+        price: "",
+        discount: undefined,
+        discount_type: undefined,
+        is_active: true,
+        is_popular: false,
+      });
+    } else if (mode === "update" && service) {
       reset({
         name: service.name ?? "",
         description: service.description ?? "",
@@ -119,11 +153,7 @@ export default function ServiceDialog({ open, onClose, mode, service }: ServiceD
         is_popular: service.is_popular ?? false,
       });
     }
-
-    if (mode === "create" && open) {
-      reset();
-    }
-  }, [mode, service, reset, open]);
+  }, [open, mode, service, parentService, reset]);
 
   return (
     <Dialog
@@ -135,21 +165,13 @@ export default function ServiceDialog({ open, onClose, mode, service }: ServiceD
       className={styles.dialogContainer}
       classes={{ paper: styles.dialog }}
     >
-      <DialogTitle
-        className={clsx(styles.dialogTitle)}
-        id="alert-dialog-title"
-        fontWeight="fontWeightMedium"
-        variant="h5"
-      >
-        {mode === "create" ? "Create Service" : "Update Service"}
+      <DialogTitle className={clsx(styles.dialogTitle)} fontWeight="fontWeightMedium" variant="h5">
+        {mode === "create" ? (isCreatingSubService ? "Create Sub-service" : "Create Service") : "Update Service"}
       </DialogTitle>
 
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
-          <DialogContent
-            className={clsx("flex flex-col py-1 px-3", styles.dialogContent)}
-            id="alert-dialog-description"
-          >
+          <DialogContent className={clsx("flex flex-col py-1 px-3", styles.dialogContent)}>
             <Box className="flex flex-col gap-2">
               <Typography fontWeight="bold">Service Name</Typography>
               <TextField
@@ -186,20 +208,19 @@ export default function ServiceDialog({ open, onClose, mode, service }: ServiceD
               />
             </Box>
 
-            <Box className="flex flex-col gap-2">
-              <Typography fontWeight="bold">Category</Typography>
-              <Select
-                name="category_id"
-                control={control}
-                placeholder="Select Category"
-                identifier="service-category"
-                options={categories.map((c) => ({
-                  label: c.name,
-                  value: c.uuid,
-                }))}
-                disabled={isLoading}
-              />
-            </Box>
+            {!isCreatingSubService && (
+              <Box className="flex flex-col gap-2">
+                <Typography fontWeight="bold">Category</Typography>
+                <Select
+                  name="category_id"
+                  control={control}
+                  placeholder="Select Category"
+                  identifier="service-category"
+                  options={categories.map((c) => ({ label: c.name, value: c.uuid }))}
+                  disabled={isLoading}
+                />
+              </Box>
+            )}
 
             <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Box className="flex flex-col gap-2">
@@ -291,7 +312,7 @@ export default function ServiceDialog({ open, onClose, mode, service }: ServiceD
             <Button onClick={onClose} disabled={isLoading}>
               Back
             </Button>
-            <Button type="submit" disabled={isLoading} loading={isLoading as any}>
+            <Button type="submit" disabled={isLoading}>
               {mode === "create" ? "Create" : "Save"}
             </Button>
           </DialogActions>

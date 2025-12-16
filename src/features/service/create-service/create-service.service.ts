@@ -7,7 +7,7 @@ export interface CreateServicePayload {
   name: string;
   description?: string | null;
   logo?: string | null;
-  category_id: string | null;
+  category_id?: string | null;
   is_active: boolean;
   is_popular: boolean;
   gender: ServiceGender;
@@ -15,6 +15,7 @@ export interface CreateServicePayload {
   price: number;
   discount?: number | null;
   discount_type?: DiscountType | null;
+  parent_id?: string;
 }
 
 export const createServiceService = async (payload: CreateServicePayload) => {

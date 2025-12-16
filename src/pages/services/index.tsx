@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import CreateService from "./_components/create-service";
 import SearchService from "./_components/search-service";
 
 export default function Services() {
@@ -10,9 +9,8 @@ export default function Services() {
           <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900) mb-2">
             Service Management
           </Typography>
-          <Box>Create and manage your categories</Box>
+          <Box>Create and manage your services</Box>
         </Box>
-        <CreateService />
       </Box>
       <SearchService />
     </Box>

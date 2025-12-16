@@ -3,8 +3,11 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { useState } from "react";
 import ServiceDialog from "../service-dailog";
 
+interface CreateServiceProps {
+  onCreatedOrUpdated?: (cb?: () => void) => Promise<void>;
+}
 
-export default function CreateService() {
+export default function CreateService({ onCreatedOrUpdated }: CreateServiceProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -13,7 +16,7 @@ export default function CreateService() {
         <Typography fontWeight="medium">Add</Typography>
       </Button>
 
-      <ServiceDialog open={open} onClose={() => setOpen(false)} mode="create" />
+      <ServiceDialog open={open} onClose={() => setOpen(false)} mode="create" onCreated={onCreatedOrUpdated} />
     </>
   );
 }
