@@ -42,6 +42,8 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   const [isLoading, setIsLoading] = useState(false);
   const categories = useAppSelector((state: RootState) => state.category.categories);
   const isCreatingSubService = mode === "create" && Boolean(parentService);
+  const isEditingSubService = mode === "update" && Boolean(service?.parent_id);
+  const shouldShowCategory = !(isCreatingSubService || isEditingSubService);
 
   const methods = useForm<ServiceForm>({
     resolver: zodResolver(serviceSchema),
@@ -66,6 +68,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
           gender: data.gender,
           price_type: data.price_type,
           price: Number(data.price),
+          duration: Number(data.duration),
           is_active: data.is_active ?? false,
           is_popular: data.is_popular ?? false,
           logo: logoUrl,
@@ -95,6 +98,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
               description: data.description,
               gender: data.gender,
               price_type: data.price_type,
+              duration: Number(data.duration),
               price: Number(data.price),
               ...(data.discount !== undefined && data.discount !== null ? { discount: Number(data.discount) } : {}),
               ...(data.discount_type ? { discount_type: data.discount_type } : {}),
@@ -132,6 +136,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         category_id: undefined,
         gender: undefined,
         price_type: undefined,
+        duration: "",
         price: "",
         discount: undefined,
         discount_type: undefined,
@@ -146,6 +151,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         category_id: service?.category?.uuid,
         gender: service.gender,
         price_type: service.price_type,
+        duration: service.duration != null ? String(service.duration) : "",
         price: service.price != null ? String(service.price) : "",
         discount: service.discount !== null && service.discount !== undefined ? service.discount : undefined,
         discount_type: service.discount_type ?? undefined,
@@ -208,7 +214,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
               />
             </Box>
 
-            {!isCreatingSubService && (
+            {!isCreatingSubService && shouldShowCategory && (
               <Box className="flex flex-col gap-2">
                 <Typography fontWeight="bold">Category</Typography>
                 <Select
@@ -256,6 +262,18 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 name="price"
                 control={control}
                 identifier="service-price"
+                disabled={isLoading}
+              />
+            </Box>
+
+            <Box className="flex flex-col gap-2">
+              <Typography fontWeight="bold">Duration</Typography>
+              <TextField
+                type="number"
+                label="Duration"
+                name="duration"
+                control={control}
+                identifier="service-duration"
                 disabled={isLoading}
               />
             </Box>

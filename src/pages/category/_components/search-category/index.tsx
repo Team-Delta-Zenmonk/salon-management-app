@@ -24,11 +24,13 @@ const SearchCategories = () => {
   }, [categories, searchQuery]);
 
   return (
-    <Box className="space-y-6">
+    <Box className="flex flex-col flex-1 min-h-0 px-8 pb-8 space-y-6">
       <Box>
         <SearchBar onSearch={setSearchQuery} placeholder="Search Category" />
       </Box>
-      <ListCategories categories={filteredCategories} />
+      <Box className="flex-1 min-h-0 overflow-y-auto">
+        <ListCategories categories={filteredCategories} />
+      </Box>
     </Box>
   );
 };

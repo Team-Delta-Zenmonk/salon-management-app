@@ -6,7 +6,7 @@ export const SalonSchema = z.object({
   logo: CloudinaryFileSchema.nullable().refine((val) => val !== null, {
     message: "Salon logo is required",
   }),
-  salon_images: z
+  photos: z
     .array(CloudinaryFileSchema)
     .min(1, "At least one salon photo is required")
     .nonempty("At least one salon photo is required"),

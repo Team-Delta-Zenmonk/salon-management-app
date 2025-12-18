@@ -9,6 +9,7 @@ export interface CreateServicePayload {
   logo?: string | null;
   category_id?: string | null;
   is_active: boolean;
+  duration?:number;
   is_popular: boolean;
   gender: ServiceGender;
   price_type: PriceType;

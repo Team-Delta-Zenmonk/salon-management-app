@@ -36,7 +36,7 @@ export default function SalonStep() {
         </Box>
         <Box>
           <FileMultiPicker
-            name="salon.salon_images"
+            name="salon.photos"
             control={control}
             identifier="salon-photos"
             label="Salon Photos"

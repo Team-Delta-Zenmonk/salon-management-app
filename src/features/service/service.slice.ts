@@ -13,6 +13,7 @@ export interface Service {
   description?: string | null;
   logo?: string | null;
   salon_id: number;
+  duration:string;
   category_id?: number | null;
   category?: Category;
   parent_id?: string | null;

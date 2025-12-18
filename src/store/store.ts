@@ -6,6 +6,7 @@ import createWebStorage from "redux-persist/es/storage/createWebStorage";
 import authReducer from "../features/auth/auth.slice";
 import categoryReducer from "../features/category/category.slice";
 import serviceReducer from "../features/service/service.slice";
+import staffReducer from "../features/staff/staff.slice";
 
 const storage = createWebStorage("local");
 
@@ -13,6 +14,7 @@ const rootReducer = combineSlices({
   auth: authReducer,
   category: categoryReducer,
   service: serviceReducer,
+  staff: staffReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

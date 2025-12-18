@@ -29,7 +29,7 @@ export default function SalonOnboarding() {
       salon: {
         type: "",
         logo: null,
-        salon_images: [],
+        photos: [],
       },
       address: {
         address: "",
@@ -48,9 +48,9 @@ export default function SalonOnboarding() {
     let fieldsToValidate: (keyof SalonOnboardingForm | string)[] = [];
 
     if (activeStep === 0) fieldsToValidate = ["owner.owner_name"];
-    if (activeStep === 1) fieldsToValidate = ["salon.type", "salon.about", "salon.logo", "salon.salon_images"];
+    if (activeStep === 1) fieldsToValidate = ["salon.type", "salon.logo", "salon.photos"];
     if (activeStep === 2)
-      fieldsToValidate = ["address.address", "address.map_link, address.latitude, address.longitude"];
+      fieldsToValidate = ["address.address", "address.map_link",];
 
     const isValid = await trigger(fieldsToValidate as any);
     if (!isValid) return;
@@ -60,13 +60,14 @@ export default function SalonOnboarding() {
       return;
     }
     const data = getValues();
+    console.log('data: ', data);
     try {
       setIsLoading(true);
       const result = await updateSalon({
         owner_name: data.owner?.owner_name,
         type: data.salon?.type,
         logo: data.salon?.logo?.url,
-        // salon_images: data.salon.salon_images.map(img => img.url),
+        photos: data.salon.photos,
         latitude: String(data?.address?.latitude),
         longitude: String(data?.address?.longitude),
         address: data?.address?.address,

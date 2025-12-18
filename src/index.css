@@ -1,14 +1,18 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
 
 body {
-  margin: 0 auto;
-  overflow-y: auto;
+  margin: 0;
+  overflow: hidden;
 }

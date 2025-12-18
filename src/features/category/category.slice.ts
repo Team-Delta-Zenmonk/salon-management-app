@@ -1,7 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { createCategoryAction } from "./create-category/create-category.action";
 import { listCategoriesAction } from "./list-categories/list-categories.action";
-import { deleteCategoryAction } from "./delete-category/delete-category.action";
 import { updateCategoryAction } from "./update-category/update-category.action";
 
 export interface Category {

@@ -1,10 +1,11 @@
+import type { CloudinaryFile } from "../../../common/cloudinary.schema";
 import { axiosInstance } from "../../../config/axios";
 
 export interface UpdateSalonPayload {
   owner_name?: string;
   type?: string;
-  logo?: string;          
-  salon_images?: string[];
+  logo?: string;
+  photos?: CloudinaryFile[];
   address?: string;
   map_link?: string;
   latitude?: string;

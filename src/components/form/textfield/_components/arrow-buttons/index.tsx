@@ -24,7 +24,7 @@ function ArrowButtons<T extends FieldValues>({
   identifier,
 }: Readonly<ArrowButtonsProps<T>>)  {
   const handleUp = () => {
-    const newValue = value ? Math.min(99, Number(value) + 1) : 1;
+    const newValue = value ? Math.min(1000000, Number(value) + 1) : 1;
     onChange(String(newValue));
   };
 

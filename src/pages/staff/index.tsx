@@ -1,7 +1,20 @@
-import { Box } from '@mui/material'
+import { Box, Typography } from "@mui/material";
+import CreateStaff from "./_components/create-staff";
+import SearchStaff from "./_components/serach-staff";
 
 export default function Staff() {
   return (
-    <Box> Welcome to Staff</Box>
-  )
+    <Box className="flex flex-col flex-1 min-h-0 w-full">
+      <Box className="flex justify-between items-start px-8 pb-6 shrink-0">
+        <Box>
+          <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900) mb-2">
+            Staff Management
+          </Typography>
+          <Box>Manage staff members of your salon</Box>
+        </Box>
+        <CreateStaff />
+      </Box>
+      <SearchStaff />
+    </Box>
+  );
 }

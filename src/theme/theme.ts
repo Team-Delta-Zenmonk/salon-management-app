@@ -730,6 +730,14 @@ const theme = createTheme({
         },
       },
     },
+    MuiAvatar: {
+      styleOverrides: {
+        root: {
+          width: 60,
+          height: 60,
+        },
+      },
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {
