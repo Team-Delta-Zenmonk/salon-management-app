@@ -75,8 +75,6 @@ export default function AssignStaffDialog({
         })),
       };
 
-      console.log("Assigning staff payload:", payload);
-
       await assignStaffToService(payload);
 
       callSnack("Staff assigned successfully", "success");
@@ -111,7 +109,6 @@ export default function AssignStaffDialog({
 
         reset({ staff: assignedStaffUuids });
       } catch (err: any) {
-        console.error("Error fetching assigned staff:", err);
         callSnack("Failed to load assigned staff", "error");
         reset({ staff: [] });
       } finally {

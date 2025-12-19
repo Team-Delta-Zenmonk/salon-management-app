@@ -60,7 +60,6 @@ export default function SalonOnboarding() {
       return;
     }
     const data = getValues();
-    console.log('data: ', data);
     try {
       setIsLoading(true);
       const result = await updateSalon({

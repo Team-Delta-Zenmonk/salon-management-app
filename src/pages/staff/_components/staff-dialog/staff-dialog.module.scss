@@ -18,5 +18,10 @@
 }
 
 .dialog {
-  width: 800px;
+  width: 100%;
+  max-width: 980px;
+}
+
+.dialogContent {
+  padding: 0 !important;
 }

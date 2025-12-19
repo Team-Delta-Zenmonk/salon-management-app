@@ -1,75 +1,81 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  FormControlLabel,
-  Switch,
-} from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box } from "@mui/material";
 import clsx from "clsx";
 import { FormProvider, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
 import styles from "./staff-dialog.module.scss";
-import { StaffSchema, type StaffForm } from "../schema/staff.schema";
-import FilePicker from "../../../../components/form/file-picker";
-import { uploadImages } from "../../../../features/upload-images/upload-images.service";
-import TextField from "../../../../components/form/textfield";
-import Select from "../../../../components/form/select";
 import { createStaffService } from "../../../../features/staff/create-staff/create-staff.service";
 import { updateStaffAction } from "../../../../features/staff/update-staff/update-staff.action";
-import DatePicker from "../../../../components/form/date-picker";
-import DateTimePicker from "../../../../components/form/time-picker";
-import { GenderOptions } from "../../../../common/enums/gender.enum";
 import { listStaffAction } from "../../../../features/staff/list-staff/list-staff.action";
-import { DaysList, type DayKey } from "../../../../common/enums/days.enum";
+import { StaffSchema, type StaffForm } from "../schema/staff.schema";
+import { createStaffDefaultPayload, updateStaffDefaultPayload } from "./_components/utils/default-payload";
+import StepperHeader from "../../../../components/stepper";
+import StaffBasicInformation from "./_components/steps/staff-basic-info";
+import StaffInformation from "./_components/steps/staff-employment";
+import StaffSchedule from "./_components/steps/staff-schedule";
 
-interface StaffDialogProps {
+type Props = {
   open: boolean;
   onClose: () => void;
   mode: "create" | "update";
   staff?: any;
-}
+};
 
-export default function StaffDialog({ open, onClose, mode, staff }: StaffDialogProps) {
+const STEPS = [{ label: "Basic" }, { label: "Employment" }, { label: "Hours" }];
+
+const STEP_FIELDS: Record<number, Array<keyof any>> = {
+  0: ["first_name", "last_name", "email", "dob", "phone_number", "additional_phone_number", "gender"],
+  1: ["title", "joining_date", "end_date", "address", "photos", "emergency_contact.name", "emergency_contact.phone"],
+  2: ["active_hours"],
+};
+
+export default function StaffDialog({ open, onClose, mode, staff }: Props) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState(0);
 
   const methods = useForm<StaffForm>({
     resolver: zodResolver(StaffSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: createStaffDefaultPayload(),
   });
 
-  const { handleSubmit, control, reset, watch, setValue } = methods;
+  const { handleSubmit, control, reset, watch, setValue, trigger } = methods;
 
-  const activeHours = watch("active_hours");
+  const close = () => {
+    if (isLoading) return;
+    onClose();
+  };
 
-  const setDayClosed = (day: DayKey, closed: boolean) => {
-    if (closed) {
-      setValue(`active_hours.${day}` as any, null);
-      return;
+  const back = () => {
+    if (step === 0) close();
+    else setStep((s) => s - 1);
+  };
+
+  const next = async () => {
+    const fields = STEP_FIELDS[step] ?? [];
+    if (fields.length > 0) {
+      const ok = await trigger(fields as any, { shouldFocus: true });
+      if (!ok) return;
     }
-    setValue(`active_hours.${day}` as any, {
-      start_time: "",
-      end_time: "",
-    });
+    setStep((s) => Math.min(s + 1, 2));
   };
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsLoading(true);
-      console.log("data", data);
+
       const photos = data.photos || (mode === "update" ? staff?.photos : undefined);
+
       const payload = {
         first_name: data.first_name,
         last_name: data.last_name,
         email: data.email,
         phone_number: data.phone_number,
-        additional_phone_number: data?.additional_phone_number ?? null,
+        additional_phone_number: data.additional_phone_number ?? null,
         dob: data.dob,
         title: data.title,
         joining_date: data.joining_date,
@@ -77,25 +83,22 @@ export default function StaffDialog({ open, onClose, mode, staff }: StaffDialogP
         address: data.address,
         emergency_contact: data.emergency_contact,
         gender: data.gender,
-        photos: photos,
+        photos,
         active_hours: data.active_hours ?? null,
       };
 
       if (mode === "create") {
-        console.log("payload", payload);
         await createStaffService(payload);
-        await dispatch(listStaffAction({ page: 1, limit: 50 }));
-        callSnack("Staff created successfully", "success");
-      } else if (mode === "update" && staff?.uuid) {
-        console.log("payload update ", payload);
-        console.log("payload in update: ", payload);
-        await dispatch(updateStaffAction({ uuid: staff.uuid, body: payload })).unwrap();
         await dispatch(listStaffAction({ page: 1, limit: 10 }));
+        callSnack("Staff created successfully", "success");
+      } else {
+        await dispatch(updateStaffAction({ uuid: staff.uuid, body: payload })).unwrap();
         callSnack("Staff updated successfully", "success");
       }
+
       onClose();
-    } catch (err) {
-      callSnack(mode === "create" ? "Staff Creation Failed" : "Staff Update Failed", "error");
+    } catch (err: any) {
+      callSnack(err?.response?.data?.message || "Action failed", "error");
     } finally {
       setIsLoading(false);
     }
@@ -103,37 +106,15 @@ export default function StaffDialog({ open, onClose, mode, staff }: StaffDialogP
 
   useEffect(() => {
     if (!open) return;
+    setStep(0);
 
     if (mode === "create") {
-      reset();
+      reset(createStaffDefaultPayload());
       return;
     }
 
     if (mode === "update" && staff) {
-      reset({
-        first_name: staff.first_name ?? "",
-        last_name: staff.last_name ?? "",
-        email: staff.email ?? "",
-        phone_number: staff.phone_number ?? "",
-        additional_phone_number: staff.additional_phone_number ?? "",
-        dob: staff.dob ?? "",
-        title: staff.title ?? "",
-        joining_date: staff.joining_date ?? "",
-        end_date: staff.end_date ?? undefined,
-        address: staff.address ?? "",
-        emergency_contact: staff.emergency_contact ?? { name: "", phone: "" },
-        gender: staff.gender,
-        photos: null,
-        active_hours: staff.active_hours ?? {
-          monday: null,
-          tuesday: null,
-          wednesday: null,
-          thursday: null,
-          friday: null,
-          saturday: null,
-          sunday: null,
-        },
-      });
+      reset(updateStaffDefaultPayload(staff));
     }
   }, [open, mode, staff, reset]);
 
@@ -142,257 +123,42 @@ export default function StaffDialog({ open, onClose, mode, staff }: StaffDialogP
       open={open}
       onClose={(event, reason) => {
         if (isLoading && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
+        close();
       }}
-      className={styles.dialogContainer}
+      fullWidth
+      maxWidth="md"
       classes={{ paper: styles.dialog }}
     >
-      <DialogTitle className={clsx(styles.dialogTitle)} fontWeight="fontWeightMedium" variant="h5">
+      <DialogTitle fontWeight="fontWeightMedium" variant="h5">
         {mode === "create" ? "Create Staff" : "Update Staff"}
       </DialogTitle>
 
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
-          <DialogContent className={clsx("flex flex-col gap-4 py-1 px-3", styles.dialogContent)}>
-            <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">First Name</Typography>
-                <TextField
-                  type="text"
-                  label="First Name"
-                  name="first_name"
-                  control={control}
-                  identifier="staff-first-name"
-                  disabled={isLoading}
-                />
-              </Box>
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">Last Name</Typography>
-                <TextField
-                  type="text"
-                  label="First Name"
-                  name="last_name"
-                  control={control}
-                  identifier="staff-last-name"
-                  disabled={isLoading}
-                />
-              </Box>
+          <StepperHeader steps={STEPS} activeStep={step} />
 
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">Email</Typography>
-                <TextField
-                  type="email"
-                  label="Email"
-                  name="email"
-                  control={control}
-                  identifier="staff-email"
-                  disabled={isLoading}
-                />
-              </Box>
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">DOB</Typography>
-                <DatePicker
-                  name="dob"
-                  control={control}
-                  placeholder="DOB"
-                  identifier="staff-dob"
-                  format="DD-MM-YYYY"
-                  disableFuture
-                  disabled={isLoading}
-                />
-              </Box>
-            </Box>
-
-            <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">Phone</Typography>
-                <TextField
-                  type="text"
-                  label="Phone Number"
-                  name="phone_number"
-                  control={control}
-                  identifier="staff-phone"
-                  disabled={isLoading}
-                />
-              </Box>
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">Additional Phone Number</Typography>
-                <TextField
-                  type="text"
-                  label="Additionl Phone"
-                  name="additional_phone_number"
-                  control={control}
-                  identifier="staff-additional-phone-number"
-                  disabled={isLoading}
-                />
-              </Box>
-            </Box>
-
-            <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">Joining Date</Typography>
-                <DatePicker
-                  name="joining_date"
-                  control={control}
-                  placeholder="Joining Date"
-                  identifier="staff-joining-date"
-                  format="DD-MM-YYYY"
-                  disabled={isLoading}
-                />
-              </Box>
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">End Date</Typography>
-                <DatePicker
-                  name="end_date"
-                  control={control}
-                  placeholder="End Date"
-                  identifier="staff-end-date"
-                  format="DD-MM-YYYY"
-                  disabled={isLoading}
-                />
-              </Box>
-            </Box>
-
-            <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">Title</Typography>
-                <TextField
-                  type="text"
-                  label="Title"
-                  name="title"
-                  control={control}
-                  identifier="staff-title"
-                  disabled={isLoading}
-                />
-              </Box>
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">Gender</Typography>
-                <Select
-                  name="gender"
-                  control={control}
-                  placeholder="Gender"
-                  identifier="staff-gender"
-                  options={GenderOptions}
-                  disabled={isLoading}
-                />
-              </Box>
-            </Box>
-
-            <Box className="flex flex-col gap-2">
-              <Typography fontWeight="bold">Photo (optional)</Typography>
-              <FilePicker
-                name="photos"
-                control={control}
-                identifier="staff-photo"
-                label="Photo (optional)"
-                uploadFn={uploadImages}
-                disabled={isLoading}
-              />
-            </Box>
-
-            <Box className="flex flex-col gap-2">
-              <Typography fontWeight="bold">Address</Typography>
-              <TextField
-                type="text"
-                label="Address"
-                name="address"
-                control={control}
-                identifier="staff-address"
-                disabled={isLoading}
-              />
-            </Box>
-
-            <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">Emergency Contact Name</Typography>
-                <TextField
-                  type="text"
-                  label="Name"
-                  name="emergency_contact.name"
-                  control={control}
-                  identifier="staff-emergency-name"
-                  disabled={isLoading}
-                />
-              </Box>
-
-              <Box className="flex flex-col gap-2">
-                <Typography fontWeight="bold">Emergency Contact Phone</Typography>
-                <TextField
-                  type="text"
-                  label="Phone"
-                  name="emergency_contact.phone"
-                  control={control}
-                  identifier="staff-emergency-phone"
-                  disabled={isLoading}
-                />
-              </Box>
-            </Box>
-
-            <Box className="flex flex-col gap-2">
-              <Typography fontWeight="bold">Active Hours</Typography>
-              <Box className="flex flex-col gap-3">
-                {DaysList.map((day) => {
-                  const val = (activeHours as any)?.[day];
-                  const isClosed = val === null;
-
-                  return (
-                    <Box key={day} className="border border-gray-200 rounded-lg p-3 space-y-3">
-                      <Box className="flex items-center justify-between">
-                        <Typography fontWeight="bold" className="capitalize">
-                          {day}
-                        </Typography>
-
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={isClosed}
-                              onChange={(e) => setDayClosed(day, e.target.checked)}
-                              disabled={isLoading}
-                            />
-                          }
-                          label="Closed"
-                        />
-                      </Box>
-
-                      {!isClosed && (
-                        <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <Box className="flex flex-col gap-2">
-                            <Typography fontWeight="bold">Start Time</Typography>
-                            <DateTimePicker
-                              name={`active_hours.${day}.start_time` as any}
-                              control={control}
-                              placeholder="Start Time"
-                              identifier={`staff-${day}-start`}
-                              disabled={isLoading}
-                            />
-                          </Box>
-
-                          <Box className="flex flex-col gap-2">
-                            <Typography fontWeight="bold">End Time</Typography>
-                            <DateTimePicker
-                              name={`active_hours.${day}.end_time` as any}
-                              control={control}
-                              placeholder="End Time"
-                              identifier={`staff-${day}-end`}
-                              disabled={isLoading}
-                            />
-                          </Box>
-                        </Box>
-                      )}
-                    </Box>
-                  );
-                })}
-              </Box>
+          <DialogContent className={clsx(styles.dialogContent)}>
+            <Box className="px-4 py-4">
+              {step === 0 && <StaffBasicInformation control={control} disabled={isLoading} />}
+              {step === 1 && <StaffInformation control={control} disabled={isLoading} />}
+              {step === 2 && <StaffSchedule control={control} watch={watch} setValue={setValue} disabled={isLoading} />}
             </Box>
           </DialogContent>
 
-          <DialogActions className={clsx(styles.dialogActions, "px-2 py-1 pb-2")}>
-            <Button onClick={onClose} disabled={isLoading}>
-              Back
+          <DialogActions className={styles.dialogActions}>
+            <Button type="button" onClick={back} disabled={isLoading}>
+              {step === 0 ? "Cancel" : "Back"}
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {mode === "create" ? "Create" : "Save"}
-            </Button>
+
+            {step < 2 ? (
+              <Button type="button" variant="contained" onClick={next} disabled={isLoading}>
+                Next
+              </Button>
+            ) : (
+              <Button type="button" variant="contained" onClick={() => onSubmit()} disabled={isLoading}>
+                {mode === "create" ? "Create" : "Save"}
+              </Button>
+            )}
           </DialogActions>
         </form>
       </FormProvider>

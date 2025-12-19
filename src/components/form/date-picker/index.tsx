@@ -37,9 +37,7 @@ const DatePicker = <T extends FieldValues>({
         name={name}
         control={control}
         render={({ field: { onChange, onBlur, value, ref }, fieldState: { error } }) => {
-          // RHF stores string ("DD-MM-YYYY"), DatePicker needs Dayjs
           const parsed: Dayjs | null = typeof value === "string" && value ? dayjs(value, format, true) : null;
-
           const dateValue = parsed && parsed.isValid() ? parsed : null;
 
           const handleDateChange = (newDate: Dayjs | null) => {
@@ -49,7 +47,6 @@ const DatePicker = <T extends FieldValues>({
               return;
             }
 
-            // store as string in RHF
             onChange(newDate.format(format));
             handleChange?.();
           };

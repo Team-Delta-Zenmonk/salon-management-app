@@ -16,9 +16,10 @@ import Services from "../pages/services";
 import Staff from "../pages/staff";
 import Offers from "../pages/offers";
 import Customers from "../pages/customers";
-import Reports from "../pages/reports";
+import Reports from "../pages/pricing";
 import Notification from "../pages/notification";
 import Bookings from "../pages/bookings";
+import StaffServiceManagementPage from "../pages/pricing";
 
 function AllRoutes() {
   return (
@@ -43,6 +44,7 @@ function AllRoutes() {
           <Route path="/services" element={<Services/>} />
           <Route path="/bookings" element={<Bookings/>} />
           <Route path="/staff" element={<Staff/>} />
+          <Route path="/staff-service-pricing" element={<StaffServiceManagementPage/>} />
           <Route path="/offers" element={<Offers/>} />
           <Route path="/customers" element={<Customers/>} />
           <Route path="/reports" element={<Reports/>} />
