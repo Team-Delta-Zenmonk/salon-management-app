@@ -6,8 +6,12 @@ import { GENDER } from "../../../../common/enums/gender.enum";
 
 const BusinessDaySchema = z
   .object({
-    start_time: z.string().datetime({ message: "Valid ISO datetime required" }),
-    end_time: z.string().datetime({ message: "Valid ISO datetime required" }),
+    start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+      message: "Valid time (HH:MM) required",
+    }),
+    end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+      message: "Valid time (HH:MM) required",
+    }),
   })
   .nullable()
   .optional();

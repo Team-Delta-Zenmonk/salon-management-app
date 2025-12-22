@@ -205,13 +205,15 @@ export default function StaffPricingAccordion({ selectedService }: { selectedSer
                             </Typography>
                           </Box>
 
-                          <IconButton
-                            size="small"
-                            className="text-(--primary-700)"
-                            onClick={() => handleOpenEdit(staff_uuid, s)}
-                          >
-                            <EditOutlined fontSize="small" className="text-(--primary-900)!" />
-                          </IconButton>
+                          {s.uuid !== selectedService.uuid && (
+                            <IconButton
+                              size="small"
+                              className="text-(--primary-700)"
+                              onClick={() => handleOpenEdit(staff_uuid, s)}
+                            >
+                              <EditOutlined fontSize="small" className="text-(--primary-900)!" />
+                            </IconButton>
+                          )}
                         </Box>
                       );
                     })}

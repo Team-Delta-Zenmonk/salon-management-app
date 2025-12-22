@@ -1,15 +1,15 @@
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import FormControl from "@mui/material/FormControl";
 import clsx from "clsx";
 import dayjs, { type Dayjs } from "dayjs";
 import { Controller, type FieldValues } from "react-hook-form";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateTimePicker as MuiDateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { TimePicker as MuiTimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import styles from "./time-picker.module.scss";
 import type { CustomDateTimePickerProps } from "./time.picker.type";
 
-const DateTimePicker = <T extends FieldValues>({
+const TimePicker = <T extends FieldValues>({
   name,
   control,
   placeholder,
@@ -20,7 +20,7 @@ const DateTimePicker = <T extends FieldValues>({
   handleChange,
 }: CustomDateTimePickerProps<T>) => {
   const openPickerIcon = (props: any) => (
-    <CalendarTodayIcon
+    <AccessTimeOutlinedIcon
       {...props}
       className={clsx(styles.icon, {
         [styles.disabledIcon]: disabled,
@@ -34,27 +34,29 @@ const DateTimePicker = <T extends FieldValues>({
         name={name}
         control={control}
         render={({ field: { onChange, onBlur, value, ref }, fieldState: { error } }) => {
-          const parsed: Dayjs | null = typeof value === "string" && value ? dayjs(value) : null;
+          const parsed: Dayjs | null = typeof value === "string" && value ? dayjs(value, "HH:mm") : null;
           const pickerValue = parsed && parsed.isValid() ? parsed : null;
-          const handleDateTimeChange = (newValue: Dayjs | null) => {
+
+          const handleTimeChange = (newValue: Dayjs | null) => {
             if (!newValue || !newValue.isValid()) {
               onChange("");
               handleChange?.();
               return;
             }
-            onChange(newValue.toISOString());
+            const timeString = newValue.format("HH:mm");
+            onChange(timeString);
             handleChange?.();
           };
 
           return (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <MuiDateTimePicker
+              <MuiTimePicker
                 value={pickerValue}
-                onChange={handleDateTimeChange}
+                onChange={handleTimeChange}
                 label={placeholder}
                 disabled={disabled}
-                minDateTime={minDateTime ?? undefined}
-                maxDateTime={maxDateTime ?? undefined}
+                minTime={minDateTime ?? undefined}
+                maxTime={maxDateTime ?? undefined}
                 slots={{ openPickerIcon }}
                 slotProps={{
                   textField: {
@@ -65,7 +67,7 @@ const DateTimePicker = <T extends FieldValues>({
                     InputProps: { className: styles.dateTimePickerInput },
                     inputProps: {
                       className: styles.input,
-                      "data-test-id": `date-time-picker-input-${identifier}`,
+                      "data-test-id": `time-picker-input-${identifier}`,
                     },
                     InputLabelProps: {
                       classes: {
@@ -76,10 +78,10 @@ const DateTimePicker = <T extends FieldValues>({
                     },
                   },
                   openPickerButton: {
-                    ...({ "data-test-id": `btn-date-time-picker-open-${identifier}` } as any),
+                    ...({ "data-test-id": `btn-time-picker-open-${identifier}` } as any),
                   },
                 }}
-                data-test-id={`date-time-picker-${identifier}`}
+                data-test-id={`time-picker-${identifier}`}
               />
             </LocalizationProvider>
           );
@@ -89,4 +91,4 @@ const DateTimePicker = <T extends FieldValues>({
   );
 };
 
-export default DateTimePicker;
+export default TimePicker;

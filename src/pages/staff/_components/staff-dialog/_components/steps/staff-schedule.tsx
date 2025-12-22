@@ -2,7 +2,7 @@ import { Box, Typography, FormControlLabel, Switch } from "@mui/material";
 import type { Control, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import type { StaffForm } from "../../../schema/staff.schema";
 import { DaysList, type DayKey } from "../../../../../../common/enums/days.enum";
-import DateTimePicker from "../../../../../../components/form/time-picker";
+import TimePicker from "../../../../../../components/form/time-picker";
 
 export default function StaffSchedule({
   control,
@@ -61,7 +61,7 @@ export default function StaffSchedule({
                 <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Box className="flex flex-col gap-2">
                     <Typography fontWeight="bold">Start Time</Typography>
-                    <DateTimePicker
+                    <TimePicker
                       name={`active_hours.${day}.start_time` as any}
                       control={control}
                       placeholder="Start Time"
@@ -72,7 +72,7 @@ export default function StaffSchedule({
 
                   <Box className="flex flex-col gap-2">
                     <Typography fontWeight="bold">End Time</Typography>
-                    <DateTimePicker
+                    <TimePicker
                       name={`active_hours.${day}.end_time` as any}
                       control={control}
                       placeholder="End Time"

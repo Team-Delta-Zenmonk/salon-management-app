@@ -1,4 +1,4 @@
-import { Box, Step, StepLabel, Stepper, Typography } from "@mui/material";
+import { Box, Step, StepConnector, StepLabel, Stepper } from "@mui/material";
 import clsx from "clsx";
 import styles from "./stepper-header.module.scss";
 import type { StepperHeaderStep } from "./stepper-header.type";
@@ -19,21 +19,17 @@ export default function StepperHeader({ steps, activeStep, className }: Props) {
               classes={{
                 label: styles.stepLabel,
               }}
-              StepIconProps={{
-                classes: {
-                  root: styles.stepIcon,
-                  active: styles.stepIconActive,
-                  completed: styles.stepIconCompleted,
-                } as any,
+              slotProps={{
+                stepIcon: {
+                  classes: {
+                    root: styles.stepIcon,
+                    active: styles.stepIconActive,
+                    completed: styles.stepIconCompleted,
+                  },
+                },
               }}
             >
-              <Typography
-                className={clsx({
-                  [styles.stepLabelActive]: steps[activeStep]?.label === s.label,
-                })}
-              >
-                {s.label}
-              </Typography>
+              {s.label}
             </StepLabel>
           </Step>
         ))}

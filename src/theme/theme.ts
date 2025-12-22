@@ -633,13 +633,6 @@ const theme = createTheme({
         },
       },
     },
-    MuiStepper: {
-      styleOverrides: {
-        root: {
-          width: "126px",
-        },
-      },
-    },
     MuiStepLabel: {
       styleOverrides: {
         root: {

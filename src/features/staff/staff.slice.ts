@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { ServiceGender } from "../../common/enums/service-gender.enum";
 import { listStaffAction } from "./list-staff/list-staff.action";
 import { updateStaffAction } from "./update-staff/update-staff.action";
-import type { CloudinaryFile } from "../../common/cloudinary.schema";
 
 export type StaffAddress = Record<string, any>;
 export type StaffEmergencyContact = Record<string, any>;

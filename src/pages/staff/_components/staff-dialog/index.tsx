@@ -67,7 +67,6 @@ export default function StaffDialog({ open, onClose, mode, staff }: Props) {
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsLoading(true);
-
       const photos = data.photos || (mode === "update" ? staff?.photos : undefined);
 
       const payload = {

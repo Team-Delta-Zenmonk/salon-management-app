@@ -7,28 +7,3 @@
 .stepperRoot {
   width: 100%;
 }
-
-.stepLabel {
-  font-weight: 600;
-  font-size: 13px;
-}
-
-.stepLabelActive {
-  color: var(--primary-800);
-}
-
-.stepLabelCompleted {
-  color: var(--secondary-700);
-}
-
-.stepIcon {
-  color: var(--secondary-400);
-}
-
-.stepIconActive {
-  color: var(--primary-800);
-}
-
-.stepIconCompleted {
-  color: var(--primary-700);
-}
