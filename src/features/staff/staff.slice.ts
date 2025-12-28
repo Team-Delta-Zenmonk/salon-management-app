@@ -1,12 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { ServiceGender } from "../../common/enums/service-gender.enum";
 import { listStaffAction } from "./list-staff/list-staff.action";
 import { updateStaffAction } from "./update-staff/update-staff.action";
 
 export type StaffAddress = Record<string, any>;
 export type StaffEmergencyContact = Record<string, any>;
 export type StaffActiveHours = Record<string, any>;
-
 export interface Staff {
   id: number;
   uuid: string;
@@ -22,40 +20,61 @@ export interface Staff {
   end_date?: string | null;
   address: string;
   emergency_contact: StaffEmergencyContact;
-  gender: ServiceGender;
+  gender: string;
   active_hours?: StaffActiveHours | null;
   created_at: string;
   updated_at: string;
 }
-
 export interface StaffState {
-  staffs: Staff[];
+  data: Staff[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 const initialState: StaffState = {
-  staffs: [],
+  data: [],
+  total: 0,
+  page: 1,
+  limit: 10,
 };
 
 export const staffSlice = createSlice({
   name: "staff",
   initialState,
   reducers: {
-    clearStaff(state) {
-      state.staffs = [];
+    resetStaff(state) {
+      state.data = [];
+      state.total = 0;
+      state.page = 1;
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(listStaffAction.fulfilled, (state, { payload }) => {
-      state.staffs = Array.isArray(payload) ? payload : [];
+    builder.addCase(listStaffAction.fulfilled, (state, action) => {
+      const { data, total, page, limit } = action.payload;
+
+      if (page === 1) {
+        state.data = data;
+      } else {
+        state.data = [...state.data, ...data];
+      }
+
+      state.total = total;
+      state.page = page;
+      state.limit = limit;
     });
+
     builder.addCase(updateStaffAction.fulfilled, (state, { payload }) => {
-      const index = state.staffs.findIndex((s) => s.uuid === payload.uuid);
+      const index = state.data.findIndex((s) => s.uuid === payload.uuid);
       if (index !== -1) {
-        state.staffs[index] = { ...state.staffs[index], ...payload.body };
+        state.data[index] = {
+          ...state.data[index],
+          ...payload.body,
+        };
       }
     });
   },
 });
 
-export const { clearStaff } = staffSlice.actions;
+export const { resetStaff } = staffSlice.actions;
 export default staffSlice.reducer;

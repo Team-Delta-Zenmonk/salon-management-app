@@ -12,15 +12,23 @@ import StaffPricingPanel from "./_components/staff-pricing-panel";
 export default function StaffServiceManagementPage() {
   const dispatch = useAppDispatch();
 
-  const servicesState = useAppSelector((state: RootState) => state.service.services) ?? [];
-  const parentServices = useMemo(() => servicesState.filter((s: any) => !s.parent_id), [servicesState]);
+  // ✅ Use paginated data from service slice
+  const serviceState = useAppSelector((state: RootState) => state.service);
+  const servicesState = serviceState?.data ?? [];
+
+  const parentServices = useMemo(
+    () => servicesState.filter((s: any) => !s.parent_id),
+    [servicesState]
+  );
 
   const [selectedServiceUuid, setSelectedServiceUuid] = useState<string | null>(null);
   const [childrenMap, setChildrenMap] = useState<Record<string, ServiceType[]>>({});
   const [subLoadingMap, setSubLoadingMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    dispatch(listServicesAction(undefined));
+    // ✅ Load a big chunk of services for pricing (no infinite scroll here)
+    dispatch(listServicesAction({ page: 1, limit: 100 }));
+    // Staff can stay paginated but 50 is fine for dialog usage
     dispatch(listStaffAction({ page: 1, limit: 50 }));
   }, [dispatch]);
 
@@ -39,6 +47,7 @@ export default function StaffServiceManagementPage() {
         const res = await listSubServicesService(parentUuid);
         const rows = Array.isArray(res) ? res : res?.rows ?? [];
         const nodes: ServiceType[] = rows.map((c: any) => ({
+          id: c.id,
           uuid: c.uuid,
           name: c.name,
           price_type: c.price_type,

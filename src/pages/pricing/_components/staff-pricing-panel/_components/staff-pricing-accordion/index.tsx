@@ -19,7 +19,8 @@ import { assignStaffToService } from "../../../../../../features/staff-service/s
 import StaffServicePricingDialog from "../staff-service-pricing-dialog";
 
 export default function StaffPricingAccordion({ selectedService }: { selectedService: ServiceType }) {
-  const staffs = useAppSelector((state: RootState) => state.staff.staffs) ?? [];
+  const staffState = useAppSelector((state: RootState) => state.staff);
+  const staffs = staffState?.data ?? [];
 
   const services = useMemo(() => [selectedService, ...(selectedService.children ?? [])], [selectedService]);
 

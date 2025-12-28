@@ -1,5 +1,5 @@
-import { Box } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { Box, CircularProgress } from "@mui/material";
+import { useEffect, useMemo, useState, useCallback } from "react";  // ✅ Removed useRef
 import { useDispatch } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
 import type { AppDispatch, RootState } from "../../../../store/store";
@@ -9,12 +9,14 @@ import Select from "../../../../components/form/select";
 import ListServices from "../list-services";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { listServicesAction } from "../../../../features/service/list-services/list-service.action";
+import { resetServices } from "../../../../features/service/service.slice";
 
 type FilterForm = {
   category_uuid: string;
 };
 
 const ALL_CATEGORIES_VALUE = "all";
+
 interface SearchServiceProps {
   selectedCategoryUuid: string;
   onCategoryChange: (uuid: string) => void;
@@ -24,7 +26,16 @@ interface SearchServiceProps {
 const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices }: SearchServiceProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const [searchQuery, setSearchQuery] = useState("");
-  const categories = useAppSelector((state: RootState) => state.category.categories) ?? [];
+  const [isLoading, setIsLoading] = useState(false);
+
+  const categories = useAppSelector((state: RootState) => state.category.data) ?? [];
+  const serviceState = useAppSelector((state: RootState) => state.service);
+  const data = serviceState?.data ?? [];
+  const total = serviceState?.total ?? 0;
+  const page = serviceState?.page ?? 1;
+  const limit = serviceState?.limit ?? 10;
+
+  // ✅ REMOVED: previousSearchRef, previousCategoryRef
 
   const methods = useForm<FilterForm>({
     defaultValues: {
@@ -35,8 +46,16 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   const { control, watch } = methods;
   const watchedCategoryUuid = watch("category_uuid");
 
+  // Load categories
   useEffect(() => {
-    dispatch(listCategoriesAction());
+    const fetchCategories = async () => {
+      try {
+        await dispatch(listCategoriesAction({ page: 1, limit: 100 })).unwrap();
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      }
+    };
+    fetchCategories();
   }, [dispatch]);
 
   const categoryOptions = useMemo(
@@ -49,23 +68,93 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
     ],
     [categories]
   );
+
+  // Sync form value with prop
   useEffect(() => {
     methods.setValue("category_uuid", selectedCategoryUuid);
   }, [selectedCategoryUuid, methods]);
 
+  // Initial load
   useEffect(() => {
-    if (watchedCategoryUuid === ALL_CATEGORIES_VALUE) {
-      dispatch(listServicesAction(undefined));
-    } else if (watchedCategoryUuid) {
-      dispatch(listServicesAction({ category_uuid: watchedCategoryUuid }));
-    }
-  }, [dispatch, watchedCategoryUuid]);
+    const fetchInitialData = async () => {
+      setIsLoading(true);
+      try {
+        if (selectedCategoryUuid === ALL_CATEGORIES_VALUE) {
+          await dispatch(listServicesAction({ page: 1, limit: 10 })).unwrap();
+        } else {
+          await dispatch(
+            listServicesAction({
+              category_uuid: selectedCategoryUuid,
+              page: 1,
+              limit: 10,
+            })
+          ).unwrap();
+        }
+      } catch (error) {
+        console.error("Failed to fetch services", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    fetchInitialData();
+  }, [dispatch, selectedCategoryUuid]);
+
+  // ✅ SIMPLIFIED: SearchBar debounces → No refs needed
+  useEffect(() => {
+    const trimmedSearch = searchQuery.trim();
+
+    const fetchFilteredData = async () => {
+      dispatch(resetServices());
+      setIsLoading(true);
+      try {
+        const params: any = {
+          page: 1,
+          limit: 10,
+          search: trimmedSearch || undefined,
+        };
+
+        if (watchedCategoryUuid !== ALL_CATEGORIES_VALUE) {
+          params.category_uuid = watchedCategoryUuid;
+        }
+
+        await dispatch(listServicesAction(params)).unwrap();
+      } catch (error) {
+        console.error("Failed to fetch filtered services", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFilteredData();  // ✅ Runs once per debounced searchQuery change
+  }, [searchQuery, watchedCategoryUuid, dispatch]);  // ✅ Clean deps
+
+  // Update parent state when category changes
   useEffect(() => {
     if (watchedCategoryUuid !== selectedCategoryUuid) {
       onCategoryChange(watchedCategoryUuid);
     }
   }, [watchedCategoryUuid, selectedCategoryUuid, onCategoryChange]);
+
+  const fetchMoreServices = useCallback(async () => {
+    try {
+      const params: any = {
+        page: page + 1,
+        limit: limit,
+        search: searchQuery.trim() || undefined,
+      };
+
+      if (watchedCategoryUuid !== ALL_CATEGORIES_VALUE) {
+        params.category_uuid = watchedCategoryUuid;
+      }
+
+      await dispatch(listServicesAction(params)).unwrap();
+    } catch (error) {
+      console.error("Failed to load more services", error);
+    }
+  }, [dispatch, page, limit, searchQuery, watchedCategoryUuid]);
+
+  const hasMore = data.length < total;
 
   return (
     <Box className="flex flex-col flex-1 min-h-0 px-8 pb-8 space-y-6">
@@ -83,12 +172,21 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
             />
           </Box>
         </Box>
-        <Box className="flex-1 min-h-0 overflow-y-auto">
-          <ListServices
-            searchQuery={searchQuery}
-            categoryUuid={selectedCategoryUuid}
-            refreshServices={refreshServices}
-          />
+        <Box className="flex-1 min-h-0 overflow-y-auto" id="servicesScrollableDiv">
+          {isLoading && data.length === 0 ? (
+            <Box className="flex items-center justify-center h-full">
+              <CircularProgress />
+            </Box>
+          ) : (
+            <ListServices
+              searchQuery={searchQuery}
+              categoryUuid={selectedCategoryUuid}
+              refreshServices={refreshServices}
+              hasMore={hasMore}
+              fetchMoreServices={fetchMoreServices}
+              total={total}
+            />
+          )}
         </Box>
       </FormProvider>
     </Box>

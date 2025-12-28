@@ -28,6 +28,7 @@ import type { RootState } from "../../../../store/store";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { createServiceService } from "../../../../features/service/create-service/create-service.service";
 import { updateServiceAction } from "../../../../features/service/update-service/update-service.action";
+
 interface ServiceDialogProps {
   open: boolean;
   onClose: () => void;
@@ -40,7 +41,10 @@ interface ServiceDialogProps {
 export default function ServiceDialog({ open, onClose, mode, service, parentService, onCreated }: ServiceDialogProps) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const categories = useAppSelector((state: RootState) => state.category.categories);
+  
+  // Fix: Access state.category.data instead of state.category.categories
+  const categories = useAppSelector((state: RootState) => state.category.data) ?? [];
+  
   const isCreatingSubService = mode === "create" && Boolean(parentService);
   const isEditingSubService = mode === "update" && Boolean(service?.parent_id);
   const shouldShowCategory = !(isCreatingSubService || isEditingSubService);
@@ -84,6 +88,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
           ...(data.discount !== undefined && data.discount !== null ? { discount: Number(data.discount) } : {}),
           ...(data.discount_type ? { discount_type: data.discount_type } : {}),
         });
+        
         callSnack(
           isCreatingSubService ? "Sub-service created successfully" : "Service created successfully",
           "success"
@@ -109,20 +114,30 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
             },
           })
         ).unwrap();
+        
         callSnack("Service updated successfully", "success");
         onCreated?.();
       }
 
       onClose();
-    } catch (err) {
-      callSnack(mode === "create" ? "Service Creation Failed" : "Service Update Failed", "error");
+    } catch (err: any) {
+      callSnack(err?.response?.data?.message || (mode === "create" ? "Service Creation Failed" : "Service Update Failed"), "error");
     } finally {
       setIsLoading(false);
     }
   });
 
+  // Fix: Pass required parameters to listCategoriesAction
   useEffect(() => {
-    dispatch(listCategoriesAction());
+    const fetchCategories = async () => {
+      try {
+        await dispatch(listCategoriesAction({ page: 1, limit: 100 })).unwrap();
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      }
+    };
+    
+    fetchCategories();
   }, [dispatch]);
 
   useEffect(() => {
@@ -267,7 +282,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
             </Box>
 
             <Box className="flex flex-col gap-2">
-              <Typography fontWeight="bold">Duration</Typography>
+              <Typography fontWeight="bold">Duration (in minutes)</Typography>
               <TextField
                 type="number"
                 label="Duration"

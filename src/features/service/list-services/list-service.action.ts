@@ -4,6 +4,9 @@ import { listServicesType } from "./list-services.type";
 
 interface ListServicesParams {
   category_uuid?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
 }
 
 export const listServicesAction = createAsyncThunk(

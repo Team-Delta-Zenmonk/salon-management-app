@@ -5,7 +5,6 @@ import type { DiscountType } from "../../common/enums/discount-type.enum";
 import { listServicesAction } from "./list-services/list-service.action";
 import { updateServiceAction } from "./update-service/update-service.action";
 import type { Category } from "../category/category.slice";
-
 export interface Service {
   id: number;
   uuid: string;
@@ -13,7 +12,7 @@ export interface Service {
   description?: string | null;
   logo?: string | null;
   salon_id: number;
-  duration:string;
+  duration: string;
   category_id?: number | null;
   category?: Category;
   parent_id?: string | null;
@@ -29,11 +28,17 @@ export interface Service {
 }
 
 export type ServicesState = {
-  services: Service[];
+  data: Service[];
+  total: number;
+  page: number;
+  limit: number;
 };
 
 const initialState: ServicesState = {
-  services: [],
+  data: [],
+  total: 0,
+  page: 1,
+  limit: 10,
 };
 
 export const serviceSlice = createSlice({
@@ -41,22 +46,38 @@ export const serviceSlice = createSlice({
   initialState,
   reducers: {
     clearServices(state) {
-      state.services = [];
+      state.data = [];
+      state.total = 0;
+      state.page = 1;
+    },
+    resetServices(state) {
+      state.data = [];
+      state.total = 0;
+      state.page = 1;
     },
   },
   extraReducers: (builder) => {
     builder.addCase(listServicesAction.fulfilled, (state, { payload }) => {
-      state.services = payload.rows;
+      const { data, total, page, limit } = payload;
+      if (page === 1) {
+        state.data = data;
+      } else {
+        state.data = [...state.data, ...data];
+      }
+
+      state.total = total;
+      state.page = page;
+      state.limit = limit;
     });
 
     builder.addCase(updateServiceAction.fulfilled, (state, { payload }) => {
-      const index = state.services.findIndex((s) => s.uuid === payload.uuid);
+      const index = state.data.findIndex((s) => s.uuid === payload.uuid);
       if (index !== -1) {
-        state.services[index] = { ...state.services[index], ...payload.body };
+        state.data[index] = { ...state.data[index], ...payload.body };
       }
     });
   },
 });
 
-export const { clearServices } = serviceSlice.actions;
+export const { clearServices, resetServices } = serviceSlice.actions;
 export default serviceSlice.reducer;

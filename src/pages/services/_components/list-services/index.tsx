@@ -1,4 +1,5 @@
-import { Box, Typography, IconButton, Collapse, Chip, Avatar } from "@mui/material";
+import { Box, Typography, IconButton, Collapse, Chip, Avatar, CircularProgress } from "@mui/material";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
@@ -21,15 +22,21 @@ interface ListServicesProps {
   searchQuery: string;
   categoryUuid?: string;
   refreshServices?: (cb?: () => void) => Promise<void>;
+  hasMore: boolean;
+  fetchMoreServices: () => void;
+  total: number;
 }
 
 export default function ListServices({
   searchQuery,
   categoryUuid,
   refreshServices: refreshServicesProp,
+  hasMore,
+  fetchMoreServices,
+  total,
 }: ListServicesProps) {
   const dispatch = useAppDispatch();
-  const services = useAppSelector((state: RootState) => state.service.services) ?? [];
+  const services = useAppSelector((state: RootState) => state.service.data) ?? [];
 
   const [expandedService, setExpandedService] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -58,9 +65,9 @@ export default function ListServices({
     if (refreshServicesProp) {
       await refreshServicesProp(cb);
     } else if (categoryUuid && categoryUuid !== "all") {
-      await dispatch(listServicesAction({ category_uuid: categoryUuid }));
+      await dispatch(listServicesAction({ category_uuid: categoryUuid, page: 1, limit: 10 }));
     } else {
-      await dispatch(listServicesAction(undefined));
+      await dispatch(listServicesAction({ page: 1, limit: 10 }));
     }
   };
 
@@ -162,109 +169,130 @@ export default function ListServices({
 
   return (
     <>
-      <Box className="space-y-4">
-        {filteredServices.map((service: any) => {
-          const isExpanded = expandedService === service.uuid;
-          const subServices = subServicesMap[service.uuid] ?? [];
-          const subLoading = subLoadingMap[service.uuid] ?? false;
+      <Box className="text-(--primary-900) mb-4">Services List ({total})</Box>
 
-          return (
-            <Box key={service.uuid} className="bg-white border border-gray-300 rounded-lg p-6">
-              <Box className="flex justify-between items-start">
-                <Box className="flex gap-4">
-                  {service.logo && <Avatar src={service.logo} alt={service.name} />}
-                  <Box>
-                    <Typography className="text-(--primary-900)" fontWeight="bold">
-                      {service.name}
-                    </Typography>
-                    {service.description && (
-                      <Typography className="text-gray-600 text-sm">{service.description}</Typography>
-                    )}
-                    <Box className="flex gap-2 mt-2">
-                      <Chip size="small" label={service.gender} />
-                      <Chip size="small" label={`${service.price_type} ₹${service.price}`} />
-                      {service.is_popular && <Chip size="small" color="warning" label="Popular" />}
-                      {!service.is_active && <Chip size="small" color="error" label="Inactive" />}
+      <InfiniteScroll
+        dataLength={filteredServices.length}
+        next={fetchMoreServices}
+        hasMore={hasMore}
+        loader={
+          <Box className="flex justify-center py-4">
+            <CircularProgress size={24} />
+          </Box>
+        }
+        scrollableTarget="servicesScrollableDiv"
+        endMessage={
+          filteredServices.length > 0 ? (
+            <Box className="text-center py-4 text-gray-500">
+              <Typography variant="body2">No more services to load</Typography>
+            </Box>
+          ) : null
+        }
+      >
+        <Box className="space-y-4">
+          {filteredServices.map((service: any) => {
+            const isExpanded = expandedService === service.uuid;
+            const subServices = subServicesMap[service.uuid] ?? [];
+            const subLoading = subLoadingMap[service.uuid] ?? false;
+
+            return (
+              <Box key={service.uuid} className="bg-white border border-gray-300 rounded-lg p-6">
+                <Box className="flex justify-between items-start">
+                  <Box className="flex gap-4">
+                    {service.logo && <Avatar src={service.logo} alt={service.name} />}
+                    <Box>
+                      <Typography className="text-(--primary-900)" fontWeight="bold">
+                        {service.name}
+                      </Typography>
+                      {service.description && (
+                        <Typography className="text-gray-600 text-sm">{service.description}</Typography>
+                      )}
+                      <Box className="flex gap-2 mt-2">
+                        <Chip size="small" label={service.gender} />
+                        <Chip size="small" label={`${service.price_type} ₹${service.price}`} />
+                        {service.is_popular && <Chip size="small" color="warning" label="Popular" />}
+                        {!service.is_active && <Chip size="small" color="error" label="Inactive" />}
+                      </Box>
                     </Box>
+                  </Box>
+
+                  <Box className="flex gap-1">
+                    <IconButton onClick={() => handleToggleExpand(service.uuid)}>
+                      {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                    <IconButton onClick={() => handleAssignStaff(service)} disabled={deleteLoading}>
+                      <Person2OutlinedIcon className="text-green-600!" />
+                    </IconButton>
+                    <IconButton onClick={() => handleOpenSubService(service)} disabled={deleteLoading}>
+                      <AddOutlinedIcon className="text-(--primary-800)!" />
+                    </IconButton>
+                    <IconButton onClick={() => handleEdit(service)} disabled={deleteLoading}>
+                      <ModeEditOutlineOutlinedIcon className="text-purple-800!" />
+                    </IconButton>
+                    <IconButton disabled={deleteLoading} onClick={() => handleServiceDeleteClick(service)}>
+                      <DeleteOutlinedIcon className="text-(--error-800)!" />
+                    </IconButton>
                   </Box>
                 </Box>
 
-                <Box className="flex gap-1">
-                  <IconButton onClick={() => handleToggleExpand(service.uuid)}>
-                    {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                  </IconButton>
-                  <IconButton onClick={() => handleAssignStaff(service)} disabled={deleteLoading}>
-                    <Person2OutlinedIcon className="text-green-600!" />
-                  </IconButton>
-                  <IconButton onClick={() => handleOpenSubService(service)} disabled={deleteLoading}>
-                    <AddOutlinedIcon className="text-(--primary-800)!" />
-                  </IconButton>
-                  <IconButton onClick={() => handleEdit(service)} disabled={deleteLoading}>
-                    <ModeEditOutlineOutlinedIcon className="text-purple-800!" />
-                  </IconButton>
-                  <IconButton disabled={deleteLoading} onClick={() => handleServiceDeleteClick(service)}>
-                    <DeleteOutlinedIcon className="text-(--error-800)!" />
-                  </IconButton>
-                </Box>
-              </Box>
-
-              <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                <Box className="mt-4 pl-6 border-l border-gray-200 space-y-3">
-                  {subLoading && <Typography className="text-gray-500">Loading sub-services...</Typography>}
-                  {!subLoading && subServices.length === 0 && (
-                    <Typography className="text-gray-500">No sub-services yet</Typography>
-                  )}
-                  {!subLoading &&
-                    subServices.map((sub) => (
-                      <Box
-                        key={sub.uuid}
-                        className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex justify-between items-start"
-                      >
-                        <Box className="flex gap-3">
-                          {sub.logo && <Avatar src={sub.logo} alt={sub.name} />}
-                          <Box>
-                            <Typography fontWeight="bold">{sub.name}</Typography>
-                            {sub.description && (
-                              <Typography className="text-gray-600 text-sm">{sub.description}</Typography>
-                            )}
-                            <Box className="flex gap-2 mt-2">
-                              <Chip size="small" label={sub.gender} />
-                              <Chip size="small" label={`${sub.price_type} ₹${sub.price}`} />
-                              {sub.is_popular && <Chip size="small" color="warning" label="Popular" />}
-                              {!sub.is_active && <Chip size="small" color="error" label="Inactive" />}
+                <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                  <Box className="mt-4 pl-6 border-l border-gray-200 space-y-3">
+                    {subLoading && <Typography className="text-gray-500">Loading sub-services...</Typography>}
+                    {!subLoading && subServices.length === 0 && (
+                      <Typography className="text-gray-500">No sub-services yet</Typography>
+                    )}
+                    {!subLoading &&
+                      subServices.map((sub) => (
+                        <Box
+                          key={sub.uuid}
+                          className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex justify-between items-start"
+                        >
+                          <Box className="flex gap-3">
+                            {sub.logo && <Avatar src={sub.logo} alt={sub.name} />}
+                            <Box>
+                              <Typography fontWeight="bold">{sub.name}</Typography>
+                              {sub.description && (
+                                <Typography className="text-gray-600 text-sm">{sub.description}</Typography>
+                              )}
+                              <Box className="flex gap-2 mt-2">
+                                <Chip size="small" label={sub.gender} />
+                                <Chip size="small" label={`${sub.price_type} ₹${sub.price}`} />
+                                {sub.is_popular && <Chip size="small" color="warning" label="Popular" />}
+                                {!sub.is_active && <Chip size="small" color="error" label="Inactive" />}
+                              </Box>
                             </Box>
                           </Box>
-                        </Box>
 
-                        <Box className="flex gap-1">
-                          <IconButton onClick={() => handleEdit(sub, service.uuid)} disabled={deleteLoading}>
-                            <ModeEditOutlineOutlinedIcon className="text-purple-800!" />
-                          </IconButton>
-                          <IconButton
-                            onClick={() => handleSubServiceDeleteClick(sub, service.uuid)}
-                            disabled={deleteLoading}
-                          >
-                            <DeleteOutlinedIcon className="text-(--error-800)!" />
-                          </IconButton>
+                          <Box className="flex gap-1">
+                            <IconButton onClick={() => handleEdit(sub, service.uuid)} disabled={deleteLoading}>
+                              <ModeEditOutlineOutlinedIcon className="text-purple-800!" />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => handleSubServiceDeleteClick(sub, service.uuid)}
+                              disabled={deleteLoading}
+                            >
+                              <DeleteOutlinedIcon className="text-(--error-800)!" />
+                            </IconButton>
+                          </Box>
                         </Box>
-                      </Box>
-                    ))}
+                      ))}
+                  </Box>
+                </Collapse>
+
+                <Box className="text-gray-400 text-xs mt-4">
+                  Created on: {dayjs(service.created_at).format("MMM DD, YYYY")}
                 </Box>
-              </Collapse>
-
-              <Box className="text-gray-400 text-xs mt-4">
-                Created on: {dayjs(service.created_at).format("MMM DD, YYYY")}
               </Box>
-            </Box>
-          );
-        })}
+            );
+          })}
+        </Box>
+      </InfiniteScroll>
 
-        {filteredServices.length === 0 && (
-          <Box className="bg-gray-200 border border-gray-400 rounded-lg p-8 text-center">
-            <Typography>No services found</Typography>
-          </Box>
-        )}
-      </Box>
+      {filteredServices.length === 0 && (
+        <Box className="bg-gray-200 border border-gray-400 rounded-lg p-8 text-center mt-4">
+          <Typography>No services found</Typography>
+        </Box>
+      )}
 
       {selectedService && (
         <ServiceDialog

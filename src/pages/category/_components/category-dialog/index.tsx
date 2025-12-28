@@ -8,12 +8,12 @@ import FilePicker from "../../../../components/form/file-picker";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { uploadImages } from "../../../../features/upload-images/upload-images.service";
 import { useAppDispatch } from "../../../../store/hooks";
-import { createCategoryAction } from "../../../../features/category/create-category/create-category.action";
 import { updateCategoryAction } from "../../../../features/category/update-category/update-category.action";
 import { callSnack } from "../../../../components/snackbar";
 import styles from "./category-dialog.module.scss";
 import { useEffect, useState } from "react";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
+import { createCategoryService } from "../../../../features/category/create-category/create-categories.service";
 
 interface CategoryDialogProps {
   open: boolean;
@@ -47,24 +47,30 @@ export default function CategoryDialog({ open, onClose, mode, category }: Catego
     }
   }, [open, mode, category, reset]);
 
-  const onSubmit = handleSubmit(async (data) => {
+const onSubmit = handleSubmit(async (data) => {
     try {
       setIsLoading(true);
 
       const logoUrl = data.logo?.url || (mode === "update" ? category.logo : undefined);
 
       if (mode === "create") {
-        await dispatch(
-          createCategoryAction({ name: data?.name, description: data?.description, logo: logoUrl })
-        ).unwrap();
-        await dispatch(listCategoriesAction());
-
+        await createCategoryService({ 
+          name: data?.name, 
+          description: data?.description, 
+          logo: logoUrl 
+        });
+        await dispatch(listCategoriesAction({ page: 1, limit: 10 })).unwrap();
+        
         callSnack("Category created successfully", "success");
       } else {
         await dispatch(
           updateCategoryAction({
             uuid: category?.uuid,
-            body: { name: data?.name, description: data?.description, logo: logoUrl },
+            body: { 
+              name: data?.name, 
+              description: data?.description, 
+              logo: logoUrl 
+            },
           })
         ).unwrap();
 
@@ -72,8 +78,8 @@ export default function CategoryDialog({ open, onClose, mode, category }: Catego
       }
 
       onClose();
-    } catch (err) {
-      callSnack("Action failed", "error");
+    } catch (err: any) {
+      callSnack(err?.response?.data?.message || "Action failed", "error");
     } finally {
       setIsLoading(false);
     }
