@@ -49,12 +49,12 @@ export const categoriesSlice = createSlice({
       } else {
         state.data = [...state.data, ...data];
       }
-      
+
       state.total = total;
       state.page = page;
       state.limit = limit;
     });
-    
+
     builder.addCase(updateCategoryAction.fulfilled, (state, { payload }) => {
       const index = state.data.findIndex((c) => c.uuid === payload.uuid);
       if (index !== -1) {

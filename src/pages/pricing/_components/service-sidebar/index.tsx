@@ -4,13 +4,13 @@ import { useState } from "react";
 import clsx from "clsx";
 import type { ServiceType } from "../../types/staff-service.types";
 
-type Props = {
+interface ServiceSideBarProps {
   services: ServiceType[];
   selectedServiceUuid: string | null;
   onSelectService: (uuid: string) => void;
   onExpandParent: (uuid: string) => Promise<void> | void;
   loadingMap: Record<string, boolean>;
-};
+}
 
 export default function ServiceSidebar({
   services,
@@ -18,7 +18,7 @@ export default function ServiceSidebar({
   onSelectService,
   onExpandParent,
   loadingMap,
-}: Props) {
+}: ServiceSideBarProps) {
   const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
 
   const toggle = async (uuid: string) => {

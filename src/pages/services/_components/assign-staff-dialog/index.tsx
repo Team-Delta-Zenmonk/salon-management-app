@@ -65,26 +65,14 @@ export default function AssignStaffDialog({
 
       const selectedStaffUuids = data.staff;
 
-      // Find staff to assign (newly selected)
-      const staffToAssign = selectedStaffUuids.filter(
-        (uuid) => !initialAssignedStaff.includes(uuid)
-      );
+      const staffToAssign = selectedStaffUuids.filter((uuid) => !initialAssignedStaff.includes(uuid));
 
-      // Find staff to unassign (previously selected but now unchecked)
-      const staffToUnassign = initialAssignedStaff.filter(
-        (uuid) => !selectedStaffUuids.includes(uuid)
-      );
+      const staffToUnassign = initialAssignedStaff.filter((uuid) => !selectedStaffUuids.includes(uuid));
 
-      // Execute unassignments
       if (staffToUnassign.length > 0) {
-        await Promise.all(
-          staffToUnassign.map((staffUuid) =>
-            unassignStaffFromService(staffUuid, service.uuid)
-          )
-        );
+        await Promise.all(staffToUnassign.map((staffUuid) => unassignStaffFromService(staffUuid, service.uuid)));
       }
 
-      // Execute assignments
       if (staffToAssign.length > 0) {
         const payload = {
           staff_services: staffToAssign.map((staffUuid) => ({
@@ -99,7 +87,6 @@ export default function AssignStaffDialog({
         await assignStaffToService(payload);
       }
 
-      // Show appropriate success message
       if (staffToAssign.length > 0 && staffToUnassign.length > 0) {
         callSnack("Staff assignment updated successfully", "success");
       } else if (staffToAssign.length > 0) {
@@ -113,16 +100,12 @@ export default function AssignStaffDialog({
       await onStaffAssigned?.();
       onClose();
     } catch (err: any) {
-      callSnack(
-        err?.response?.data?.message || "Staff assignment update failed",
-        "error"
-      );
+      callSnack(err?.response?.data?.message || "Staff assignment update failed", "error");
     } finally {
       setIsLoading(false);
     }
   });
 
-  // Load ALL staff
   useEffect(() => {
     if (open) {
       dispatch(resetStaff());
@@ -130,7 +113,6 @@ export default function AssignStaffDialog({
     }
   }, [open, dispatch]);
 
-  // Load assigned staff
   useEffect(() => {
     const fetchAndPopulateAssignedStaff = async () => {
       if (!open || !serviceUuid || staffs.length === 0) return;
@@ -145,7 +127,6 @@ export default function AssignStaffDialog({
           .filter((staff: Staff) => assignedStaffIds.includes(staff.id))
           .map((staff: Staff) => staff.uuid);
 
-        // Store initial assigned staff for comparison
         setInitialAssignedStaff(assignedStaffUuids);
         reset({ staff: assignedStaffUuids });
       } catch (err: any) {
@@ -160,7 +141,6 @@ export default function AssignStaffDialog({
     fetchAndPopulateAssignedStaff();
   }, [open, serviceUuid, staffs.length, reset]);
 
-  // Reset on close
   useEffect(() => {
     if (!open) {
       reset({ staff: [] });
@@ -196,15 +176,8 @@ export default function AssignStaffDialog({
               </Box>
             ) : (
               <Box className="flex flex-col gap-4 max-h-[400px] overflow-y-auto">
-                <Typography fontWeight="bold">
-                  Select Staff ({staffs.length} available)
-                </Typography>
-                <CheckboxGroup 
-                  name="staff" 
-                  control={control} 
-                  identifier="staff-assignment" 
-                  options={staffOptions} 
-                />
+                <Typography fontWeight="bold">Select Staff ({staffs.length} available)</Typography>
+                <CheckboxGroup name="staff" control={control} identifier="staff-assignment" options={staffOptions} />
               </Box>
             )}
           </DialogContent>
@@ -213,8 +186,8 @@ export default function AssignStaffDialog({
             <Button onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading || staffs.length === 0 || isFetchingAssignedStaff}
               loading={isLoading}
             >

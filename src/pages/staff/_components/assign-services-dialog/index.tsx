@@ -1,13 +1,4 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  CircularProgress,
-} from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, CircularProgress } from "@mui/material";
 import clsx from "clsx";
 import { FormProvider, useForm } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
@@ -45,10 +36,7 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
   const { control, handleSubmit, reset, watch } = methods;
   const currentServiceSelection = watch("services");
 
-  const serviceOptions = useMemo(
-    () => services.map((s: any) => ({ label: s.name, value: s.uuid })),
-    [services]
-  );
+  const serviceOptions = useMemo(() => services.map((s: any) => ({ label: s.name, value: s.uuid })), [services]);
 
   const onSubmit = handleSubmit(async (data) => {
     if (!data.services?.length) {
@@ -65,7 +53,7 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
         await Promise.all(
           servicesToUnassign.map((serviceUuid) =>
             unassignStaffFromService(staff.uuid, serviceUuid).catch((err) => {
-              console.error(`Failed to unassign service ${serviceUuid}:`, err);
+              callSnack(`Failed to unassign service ${serviceUuid}`, "error");
               return null;
             })
           )
@@ -87,7 +75,7 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
       }
       const message = `Services updated successfully: ${servicesToAssign.length} assigned, ${servicesToUnassign.length} removed`;
       callSnack(message, "success");
-      
+
       await onAssigned?.();
       onClose();
     } catch (err: any) {
@@ -116,9 +104,7 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
           assignedServiceUuids = assigned.map((x: any) => x.service_uuid);
         } else {
           const assignedServiceIds = assigned.map((x: any) => x.service_id);
-          assignedServiceUuids = services
-            .filter((s: any) => assignedServiceIds.includes(s.id))
-            .map((s: any) => s.uuid);
+          assignedServiceUuids = services.filter((s: any) => assignedServiceIds.includes(s.id)).map((s: any) => s.uuid);
         }
         setInitialAssignedServices(assignedServiceUuids);
         reset({ services: assignedServiceUuids });
@@ -192,8 +178,8 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
             <Button onClick={onClose} disabled={isSaving}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSaving || showLoader || serviceOptions.length === 0}
               variant="contained"
               loading={isSaving}

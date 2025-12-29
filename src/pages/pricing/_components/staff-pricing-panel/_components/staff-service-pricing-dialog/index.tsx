@@ -1,5 +1,5 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography } from "@mui/material";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { StaffPricingType } from "../../../../types/staff-service.types";
 import Select from "../../../../../../components/form/select";
@@ -7,9 +7,7 @@ import { PriceTypeOptions } from "../../../../../../common/enums/price-type.enum
 import TextField from "../../../../../../components/form/textfield";
 
 type DialogContext = {
-  staff_uuid: string;
   staff_name: string;
-  service_uuid: string;
   service_name: string;
   current?: StaffPricingType;
 };
@@ -34,22 +32,23 @@ export default function StaffServicePricingDialog({ open, onClose, context, onSa
   const methods = useForm<FormValues>({
     defaultValues: {
       price_type: current?.price_type ?? "fixed",
-      price: current?.price ?? 0,
-      duration: current?.duration ?? 45,
+      price: current?.price ? Number(current.price) : 0,
+      duration: current?.duration ? Number(current.duration) : 0,
     },
   });
 
   const { handleSubmit, control, reset, watch, setValue } = methods;
 
   const priceType = watch("price_type");
-  const isFree = useMemo(() => priceType === "free", [priceType]);
+  const isFree = priceType === "free";
 
   useEffect(() => {
     if (!open) return;
+
     reset({
       price_type: current?.price_type ?? "fixed",
-      price: current?.price ?? 0,
-      duration: current?.duration ?? 45,
+      price: current?.price ? Number(current.price) : 0,
+      duration: current?.duration ? Number(current.duration) : 0,
     });
   }, [open, current, reset]);
 
@@ -62,8 +61,8 @@ export default function StaffServicePricingDialog({ open, onClose, context, onSa
       setLoading(true);
       await onSave({
         price_type: data.price_type,
-        price: Math.max(0, Number(data.price)),
-        duration: Math.max(0, Number(data.duration)),
+        price: Number.isFinite(Number(data.price)) ? Math.max(0, Number(data.price)) : 0,
+        duration: Number.isFinite(Number(data.duration)) ? Math.max(0, Number(data.duration)) : 0,
       });
     } finally {
       setLoading(false);

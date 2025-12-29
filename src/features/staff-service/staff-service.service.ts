@@ -14,4 +14,3 @@ export const assignStaffToService = async (payload: StaffServicePayload) => {
   const response = await axiosInstance.post("/salons/staff-services", payload);
   return response.data;
 };
-  

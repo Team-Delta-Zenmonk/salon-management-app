@@ -11,42 +11,33 @@ import StaffPricingPanel from "./_components/staff-pricing-panel";
 
 export default function StaffServiceManagementPage() {
   const dispatch = useAppDispatch();
-
-  // ✅ Use paginated data from service slice
   const serviceState = useAppSelector((state: RootState) => state.service);
-  const servicesState = serviceState?.data ?? [];
-
-  const parentServices = useMemo(
-    () => servicesState.filter((s: any) => !s.parent_id),
-    [servicesState]
-  );
-
+  const allServices = serviceState?.data ?? [];
+  const parentServices = useMemo(() => allServices.filter((s: any) => !s.parent_id), [allServices]);
   const [selectedServiceUuid, setSelectedServiceUuid] = useState<string | null>(null);
-  const [childrenMap, setChildrenMap] = useState<Record<string, ServiceType[]>>({});
-  const [subLoadingMap, setSubLoadingMap] = useState<Record<string, boolean>>({});
+  const [subServicesByParentUuid, setSubServicesByParentUuid] = useState<Record<string, ServiceType[]>>({});
+  const [subServicesLoadingByParentUuid, setSubServicesLoadingByParentUuid] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    // ✅ Load a big chunk of services for pricing (no infinite scroll here)
     dispatch(listServicesAction({ page: 1, limit: 100 }));
-    // Staff can stay paginated but 50 is fine for dialog usage
     dispatch(listStaffAction({ page: 1, limit: 50 }));
   }, [dispatch]);
 
   useEffect(() => {
-    if (!selectedServiceUuid && parentServices.length > 0) {
-      setSelectedServiceUuid(parentServices[0].uuid);
-    }
-  }, [parentServices, selectedServiceUuid]);
+    if (parentServices.length === 0) return;
+    setSelectedServiceUuid((prev) => prev ?? parentServices[0].uuid);
+  }, [parentServices]);
 
   const fetchSubServicesForParent = useCallback(
     async (parentUuid: string) => {
-      if (childrenMap[parentUuid]) return;
-
+      if (subServicesByParentUuid[parentUuid]) return;
       try {
-        setSubLoadingMap((p) => ({ ...p, [parentUuid]: true }));
+        setSubServicesLoadingByParentUuid((p) => ({ ...p, [parentUuid]: true }));
+
         const res = await listSubServicesService(parentUuid);
         const rows = Array.isArray(res) ? res : res?.rows ?? [];
-        const nodes: ServiceType[] = rows.map((c: any) => ({
+
+        const subServices: ServiceType[] = rows.map((c: any) => ({
           id: c.id,
           uuid: c.uuid,
           name: c.name,
@@ -54,14 +45,15 @@ export default function StaffServiceManagementPage() {
           price: c.price,
           duration: c.duration,
         }));
-        setChildrenMap((p) => ({ ...p, [parentUuid]: nodes }));
+
+        setSubServicesByParentUuid((p) => ({ ...p, [parentUuid]: subServices }));
       } catch {
-        setChildrenMap((p) => ({ ...p, [parentUuid]: [] }));
+        setSubServicesByParentUuid((p) => ({ ...p, [parentUuid]: [] }));
       } finally {
-        setSubLoadingMap((p) => ({ ...p, [parentUuid]: false }));
+        setSubServicesLoadingByParentUuid((p) => ({ ...p, [parentUuid]: false }));
       }
     },
-    [childrenMap]
+    [subServicesByParentUuid]
   );
 
   const handleExpandParent = useCallback(
@@ -76,29 +68,30 @@ export default function StaffServiceManagementPage() {
     fetchSubServicesForParent(selectedServiceUuid);
   }, [selectedServiceUuid, fetchSubServicesForParent]);
 
-  const services: ServiceType[] = useMemo(
+  const servicesTree: ServiceType[] = useMemo(
     () =>
       parentServices.map(
         (p: any): ServiceType => ({
+          id: p.id,
           uuid: p.uuid,
           name: p.name,
           price_type: p.price_type,
           price: p.price,
           duration: p.duration,
-          children: childrenMap[p.uuid] ?? [],
+          children: subServicesByParentUuid[p.uuid] ?? [],
         })
       ),
-    [parentServices, childrenMap]
+    [parentServices, subServicesByParentUuid]
   );
 
   const selectedService = useMemo(
-    () => services.find((s) => s.uuid === selectedServiceUuid) ?? null,
-    [services, selectedServiceUuid]
+    () => servicesTree.find((s) => s.uuid === selectedServiceUuid) ?? null,
+    [servicesTree, selectedServiceUuid]
   );
 
   return (
-    <Box className="flex flex-col w-full h-full px-8 py-6 gap-6">
-      <Box>
+    <Box className="flex flex-col w-full h-full gap-6">
+      <Box className="px-8">
         <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900)">
           Staff Service Management
         </Typography>
@@ -106,19 +99,22 @@ export default function StaffServiceManagementPage() {
           Manage staff-specific price and duration for services and subservices.
         </Typography>
       </Box>
+
       <Divider />
+
       <Box className="flex flex-1 min-h-0 gap-6 w-full flex-col lg:flex-row">
         <Box className="bg-white border border-gray-200 rounded-lg w-full lg:w-[380px] flex flex-col min-h-0">
           <Box className="flex-1 min-h-0 overflow-y-auto">
             <ServiceSidebar
-              services={services}
+              services={servicesTree}
               selectedServiceUuid={selectedServiceUuid}
               onSelectService={setSelectedServiceUuid}
               onExpandParent={handleExpandParent}
-              loadingMap={subLoadingMap}
+              loadingMap={subServicesLoadingByParentUuid}
             />
           </Box>
         </Box>
+
         <Box className="flex-1 min-w-0 flex flex-col min-h-0">
           <Box className="flex-1 min-h-0 overflow-y-auto">
             <StaffPricingPanel selectedService={selectedService} />

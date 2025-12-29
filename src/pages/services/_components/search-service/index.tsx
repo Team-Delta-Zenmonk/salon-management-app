@@ -1,5 +1,5 @@
 import { Box, CircularProgress } from "@mui/material";
-import { useEffect, useMemo, useState, useCallback } from "react";  // ✅ Removed useRef
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
 import type { AppDispatch, RootState } from "../../../../store/store";
@@ -10,6 +10,7 @@ import ListServices from "../list-services";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { listServicesAction } from "../../../../features/service/list-services/list-service.action";
 import { resetServices } from "../../../../features/service/service.slice";
+import { callSnack } from "../../../../components/snackbar";
 
 type FilterForm = {
   category_uuid: string;
@@ -35,8 +36,6 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   const page = serviceState?.page ?? 1;
   const limit = serviceState?.limit ?? 10;
 
-  // ✅ REMOVED: previousSearchRef, previousCategoryRef
-
   const methods = useForm<FilterForm>({
     defaultValues: {
       category_uuid: selectedCategoryUuid,
@@ -46,13 +45,12 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   const { control, watch } = methods;
   const watchedCategoryUuid = watch("category_uuid");
 
-  // Load categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         await dispatch(listCategoriesAction({ page: 1, limit: 100 })).unwrap();
       } catch (error) {
-        console.error("Failed to fetch categories", error);
+        callSnack("Failed to fetch categories", "error");
       }
     };
     fetchCategories();
@@ -69,12 +67,10 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
     [categories]
   );
 
-  // Sync form value with prop
   useEffect(() => {
     methods.setValue("category_uuid", selectedCategoryUuid);
   }, [selectedCategoryUuid, methods]);
 
-  // Initial load
   useEffect(() => {
     const fetchInitialData = async () => {
       setIsLoading(true);
@@ -91,7 +87,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
           ).unwrap();
         }
       } catch (error) {
-        console.error("Failed to fetch services", error);
+        callSnack("Failed to fetch services", "error");
       } finally {
         setIsLoading(false);
       }
@@ -100,7 +96,6 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
     fetchInitialData();
   }, [dispatch, selectedCategoryUuid]);
 
-  // ✅ SIMPLIFIED: SearchBar debounces → No refs needed
   useEffect(() => {
     const trimmedSearch = searchQuery.trim();
 
@@ -120,16 +115,15 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
 
         await dispatch(listServicesAction(params)).unwrap();
       } catch (error) {
-        console.error("Failed to fetch filtered services", error);
+        callSnack("Internal Server Error", "error");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchFilteredData();  // ✅ Runs once per debounced searchQuery change
-  }, [searchQuery, watchedCategoryUuid, dispatch]);  // ✅ Clean deps
+    fetchFilteredData();
+  }, [searchQuery, watchedCategoryUuid, dispatch]);
 
-  // Update parent state when category changes
   useEffect(() => {
     if (watchedCategoryUuid !== selectedCategoryUuid) {
       onCategoryChange(watchedCategoryUuid);
@@ -150,7 +144,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
 
       await dispatch(listServicesAction(params)).unwrap();
     } catch (error) {
-      console.error("Failed to load more services", error);
+      callSnack("Failed to load more services", "error");
     }
   }, [dispatch, page, limit, searchQuery, watchedCategoryUuid]);
 

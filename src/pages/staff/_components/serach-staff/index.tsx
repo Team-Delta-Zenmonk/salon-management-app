@@ -1,5 +1,5 @@
 import { Box, CircularProgress } from "@mui/material";
-import { useEffect, useState, useCallback } from "react"; 
+import { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import type { AppDispatch, RootState } from "../../../../store/store";
 import { listStaffAction } from "../../../../features/staff/list-staff/list-staff.action";
@@ -12,7 +12,7 @@ const SearchStaff = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const staffState = useSelector((state: RootState) => state.staff);
   const data = staffState?.data ?? [];
   const total = staffState?.total ?? 0;
@@ -25,8 +25,7 @@ const SearchStaff = () => {
       try {
         await dispatch(listStaffAction({ page: 1, limit: 10 })).unwrap();
       } catch (error) {
-        callSnack("Failed to fetch staff","error")
-
+        callSnack("Failed to fetch staff", "error");
       } finally {
         setIsLoading(false);
       }
@@ -36,7 +35,7 @@ const SearchStaff = () => {
 
   useEffect(() => {
     const trimmedSearch = searchQuery.trim();
-    
+
     const fetchSearchResults = async () => {
       dispatch(resetStaff());
       setIsLoading(true);
@@ -49,7 +48,7 @@ const SearchStaff = () => {
           })
         ).unwrap();
       } catch (error) {
-        console.error("Failed to search staff", error);
+        callSnack("Failed to search staff", "error");
       } finally {
         setIsLoading(false);
       }
@@ -67,7 +66,7 @@ const SearchStaff = () => {
         })
       ).unwrap();
     } catch (error) {
-      console.error("Failed to load more staff", error);
+      callSnack("Failed to load more staff", "error");
     }
   }, [dispatch, page, limit, searchQuery]);
 
@@ -78,7 +77,7 @@ const SearchStaff = () => {
       <Box>
         <SearchBar onSearch={setSearchQuery} placeholder="Search Staff" />
       </Box>
-      
+
       <Box className="flex-1 min-h-0 overflow-y-auto" id="scrollableDiv">
         {isLoading && data.length === 0 ? (
           <Box className="flex items-center justify-center h-full">
