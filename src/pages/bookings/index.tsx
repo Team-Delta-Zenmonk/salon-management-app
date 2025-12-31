@@ -1,10 +1,25 @@
 import { Box, Typography } from "@mui/material";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import BookingCalendar from "./_components/booking-calender";
 import CreateBooking from "./_components/create-booking";
 import type { Booking, BookingStatus } from "./types/booking.type";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { ALL_SERVICES_VALUE, ALL_STAFF_VALUE, BOOKING_STATUS_COLORS } from "./constants/booking.constants";
+import { listStaffAction } from "../../features/staff/list-staff/list-staff.action";
+import { listServicesAction } from "../../features/service/list-services/list-service.action";
+import Select from "../../components/form/select";
+
+interface FilterForm {
+  staff: string;
+  service: string;
+}
 
 export default function BookingPage() {
+  const dispatch = useAppDispatch();
+  const { data: staff } = useAppSelector((state) => state.staff);
+  const { data: services } = useAppSelector((state) => state.service);
+
   const [selectedRange, setSelectedRange] = useState<[Date, Date] | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([
     {
@@ -44,6 +59,7 @@ export default function BookingPage() {
       start_time: "2025-12-29T10:00:00",
       end_time: "2025-12-29T11:00:00",
       status: "confirmed",
+      notes: "Regular customer, prefers gel polish",
     },
     {
       uuid: "b4",
@@ -69,36 +85,73 @@ export default function BookingPage() {
       start_time: "2025-12-30T09:30:00",
       end_time: "2025-12-30T10:30:00",
       status: "confirmed",
+      notes: "Regular customer, prefers gel polish",
     },
   ]);
 
+  const { control, watch } = useForm<FilterForm>({
+    defaultValues: {
+      staff: ALL_STAFF_VALUE,
+      service: ALL_SERVICES_VALUE,
+    },
+  });
+
+  const selectedStaff = watch("staff");
+  const selectedService = watch("service");
+
+  useEffect(() => {
+    dispatch(listStaffAction({ page: 1, limit: 100 }));
+    dispatch(listServicesAction({ page: 1, limit: 100 }));
+  }, [dispatch]);
+
+  const staffOptions = useMemo(
+    () => [
+      { label: "All Staff", value: ALL_STAFF_VALUE },
+      ...staff.map((s) => ({
+        label: `${s.first_name}${s.last_name ? ` ${s.last_name}` : ""}`,
+        value: s.uuid,
+      })),
+    ],
+    [staff]
+  );
+
+  const serviceOptions = useMemo(
+    () => [
+      { label: "All Services", value: ALL_SERVICES_VALUE },
+      ...services.map((s) => ({
+        label: s.name,
+        value: s.uuid,
+      })),
+    ],
+    [services]
+  );
+
+  const filteredBookings = useMemo(() => {
+    return bookings.filter((booking) => {
+      const matchesStaff = selectedStaff === ALL_STAFF_VALUE || booking.staff_uuid === selectedStaff;
+      const matchesService = selectedService === ALL_SERVICES_VALUE || booking.service_uuid === selectedService;
+      return matchesStaff && matchesService;
+    });
+  }, [bookings, selectedStaff, selectedService]);
+
   const getStatusColor = (status: BookingStatus): string => {
-    switch (status) {
-      case "confirmed":
-        return "#10b981";
-      case "cancelled":
-        return "#ef4444";
-      default:
-        return "#6b7280";
-    }
+    return BOOKING_STATUS_COLORS[status] ?? "#6b7280";
   };
 
   const handleDateRangeChange = (range: [Date, Date]) => {
     setSelectedRange(range);
-    console.log("Selected range:", range);
   };
 
-  const todayBookingsCount = bookings.filter(
+  const todayBookingsCount = filteredBookings.filter(
     (b) => b.status === "confirmed" && new Date(b.start_time).toDateString() === new Date().toDateString()
   ).length;
 
   const updateBookingStatus = (bookingUuid: string, newStatus: BookingStatus) => {
     setBookings((prev) => prev.map((b) => (b.uuid === bookingUuid ? { ...b, status: newStatus } : b)));
-    console.log(`Booking ${bookingUuid} → ${newStatus}`);
   };
 
   return (
-    <Box className="flex flex-col flex-1 min-h-0 w-full space-y-6 bg-gray-50 px-8 pb-6 ">
+    <Box className="flex flex-col flex-1 min-h-0 w-full space-y-6 bg-gray-50 px-8 pb-6">
       <Box className="flex justify-between items-start shrink-0">
         <Box>
           <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900) mb-2">
@@ -109,24 +162,49 @@ export default function BookingPage() {
             confirmed bookings
           </Typography>
         </Box>
-
         <CreateBooking />
       </Box>
 
-      <Box className="bg-white p-4 shadow-sm flex gap-6 max-w-[250px]  border border-gray-300 rounded-lg">
-        <Box className="flex items-center gap-2">
-          <Box className="w-3 h-3 rounded-full bg-[#10b981]"></Box>
-          <Box className="text-xs font-medium">Confirmed</Box>
+      <Box className="flex items-center gap-4 flex-wrap">
+        <Box className="w-[200px]">
+          <Select
+            name="staff"
+            control={control}
+            placeholder="Select Staff"
+            options={staffOptions}
+            identifier="booking-staff-filter"
+            translate={false}
+            disabled={staffOptions.length === 1}
+          />
         </Box>
-        <Box className="flex items-center gap-2">
-          <Box className="w-3 h-3 rounded-full bg-[#ef4444]"></Box>
-          <Box className="text-xs font-medium">Cancelled</Box>
+
+        <Box className="w-[200px]">
+          <Select
+            name="service"
+            control={control}
+            placeholder="Select Service"
+            options={serviceOptions}
+            identifier="booking-service-filter"
+            translate={false}
+            disabled={serviceOptions.length === 1}
+          />
+        </Box>
+
+        <Box className="bg-white p-3 shadow-sm flex gap-6 border border-gray-300 rounded-lg">
+          <Box className="flex items-center gap-2">
+            <Box className="w-3 h-3 rounded-full bg-[#10b981]"></Box>
+            <Box className="text-xs font-medium">Confirmed</Box>
+          </Box>
+          <Box className="flex items-center gap-2">
+            <Box className="w-3 h-3 rounded-full bg-[#ef4444]"></Box>
+            <Box className="text-xs font-medium">Cancelled</Box>
+          </Box>
         </Box>
       </Box>
 
       <Box className="flex-1 bg-white shadow-sm p-2 border border-gray-300">
         <BookingCalendar
-          bookings={bookings}
+          bookings={filteredBookings}
           onDateRangeChange={handleDateRangeChange}
           updateBookingStatus={updateBookingStatus}
           getStatusColor={getStatusColor}

@@ -8,6 +8,7 @@ import BookingEvent from "./_components/booking-events";
 import styles from "./booking-calender.module.scss";
 import { Box } from "@mui/material";
 import BookingDetailsDrawer from "./_components/booking-detail-drawer";
+import { DEFAULT_SLOT_DURATION, DEFAULT_SLOT_MAX_TIME, DEFAULT_SLOT_MIN_TIME } from "../../constants/booking.constants";
 
 interface BookingCalendarProps {
   bookings: Booking[];
@@ -78,10 +79,10 @@ export default function BookingCalendar({
           eventContent={eventContent}
           datesSet={handleDatesSet}
           height="100%"
-          slotMinTime="08:00:00"
-          slotMaxTime="22:00:00"
+          slotMinTime={DEFAULT_SLOT_MIN_TIME}
+          slotMaxTime={DEFAULT_SLOT_MAX_TIME}
           allDaySlot={false}
-          slotDuration="00:30:00"
+          slotDuration={DEFAULT_SLOT_DURATION}
           slotLabelInterval="01:00:00"
           expandRows={true}
           dayMaxEvents={dayMaxEvents}

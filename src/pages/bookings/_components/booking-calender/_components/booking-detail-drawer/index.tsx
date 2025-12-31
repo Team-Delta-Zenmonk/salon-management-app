@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Divider, Drawer, IconButton, Typography } from "@mui/material";
+import { Box, Button, Chip, Drawer, IconButton, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import type { Booking, BookingStatus } from "../../../../types/booking.type";
 import InfoRow from "./_components/drawer-info-row";
 import CancelBookingDialog from "./_components/cancel-booking-dialog";
+import { formatTimeRange } from "../../../../utils/format-time-range";
 
 type BookingDetailsDrawerProps = {
   open: boolean;
@@ -17,24 +18,13 @@ type BookingDetailsDrawerProps = {
   onCancel: (bookingUuid: string, reason?: string) => void;
 };
 
-function formatTimeRange(startISO: string, endISO: string) {
-  const start = new Date(startISO);
-  const end = new Date(endISO);
-
-  const date = start.toLocaleDateString(undefined, {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
-  const startTime = start.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-  const endTime = end.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-
-  return { date, startTime, endTime };
-}
-
-export default function BookingDetailsDrawer({ open, booking, onClose, getStatusColor, onCancel }: BookingDetailsDrawerProps) {
+export default function BookingDetailsDrawer({
+  open,
+  booking,
+  onClose,
+  getStatusColor,
+  onCancel,
+}: BookingDetailsDrawerProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
@@ -76,7 +66,6 @@ export default function BookingDetailsDrawer({ open, booking, onClose, getStatus
                 {booking ? `#${booking.uuid}` : "—"}
               </Typography>
             </Box>
-
             <IconButton onClick={onClose} size="small">
               <CloseIcon />
             </IconButton>
