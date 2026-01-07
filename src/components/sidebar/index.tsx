@@ -1,12 +1,10 @@
 import React from "react";
-import { Box, Typography, List, ListItemButton, ListItemIcon, ListItemText, Stack, Button } from "@mui/material";
-import { Link, useLocation } from "react-router-dom";
+import { Box, Typography, Stack } from "@mui/material";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import { navigationItems } from "../../layouts/navigation";
 import CustomDrawer from "../drawer";
 import SidebarNavList from "./_components/sidebar-nav-list";
-import Login from "../../pages/login";
-import LoginButton from "../login";
+import LogoutButton from "../logout";
 
 type SidebarProps = {
   drawerWidth: number;
@@ -37,7 +35,7 @@ const Sidebar = ({ drawerWidth, mobileOpen, onToggleSidebar, isDesktop }: Sideba
         <SidebarNavList items={navigationItems} isDesktop={isDesktop} onItemClick={onToggleSidebar} />
       </Box>
       <Box className="border-t border-gray-200 p-4 ">
-        <LoginButton />
+        <LogoutButton />
       </Box>
     </Box>
   );

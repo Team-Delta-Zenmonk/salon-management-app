@@ -7,7 +7,7 @@ import { callSnack } from "../snackbar";
 import { useAppDispatch } from "../../store/hooks";
 import { logout } from "../../features/auth/auth.slice";
 
-const LoginButton = () => {
+const LogoutButton = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useAppDispatch();
@@ -39,4 +39,4 @@ const LoginButton = () => {
   );
 };
 
-export default LoginButton;
+export default LogoutButton;
