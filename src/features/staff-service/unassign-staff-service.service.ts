@@ -1,6 +1,9 @@
 import { axiosInstance } from "../../config/axios";
+interface BulkUnassignPayload {
+  staff_services: string[];
+}
 
-export const unassignStaffFromService = async (staffUuid: string, serviceUuid: string) => {
-  const response = await axiosInstance.delete(`/salons/staff-services/${staffUuid}/${serviceUuid}`);
+export const unassignStaffFromService = async (payload: BulkUnassignPayload) => {
+  const response = await axiosInstance.post("/salons/staff-services/unassign", payload);
   return response.data;
 };

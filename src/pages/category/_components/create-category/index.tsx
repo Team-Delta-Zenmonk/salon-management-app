@@ -9,7 +9,7 @@ export default function CreateCategory() {
   return (
     <>
       <Button variant="contained" startIcon={<AddOutlinedIcon className="text-white!" />} onClick={() => setOpen(true)}>
-        <Typography fontWeight="medium">Add</Typography>
+        <Typography fontWeight="medium">Create Custom</Typography>
       </Button>
 
       <CategoryDialog open={open} onClose={() => setOpen(false)} mode="create" />
