@@ -44,45 +44,45 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
       return;
     }
 
-    try {
-      setIsSaving(true);
-      const servicesToAssign = data.services.filter((uuid) => !initialAssignedServices.includes(uuid));
-      const servicesToUnassign = initialAssignedServices.filter((uuid) => !data.services.includes(uuid));
+    // try {
+    //   setIsSaving(true);
+    //   const servicesToAssign = data.services.filter((uuid) => !initialAssignedServices.includes(uuid));
+    //   const servicesToUnassign = initialAssignedServices.filter((uuid) => !data.services.includes(uuid));
 
-      if (servicesToUnassign.length > 0) {
-        await Promise.all(
-          servicesToUnassign.map((serviceUuid) =>
-            unassignStaffFromService(staff.uuid, serviceUuid).catch((err) => {
-              callSnack(`Failed to unassign service ${serviceUuid}`, "error");
-              return null;
-            })
-          )
-        );
-      }
+    //   if (servicesToUnassign.length > 0) {
+    //     await Promise.all(
+    //       servicesToUnassign.map((serviceUuid) =>
+    //         unassignStaffFromService(staff.uuid, serviceUuid).catch((err) => {
+    //           callSnack(`Failed to unassign service ${serviceUuid}`, "error");
+    //           return null;
+    //         })
+    //       )
+    //     );
+    //   }
 
-      if (servicesToAssign.length > 0) {
-        const selectedServices = services.filter((s: any) => servicesToAssign.includes(s.uuid));
-        const payload = {
-          staff_services: selectedServices.map((s: any) => ({
-            service_uuid: s.uuid,
-            staff_uuid: staff.uuid,
-            price_type: s.price_type,
-            price: s.price,
-            duration: s.duration ?? 45,
-          })),
-        };
-        await assignStaffToService(payload);
-      }
-      const message = `Services updated successfully: ${servicesToAssign.length} assigned, ${servicesToUnassign.length} removed`;
-      callSnack(message, "success");
+    //   if (servicesToAssign.length > 0) {
+    //     const selectedServices = services.filter((s: any) => servicesToAssign.includes(s.uuid));
+    //     const payload = {
+    //       staff_services: selectedServices.map((s: any) => ({
+    //         service_uuid: s.uuid,
+    //         staff_uuid: staff.uuid,
+    //         price_type: s.price_type,
+    //         price: s.price,
+    //         duration: s.duration ?? 45,
+    //       })),
+    //     };
+    //     await assignStaffToService(payload);
+    //   }
+    //   const message = `Services updated successfully: ${servicesToAssign.length} assigned, ${servicesToUnassign.length} removed`;
+    //   callSnack(message, "success");
 
-      await onAssigned?.();
-      onClose();
-    } catch (err: any) {
-      callSnack(err?.response?.data?.message || "Service Assignment Failed", "error");
-    } finally {
-      setIsSaving(false);
-    }
+    //   await onAssigned?.();
+    //   onClose();
+    // } catch (err: any) {
+    //   callSnack(err?.response?.data?.message || "Service Assignment Failed", "error");
+    // } finally {
+    //   setIsSaving(false);
+    // }
   });
 
   useEffect(() => {

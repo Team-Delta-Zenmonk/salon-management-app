@@ -60,50 +60,50 @@ export default function AssignStaffDialog({
   }));
 
   const onSubmit = handleSubmit(async (data) => {
-    try {
-      setIsLoading(true);
+    // try {
+    //   setIsLoading(true);
 
-      const selectedStaffUuids = data.staff;
+    //   const selectedStaffUuids = data.staff;
 
-      const staffToAssign = selectedStaffUuids.filter((uuid) => !initialAssignedStaff.includes(uuid));
+    //   const staffToAssign = selectedStaffUuids.filter((uuid) => !initialAssignedStaff.includes(uuid));
 
-      const staffToUnassign = initialAssignedStaff.filter((uuid) => !selectedStaffUuids.includes(uuid));
+    //   const staffToUnassign = initialAssignedStaff.filter((uuid) => !selectedStaffUuids.includes(uuid));
 
-      if (staffToUnassign.length > 0) {
-        await Promise.all(staffToUnassign.map((staffUuid) => unassignStaffFromService(staffUuid, service.uuid)));
-      }
+    //   if (staffToUnassign.length > 0) {
+    //     await Promise.all(staffToUnassign.map((staffUuid) => unassignStaffFromService(staffUuid, service.uuid)));
+    //   }
 
-      if (staffToAssign.length > 0) {
-        const payload = {
-          staff_services: staffToAssign.map((staffUuid) => ({
-            service_uuid: service.uuid,
-            staff_uuid: staffUuid,
-            price_type: service.price_type,
-            price: service.price,
-            duration: service.duration ?? 45,
-          })),
-        };
+    //   if (staffToAssign.length > 0) {
+    //     const payload = {
+    //       staff_services: staffToAssign.map((staffUuid) => ({
+    //         service_uuid: service.uuid,
+    //         staff_uuid: staffUuid,
+    //         price_type: service.price_type,
+    //         price: service.price,
+    //         duration: service.duration ?? 45,
+    //       })),
+    //     };
 
-        await assignStaffToService(payload);
-      }
+    //     await assignStaffToService(payload);
+    //   }
 
-      if (staffToAssign.length > 0 && staffToUnassign.length > 0) {
-        callSnack("Staff assignment updated successfully", "success");
-      } else if (staffToAssign.length > 0) {
-        callSnack("Staff assigned successfully", "success");
-      } else if (staffToUnassign.length > 0) {
-        callSnack("Staff unassigned successfully", "success");
-      } else {
-        callSnack("No changes made", "info");
-      }
+    //   if (staffToAssign.length > 0 && staffToUnassign.length > 0) {
+    //     callSnack("Staff assignment updated successfully", "success");
+    //   } else if (staffToAssign.length > 0) {
+    //     callSnack("Staff assigned successfully", "success");
+    //   } else if (staffToUnassign.length > 0) {
+    //     callSnack("Staff unassigned successfully", "success");
+    //   } else {
+    //     callSnack("No changes made", "info");
+    //   }
 
-      await onStaffAssigned?.();
-      onClose();
-    } catch (err: any) {
-      callSnack(err?.response?.data?.message || "Staff assignment update failed", "error");
-    } finally {
-      setIsLoading(false);
-    }
+    //   await onStaffAssigned?.();
+    //   onClose();
+    // } catch (err: any) {
+    //   callSnack(err?.response?.data?.message || "Staff assignment update failed", "error");
+    // } finally {
+    //   setIsLoading(false);
+    // }
   });
 
   useEffect(() => {

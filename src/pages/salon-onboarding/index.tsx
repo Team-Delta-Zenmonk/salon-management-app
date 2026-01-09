@@ -49,8 +49,7 @@ export default function SalonOnboarding() {
 
     if (activeStep === 0) fieldsToValidate = ["owner.owner_name"];
     if (activeStep === 1) fieldsToValidate = ["salon.type", "salon.logo", "salon.photos"];
-    if (activeStep === 2)
-      fieldsToValidate = ["address.address", "address.map_link",];
+    if (activeStep === 2) fieldsToValidate = ["address.address", "address.map_link"];
 
     const isValid = await trigger(fieldsToValidate as any);
     if (!isValid) return;
@@ -62,7 +61,7 @@ export default function SalonOnboarding() {
     const data = getValues();
     try {
       setIsLoading(true);
-      const result = await updateSalon({
+      await updateSalon({
         owner_name: data.owner?.owner_name,
         type: data.salon?.type,
         logo: data.salon?.logo?.url,
@@ -73,11 +72,9 @@ export default function SalonOnboarding() {
         map_link: data?.address?.map_link,
         is_onboarded: true,
       });
-      if (result?.message?.[0] === 1) {
-        dispatch(completeOnboarding({}));
-        callSnack("Onboarding completed", "success");
-        navigate("/dashboard");
-      }
+      dispatch(completeOnboarding({}));
+      callSnack("Onboarding completed", "success");
+      navigate("/dashboard");
     } catch {
       callSnack("Failed to save salon details", "error");
     } finally {

@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { listStaffAction } from "./list-staff/list-staff.action";
 import { updateStaffAction } from "./update-staff/update-staff.action";
+import type { CloudinaryFile } from "../../common/cloudinary.schema";
 
 export type StaffAddress = Record<string, any>;
 export type StaffEmergencyContact = Record<string, any>;
@@ -11,7 +12,7 @@ export interface Staff {
   first_name: string;
   last_name?: string | null;
   email: string;
-  photos: string;
+  photos: CloudinaryFile;
   phone_number: string;
   additional_phone_number?: string | null;
   dob: string;

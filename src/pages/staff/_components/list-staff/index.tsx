@@ -107,7 +107,7 @@ export default function ListStaff({
             >
               <Box className="flex items-start justify-between gap-4 mb-6">
                 <Box className="flex items-center gap-4 flex-1 min-w-0">
-                  <Avatar src={staff.photos} alt={getFullName(staff)} />
+                  <Avatar src={staff.photos?.url} alt={getFullName(staff)} />
                   <Box className="min-w-0 flex-1">
                     <Typography className="text-(--primary-900)" fontWeight="bold">
                       {getFullName(staff)}
