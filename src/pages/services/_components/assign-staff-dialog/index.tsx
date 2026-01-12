@@ -8,190 +8,180 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
-import clsx from "clsx";
 import { FormProvider, useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
 import { callSnack } from "../../../../components/snackbar";
-import styles from "./list-staff.module.scss";
 import CheckboxGroup from "../../../../components/form/checkbox";
-import { resetStaff, type Staff } from "../../../../features/staff/staff.slice";
 import { listStaffAction } from "../../../../features/staff/list-staff/list-staff.action";
-import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
 import { listServiceStaff } from "../../../../features/service/list-staff/list-staff.service";
+import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
 import { unassignStaffFromService } from "../../../../features/staff-service/unassign-staff-service.service";
-
-interface ListStaffDialogProps {
+import styles from "./list-staff.module.scss";
+import clsx from "clsx";
+interface AssignStaffDialogProps {
   open: boolean;
   onClose: () => void;
   serviceUuid: string;
-  service: any;
-  onStaffAssigned?: (cb?: () => void) => Promise<void>;
+  service: {
+    price_type: string;
+    price: number;
+    duration: number;
+  };
+  onStaffAssigned?: () => void;
 }
-
-interface StaffAssignmentForm {
-  staff: string[];
+interface FormValues {
+  staff_ids: string[];
 }
 
 export default function AssignStaffDialog({
   open,
   onClose,
   serviceUuid,
-  onStaffAssigned,
   service,
-}: ListStaffDialogProps) {
+  onStaffAssigned,
+}: AssignStaffDialogProps) {
   const dispatch = useAppDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingAssignedStaff, setIsFetchingAssignedStaff] = useState(false);
-  const [initialAssignedStaff, setInitialAssignedStaff] = useState<string[]>([]);
 
-  const staffState = useAppSelector((state: RootState) => state.staff);
-  const staffs = staffState?.data ?? [];
-
-  const methods = useForm<StaffAssignmentForm>({
-    defaultValues: { staff: [] },
-  });
-  const { handleSubmit, control, reset } = methods;
-
-  const staffOptions = staffs.map((staff: Staff) => ({
-    label: `${staff.first_name} ${staff.last_name || ""}`,
-    value: staff.uuid,
-  }));
-
-  const onSubmit = handleSubmit(async (data) => {
-    // try {
-    //   setIsLoading(true);
-
-    //   const selectedStaffUuids = data.staff;
-
-    //   const staffToAssign = selectedStaffUuids.filter((uuid) => !initialAssignedStaff.includes(uuid));
-
-    //   const staffToUnassign = initialAssignedStaff.filter((uuid) => !selectedStaffUuids.includes(uuid));
-
-    //   if (staffToUnassign.length > 0) {
-    //     await Promise.all(staffToUnassign.map((staffUuid) => unassignStaffFromService(staffUuid, service.uuid)));
-    //   }
-
-    //   if (staffToAssign.length > 0) {
-    //     const payload = {
-    //       staff_services: staffToAssign.map((staffUuid) => ({
-    //         service_uuid: service.uuid,
-    //         staff_uuid: staffUuid,
-    //         price_type: service.price_type,
-    //         price: service.price,
-    //         duration: service.duration ?? 45,
-    //       })),
-    //     };
-
-    //     await assignStaffToService(payload);
-    //   }
-
-    //   if (staffToAssign.length > 0 && staffToUnassign.length > 0) {
-    //     callSnack("Staff assignment updated successfully", "success");
-    //   } else if (staffToAssign.length > 0) {
-    //     callSnack("Staff assigned successfully", "success");
-    //   } else if (staffToUnassign.length > 0) {
-    //     callSnack("Staff unassigned successfully", "success");
-    //   } else {
-    //     callSnack("No changes made", "info");
-    //   }
-
-    //   await onStaffAssigned?.();
-    //   onClose();
-    // } catch (err: any) {
-    //   callSnack(err?.response?.data?.message || "Staff assignment update failed", "error");
-    // } finally {
-    //   setIsLoading(false);
-    // }
+  const methods = useForm<FormValues>({
+    defaultValues: { staff_ids: [] },
   });
 
-  useEffect(() => {
-    if (open) {
-      dispatch(resetStaff());
-      dispatch(listStaffAction({ page: 1, limit: 100 }));
-    }
-  }, [open, dispatch]);
+  const { handleSubmit, reset } = methods;
+
+  const { data: allStaff } = useAppSelector((state: RootState) => state.staff);
+
+  const [assignedStaffServices, setAssignedStaffServices] = useState<any[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchAndPopulateAssignedStaff = async () => {
-      if (!open || !serviceUuid || staffs.length === 0) return;
+    if (!open) return;
+    setLoading(true);
+    dispatch(listStaffAction({}));
+    listServiceStaff(serviceUuid)
+      .then((res) => {
+        setAssignedStaffServices(res || []);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [open, serviceUuid]);
 
-      try {
-        setIsFetchingAssignedStaff(true);
+  const staffIdToUuidMap = useMemo(() => {
+    return new Map(allStaff.map((s) => [s.id, s.uuid]));
+  }, [allStaff]);
 
-        const assignedStaffData = await listServiceStaff(serviceUuid);
-        const assignedStaffIds = assignedStaffData.map((item: any) => item.staff_id);
+  const assignedStaffMap = useMemo(() => {
+    return new Map(
+      assignedStaffServices
+        .map((ss) => {
+          const staffUuid = staffIdToUuidMap.get(ss.staff_id);
+          return staffUuid ? [staffUuid, ss] : null;
+        })
+        .filter(Boolean) as [string, any][]
+    );
+  }, [assignedStaffServices, staffIdToUuidMap]);
 
-        const assignedStaffUuids = staffs
-          .filter((staff: Staff) => assignedStaffIds.includes(staff.id))
-          .map((staff: Staff) => staff.uuid);
+  useEffect(() => {
+    if (!assignedStaffServices.length || !allStaff.length) return;
 
-        setInitialAssignedStaff(assignedStaffUuids);
-        reset({ staff: assignedStaffUuids });
-      } catch (err: any) {
-        callSnack("Failed to load assigned staff", "error");
-        setInitialAssignedStaff([]);
-        reset({ staff: [] });
-      } finally {
-        setIsFetchingAssignedStaff(false);
+    reset({
+      staff_ids: Array.from(assignedStaffMap.keys()),
+    });
+  }, [assignedStaffMap, allStaff]);
+
+  const staffOptions = useMemo(() => {
+    return allStaff.map((staff) => ({
+      label: `${staff.first_name} ${staff.last_name ?? ""}`,
+      value: staff.uuid,
+    }));
+  }, [allStaff]);
+
+  const onSubmit = async (values: FormValues) => {
+    setSaving(true);
+
+    try {
+      const selectedStaffUuids = values.staff_ids;
+      const toAssign = selectedStaffUuids
+        .filter((staffUuid) => !assignedStaffMap.has(staffUuid))
+        .map((staffUuid) => ({
+          service_uuid: serviceUuid,
+          staff_uuid: staffUuid,
+          price_type: service.price_type,
+          price: service.price,
+          duration: service.duration,
+        }));
+
+      const toUnassign = Array.from(assignedStaffMap.entries())
+        .filter(([staffUuid]) => !selectedStaffUuids.includes(staffUuid))
+        .map(([, staffService]) => staffService.uuid);
+
+      if (toAssign.length > 0) {
+        await assignStaffToService({ staff_services: toAssign });
       }
-    };
 
-    fetchAndPopulateAssignedStaff();
-  }, [open, serviceUuid, staffs.length, reset]);
+      if (toUnassign.length > 0) {
+        await unassignStaffFromService({ staff_services: toUnassign });
+      }
 
-  useEffect(() => {
-    if (!open) {
-      reset({ staff: [] });
-      setInitialAssignedStaff([]);
+      callSnack("Staff assignment updated successfully", "success");
+      onStaffAssigned?.();
+      onClose();
+    } catch (err: any) {
+      callSnack(err?.message || "Failed to update staff assignment", "error");
+    } finally {
+      setSaving(false);
     }
-  }, [open, reset]);
+  };
 
   return (
     <Dialog
       open={open}
       onClose={(event, reason) => {
-        if (isLoading && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
+        if (saving && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
+        close();
       }}
-      className={styles.dialogContainer}
-      classes={{ paper: styles.dialog }}
-      maxWidth="sm"
       fullWidth
+      maxWidth="sm"
+      classes={{ paper: styles.dialog }}
     >
-      <DialogTitle className={clsx(styles.dialogTitle)} fontWeight="fontWeightMedium" variant="h5">
-        Assign Staff to "{service?.name}"
-      </DialogTitle>
+      <DialogTitle>Assign Staff</DialogTitle>
 
       <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent className={clsx("flex flex-col py-1 px-3", styles.dialogContent)}>
-            {isFetchingAssignedStaff || staffs.length === 0 ? (
-              <Box className="flex flex-col items-center justify-center py-12">
-                <CircularProgress size={24} className="mb-2" />
-                <Typography className="text-gray-500">
-                  {isFetchingAssignedStaff ? "Loading assigned staff..." : "Loading staff..."}
-                </Typography>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogContent className={clsx(styles.dialogContent)}>
+            {loading ? (
+              <Box className="flex justify-center py-6">
+                <CircularProgress />
               </Box>
             ) : (
-              <Box className="flex flex-col gap-4 max-h-[400px] overflow-y-auto">
-                <Typography fontWeight="bold">Select Staff ({staffs.length} available)</Typography>
-                <CheckboxGroup name="staff" control={control} identifier="staff-assignment" options={staffOptions} />
-              </Box>
+              <>
+                <Typography variant="body2">Select staff members to assign to this service</Typography>
+
+                <CheckboxGroup
+                  name="staff_ids"
+                  control={methods.control}
+                  identifier="assign-staff"
+                  options={staffOptions}
+                  optionGap={2}
+                />
+              </>
             )}
           </DialogContent>
 
-          <DialogActions className={clsx(styles.dialogActions, "px-2 py-1 pb-2")}>
-            <Button onClick={onClose} disabled={isLoading}>
+          <DialogActions className={styles.dialogActions}>
+            <Button onClick={onClose} disabled={saving}>
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || staffs.length === 0 || isFetchingAssignedStaff}
-              loading={isLoading}
+              variant="contained"
+              disabled={saving}
+              startIcon={saving ? <CircularProgress size={18} /> : null}
             >
-              Save Changes
+              Save
             </Button>
           </DialogActions>
         </form>

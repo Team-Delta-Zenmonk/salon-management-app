@@ -3,20 +3,17 @@
     color: var(--white);
   }
 }
-
-.dialogContainer {
-  .dialogContent {
-    gap: 16px;
-    padding: 8px 24px 24px 24px;
-  }
-  .dialogActions {
-    gap: 8px;
-  }
-  .dialogTitle {
-    color: var(--primary-900);
-  }
+.dialogContent {
+  padding: 0px 24px 24px 24px;
+  color: var(--primary-900);
+}
+.dialogActions {
+  gap: 8px;
+}
+.dialogTitle {
+  color: var(--primary-900);
 }
 
 .dialog {
-  width: 350px;
+  width: 450px;
 }

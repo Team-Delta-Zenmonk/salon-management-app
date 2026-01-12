@@ -1,190 +1,183 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, CircularProgress } from "@mui/material";
-import clsx from "clsx";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Box,
+  CircularProgress,
+} from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
 import { callSnack } from "../../../../components/snackbar";
 import CheckboxGroup from "../../../../components/form/checkbox";
-import styles from "./assign-services.module.scss";
 import { listServicesAction } from "../../../../features/service/list-services/list-service.action";
-import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
 import { listStaffServices } from "../../../../features/staff/list-services/list-services.service";
-import { resetServices } from "../../../../features/service/service.slice";
+import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
 import { unassignStaffFromService } from "../../../../features/staff-service/unassign-staff-service.service";
+import styles from "./assign-services.module.scss";
+import clsx from "clsx";
 interface AssignServicesDialogProps {
   open: boolean;
   onClose: () => void;
-  staff: { uuid: string; id: number };
-  onAssigned?: () => Promise<void> | void;
+  staff: { uuid: string };
+  onAssigned?: () => void;
 }
-interface FormType {
-  services: string[];
+interface FormValues {
+  service_uuids: string[];
 }
 
 export default function AssignServicesDialog({ open, onClose, staff, onAssigned }: AssignServicesDialogProps) {
   const dispatch = useAppDispatch();
-  const [isSaving, setIsSaving] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
-  const [initialAssignedServices, setInitialAssignedServices] = useState<string[]>([]);
-  const serviceState = useAppSelector((state: RootState) => state.service);
-  const services = serviceState?.data ?? [];
 
-  const methods = useForm<FormType>({
-    defaultValues: { services: [] },
-  });
-  const { control, handleSubmit, reset, watch } = methods;
-  const currentServiceSelection = watch("services");
-
-  const serviceOptions = useMemo(() => services.map((s: any) => ({ label: s.name, value: s.uuid })), [services]);
-
-  const onSubmit = handleSubmit(async (data) => {
-    if (!data.services?.length) {
-      callSnack("Please select at least one service", "error");
-      return;
-    }
-
-    // try {
-    //   setIsSaving(true);
-    //   const servicesToAssign = data.services.filter((uuid) => !initialAssignedServices.includes(uuid));
-    //   const servicesToUnassign = initialAssignedServices.filter((uuid) => !data.services.includes(uuid));
-
-    //   if (servicesToUnassign.length > 0) {
-    //     await Promise.all(
-    //       servicesToUnassign.map((serviceUuid) =>
-    //         unassignStaffFromService(staff.uuid, serviceUuid).catch((err) => {
-    //           callSnack(`Failed to unassign service ${serviceUuid}`, "error");
-    //           return null;
-    //         })
-    //       )
-    //     );
-    //   }
-
-    //   if (servicesToAssign.length > 0) {
-    //     const selectedServices = services.filter((s: any) => servicesToAssign.includes(s.uuid));
-    //     const payload = {
-    //       staff_services: selectedServices.map((s: any) => ({
-    //         service_uuid: s.uuid,
-    //         staff_uuid: staff.uuid,
-    //         price_type: s.price_type,
-    //         price: s.price,
-    //         duration: s.duration ?? 45,
-    //       })),
-    //     };
-    //     await assignStaffToService(payload);
-    //   }
-    //   const message = `Services updated successfully: ${servicesToAssign.length} assigned, ${servicesToUnassign.length} removed`;
-    //   callSnack(message, "success");
-
-    //   await onAssigned?.();
-    //   onClose();
-    // } catch (err: any) {
-    //   callSnack(err?.response?.data?.message || "Service Assignment Failed", "error");
-    // } finally {
-    //   setIsSaving(false);
-    // }
+  const methods = useForm<FormValues>({
+    defaultValues: { service_uuids: [] },
   });
 
-  useEffect(() => {
-    if (open) {
-      dispatch(resetServices());
-      dispatch(listServicesAction({ page: 1, limit: 100 }));
-    }
-  }, [open, dispatch]);
+  const { handleSubmit, reset } = methods;
+
+  const { data: services } = useAppSelector((state: RootState) => state.service);
+
+  const [assignedStaffServices, setAssignedStaffServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const fetchAssigned = async () => {
-      if (!open || !staff?.uuid || services.length === 0) return;
+    if (!open) return;
 
-      try {
-        setIsFetching(true);
-        const assigned = await listStaffServices(staff.uuid);
-        let assignedServiceUuids: string[] = [];
-        if (assigned.some((item: any) => item.service_uuid)) {
-          assignedServiceUuids = assigned.map((x: any) => x.service_uuid);
-        } else {
-          const assignedServiceIds = assigned.map((x: any) => x.service_id);
-          assignedServiceUuids = services.filter((s: any) => assignedServiceIds.includes(s.id)).map((s: any) => s.uuid);
-        }
-        setInitialAssignedServices(assignedServiceUuids);
-        reset({ services: assignedServiceUuids });
-      } catch (e: any) {
-        callSnack("Failed to load assigned services", "error");
-        setInitialAssignedServices([]);
-        reset({ services: [] });
-      } finally {
-        setIsFetching(false);
+    setLoading(true);
+
+    dispatch(listServicesAction({}));
+
+    listStaffServices(staff.uuid)
+      .then((res) => {
+        setAssignedStaffServices(res || []);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [open, staff.uuid, dispatch]);
+
+  const serviceIdToUuidMap = useMemo(() => {
+    return new Map(services.map((s) => [s.id, s.uuid]));
+  }, [services]);
+
+  const assignedServiceMap = useMemo(() => {
+    return new Map(
+      assignedStaffServices
+        .map((ss) => {
+          const serviceUuid = serviceIdToUuidMap.get(ss.service_id);
+          return serviceUuid ? [serviceUuid, ss] : null;
+        })
+        .filter(Boolean) as [string, any][]
+    );
+  }, [assignedStaffServices, serviceIdToUuidMap]);
+
+  useEffect(() => {
+    if (!services.length) return;
+
+    reset({
+      service_uuids: Array.from(assignedServiceMap.keys()),
+    });
+  }, [assignedServiceMap, services, reset]);
+
+  const serviceOptions = useMemo(() => {
+    return services.map((service) => ({
+      label: service.name,
+      value: service.uuid,
+    }));
+  }, [services]);
+
+  const onSubmit = async (values: FormValues) => {
+    setSaving(true);
+
+    try {
+      const selectedServiceUuids = values.service_uuids;
+      const toAssign = selectedServiceUuids
+        .filter((serviceUuid) => !assignedServiceMap.has(serviceUuid))
+        .map((serviceUuid) => {
+          const service = services.find((s) => s.uuid === serviceUuid);
+
+          return {
+            staff_uuid: staff.uuid,
+            service_uuid: serviceUuid,
+            price_type: service?.price_type,
+            price: service?.price ? Number(service.price) : undefined,
+            duration: service?.duration ? Number(service.duration) : undefined,
+          };
+        });
+
+      const toUnassign = Array.from(assignedServiceMap.entries())
+        .filter(([serviceUuid]) => !selectedServiceUuids.includes(serviceUuid))
+        .map(([, staffService]) => staffService.uuid);
+
+      if (toAssign.length > 0) {
+        await assignStaffToService({ staff_services: toAssign });
       }
-    };
-    fetchAssigned();
-  }, [open, staff?.uuid, services.length, reset, services]);
 
-  useEffect(() => {
-    if (!open) {
-      setInitialAssignedServices([]);
-      reset({ services: [] });
+      if (toUnassign.length > 0) {
+        await unassignStaffFromService({ staff_services: toUnassign });
+      }
+
+      callSnack("Services updated successfully", "success");
+      onAssigned?.();
+      onClose();
+    } catch (err: any) {
+      callSnack(err?.message || "Failed to update services", "error");
+    } finally {
+      setSaving(false);
     }
-  }, [open, reset]);
-
-  const showLoader = isFetching || services.length === 0;
+  };
 
   return (
     <Dialog
       open={open}
       onClose={(event, reason) => {
-        if (isSaving && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
+        if (saving && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
+        close();
       }}
-      className={styles.dialogContainer}
-      classes={{ paper: styles.dialog }}
-      maxWidth="md"
       fullWidth
+      maxWidth="sm"
+      classes={{ paper: styles.dialog }}
     >
-      <DialogTitle className={clsx(styles.dialogTitle)} fontWeight="fontWeightMedium" variant="h5">
-        Assign Services
-      </DialogTitle>
+      <DialogTitle>Assign Services</DialogTitle>
 
       <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent className={clsx("flex flex-col py-1 px-3", styles.dialogContent)}>
-            {showLoader ? (
-              <Box className="flex flex-col items-center justify-center py-12">
-                <CircularProgress size={24} className="mb-2" />
-                <Typography className="text-gray-500">
-                  {isFetching ? "Loading assigned services..." : "Loading services..."}
-                </Typography>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogContent className={clsx(styles.dialogContent)}>
+            {loading ? (
+              <Box className="flex justify-center py-6">
+                <CircularProgress />
               </Box>
             ) : (
-              <Box className="flex flex-col gap-4 max-h-[500px] overflow-y-auto">
-                <Typography fontWeight="bold">
-                  Select Services ({services.length} available)
-                  {initialAssignedServices.length > 0 && (
-                    <Typography component="span" className="text-sm text-blue-600 ml-2">
-                      ({initialAssignedServices.length} already assigned)
-                    </Typography>
-                  )}
-                </Typography>
+              <>
+                <Typography variant="body2">Select services to assign to this staff member</Typography>
+
                 <CheckboxGroup
-                  name="services"
-                  control={control}
-                  identifier="staff-services-assignment"
+                  name="service_uuids"
+                  control={methods.control}
+                  identifier="assign-services"
                   options={serviceOptions}
+                  optionGap={2}
                 />
-              </Box>
+              </>
             )}
           </DialogContent>
 
-          <DialogActions className={clsx(styles.dialogActions, "px-2 py-1 pb-2")}>
-            <Button onClick={onClose} disabled={isSaving}>
+          <DialogActions className={styles.dialogActions}>
+            <Button onClick={onClose} disabled={saving}>
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={isSaving || showLoader || serviceOptions.length === 0}
               variant="contained"
-              loading={isSaving}
+              disabled={saving}
+              startIcon={saving ? <CircularProgress size={18} /> : null}
             >
-              {isSaving ? "Updating..." : "Update Assignments"}
+              Save
             </Button>
           </DialogActions>
         </form>
