@@ -51,7 +51,7 @@ export default function AssignStaffDialog({
   const { handleSubmit, reset } = methods;
 
   const { data: allStaff } = useAppSelector((state: RootState) => state.staff);
-
+  const salonUUID = useAppSelector((state)=> state.auth.salon.uuid);
   const [assignedStaffServices, setAssignedStaffServices] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,7 +60,7 @@ export default function AssignStaffDialog({
     if (!open) return;
     setLoading(true);
     dispatch(listStaffAction({}));
-    listServiceStaff(serviceUuid)
+    listServiceStaff(serviceUuid,salonUUID)
       .then((res) => {
         setAssignedStaffServices(res || []);
       })
@@ -93,7 +93,7 @@ export default function AssignStaffDialog({
   }, [assignedStaffMap, allStaff]);
 
   const staffOptions = useMemo(() => {
-    return allStaff.map((staff) => ({
+    return allStaff.map((staff:any) => ({
       label: `${staff.first_name} ${staff.last_name ?? ""}`,
       value: staff.uuid,
     }));

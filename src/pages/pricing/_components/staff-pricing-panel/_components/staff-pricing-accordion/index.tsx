@@ -27,6 +27,7 @@ interface DialogContext {
 }
 
 export default function StaffPricingAccordion({ selectedService }: { selectedService: ServiceType }) {
+  const salonUUID = useAppSelector((state)=> state.auth.salon.uuid);
   const staffState = useAppSelector((state: RootState) => state.staff);
   const staffs = staffState?.data ?? [];
   const servicesToShow = useMemo(() => [selectedService, ...(selectedService.children ?? [])], [selectedService]);
@@ -47,7 +48,7 @@ export default function StaffPricingAccordion({ selectedService }: { selectedSer
     (async () => {
       try {
         setServiceStaffLoading((p) => ({ ...p, [serviceUuid]: true }));
-        const res = await listServiceStaff(serviceUuid);
+        const res = await listServiceStaff(serviceUuid,salonUUID);
         const rows = Array.isArray(res) ? res : res?.rows ?? res?.data ?? [];
         const mapped = rows.map((r: any) => ({ staff_id: r.staff_id }));
         setServiceStaffMap((p) => ({ ...p, [serviceUuid]: mapped }));
