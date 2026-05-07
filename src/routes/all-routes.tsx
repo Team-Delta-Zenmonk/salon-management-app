@@ -16,7 +16,7 @@ import Services from "../pages/services";
 import Staff from "../pages/staff";
 import Offers from "../pages/offers";
 import Customers from "../pages/customers";
-import Reports from "../pages/pricing";
+import Reports from "../pages/reports";
 import Notification from "../pages/notification";
 import Bookings from "../pages/bookings";
 import StaffServiceManagementPage from "../pages/pricing";
