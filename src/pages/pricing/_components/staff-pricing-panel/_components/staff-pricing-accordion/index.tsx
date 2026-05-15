@@ -27,7 +27,7 @@ interface DialogContext {
 }
 
 export default function StaffPricingAccordion({ selectedService }: { selectedService: ServiceType }) {
-  const salonUUID = useAppSelector((state)=> state.auth.salon.uuid);
+  const salonUUID = useAppSelector((state) => state.auth.salon.uuid);
   const staffState = useAppSelector((state: RootState) => state.staff);
   const staffs = staffState?.data ?? [];
   const servicesToShow = useMemo(() => [selectedService, ...(selectedService.children ?? [])], [selectedService]);
@@ -48,8 +48,8 @@ export default function StaffPricingAccordion({ selectedService }: { selectedSer
     (async () => {
       try {
         setServiceStaffLoading((p) => ({ ...p, [serviceUuid]: true }));
-        const res = await listServiceStaff(serviceUuid,salonUUID);
-        const rows = Array.isArray(res) ? res : res?.rows ?? res?.data ?? [];
+        const res = await listServiceStaff(serviceUuid, salonUUID);
+        const rows = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
         const mapped = rows.map((r: any) => ({ staff_id: r.staff_id }));
         setServiceStaffMap((p) => ({ ...p, [serviceUuid]: mapped }));
       } catch (e) {
@@ -73,7 +73,7 @@ export default function StaffPricingAccordion({ selectedService }: { selectedSer
     try {
       setStaffPricingLoading((p) => ({ ...p, [staff_uuid]: true }));
       const res = await listStaffServices(staff_uuid);
-      const rows: StaffPricingType[] = Array.isArray(res) ? res : res?.rows ?? res?.data ?? [];
+      const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
       setStaffServicesMap((p) => ({ ...p, [staff_uuid]: rows }));
     } catch (e) {
       callSnack("Failed to load staff pricing", "error");
@@ -130,7 +130,7 @@ export default function StaffPricingAccordion({ selectedService }: { selectedSer
         ],
       });
       const res = await listStaffServices(staff_uuid);
-      const rows: StaffPricingType[] = Array.isArray(res) ? res : res?.rows ?? res?.data ?? [];
+      const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
       setStaffServicesMap((p) => ({ ...p, [staff_uuid]: rows }));
 
       callSnack("Pricing updated successfully", "success");
@@ -210,11 +210,9 @@ export default function StaffPricingAccordion({ selectedService }: { selectedSer
                               )}
                             </Typography>
                           </Box>
-                          {service.uuid !== selectedService.uuid && (
-                            <IconButton size="small" onClick={() => handleOpenEdit(staff_uuid, service)}>
-                              <EditOutlined fontSize="small" className="text-(--primary-900)!" />
-                            </IconButton>
-                          )}
+                          <IconButton size="small" onClick={() => handleOpenEdit(staff_uuid, service)}>
+                            <EditOutlined fontSize="small" className="text-(--primary-900)!" />
+                          </IconButton>
                         </Box>
                       );
                     })}

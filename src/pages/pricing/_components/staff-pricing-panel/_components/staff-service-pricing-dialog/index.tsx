@@ -21,8 +21,8 @@ type StaffServicePricingDialogProps = {
 
 type FormValues = {
   price_type: string;
-  price: number;
-  duration: number;
+  price: string | number;
+  duration: string | number;
 };
 
 export default function StaffServicePricingDialog({ open, onClose, context, onSave }: StaffServicePricingDialogProps) {
@@ -32,12 +32,12 @@ export default function StaffServicePricingDialog({ open, onClose, context, onSa
   const methods = useForm<FormValues>({
     defaultValues: {
       price_type: current?.price_type ?? "fixed",
-      price: current?.price ? Number(current.price) : 0,
-      duration: current?.duration ? Number(current.duration) : 0,
+      price: current?.price ? String(current.price) : "0",
+      duration: current?.duration ? String(current.duration) : "0",
     },
   });
 
-  const { handleSubmit, control, reset, watch, setValue } = methods;
+  const { handleSubmit, control, reset, watch, setValue, formState: { isDirty } } = methods;
 
   const priceType = watch("price_type");
   const isFree = priceType === "free";
@@ -47,13 +47,13 @@ export default function StaffServicePricingDialog({ open, onClose, context, onSa
 
     reset({
       price_type: current?.price_type ?? "fixed",
-      price: current?.price ? Number(current.price) : 0,
-      duration: current?.duration ? Number(current.duration) : 0,
+      price: current?.price ? String(current.price) : "0",
+      duration: current?.duration ? String(current.duration) : "0",
     });
   }, [open, current, reset]);
 
   useEffect(() => {
-    if (isFree) setValue("price", 0);
+    if (isFree) setValue("price", "0");
   }, [isFree, setValue]);
 
   const submit = handleSubmit(async (data) => {
@@ -114,7 +114,7 @@ export default function StaffServicePricingDialog({ open, onClose, context, onSa
           <Button onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={submit} disabled={loading}>
+          <Button variant="contained" onClick={submit} disabled={loading || !isDirty}>
             Save
           </Button>
         </DialogActions>

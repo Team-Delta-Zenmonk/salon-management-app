@@ -3,8 +3,13 @@ import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import BookingCalendar from "./_components/booking-calender";
 import CreateBooking from "./_components/create-booking";
-import type { Booking, BookingStatus } from "./types/booking.type";
+import type { BookingStatus } from "./types/booking.type";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { listBookingsAction } from "../../features/booking/get-bookings/get-bookings.action";
+import { updateBookingAction } from "../../features/booking/update-booking/update-booking.action";
+import { BOOKING_STATUS } from "../../common/enums/booking-status.enum";
+import { BOOKING_FILTER } from "../../common/enums/booking-filter.enum";
+import { BOOKING_SOURCE } from "../../common/enums/booking-source.enum";
 import { ALL_SERVICES_VALUE, ALL_STAFF_VALUE, BOOKING_STATUS_COLORS } from "./constants/booking.constants";
 import { listStaffAction } from "../../features/staff/list-staff/list-staff.action";
 import { listServicesAction } from "../../features/service/list-services/list-service.action";
@@ -19,75 +24,8 @@ export default function BookingPage() {
   const dispatch = useAppDispatch();
   const { data: staff } = useAppSelector((state) => state.staff);
   const { data: services } = useAppSelector((state) => state.service);
-
+  const { data: bookings } = useAppSelector((state) => state.booking);
   const [selectedRange, setSelectedRange] = useState<[Date, Date] | null>(null);
-  const [bookings, setBookings] = useState<Booking[]>([
-    {
-      uuid: "b1",
-      customer_name: "Rahul Sharma",
-      customer_email: "rahul@example.com",
-      service_uuid: "s1",
-      service_name: "Haircut",
-      staff_uuid: "st1",
-      staff_name: "John Doe",
-      start_time: "2025-12-29T10:00:00",
-      end_time: "2025-12-29T11:00:00",
-      status: "confirmed",
-      notes: "Front side trim",
-    },
-    {
-      uuid: "b2",
-      customer_name: "Priya Singh",
-      customer_email: "priya@example.com",
-      service_uuid: "s2",
-      service_name: "Hair Coloring",
-      staff_uuid: "st2",
-      staff_name: "Jane Smith",
-      start_time: "2025-12-29T10:00:00",
-      end_time: "2025-12-29T11:00:00",
-      status: "confirmed",
-      notes: "Full highlights",
-    },
-    {
-      uuid: "b3",
-      customer_name: "Amit Patel",
-      customer_email: "amit@example.com",
-      service_uuid: "s3",
-      service_name: "Manicure",
-      staff_uuid: "st3",
-      staff_name: "Sarah Wilson",
-      start_time: "2025-12-29T10:00:00",
-      end_time: "2025-12-29T11:00:00",
-      status: "confirmed",
-      notes: "Regular customer, prefers gel polish",
-    },
-    {
-      uuid: "b4",
-      customer_name: "Neha Gupta",
-      customer_email: "neha@example.com",
-      service_uuid: "s4",
-      service_name: "Facial",
-      staff_uuid: "st1",
-      staff_name: "John Doe",
-      start_time: "2025-12-29T15:00:00",
-      end_time: "2025-12-29T16:00:00",
-      status: "cancelled",
-      notes: "Customer no-show",
-    },
-    {
-      uuid: "b5",
-      customer_name: "Vikram Singh",
-      customer_email: "vikram@example.com",
-      service_uuid: "s5",
-      service_name: "Pedicure",
-      staff_uuid: "st2",
-      staff_name: "Jane Smith",
-      start_time: "2025-12-30T09:30:00",
-      end_time: "2025-12-30T10:30:00",
-      status: "confirmed",
-      notes: "Regular customer, prefers gel polish",
-    },
-  ]);
 
   const { control, watch } = useForm<FilterForm>({
     defaultValues: {
@@ -102,6 +40,7 @@ export default function BookingPage() {
   useEffect(() => {
     dispatch(listStaffAction({ page: 1, limit: 100 }));
     dispatch(listServicesAction({ page: 1, limit: 100 }));
+    dispatch(listBookingsAction({ filter: BOOKING_FILTER.MONTH })); // Load all for the month by default
   }, [dispatch]);
 
   const staffOptions = useMemo(
@@ -112,7 +51,7 @@ export default function BookingPage() {
         value: s.uuid,
       })),
     ],
-    [staff]
+    [staff],
   );
 
   const serviceOptions = useMemo(
@@ -123,16 +62,59 @@ export default function BookingPage() {
         value: s.uuid,
       })),
     ],
-    [services]
+    [services],
   );
 
+  const mappedBookings = useMemo(() => {
+    return bookings.map((booking) => {
+      const bookingServices = booking.booking_services ?? [];
+      const isCustomerBooking = booking.created_by === BOOKING_SOURCE.CUSTOMER;
+
+      const customerName = isCustomerBooking
+        ? booking.customer?.name || "Registered Customer"
+        : booking.admin_booking?.name || "Walk-in Customer";
+
+      const customerEmail = isCustomerBooking ? booking.customer?.email || "" : "";
+
+      const customerPhone = isCustomerBooking ? "" : booking.admin_booking?.phone || "";
+
+      const serviceNames = bookingServices.map((bs: any) => bs.service?.name).filter(Boolean);
+      const staffNames = [
+        ...new Set(
+          bookingServices
+            .map((bs: any) => {
+              const first = bs.staff?.first_name || "";
+              const last = bs.staff?.last_name || "";
+              return `${first} ${last}`.trim();
+            })
+            .filter(Boolean),
+        ),
+      ];
+
+      return {
+        ...booking,
+        customer_name: customerName,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        service_name: serviceNames.length > 0 ? serviceNames.join(", ") : "Unknown Service",
+        staff_name: staffNames.length > 0 ? staffNames.join(", ") : "Unknown",
+        start_time: booking.booking_start_time,
+        end_time: booking.booking_end_time,
+        created_by: booking.created_by,
+      };
+    });
+  }, [bookings]);
+
   const filteredBookings = useMemo(() => {
-    return bookings.filter((booking) => {
-      const matchesStaff = selectedStaff === ALL_STAFF_VALUE || booking.staff_uuid === selectedStaff;
-      const matchesService = selectedService === ALL_SERVICES_VALUE || booking.service_uuid === selectedService;
+    return mappedBookings.filter((booking: any) => {
+      const services = booking.booking_services ?? [];
+      const matchesStaff =
+        selectedStaff === ALL_STAFF_VALUE || services.some((bs: any) => bs.staff?.uuid === selectedStaff);
+      const matchesService =
+        selectedService === ALL_SERVICES_VALUE || services.some((bs: any) => bs.service?.uuid === selectedService);
       return matchesStaff && matchesService;
     });
-  }, [bookings, selectedStaff, selectedService]);
+  }, [mappedBookings, selectedStaff, selectedService]);
 
   const getStatusColor = (status: BookingStatus): string => {
     return BOOKING_STATUS_COLORS[status] ?? "#6b7280";
@@ -143,11 +125,11 @@ export default function BookingPage() {
   };
 
   const todayBookingsCount = filteredBookings.filter(
-    (b) => b.status === "confirmed" && new Date(b.start_time).toDateString() === new Date().toDateString()
+    (b) => b.status === BOOKING_STATUS.CONFIRMED && new Date(b.start_time).toDateString() === new Date().toDateString(),
   ).length;
 
   const updateBookingStatus = (bookingUuid: string, newStatus: BookingStatus) => {
-    setBookings((prev) => prev.map((b) => (b.uuid === bookingUuid ? { ...b, status: newStatus } : b)));
+    dispatch(updateBookingAction({ uuid: bookingUuid, body: { status: newStatus } }));
   };
 
   return (

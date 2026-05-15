@@ -9,6 +9,7 @@ import styles from "./booking-calender.module.scss";
 import { Box } from "@mui/material";
 import BookingDetailsDrawer from "./_components/booking-detail-drawer";
 import { DEFAULT_SLOT_DURATION, DEFAULT_SLOT_MAX_TIME, DEFAULT_SLOT_MIN_TIME } from "../../constants/booking.constants";
+import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
 
 interface BookingCalendarProps {
   bookings: Booking[];
@@ -42,7 +43,7 @@ export default function BookingCalendar({
   const eventContent = (arg: any) => {
     const booking = arg.event.extendedProps as Booking;
     const color = getStatusColor(booking.status);
-    const isCancelled = booking.status === "cancelled";
+    const isCancelled = booking.status === BOOKING_STATUS.CANCELLED;
 
     return <BookingEvent booking={booking} color={color} isCancelled={isCancelled} />;
   };
@@ -79,6 +80,7 @@ export default function BookingCalendar({
           eventContent={eventContent}
           datesSet={handleDatesSet}
           height="100%"
+          timeZone="UTC"
           slotMinTime={DEFAULT_SLOT_MIN_TIME}
           slotMaxTime={DEFAULT_SLOT_MAX_TIME}
           allDaySlot={false}
@@ -98,7 +100,7 @@ export default function BookingCalendar({
         booking={selectedBookingLatest}
         onClose={() => setDetailsOpen(false)}
         getStatusColor={getStatusColor}
-        onCancel={(uuid: any) => updateBookingStatus(uuid, "cancelled")}
+        onCancel={(uuid: any) => updateBookingStatus(uuid, BOOKING_STATUS.CANCELLED)}
       />
     </>
   );
