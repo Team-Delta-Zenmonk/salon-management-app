@@ -4,6 +4,16 @@ import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { GENDER } from "../../../../common/enums/gender.enum";
 
+const parseDateString = (val: any) => {
+  if (typeof val === "string" && val.includes("-")) {
+    const parts = val.split("-");
+    if (parts.length === 3 && parts[2].length === 4) {
+      return dayjs(`${parts[2]}-${parts[1]}-${parts[0]}`);
+    }
+  }
+  return dayjs(val);
+};
+
 const BusinessDaySchema = z
   .object({
     start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
@@ -29,32 +39,72 @@ const ActiveHoursSchema = z
   .optional();
 
 export const StaffSchema = z.object({
-  first_name: z.string({ message: "Required" }).min(2, { message: "Minimum 2 characters" }),
-  last_name: z.string({ message: "Required" }).min(2, { message: "Minimum 2 characters" }),
-  email: z.string({ message: "Required" }).email({ message: "Valid email required" }),
-  phone_number: z.string({ message: "Required" }).min(10, { message: "Minimum 10 digits" }),
-  additional_phone_number: z.string({ message: "Required" }).min(10, { message: "Minimum 10 digits" }),
+  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }),
+  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }),
+  email: z
+    .string({ message: "Required" })
+    .min(1, { message: "Required" })
+    .email({ message: "Invalid email" }),
+  phone_number: z
+    .string({ message: "Required" })
+    .min(1, { message: "Required" })
+    .regex(/^\d{10}$/, { message: "Phone number must be exactly 10 digits" }),
+  additional_phone_number: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^\d{10}$/.test(val),
+      { message: "Phone number must be exactly 10 digits" }
+    ),
   dob: z
     .any()
-    .refine((val) => val, {
-      message: "required",
+    .refine((val) => val !== null && val !== undefined && val !== "", {
+      message: "Required",
     })
     .refine(
       (val: Dayjs | string) => {
-        const date = dayjs(val);
-        return date?.isValid() && date?.year() > 1899 && !date?.isAfter(dayjs(), "day");
+        if (!val) return true;
+        const date = parseDateString(val);
+        return (
+          date.isValid() &&
+          date.year() >= 1900 &&
+          !date.isAfter(dayjs().endOf("day"), "day")
+        );
       },
-      {
-        message: "invalidDate",
-      }
+      { message: "Invalid date" }
     ),
-  title: z.string({ message: "Required" }).min(2, { message: "Minimum 2 characters" }),
-  joining_date: z.string({ message: "Required" }).regex(/^\d{2}-\d{2}-\d{4}$/, { message: "DD-MM-YYYY format" }),
-  end_date: z.string().optional(),
-  address: z.string({ message: "Required" }).min(5, { message: "Address too short" }),
+  title: z.string({ message: "Required" }).min(1, { message: "Required" }),
+  joining_date: z
+    .any()
+    .refine((val) => val !== null && val !== undefined && val !== "", {
+      message: "Required",
+    })
+    .refine(
+      (val: Dayjs | string) => {
+        if (!val) return true;
+        return parseDateString(val).isValid();
+      },
+      { message: "Invalid date" }
+    ),
+
+  end_date: z
+    .any()
+    .optional()
+    .refine(
+      (val: Dayjs | string) => {
+        if (!val) return true;
+        return parseDateString(val).isValid();
+      },
+      { message: "Invalid date" }
+    ),
+
+  address: z.string({ message: "Required" }).min(1, { message: "Required" }),
   emergency_contact: z.object({
-    name: z.string({ message: "Emergency contact name required" }),
-    phone: z.string({ message: "Emergency contact phone required" }).min(10),
+    name: z.string({ message: "Required" }).min(1, { message: "Required" }),
+    phone: z
+      .string({ message: "Required" })
+      .min(1, { message: "Required" })
+      .regex(/^\d{10}$/, { message: "Phone number must be exactly 10 digits" }),
   }),
   gender: z.enum(Object.values(GENDER), {
     message: "Required",

@@ -21,6 +21,7 @@ const DatePicker = <T extends FieldValues>({
   disabled,
   minDate,
   handleChange,
+  rules,
 }: CustomDatePickerProps<T>) => {
   const openPickerIcon = (props: any) => (
     <CalendarTodayIcon
@@ -36,6 +37,7 @@ const DatePicker = <T extends FieldValues>({
       <Controller
         name={name}
         control={control}
+        rules={rules}
         render={({ field: { onChange, onBlur, value, ref }, fieldState: { error } }) => {
           const parsed: Dayjs | null = typeof value === "string" && value ? dayjs(value, format, true) : null;
           const dateValue = parsed && parsed.isValid() ? parsed : null;

@@ -31,6 +31,10 @@ const TextField = <T extends FieldValues>({
   highlightPrimaryIconButton = false,
   processChange,
   extraSpacesNotAllowed = true,
+  min,
+  max,
+  multiline,
+  rows,
 }: CustomTextFieldProps<T>) => {
   
   const handleNumberChange = (evt: React.KeyboardEvent<HTMLDivElement>) => {
@@ -94,6 +98,8 @@ const TextField = <T extends FieldValues>({
             htmlInput: {
               "data-test-id": `input-${identifier}`,
               maxLength: maxLength,
+              min: min,
+              max: max,
               className: startAdornment ? styles.inputWithStartAdornment : styles.input,
             },
             input: {
@@ -108,6 +114,8 @@ const TextField = <T extends FieldValues>({
                     value={value}
                     error={error}
                     identifier={identifier}
+                    min={min}
+                    max={max}
                   />
                 ) : (
                   endAdornment && (
@@ -172,6 +180,8 @@ const TextField = <T extends FieldValues>({
           }}
           value={value ?? ""}
           onBlur={handleBlur ?? onBlur}
+          multiline={multiline}
+          rows={rows}
           {...others}
           onChange={(e) => {
             const newValue = e.target.value;

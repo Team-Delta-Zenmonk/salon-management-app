@@ -1,0 +1,1 @@
+export const listInventoryLogsType = "inventory/listInventoryLogs";

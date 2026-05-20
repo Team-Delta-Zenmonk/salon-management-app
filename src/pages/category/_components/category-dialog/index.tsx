@@ -47,17 +47,17 @@ export default function CategoryDialog({ open, onClose, mode, category }: Catego
     }
   }, [open, mode, category, reset]);
 
-const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data) => {
     try {
       setIsLoading(true);
 
       const logoUrl = data.logo?.url || (mode === "update" ? category.logo : undefined);
 
       if (mode === "create") {
-        await createCategoryService({ 
-          name: data?.name, 
-          description: data?.description, 
-          logo: logoUrl 
+        await createCategoryService({
+          name: data?.name,
+          description: data?.description,
+          logo: logoUrl
         });
         await dispatch(listCategoriesAction({ page: 1, limit: 10 })).unwrap();
         
@@ -66,10 +66,10 @@ const onSubmit = handleSubmit(async (data) => {
         await dispatch(
           updateCategoryAction({
             uuid: category?.uuid,
-            body: { 
-              name: data?.name, 
-              description: data?.description, 
-              logo: logoUrl 
+            body: {
+              name: data?.name,
+              description: data?.description,
+              logo: logoUrl
             },
           })
         ).unwrap();
@@ -79,7 +79,7 @@ const onSubmit = handleSubmit(async (data) => {
 
       onClose();
     } catch (err: any) {
-      callSnack(err?.response?.data?.message || "Action failed", "error");
+      callSnack(err?.response?.data?.message || "Category with this name already exists", "error");
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +118,7 @@ const onSubmit = handleSubmit(async (data) => {
                 name="name"
                 control={control}
                 identifier="category-name"
-                pattern={VALIDATE_PATTERN.alphabet}
+                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                 disabled={isLoading}
               />
             </Box>

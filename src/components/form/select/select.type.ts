@@ -8,4 +8,5 @@ export type CustomSelectProps<T extends FieldValues> = {
   identifier: string;
   translate?: boolean;
   disabled?: boolean;
+  rules?: any;
 };

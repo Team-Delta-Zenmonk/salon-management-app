@@ -38,12 +38,12 @@ export default function StaffDialog({ open, onClose, mode, staff }: Props) {
 
   const methods = useForm<StaffForm>({
     resolver: zodResolver(StaffSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: createStaffDefaultPayload(),
   });
 
-  const { handleSubmit, control, reset, watch, setValue, trigger } = methods;
+  const { handleSubmit, control, reset, watch, setValue, trigger, formState: { errors } } = methods;
 
   const close = () => {
     if (isLoading) return;
@@ -102,6 +102,23 @@ export default function StaffDialog({ open, onClose, mode, staff }: Props) {
       setIsLoading(false);
     }
   });
+
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name) {
+        const keys = name.split(".");
+        let hasError: any = errors;
+        for (const k of keys) {
+          hasError = hasError?.[k];
+          if (!hasError) break;
+        }
+        if (hasError) {
+          trigger(name as any);
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, trigger, errors]);
 
   useEffect(() => {
     if (!open) return;

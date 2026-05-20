@@ -31,7 +31,7 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
       callSnack("Category created successfully", "success");
       onClose();
     } catch (err: any) {
-      callSnack(err?.response?.data?.message || "Failed to create category", "error");
+      callSnack(err?.response?.data?.message || "Category with this name already exists", "error");
     } finally {
       setIsLoading(false);
     }

@@ -5,6 +5,11 @@ import { navigationItems } from "../../layouts/navigation";
 import CustomDrawer from "../drawer";
 import SidebarNavList from "./_components/sidebar-nav-list";
 import LogoutButton from "../logout";
+import { Tooltip } from "@mui/material";
+import { shouldShowTooltip } from "../../common/shouldShowTooltip";
+
+import { useAppSelector } from "../../store/hooks";
+import type { RootState } from "../../store/store";
 
 type SidebarProps = {
   drawerWidth: number;
@@ -14,6 +19,7 @@ type SidebarProps = {
 };
 
 const Sidebar = ({ drawerWidth, mobileOpen, onToggleSidebar, isDesktop }: SidebarProps) => {
+  const { salon } = useAppSelector((state: RootState) => state.auth);
   const drawerContent = (
     <Box className="flex flex-col h-full">
       <Box className="border-b border-gray-200 p-3">
@@ -21,10 +27,12 @@ const Sidebar = ({ drawerWidth, mobileOpen, onToggleSidebar, isDesktop }: Sideba
           <Box className="flex items-center justify-center w-10 h-10 rounded-full bg-(--primary-900)!">
             <ContentCutIcon className="text-white!" />
           </Box>
-          <Box>
-            <Typography variant="subtitle1" fontWeight={600} color="primary">
-              Salon Manager
-            </Typography>
+          <Box className="min-w-0 flex-1">
+            <Tooltip title={salon?.owner_name || "Salon Manager"} disableHoverListener={!shouldShowTooltip(salon?.owner_name || "Salon Manager", "160px")}>
+              <Typography variant="subtitle1" fontWeight={600} color="primary" className="truncate" sx={{ textTransform: "capitalize" }}>
+                {salon?.owner_name || "Salon Manager"}
+              </Typography>
+            </Tooltip>
             <Typography variant="caption" color="text.secondary">
               Admin Panel
             </Typography>

@@ -1,0 +1,33 @@
+.updateButton {
+  .editIcon {
+    color: var(--white);
+  }
+}
+
+.dialogContainer {
+  .dialogContent {
+    gap: 16px;
+    padding: 8px 24px 24px 24px;
+  }
+  .dialogActions {
+    gap: 8px;
+  }
+  .dialogTitle {
+    color: var(--primary-900);
+  }
+}
+
+.dialogSm {
+  width: 400px;
+  overflow: hidden;
+}
+
+.dialogMd {
+  width: 500px;
+  overflow: hidden;
+}
+
+.dialogLg {
+  width: 600px;
+  overflow: hidden;
+}
