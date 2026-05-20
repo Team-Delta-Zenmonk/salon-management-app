@@ -20,6 +20,7 @@ import Reports from "../pages/pricing";
 import Notification from "../pages/notification";
 import Bookings from "../pages/bookings";
 import StaffServiceManagementPage from "../pages/pricing";
+import MyProfile from "../pages/my-profile";
 
 function AllRoutes() {
   return (
@@ -38,6 +39,7 @@ function AllRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
+          <Route path="/my-profile" element={<MyProfile/>} />
           <Route path="/dashboard" element={<Dashboard/>} />
           <Route path="/inventory" element={<Inventory/>} />
           <Route path="/categories" element={<Category/>} />

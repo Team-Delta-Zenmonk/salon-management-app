@@ -22,7 +22,7 @@ const Layout = () => {
         isDesktop={isDesktop}
       />
 
-      <Box component="main" className="flex flex-col flex-1 h-screen">
+      <Box component="main" className="flex flex-col flex-1 h-screen w-full">
         <Topbar onMenuClick={!isDesktop ? handleToggleSidebar : undefined} />
         <Box className="flex-1 min-h-0 overflow-y-auto">
           <Container maxWidth="xl" className="py-6 flex flex-col h-full">

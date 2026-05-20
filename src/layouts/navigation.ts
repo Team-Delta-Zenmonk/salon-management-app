@@ -9,6 +9,7 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import CurrencyRupeeOutlinedIcon from '@mui/icons-material/CurrencyRupeeOutlined';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 export type NavItem = {
   name: string;
@@ -17,6 +18,7 @@ export type NavItem = {
 };
 
 export const navigationItems: NavItem[] = [
+  { name: "My Profile", path: "/my-profile", icon: AccountCircleIcon },
   { name: "Dashboard", path: "/dashboard", icon: DashboardIcon },
   { name: "Categories", path: "/categories", icon: CategoryOutlinedIcon },
   { name: "Services", path: "/services", icon: DesignServicesIcon },

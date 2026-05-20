@@ -14,7 +14,7 @@ export type CustomTextFieldProps<T extends FieldValues> = {
   label?: string;
   disabled?: boolean;
   maxLength?: number;
-  rules?: Record<string, string[]>;
+  rules?: any;
   identifier: string;
   loading?: boolean;
   endAdornment?: React.ReactElement<SvgIconProps>;
@@ -26,5 +26,9 @@ export type CustomTextFieldProps<T extends FieldValues> = {
   showError?: boolean;
   highlightPrimaryIconButton?: boolean;
   processChange?: (e: string) => string;
-  extraSpacesNotAllowed?: boolean
+  extraSpacesNotAllowed?: boolean;
+  min?: number;
+  max?: number;
+  multiline?: boolean;
+  rows?: number;
 };

@@ -1,0 +1,1 @@
+export const updateInventoryItemType = "inventory/updateInventoryItem";

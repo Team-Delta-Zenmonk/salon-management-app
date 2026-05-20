@@ -17,32 +17,33 @@ const Select = <T extends FieldValues>({
   identifier,
   translate = true,
   disabled = false,
+  rules,
 }: CustomSelectProps<T>) => {
   
   return (
     <Controller
       name={name}
       control={control}
+      rules={rules}
       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error } }) => {
         return (
           <FormControl fullWidth error={!!error?.type}>
-            <InputLabel
-              id={name}
-              data-test-id={`label-${identifier}`}
-              classes={{ root: clsx(styles.label, { [styles.disabledLabel]: disabled }), shrink: styles.shrunkLabel }}
-            >
-              {placeholder}
-            </InputLabel>
             <MuiSelect
+              displayEmpty
               disabled={disabled}
               onChange={onChange}
               value={value ?? ""}
               inputRef={ref}
               name={name}
-              label={placeholder}
-              labelId={name}
               error={!!error?.type}
               onBlur={onBlur}
+              renderValue={(selected) => {
+                if (!selected || selected === "") {
+                  return <Typography color="text.secondary" variant="paragraphMd">{placeholder}</Typography>;
+                }
+                const selectedOption = options?.find(opt => opt.value === selected);
+                return selectedOption ? (translate ? selectedOption.label : selectedOption.label) : selected;
+              }}
               MenuProps={{ sx: { maxHeight: "40vh" }, PaperProps: { className: styles.menuPaper }}}
               inputProps={{
                 className: styles.input,

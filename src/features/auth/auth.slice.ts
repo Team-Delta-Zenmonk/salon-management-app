@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { loginSalonAction } from "./login/login.action";
 import { verifySalonAction } from "./verify-salon/verify-salon.action";
+import { getSalonProfileAction } from "./profile/actions/getSalonProfile.action";
 
 export interface Salon {
   id: number;
@@ -65,6 +66,9 @@ export const authSlice = createSlice({
     });
     builder.addCase(verifySalonAction.rejected, (state) => {
       state.isAuthenticated = false;
+    });
+    builder.addCase(getSalonProfileAction.fulfilled, (state, { payload }) => {
+      state.salon = payload;
     });
   },
 });

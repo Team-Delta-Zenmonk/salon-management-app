@@ -73,6 +73,8 @@ export default function StaffBasicInformation({ control, disabled }: { control: 
             control={control}
             identifier="staff-phone"
             disabled={disabled}
+            pattern={/^\d*$/}
+            maxLength={10}
           />
         </Box>
 
@@ -85,6 +87,8 @@ export default function StaffBasicInformation({ control, disabled }: { control: 
             control={control}
             identifier="staff-add-phone"
             disabled={disabled}
+            pattern={/^\d*$/}
+            maxLength={10}
           />
         </Box>
       </Box>

@@ -7,6 +7,9 @@ import authReducer from "../features/auth/auth.slice";
 import categoryReducer from "../features/category/category.slice";
 import serviceReducer from "../features/service/service.slice";
 import staffReducer from "../features/staff/staff.slice";
+import inventoryItemReducer from "../features/inventory/inventory-item.slice";
+import inventoryLogReducer from "../features/inventory/inventory-log.slice";
+import itemsCategoryReducer from "../features/inventory/items-category.slice";
 
 const storage = createWebStorage("local");
 
@@ -15,6 +18,9 @@ const rootReducer = combineSlices({
   category: categoryReducer,
   service: serviceReducer,
   staff: staffReducer,
+  inventoryItem: inventoryItemReducer,
+  inventoryLog: inventoryLogReducer,
+  itemsCategory: itemsCategoryReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
