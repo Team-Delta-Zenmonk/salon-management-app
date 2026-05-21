@@ -1,8 +1,7 @@
 **/node_modules
 **/npm-debug.log
-build
+dist
 /coverage/
 .idea/
 .git
-/.next/
 .env*.local
