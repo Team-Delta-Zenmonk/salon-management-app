@@ -40,10 +40,10 @@ const DatePicker = <T extends FieldValues>({
         rules={rules}
         render={({ field: { onChange, onBlur, value, ref }, fieldState: { error } }) => {
           const parsed: Dayjs | null = typeof value === "string" && value ? dayjs(value, format, true) : null;
-          const dateValue = parsed && parsed.isValid() ? parsed : null;
+          const dateValue = parsed?.isValid() ? parsed : null;
 
           const handleDateChange = (newDate: Dayjs | null) => {
-            if (!newDate || !newDate.isValid()) {
+            if (!newDate?.isValid()) {
               onChange("");
               handleChange?.();
               return;

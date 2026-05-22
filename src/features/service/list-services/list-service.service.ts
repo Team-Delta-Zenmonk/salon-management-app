@@ -23,7 +23,8 @@ export const listServicesService = async (params?: ListServicesParams) => {
   }
 
   const queryString = queryParams.toString();
-  const url = `/salons/services${queryString ? `?${queryString}` : ""}`;
+  const query = queryString ? `?${queryString}` : "";
+  const url = `/salons/services${query}`;
 
   const res = await axiosInstance.get(url);
   return res.data;

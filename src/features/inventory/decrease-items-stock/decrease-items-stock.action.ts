@@ -5,11 +5,11 @@ import { decreaseStockType } from "./decrease-items-stock.type";
 export const decreaseStockAction = createAsyncThunk(
   decreaseStockType,
   async (
-    data: { uuid: string; currentStock: number; quantityToDecrease: number },
+    data: { uuid: string; newStock: number },
     thunkAPI
   ) => {
     try {
-      const res = await decreaseStock(data.uuid, data.currentStock, data.quantityToDecrease);
+      const res = await decreaseStock(data.uuid, data.newStock);
       return res;
     } catch (err: any) {
       return thunkAPI.rejectWithValue({

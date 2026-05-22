@@ -4,22 +4,13 @@ import { getInventoryLogType } from "./get-inventory-log.type";
 
 export const getInventoryLogAction = createAsyncThunk(
   getInventoryLogType,
-  async (
-    params: {
-      page?: number;
-      limit?: number;
-      search?: string;
-      sortBy?: string;
-      item_uuid?: string;
-    } = {},
-    thunkAPI
-  ) => {
+  async (uuid: string, thunkAPI) => {
     try {
-      const res = await getInventoryLogService(params);
+      const res = await getInventoryLogService(uuid);
       return res;
     } catch (err: any) {
       return thunkAPI.rejectWithValue({
-        message: err?.response?.data?.message || "Unable to fetch inventory logs",
+        message: err?.response?.data?.message || "Unable to fetch inventory log",
       });
     }
   }

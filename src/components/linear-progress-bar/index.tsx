@@ -5,7 +5,7 @@ interface LinearProgressBarProps {
   totalSteps: number;
 }
 
-export function LinearProgressBar({ step, totalSteps }: LinearProgressBarProps) {
+export function LinearProgressBar({ step, totalSteps }: Readonly<LinearProgressBarProps>) {
   const value = (step / totalSteps) * 100;
 
   return (

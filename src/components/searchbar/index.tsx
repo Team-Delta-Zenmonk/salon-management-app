@@ -18,7 +18,7 @@ const SearchBar = ({ onSearch, placeholder }: SearchBarProps) => {
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    const cleaned = input.trim().replace(/\s{2,}/g, " ");
+    const cleaned = input.trim().replaceAll(/\s{2,}/g, " ");
     setSearchQuery(input);
 
     if (cleaned === "") {

@@ -9,7 +9,7 @@ import serviceReducer from "../features/service/service.slice";
 import staffReducer from "../features/staff/staff.slice";
 import inventoryItemReducer from "../features/inventory/inventory-item.slice";
 import inventoryLogReducer from "../features/inventory/inventory-log.slice";
-import itemsCategoryReducer from "../features/inventory/items-category.slice";
+import itemsCategoryReducer from "../features/inventory/inventory-items-category.slice";
 import bookingReducer from "../features/booking/booking.slice";
 
 const storage = createWebStorage("local");

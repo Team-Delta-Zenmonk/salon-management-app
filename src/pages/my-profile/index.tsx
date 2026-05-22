@@ -6,12 +6,12 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import type { RootState } from "../../store/store";
-import { getSalonProfileAction } from "../../features/auth/profile/actions/getSalonProfile.action";
-import { updateSalonProfileAction } from "../../features/auth/profile/actions/updateSalonProfile.action";
+import { getSalonProfileAction } from "../../features/auth/profile/get-salon-profile/getSalonProfile.action";
+import { updateSalonProfileAction } from "../../features/auth/profile/update-salon-profile/update-salon-profile.action";
 import { callSnack } from "../../components/snackbar";
 import { zodResolver } from "@hookform/resolvers/zod";
-import ProfileInfoCard from "./_components/ProfileInfoCard";
-import BusinessHoursCard from "./_components/BusinessHoursCard";
+import ProfileInfoCard from "./_components/profile-info-card";
+import SalonWorkingHoursCard from "./_components/salon-working-hours-card";
 import { MyProfileSchema, type SalonProfileForm } from "./schema/my-profile.schema";
 import { DAYS_MAP } from "./_components/constants/business-hours.constants";
 import styles from "./my-profile.module.scss";
@@ -92,7 +92,7 @@ const MyProfile = () => {
       } else {
         callSnack("Failed to update profile", "error");
       }
-    } catch (error) {
+    } catch {
       callSnack("An error occurred during update", "error");
     }
   };
@@ -123,16 +123,7 @@ const MyProfile = () => {
             </Typography>
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1.5 }}>
-            {!isEditing ? (
-              <Button
-                variant="contained"
-                startIcon={<EditIcon sx={{ color: "common.white" }} />}
-                onClick={() => setIsEditing(true)}
-                sx={{ borderRadius: "8px", px: 3, py: 1.25, boxShadow: "none", whiteSpace: "nowrap" }}
-              >
-                EDIT PROFILE
-              </Button>
-            ) : (
+            {isEditing ? (
               <>
                 <Button
                   variant="outlined"
@@ -151,10 +142,19 @@ const MyProfile = () => {
                   Save Changes
                 </Button>
               </>
+            ) : (
+              <Button
+                variant="contained"
+                startIcon={<EditIcon sx={{ color: "common.white" }} />}
+                onClick={() => setIsEditing(true)}
+                sx={{ borderRadius: "8px", px: 3, py: 1.25, boxShadow: "none", whiteSpace: "nowrap" }}
+              >
+                EDIT PROFILE
+              </Button>
             )}
           </Box>
         </Box>
-        <Grid container spacing={4} sx={{ alignItems: isEditing ? "flex-start" : "stretch" }}>
+        <Grid container spacing={4} sx={{ alignItems: "flex-start" }}>
           <Grid size={{ xs: 12, lg: 8 }}>
             <ProfileInfoCard
               isEditing={isEditing}
@@ -164,8 +164,8 @@ const MyProfile = () => {
               clearErrors={clearErrors}
             />
           </Grid>
-          <Grid size={{ xs: 12, lg: 4 }} sx={{ display: "flex" }}>
-            <BusinessHoursCard
+          <Grid size={{ xs: 12, lg: 4 }}>
+            <SalonWorkingHoursCard
               isEditing={isEditing}
               control={control}
               watch={watch}

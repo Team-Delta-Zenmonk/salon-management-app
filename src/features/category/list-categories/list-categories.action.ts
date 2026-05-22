@@ -4,7 +4,7 @@ import { listCategoriesType } from "./list-categories.type";
 
 export const listCategoriesAction = createAsyncThunk(
   listCategoriesType,
-  async (params: ListCategoriesParams = {}, thunkAPI) => {
+  async (params: ListCategoriesParams, thunkAPI) => {
     try {
       const res = await listCategoriesService(params);
       return res;

@@ -6,7 +6,7 @@ type InfoRowProps = {
   value: string;
 };
 
-export default function InfoRow({ icon, label, value }: InfoRowProps) {
+export default function InfoRow({ icon, label, value }: Readonly<InfoRowProps>) {
   return (
     <Box className="flex items-start gap-2 rounded-lg bg-gray-50 border border-gray-100 p-3">
       <Box className="mt-0.5 text-gray-600">{icon}</Box>

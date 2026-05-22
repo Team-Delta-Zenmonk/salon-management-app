@@ -1,10 +1,8 @@
 import { Typography } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import MuiSelect from "@mui/material/Select";
-import clsx from "clsx";
 import { Controller, type FieldValues } from "react-hook-form";
 import styles from "./select.module.scss";
 import type { CustomSelectProps } from "./select.type";
@@ -19,7 +17,7 @@ const Select = <T extends FieldValues>({
   disabled = false,
   rules,
 }: CustomSelectProps<T>) => {
-  
+
   return (
     <Controller
       name={name}
@@ -42,9 +40,9 @@ const Select = <T extends FieldValues>({
                   return <Typography color="text.secondary" variant="paragraphMd">{placeholder}</Typography>;
                 }
                 const selectedOption = options?.find(opt => opt.value === selected);
-                return selectedOption ? (translate ? selectedOption.label : selectedOption.label) : selected;
+                return selectedOption ? selectedOption.label : selected;
               }}
-              MenuProps={{ sx: { maxHeight: "40vh" }, PaperProps: { className: styles.menuPaper }}}
+              MenuProps={{ sx: { maxHeight: "40vh" }, PaperProps: { className: styles.menuPaper } }}
               inputProps={{
                 className: styles.input,
                 "data-test-id": `input-select-${identifier}`,
@@ -68,7 +66,7 @@ const Select = <T extends FieldValues>({
                       data-test-id={`li-${identifier}-${option.label}`}
                     >
                       <Typography variant="paragraphMd" color="secondary" className={styles.menuItem}>
-                        {translate ? option.label : option.label}
+                        {option.label}
                       </Typography>
                     </MenuItem>
                   );

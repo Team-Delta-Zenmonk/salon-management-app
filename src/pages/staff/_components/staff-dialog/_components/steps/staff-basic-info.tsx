@@ -7,7 +7,7 @@ import DatePicker from "../../../../../../components/form/date-picker";
 import Select from "../../../../../../components/form/select";
 import { GenderOptions } from "../../../../../../common/enums/gender.enum";
 
-export default function StaffBasicInformation({ control, disabled }: { control: Control<StaffForm>; disabled: boolean }) {
+export default function StaffBasicInformation({ control, disabled }: Readonly<{ control: Control<StaffForm>; disabled: boolean }>) {
   return (
     <Box className="flex flex-col gap-4">
       <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">

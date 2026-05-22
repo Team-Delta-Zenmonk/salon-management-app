@@ -1,4 +1,4 @@
-import { Box, Step, StepConnector, StepLabel, Stepper } from "@mui/material";
+import { Box, Step, StepLabel, Stepper } from "@mui/material";
 import clsx from "clsx";
 import styles from "./stepper-header.module.scss";
 import type { StepperHeaderStep } from "./stepper-header.type";
@@ -9,7 +9,7 @@ type Props = {
   className?: string;
 };
 
-export default function StepperHeader({ steps, activeStep, className }: Props) {
+export default function StepperHeader({ steps, activeStep, className }: Readonly<Props>) {
   return (
     <Box className={clsx(styles.container, className)}>
       <Stepper activeStep={activeStep} alternativeLabel className={styles.stepperRoot}>

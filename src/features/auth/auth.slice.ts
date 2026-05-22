@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { loginSalonAction } from "./login/login.action";
 import { verifySalonAction } from "./verify-salon/verify-salon.action";
-import { getSalonProfileAction } from "./profile/actions/getSalonProfile.action";
+import { getSalonProfileAction } from "./profile/get-salon-profile/getSalonProfile.action";
 
 export interface Salon {
   id: number;
@@ -23,7 +23,7 @@ export interface Salon {
 }
 
 export type AuthState = {
-  salon: any | null;
+  salon: any;
   isAuthenticated: boolean;
   isOnboardingComplete: boolean;
 };

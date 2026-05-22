@@ -1,1 +1,1 @@
-export const listInventoryItemsType = "inventory/listInventoryItems";
+export const listInventoryItemsType = "inventory-item/listInventoryItems";

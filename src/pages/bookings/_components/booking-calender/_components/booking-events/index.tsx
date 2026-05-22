@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type { Booking } from "../../../../types/booking.type";
 import styles from "./booking-events.module.scss";
 
@@ -8,7 +8,7 @@ interface BookingEventProps {
   isCancelled: boolean;
 }
 
-export default function BookingEvent({ booking, color, isCancelled }: BookingEventProps) {
+export default function BookingEvent({ booking, color, isCancelled }: Readonly<BookingEventProps>) {
   return (
     <Box
       className={`${styles.bookingEvent} ${isCancelled ? styles.cancelled : styles.confirmed}`}

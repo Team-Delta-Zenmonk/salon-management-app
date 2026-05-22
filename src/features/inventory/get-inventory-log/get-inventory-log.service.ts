@@ -1,6 +1,6 @@
-import { getTransactions } from "../list-inventory-logs/list-inventory-logs.service";
-import type { InventoryLogsParams } from "../types/inventory-item.type";
+import { axiosInstance } from "../../../config/axios";
 
-export const getInventoryLogService = async (params: InventoryLogsParams = {}) => {
-  return await getTransactions(params);
+export const getInventoryLogService = async (uuid: string) => {
+  const res = await axiosInstance.get(`/salons/inventory-transactions/${uuid}`);
+  return res.data;
 };

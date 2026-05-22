@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { listInventoryItemsAction } from "./list-inventory-items/list-inventory-items.action";
-import type { InventoryItemCategory } from "./items-category.slice";
+import type { InventoryItemCategory } from "./inventory-items-category.slice";
 
 export interface InventoryItem {
   id: number;
@@ -36,23 +36,19 @@ const initialState: InventoryItemState = {
 export const inventoryItemSlice = createSlice({
   name: "inventoryItem",
   initialState,
-  reducers: {
-    appendStock(state, action) {
-      const { data, total, page, limit } = action.payload;
-      const existingUuids = new Set(state.data.map((item) => item.uuid));
-      const newItems = data.filter((item: InventoryItem) => !existingUuids.has(item.uuid));
-
-      state.data = [...state.data, ...newItems];
-      state.total = total;
-      state.page = page;
-      state.limit = limit;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(listInventoryItemsAction.fulfilled, (state, action) => {
       const { data, total, page, limit } = action.payload;
 
-      state.data = data;
+      if (action.meta.arg.page && action.meta.arg.page > 1) {
+        const existingUuids = new Set(state.data.map((item) => item.uuid));
+        const newItems = data.filter((item: InventoryItem) => !existingUuids.has(item.uuid));
+        state.data = [...state.data, ...newItems];
+      } else {
+        state.data = data;
+      }
+
       state.total = total;
       state.page = page;
       state.limit = limit;
@@ -60,5 +56,4 @@ export const inventoryItemSlice = createSlice({
   },
 });
 
-export const { appendStock } = inventoryItemSlice.actions;
 export default inventoryItemSlice.reducer;

@@ -2,6 +2,7 @@ import * as z from "zod";
 import dayjs from "dayjs";
 
 export const inventoryLogSchema = z.object({
+  item_uuid: z.string().min(1, "Please select an item"),
   ordered_date: z.string().min(1, "Required"),
   received_date: z.string().min(1, "Required"),
   ordered_quantity: z.coerce.number().min(1, "Required atleast 1").max(50000, "Value must be less than or equal to 50000"),
@@ -15,7 +16,7 @@ export const inventoryLogSchema = z.object({
     const received = dayjs(data.received_date);
     if (received.isBefore(ordered, 'day')) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["received_date"],
         message: "Invalid Date",
       });

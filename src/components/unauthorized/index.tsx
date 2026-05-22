@@ -3,7 +3,7 @@ import { Box, Button, Typography } from "@mui/material";
 
 export default function Unauthorized() {
   const handleGoBack = () => {
-    window.history.back();
+    globalThis.history.back();
   };
   return (
     <Box className="min-h-screen bg-white flex items-center justify-center p-4">

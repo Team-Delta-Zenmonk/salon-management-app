@@ -57,7 +57,7 @@ const EMPTY_SERVICE = { service_id: undefined as any, staff_id: undefined as any
 
 const formatPrice = (price: number) => `₹${Math.round(price).toLocaleString("en-IN")}`;
 
-export default function BookingDialog({ open, onClose, mode, booking }: BookingDialogProps) {
+export default function BookingDialog({ open, onClose, mode, booking }: Readonly<BookingDialogProps>) {
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state) => state.auth);
   const { data: services } = useAppSelector((state) => state.service);
@@ -76,7 +76,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: BookingD
     },
   });
 
-  const { handleSubmit, watch, reset, control } = methods;
+  const { handleSubmit, reset, control } = methods;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -89,11 +89,13 @@ export default function BookingDialog({ open, onClose, mode, booking }: BookingD
 
   const getServiceOptionsForRow = useCallback(
     (rowIndex: number) => {
-      const selectedIds = (watchedServices ?? [])
-        .map((s, i) => (i !== rowIndex && s.service_id ? Number(s.service_id) : null))
-        .filter(Boolean);
+      const selectedIds = new Set(
+        (watchedServices ?? [])
+          .map((s, i) => (i !== rowIndex && s.service_id ? Number(s.service_id) : null))
+          .filter(Boolean)
+      );
 
-      return allServiceOptions.filter((opt) => !selectedIds.includes(Number(opt.value)));
+      return allServiceOptions.filter((opt) => !selectedIds.has(Number(opt.value)));
     },
     [allServiceOptions, watchedServices],
   );
@@ -173,10 +175,13 @@ export default function BookingDialog({ open, onClose, mode, booking }: BookingD
   const getStaffOptions = (rowIndex: number) => {
     const rowData = staffMap[rowIndex];
     if (!rowData?.data) return [];
-    return rowData.data.map((ss) => ({
-      label: `${ss.staff.first_name}${ss.staff.last_name ? ` ${ss.staff.last_name}` : ""}`,
-      value: String(ss.staff_id),
-    }));
+    return rowData.data.map((ss) => {
+      const lastName = ss.staff.last_name ? ` ${ss.staff.last_name}` : "";
+      return {
+        label: `${ss.staff.first_name}${lastName}`,
+        value: String(ss.staff_id),
+      };
+    });
   };
 
   const getStaffService = (rowIndex: number, staffId: any): ServiceStaff | undefined => {

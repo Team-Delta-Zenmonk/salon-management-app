@@ -34,24 +34,24 @@ export default function ListServices({
   hasMore,
   fetchMoreServices,
   total,
-}: ListServicesProps) {
+}: Readonly<ListServicesProps>) {
   const dispatch = useAppDispatch();
   const services = useAppSelector((state: RootState) => state.service.data) ?? [];
 
   const [expandedService, setExpandedService] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<any | null>(null);
+  const [selectedService, setSelectedService] = useState<any>(null);
   const [subServiceOpen, setSubServiceOpen] = useState(false);
-  const [subServiceParent, setSubServiceParent] = useState<any | null>(null);
+  const [subServiceParent, setSubServiceParent] = useState<any>(null);
   const [editingSubServiceParent, setEditingSubServiceParent] = useState<string | null>(null);
   const [subServicesMap, setSubServicesMap] = useState<Record<string, any[]>>({});
   const [subLoadingMap, setSubLoadingMap] = useState<Record<string, boolean>>({});
   const [staffDialogOpen, setStaffDialogOpen] = useState(false);
-  const [selectedServiceForStaff, setSelectedServiceForStaff] = useState<any | null>(null);
+  const [selectedServiceForStaff, setSelectedServiceForStaff] = useState<any>(null);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deletingService, setDeletingService] = useState<any | null>(null);
+  const [deletingService, setDeletingService] = useState<any>(null);
   const [deletingSubServiceParent, setDeletingSubServiceParent] = useState<string | null>(null);
 
   const filteredServices = useMemo(() => {

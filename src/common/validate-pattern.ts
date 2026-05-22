@@ -7,5 +7,5 @@ export const VALIDATE_PATTERN = {
   alphaNumericSpecialWithSpace: /^(?!.* {2})[A-Za-zÀ-ÖØ-öø-ÿĀ-žƀ-ƶǍ-ǰȀ-ȳẽẼṅṄǹǸẏẎ0-9@#$%^&*()_+\-={}|\\:;"'<>,.?/!`~ ]*$/,
   uppercase: /[A-Z]/,
   lowercase: /[a-z]/,
-  specialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+  specialChar: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
 };

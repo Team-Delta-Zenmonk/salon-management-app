@@ -7,7 +7,7 @@ interface CreateServiceProps {
   onCreatedOrUpdated?: (cb?: () => void) => Promise<void>;
 }
 
-export default function CreateService({ onCreatedOrUpdated }: CreateServiceProps) {
+export default function CreateService({ onCreatedOrUpdated }: Readonly<CreateServiceProps>) {
   const [open, setOpen] = useState(false);
 
   return (

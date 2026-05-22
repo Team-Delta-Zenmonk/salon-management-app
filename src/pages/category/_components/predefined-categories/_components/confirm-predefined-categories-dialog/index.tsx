@@ -14,7 +14,7 @@ interface PredefinedCategoryDetailsDialogProps {
   category: PredefinedCategory;
 }
 
-export default function PredefinedCategoryDetailsDialog({ open, onClose, category }: PredefinedCategoryDetailsDialogProps) {
+export default function PredefinedCategoryDetailsDialog({ open, onClose, category }: Readonly<PredefinedCategoryDetailsDialogProps>) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
 

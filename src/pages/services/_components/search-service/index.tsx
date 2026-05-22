@@ -49,7 +49,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
     const fetchCategories = async () => {
       try {
         await dispatch(listCategoriesAction({ page: 1, limit: 100 })).unwrap();
-      } catch (error) {
+      } catch {
         callSnack("Failed to fetch categories", "error");
       }
     };
@@ -86,7 +86,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
             })
           ).unwrap();
         }
-      } catch (error) {
+      } catch {
         callSnack("Failed to fetch services", "error");
       } finally {
         setIsLoading(false);
@@ -114,7 +114,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
         }
 
         await dispatch(listServicesAction(params)).unwrap();
-      } catch (error) {
+      } catch {
         callSnack("Internal Server Error", "error");
       } finally {
         setIsLoading(false);
@@ -143,7 +143,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
       }
 
       await dispatch(listServicesAction(params)).unwrap();
-    } catch (error) {
+    } catch {
       callSnack("Failed to load more services", "error");
     }
   }, [dispatch, page, limit, searchQuery, watchedCategoryUuid]);

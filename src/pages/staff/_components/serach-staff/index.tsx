@@ -24,7 +24,7 @@ const SearchStaff = () => {
       setIsLoading(true);
       try {
         await dispatch(listStaffAction({ page: 1, limit: 10 })).unwrap();
-      } catch (error) {
+      } catch {
         callSnack("Failed to fetch staff", "error");
       } finally {
         setIsLoading(false);
@@ -47,7 +47,7 @@ const SearchStaff = () => {
             search: trimmedSearch || undefined,
           })
         ).unwrap();
-      } catch (error) {
+      } catch {
         callSnack("Failed to search staff", "error");
       } finally {
         setIsLoading(false);
@@ -65,7 +65,7 @@ const SearchStaff = () => {
           search: searchQuery.trim() || undefined,
         })
       ).unwrap();
-    } catch (error) {
+    } catch {
       callSnack("Failed to load more staff", "error");
     }
   }, [dispatch, page, limit, searchQuery]);

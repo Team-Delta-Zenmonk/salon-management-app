@@ -36,7 +36,7 @@ const TextField = <T extends FieldValues>({
   multiline,
   rows,
 }: CustomTextFieldProps<T>) => {
-  
+
   const handleNumberChange = (evt: React.KeyboardEvent<HTMLDivElement>) => {
     !/\d/.test(evt.key) &&
       evt.key !== "Backspace" &&
@@ -52,7 +52,7 @@ const TextField = <T extends FieldValues>({
   const handleInput = (e: any) => {
     if (extraSpacesNotAllowed) {
       const input = e.target;
-      const cleaned = input.value.replace(/^\s+/, "").replace(/\s{2,}/g, " ");
+      const cleaned = input.value.replaceAll(/^\s+/, "").replaceAll(/\s{2,}/g, " ");
       if (input.value !== cleaned) {
         const diff = input.value.length - cleaned.length;
         const caretPos = Math.max(input.selectionStart - diff, 0);
@@ -84,13 +84,12 @@ const TextField = <T extends FieldValues>({
             const input = e.target as HTMLInputElement;
             const { selectionStart, selectionEnd, value } = input;
             const newValue = value.slice(0, selectionStart!) + (e.data ?? "") + value.slice(selectionEnd!);
-            if (extraSpacesNotAllowed && (!value?.trim() && !newValue.trim()) || value.replace(/\s+/g, " ") === newValue.replace(/\s+/g, " ")) {
+            if (extraSpacesNotAllowed && (!value?.trim() && !newValue.trim()) || value.replaceAll(/\s+/g, " ") === newValue.replaceAll(/\s+/g, " ")) {
               e.preventDefault();
               return;
             }
             if (pattern && !pattern.test(newValue)) {
               e.preventDefault();
-              return;
             }
           }}
           onInput={handleInput}
@@ -149,7 +148,7 @@ const TextField = <T extends FieldValues>({
                           disableRipple
                           data-test-id={`btn-end-adornment-${identifier}`}
                           edge={"end"}
-                          onClick={() => onEndAdornmentClick && onEndAdornmentClick(value!)}
+                          onClick={() => onEndAdornmentClick?.(value!)}
                           disabled={disabled}
                           className={clsx(
                             { errorText: error && showError },

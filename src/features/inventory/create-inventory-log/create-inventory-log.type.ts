@@ -1,1 +1,1 @@
-export const createInventoryLogType = "inventory/createInventoryLog";
+export const createInventoryLogType = "inventory-log/createInventoryLog";

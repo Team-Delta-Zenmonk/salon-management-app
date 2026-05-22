@@ -23,7 +23,7 @@ export default function BookingCalendar({
   onDateRangeChange,
   updateBookingStatus,
   getStatusColor,
-}: BookingCalendarProps) {
+}: Readonly<BookingCalendarProps>) {
   const [currentView, setCurrentView] = useState("timeGridWeek");
 
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -48,7 +48,8 @@ export default function BookingCalendar({
     return <BookingEvent booking={booking} color={color} isCancelled={isCancelled} />;
   };
 
-  const dayMaxEvents = currentView === "timeGridDay" ? false : currentView === "dayGridMonth" ? 1 : false;
+  let dayMaxEvents: number | false = false;
+  if (currentView === "dayGridMonth") dayMaxEvents = 1;
   const eventMaxStack = currentView === "timeGridWeek" ? 1 : undefined;
 
   const selectedBookingLatest = useMemo(() => {

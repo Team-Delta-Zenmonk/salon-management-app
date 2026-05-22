@@ -41,23 +41,19 @@ const initialState: InventoryLogState = {
 export const inventoryLogSlice = createSlice({
   name: "inventoryLog",
   initialState,
-  reducers: {
-    appendTransactions(state, action) {
-      const { data, total, page, limit } = action.payload;
-      const existingUuids = new Set(state.data.map((item) => item.uuid));
-      const newItems = data.filter((item: InventoryTransaction) => !existingUuids.has(item.uuid));
-
-      state.data = [...state.data, ...newItems];
-      state.total = total;
-      state.page = page;
-      state.limit = limit;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(listInventoryLogsAction.fulfilled, (state, action) => {
       const { data, total, page, limit } = action.payload;
 
-      state.data = data;
+      if (action.meta.arg.page && action.meta.arg.page > 1) {
+        const existingUuids = new Set(state.data.map((item) => item.uuid));
+        const newItems = data.filter((item: InventoryTransaction) => !existingUuids.has(item.uuid));
+        state.data = [...state.data, ...newItems];
+      } else {
+        state.data = data;
+      }
+
       state.total = total;
       state.page = page;
       state.limit = limit;
@@ -65,5 +61,4 @@ export const inventoryLogSlice = createSlice({
   },
 });
 
-export const { appendTransactions } = inventoryLogSlice.actions;
 export default inventoryLogSlice.reducer;

@@ -26,7 +26,7 @@ export default function ListCategories({
   hasMore,
   fetchMoreCategories,
   searchQuery,
-}: ListCategoriesProps) {
+}: Readonly<ListCategoriesProps>) {
   const dispatch = useDispatch<AppDispatch>();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);

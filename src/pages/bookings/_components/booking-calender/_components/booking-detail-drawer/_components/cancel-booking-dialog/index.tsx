@@ -6,7 +6,7 @@ type CancelBookingDialogProps = {
   onConfirm: () => void;
 };
 
-export default function CancelBookingDialog({ open, onClose, onConfirm }: CancelBookingDialogProps) {
+export default function CancelBookingDialog({ open, onClose, onConfirm }: Readonly<CancelBookingDialogProps>) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle className="font-semibold">Cancel this booking?</DialogTitle>

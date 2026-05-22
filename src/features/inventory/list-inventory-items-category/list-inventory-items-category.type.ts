@@ -1,0 +1,1 @@
+export const listItemsCategoryType = "inventory-items-category/listItemsCategory";

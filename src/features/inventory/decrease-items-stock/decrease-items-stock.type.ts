@@ -1,1 +1,1 @@
-export const decreaseStockType = "inventory/decreaseStock";
+export const decreaseStockType = "inventory-item/decreaseStock";

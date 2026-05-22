@@ -1,1 +1,1 @@
-export const getInventoryItemType = "inventory/getInventoryItem";
+export const getInventoryItemType = "inventory-item/getInventoryItem";

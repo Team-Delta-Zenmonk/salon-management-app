@@ -22,7 +22,7 @@ interface CategoryDialogProps {
   category?: any;
 }
 
-export default function CategoryDialog({ open, onClose, mode, category }: CategoryDialogProps) {
+export default function CategoryDialog({ open, onClose, mode, category }: Readonly<CategoryDialogProps>) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -60,7 +60,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Catego
           logo: logoUrl
         });
         await dispatch(listCategoriesAction({ page: 1, limit: 10 })).unwrap();
-        
+
         callSnack("Category created successfully", "success");
       } else {
         await dispatch(

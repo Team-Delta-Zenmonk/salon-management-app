@@ -1,11 +1,10 @@
 import React from "react";
-import { Box, Typography, Stack } from "@mui/material";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import { navigationItems } from "../../layouts/navigation";
 import CustomDrawer from "../drawer";
 import SidebarNavList from "./_components/sidebar-nav-list";
 import LogoutButton from "../logout";
-import { Tooltip } from "@mui/material";
+import { Box, Typography, Stack, Tooltip } from "@mui/material";
 import { shouldShowTooltip } from "../../common/shouldShowTooltip";
 
 import { useAppSelector } from "../../store/hooks";

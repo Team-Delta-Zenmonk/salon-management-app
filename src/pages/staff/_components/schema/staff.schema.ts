@@ -16,10 +16,10 @@ const parseDateString = (val: any) => {
 
 const BusinessDaySchema = z
   .object({
-    start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+    start_time: z.string().regex(/^([0-1]?\d|2[0-3]):[0-5]\d$/, {
       message: "Valid time (HH:MM) required",
     }),
-    end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+    end_time: z.string().regex(/^([0-1]?\d|2[0-3]):[0-5]\d$/, {
       message: "Valid time (HH:MM) required",
     }),
   })

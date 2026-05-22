@@ -12,7 +12,7 @@
 .transactionCard {
   background: var(--white);
   border: 1px solid var(--secondary-200);
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   overflow: hidden;
   cursor: pointer;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
@@ -25,44 +25,6 @@
     border-color: var(--primary-300);
     box-shadow: 0 4px 16px var(--secondary-100);
   }
-}
-
-.transactionCardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 14px 16px 10px;
-  border-bottom: 1px solid var(--secondary-100);
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.transactionCardHeaderLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-}
-
-.statusChip {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 14px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.statusReceived {
-  background: var(--success-50);
-  color: var(--success-700);
-}
-
-.statusPending {
-  background: var(--warning-50);
-  color: var(--warning-700);
 }
 
 .transactionCardBody {
@@ -86,7 +48,7 @@
 .stockCard {
   background: var(--white);
   border: 1px solid var(--secondary-300);
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   overflow: hidden;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -117,40 +79,11 @@
   min-width: 0;
 }
 
-.stockDetails {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-shrink: 0;
-  width: 100%;
-  justify-content: space-between;
-  padding-top: 10px;
-  border-top: 1px solid var(--secondary-100);
-}
-
-.stockDetailItem {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-
-.stockChips {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-}
-
 .emptyState {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 48px 24px;
-}
-
-.paginationWrapper {
-  margin-top: 8px;
 }
 
 .loadingWrapper {

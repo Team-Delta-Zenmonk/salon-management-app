@@ -11,7 +11,7 @@ interface ListServicesParams {
 
 export const listServicesAction = createAsyncThunk(
   listServicesType,
-  async (params: ListServicesParams | undefined, thunkAPI) => {
+  async (params: ListServicesParams, thunkAPI) => {
     try {
       return await listServicesService(params);
     } catch (err: any) {

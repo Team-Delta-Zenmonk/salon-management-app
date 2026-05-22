@@ -42,7 +42,7 @@ const FileMultiPicker = <T extends FieldValues>({
     current: Array<{ url: string; filename: string }>
   ) => {
     const files = event.target.files;
-    if (!files || !files.length) return;
+    if (!files?.length) return;
 
     const invalidFile = Array.from(files).find((file) => !ALLOWED_IMAGE_TYPES.includes(file.type as any));
 
@@ -89,6 +89,50 @@ const FileMultiPicker = <T extends FieldValues>({
     onChange(current.filter((u) => u.url !== url));
   };
 
+  const renderEndAdornment = (
+    loading: boolean,
+    arr: Array<{ url: string; filename: string }>,
+    identifier: string,
+    disabled: boolean | undefined,
+    onChange: (value: Array<{ url: string; filename: string }>) => void,
+  ) => {
+    if (loading) {
+      return (
+        <CircularProgress
+          data-test-id={`loading-${identifier}`}
+          className={styles.adornmentLoading}
+          size={20}
+        />
+      );
+    }
+
+    if (arr.length) {
+      return (
+        <IconButton
+          className={styles.adornmentIconButton}
+          data-test-id={`clear-btn-${identifier}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            clearAll(onChange);
+          }}
+          disabled={disabled}
+        >
+          <ClearIcon data-test-id={`clear-btn-icon-${identifier}`} />
+        </IconButton>
+      );
+    }
+
+    return (
+      <IconButton
+        disabled={disabled}
+        data-test-id={`upload-btn-${identifier}`}
+        className={styles.adornmentIconButton}
+      >
+        <UploadFileIcon data-test-id={`upload-btn-icon-${identifier}`} className="text-secondary-500" />
+      </IconButton>
+    );
+  };
+
   return (
     <Controller
       name={name}
@@ -120,39 +164,11 @@ const FileMultiPicker = <T extends FieldValues>({
                 }}
                 slotProps={{
                   root: {
-                    className: !arr.length ? styles.inputRoot : "",
+                    className: arr.length ? "" : styles.inputRoot,
                   },
                 }}
                 readOnly
-                endAdornment={
-                  loading ? (
-                    <CircularProgress
-                      data-test-id={`loading-${identifier}`}
-                      className={styles.adornmentLoading}
-                      size={20}
-                    />
-                  ) : arr.length ? (
-                    <IconButton
-                      className={styles.adornmentIconButton}
-                      data-test-id={`clear-btn-${identifier}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        clearAll(onChange);
-                      }}
-                      disabled={disabled}
-                    >
-                      <ClearIcon data-test-id={`clear-btn-icon-${identifier}`} />
-                    </IconButton>
-                  ) : (
-                    <IconButton
-                      disabled={disabled}
-                      data-test-id={`upload-btn-${identifier}`}
-                      className={styles.adornmentIconButton}
-                    >
-                      <UploadFileIcon data-test-id={`upload-btn-icon-${identifier}`} className="text-secondary-500" />
-                    </IconButton>
-                  )
-                }
+                endAdornment={renderEndAdornment(loading, arr, identifier, disabled, onChange)}
               />
 
               {error && (

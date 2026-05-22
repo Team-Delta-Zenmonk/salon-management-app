@@ -1,0 +1,1 @@
+export const getSalonProfileType = "auth/getSalonProfile";

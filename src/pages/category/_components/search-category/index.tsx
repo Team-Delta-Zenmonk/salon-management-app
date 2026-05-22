@@ -23,7 +23,7 @@ const SearchCategories = () => {
       setIsLoading(true);
       try {
         await dispatch(listCategoriesAction({ page: 1, limit: 10 })).unwrap();
-      } catch (error) {
+      } catch {
         callSnack("Failed to fetch categoreis", "error");
       } finally {
         setIsLoading(false);
@@ -47,7 +47,7 @@ const SearchCategories = () => {
             search: trimmedSearch || undefined,
           })
         ).unwrap();
-      } catch (error) {
+      } catch {
         callSnack("Failed to search categories", "error");
       } finally {
         setIsLoading(false);

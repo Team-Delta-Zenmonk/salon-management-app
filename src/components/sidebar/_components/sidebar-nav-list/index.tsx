@@ -15,7 +15,7 @@ type SidebarNavListProps = {
   onItemClick?: () => void;
 };
 
-function SidebarNavList({ items, isDesktop, onItemClick }: SidebarNavListProps): ReactElement {
+function SidebarNavList({ items, isDesktop, onItemClick }: Readonly<SidebarNavListProps>): ReactElement {
   const location = useLocation();
 
   return (
@@ -29,7 +29,7 @@ function SidebarNavList({ items, isDesktop, onItemClick }: SidebarNavListProps):
             key={item.path}
             component={RouterLink}
             to={item.path}
-            onClick={!isDesktop ? onItemClick : undefined}
+            onClick={isDesktop ? undefined : onItemClick}
             selected={isActive}
             className={clsx("mb-1! rounded-lg!", isActive ? "bg-(--primary-900)! text-white!" : "hover:bg-gray-100")}
           >

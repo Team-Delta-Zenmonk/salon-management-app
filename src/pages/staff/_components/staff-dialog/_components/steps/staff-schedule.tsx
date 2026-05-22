@@ -9,12 +9,12 @@ export default function StaffSchedule({
   watch,
   setValue,
   disabled,
-}: {
+}: Readonly<{
   control: Control<StaffForm>;
   watch: UseFormWatch<StaffForm>;
   setValue: UseFormSetValue<StaffForm>;
   disabled: boolean;
-}) {
+}>) {
   const activeHours = watch("active_hours");
 
   const setDayClosed = (day: DayKey, closed: boolean) => {
@@ -36,7 +36,7 @@ export default function StaffSchedule({
       <Box className="flex flex-col gap-3">
         {DaysList.map((day) => {
           const val = (activeHours as any)?.[day];
-          const isClosed = val === null || typeof val === "undefined";
+          const isClosed = val === null || val === undefined;
 
           return (
             <Box key={day} className="border border-gray-200 rounded-lg p-3 space-y-3">

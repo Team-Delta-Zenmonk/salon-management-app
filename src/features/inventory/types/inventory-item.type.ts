@@ -2,8 +2,9 @@ export interface InventoryItemsParams {
   page?: number;
   limit?: number;
   search?: string;
-  sortBy?: string;
-  category_uuid?: string;
+  sort_by?: string;
+  sort_order?: "ASC" | "DESC";
+  category_id?: string;
   item_type?: string;
 }
 
@@ -11,7 +12,8 @@ export interface InventoryLogsParams {
   page?: number;
   limit?: number;
   search?: string;
-  sortBy?: string;
+  sort_by?: string;
+  sort_order?: "ASC" | "DESC";
   item_uuid?: string;
 }
 

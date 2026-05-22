@@ -28,7 +28,7 @@ interface ServiceDialogProps {
   onCreated?: () => void;
 }
 
-export default function ServiceDialog({ open, onClose, mode, service, parentService, onCreated }: ServiceDialogProps) {
+export default function ServiceDialog({ open, onClose, mode, service, parentService, onCreated }: Readonly<ServiceDialogProps>) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,70 +44,63 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
   const { handleSubmit, control, reset, watch, setValue } = methods;
 
+  const buildPayload = (data: ServiceForm, logoUrl: string | undefined) => {
+    const payload: any = {
+      name: data.name,
+      description: data.description,
+      gender: data.gender,
+      price_type: data.price_type,
+      price: Number(data.price),
+      duration: Number(data.duration),
+      is_active: data.is_active ?? false,
+      is_popular: data.is_popular ?? false,
+      logo: logoUrl,
+    };
+
+    if (data.discount !== undefined && data.discount !== null) {
+      payload.discount = Number(data.discount);
+    }
+    if (data.discount_type) {
+      payload.discount_type = data.discount_type;
+    }
+
+    if (mode === "create") {
+      if (isCreatingSubService) {
+        payload.parent_id = parentService?.uuid;
+      } else {
+        payload.category_id = data.category_id;
+      }
+    } else if (data.category_id) {
+      payload.category_id = data.category_id;
+    }
+
+    return payload;
+  };
+
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsLoading(true);
       const logoUrl = data.logo?.url || (mode === "update" ? service?.logo : undefined);
 
+      if (mode === "create" && !isCreatingSubService && !data.category_id) {
+        callSnack("Category is required", "error");
+        return;
+      }
+
+      const payload = buildPayload(data, logoUrl);
+
       if (mode === "create") {
-        if (!isCreatingSubService && !data.category_id) {
-          callSnack("Category is required", "error");
-          return;
-        }
-
-        await createServiceService({
-          name: data.name,
-          description: data.description,
-          gender: data.gender,
-          price_type: data.price_type,
-          price: Number(data.price),
-          duration: Number(data.duration),
-          is_active: data.is_active ?? false,
-          is_popular: data.is_popular ?? false,
-          logo: logoUrl,
-          ...(isCreatingSubService
-            ? {
-                parent_id: parentService.uuid,
-                category_id: undefined,
-              }
-            : {
-                category_id: data.category_id,
-              }),
-
-          ...(data.discount !== undefined && data.discount !== null ? { discount: Number(data.discount) } : {}),
-          ...(data.discount_type ? { discount_type: data.discount_type } : {}),
-        });
-
+        await createServiceService(payload);
         callSnack(
           isCreatingSubService ? "Sub-service created successfully" : "Service created successfully",
           "success"
         );
-        onCreated?.();
       } else {
-        await dispatch(
-          updateServiceAction({
-            uuid: service.uuid,
-            body: {
-              name: data.name,
-              description: data.description,
-              gender: data.gender,
-              price_type: data.price_type,
-              duration: Number(data.duration),
-              price: Number(data.price),
-              ...(data.discount !== undefined && data.discount !== null ? { discount: Number(data.discount) } : {}),
-              ...(data.discount_type ? { discount_type: data.discount_type } : {}),
-              is_active: data.is_active ?? false,
-              is_popular: data.is_popular ?? false,
-              logo: logoUrl,
-              ...(data.category_id ? { category_id: data.category_id } : {}),
-            },
-          })
-        ).unwrap();
-
+        await dispatch(updateServiceAction({ uuid: service.uuid, body: payload })).unwrap();
         callSnack("Service updated successfully", "success");
-        onCreated?.();
       }
 
+      onCreated?.();
       onClose();
     } catch (err: any) {
       callSnack(
@@ -123,7 +116,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     const fetchCategories = async () => {
       try {
         await dispatch(listCategoriesAction({ page: 1, limit: 100 })).unwrap();
-      } catch (error) {
+      } catch {
         callSnack("Failed to fetch categories", "error");
       }
     };
@@ -157,9 +150,9 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         category_id: service?.category?.uuid,
         gender: service.gender,
         price_type: service.price_type,
-        duration: service.duration != null ? String(service.duration) : "",
-        price: service.price != null ? String(service.price) : "",
-        discount: service.discount !== null && service.discount !== undefined ? service.discount : undefined,
+        duration: service.duration == null ? "" : String(service.duration),
+        price: service.price == null ? "" : String(service.price),
+        discount: service.discount ?? undefined,
         discount_type: service.discount_type ?? undefined,
         is_active: service.is_active ?? false,
         is_popular: service.is_popular ?? false,

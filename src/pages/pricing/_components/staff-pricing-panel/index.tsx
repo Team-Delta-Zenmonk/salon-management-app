@@ -3,7 +3,7 @@ import type { ServiceType } from "../../types/staff-service.types";
 import StaffPricingAccordion from "./_components/staff-pricing-accordion";
 
 
-export default function StaffPricingPanel({ selectedService }: { selectedService: ServiceType | null }) {
+export default function StaffPricingPanel({ selectedService }: Readonly<{ selectedService: ServiceType | null }>) {
   if (!selectedService) {
     return (
       <Box className="bg-white border border-gray-200 rounded-lg p-6">

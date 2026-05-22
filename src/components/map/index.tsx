@@ -14,7 +14,7 @@ type LocationMapProps = {
   clearErrors: any;
 };
 
-export default function LocationMap({ control, latitude, longitude, label, disabled, setValue, clearErrors }: LocationMapProps) {
+export default function LocationMap({ control, latitude, longitude, label, disabled, setValue, clearErrors }: Readonly<LocationMapProps>) {
   const handleLocationChange = async (
     coords: LatLngValue,
     latFieldOnChange: (v: any) => void,

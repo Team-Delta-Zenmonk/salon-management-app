@@ -5,10 +5,9 @@ import ContentCutIcon from "@mui/icons-material/ContentCut";
 import { Box, Button, Typography } from "@mui/material";
 import TextField from "../../components/form/textfield";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import PasswordField from "../../components/form/password-field";
 import { registerSalon } from "../../features/salon-onboarding/register-salon/register-salon.service";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { callSnack } from "../../components/snackbar";
 import { VALIDATE_PATTERN } from "../../common/validate-pattern";
 

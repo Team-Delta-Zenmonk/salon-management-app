@@ -15,7 +15,7 @@ export default function Services() {
   const refreshServices = useCallback(
     async (cb?: () => void) => {
       if (selectedCategoryUuid === ALL_CATEGORIES_VALUE) {
-        await dispatch(listServicesAction(undefined));
+        await dispatch(listServicesAction({}));
       } else {
         await dispatch(listServicesAction({ category_uuid: selectedCategoryUuid }));
       }
@@ -25,7 +25,7 @@ export default function Services() {
   );
 
   return (
-     <Box className="flex flex-col flex-1 min-h-0 w-full">
+    <Box className="flex flex-col flex-1 min-h-0 w-full">
       <Box className="flex justify-between items-start px-8 pb-6 shrink-0">
         <Box>
           <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900) mb-2">

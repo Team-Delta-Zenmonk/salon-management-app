@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton, Collapse, CircularProgress, Divider } from "@mui/material";
+import { Box, Typography, IconButton, Collapse, CircularProgress } from "@mui/material";
 import { ExpandMore, ChevronRight } from "@mui/icons-material";
 import { useState } from "react";
 import clsx from "clsx";
@@ -18,13 +18,48 @@ export default function ServiceSidebar({
   onSelectService,
   onExpandParent,
   loadingMap,
-}: ServiceSideBarProps) {
+}: Readonly<ServiceSideBarProps>) {
   const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
 
   const toggle = async (uuid: string) => {
     const next = !openMap[uuid];
     setOpenMap((p) => ({ ...p, [uuid]: next }));
     if (next) await onExpandParent(uuid);
+  };
+
+  const renderChildren = (s: ServiceType, loading: boolean) => {
+    if (loading) {
+      return (
+        <Box className="flex items-center gap-2 text-gray-500 text-sm py-2">
+          <CircularProgress size={16} /> Loading subservices...
+        </Box>
+      );
+    }
+
+    if ((s.children?.length ?? 0) === 0) {
+      return (
+        <Typography className="text-sm text-gray-500 py-1">No sub-services</Typography>
+      );
+    }
+
+    return (
+      <>
+        <Typography className="text-xs text-gray-500 font-medium">Sub-services</Typography>
+        {s.children!.map((child) => (
+          <Box key={child.uuid} className="p-2 border border-gray-200 rounded-md bg-white">
+            <Typography className="truncate text-sm font-medium text-gray-800">
+              {child.name}
+            </Typography>
+            <Typography className="text-xs text-gray-500">
+              Base: ₹{child.price ?? "-"} · {child.duration ?? "-"}m · {child.price_type ?? "-"}
+            </Typography>
+            <Typography className="text-xs text-sky-800 mt-1">
+              Adjust staff pricing from the right panel
+            </Typography>
+          </Box>
+        ))}
+      </>
+    );
   };
 
   return (
@@ -77,31 +112,7 @@ export default function ServiceSidebar({
                 <Collapse in={isOpen} timeout="auto" unmountOnExit>
                   <Box className="pl-[34px] pb-2 pr-2">
                     <Box className="ml-2 border-l border-gray-200 pl-4 flex flex-col gap-2">
-                      {loading ? (
-                        <Box className="flex items-center gap-2 text-gray-500 text-sm py-2">
-                          <CircularProgress size={16} /> Loading subservices...
-                        </Box>
-                      ) : (s.children?.length ?? 0) === 0 ? (
-                        <Typography className="text-sm text-gray-500 py-1">No sub-services</Typography>
-                      ) : (
-                        <>
-                          <Typography className="text-xs text-gray-500 font-medium">Sub-services</Typography>
-
-                          {s.children!.map((child) => (
-                            <Box key={child.uuid} className="p-2 border border-gray-200 rounded-md bg-white">
-                              <Typography className="truncate text-sm font-medium text-gray-800">
-                                {child.name}
-                              </Typography>
-                              <Typography className="text-xs text-gray-500">
-                                Base: ₹{child.price ?? "-"} · {child.duration ?? "-"}m · {child.price_type ?? "-"}
-                              </Typography>
-                              <Typography className="text-xs text-sky-800 mt-1">
-                                Adjust staff pricing from the right panel
-                              </Typography>
-                            </Box>
-                          ))}
-                        </>
-                      )}
+                      {renderChildren(s, loading)}
                     </Box>
                   </Box>
                 </Collapse>

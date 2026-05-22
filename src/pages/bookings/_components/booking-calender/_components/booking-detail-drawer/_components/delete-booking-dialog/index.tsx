@@ -7,7 +7,7 @@ type DeleteBookingDialogProps = {
   isDeleting: boolean;
 };
 
-export default function DeleteBookingDialog({ open, onClose, onConfirm, isDeleting }: DeleteBookingDialogProps) {
+export default function DeleteBookingDialog({ open, onClose, onConfirm, isDeleting }: Readonly<DeleteBookingDialogProps>) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle className="font-semibold">Permanently Delete Booking?</DialogTitle>

@@ -28,7 +28,7 @@ export default function PredefinedCategoriesSection() {
         <Box className="flex flex-wrap gap-3">
           {predefinedCategoriesData.map((category, index) => (
             <Chip
-              key={index}
+              key={category.name}
               label={category.name}
               onClick={() => handleCategoryClick(category)}
               variant="outlined"

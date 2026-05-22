@@ -31,7 +31,7 @@ const STEP_FIELDS: Record<number, Array<keyof any>> = {
   2: ["active_hours"],
 };
 
-export default function StaffDialog({ open, onClose, mode, staff }: Props) {
+export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Props>) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(0);

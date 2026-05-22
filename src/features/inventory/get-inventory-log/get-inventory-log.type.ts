@@ -1,1 +1,1 @@
-export const getInventoryLogType = "inventory/getInventoryLog";
+export const getInventoryLogType = "inventory-log/getInventoryLog";

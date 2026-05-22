@@ -25,7 +25,7 @@ type FormValues = {
   duration: string | number;
 };
 
-export default function StaffServicePricingDialog({ open, onClose, context, onSave }: StaffServicePricingDialogProps) {
+export default function StaffServicePricingDialog({ open, onClose, context, onSave }: Readonly<StaffServicePricingDialogProps>) {
   const { staff_name, service_name, current } = context;
   const [loading, setLoading] = useState(false);
 

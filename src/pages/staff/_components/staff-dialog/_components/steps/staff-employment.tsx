@@ -6,7 +6,7 @@ import DatePicker from "../../../../../../components/form/date-picker";
 import FilePicker from "../../../../../../components/form/file-picker";
 import { uploadImages } from "../../../../../../features/upload-images/upload-images.service";
 
-export default function StaffEmployment({ control, disabled }: { control: Control<StaffForm>; disabled: boolean }) {
+export default function StaffEmployment({ control, disabled }: Readonly<{ control: Control<StaffForm>; disabled: boolean }>) {
   return (
     <Box className="flex flex-col gap-4">
       <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">

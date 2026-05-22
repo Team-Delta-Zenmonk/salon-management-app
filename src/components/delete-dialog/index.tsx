@@ -17,7 +17,7 @@ export default function DeleteDialog({
   itemName,
   isLoading,
   onDelete,
-}: DeleteDialogProps) {
+}: Readonly<DeleteDialogProps>) {
   return (
     <Dialog
       open={open}

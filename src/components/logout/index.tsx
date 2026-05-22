@@ -33,6 +33,7 @@ const LogoutButton = () => {
       startIcon={<LogoutIcon className="text-red-600!" />}
       onClick={handleLogout}
       className="flex-start border-2"
+      disabled={isLoading}
     >
       Logout
     </Button>

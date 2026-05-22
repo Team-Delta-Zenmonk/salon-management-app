@@ -26,7 +26,7 @@ export default function ListStaff({
   hasMore,
   fetchMoreStaff,
   searchQuery,
-}: ListStaffProps) {
+}: Readonly<ListStaffProps>) {
   const dispatch = useAppDispatch();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -50,7 +50,7 @@ export default function ListStaff({
     try {
       setDeleteLoading(true);
       await removeStaffService(selectedStaff.uuid);
-      
+
       await dispatch(
         listStaffAction({
           page: 1,
@@ -58,7 +58,7 @@ export default function ListStaff({
           search: searchQuery.trim() || undefined,
         })
       ).unwrap();
-      
+
       callSnack("Staff deleted successfully", "success");
     } catch (error: any) {
       callSnack(error?.response?.data?.message || "Failed to delete staff", "error");
@@ -127,15 +127,15 @@ export default function ListStaff({
                   >
                     <AssignmentTurnedInOutlinedIcon className="text-purple-800!" />
                   </IconButton>
-                  <IconButton 
-                    onClick={() => handleEdit(staff)} 
+                  <IconButton
+                    onClick={() => handleEdit(staff)}
                     title="Edit Staff"
                     disabled={deleteLoading}
                   >
                     <EditOutlined className="text-(--primary-800)!" />
                   </IconButton>
-                  <IconButton 
-                    onClick={() => handleDelete(staff)} 
+                  <IconButton
+                    onClick={() => handleDelete(staff)}
                     title="Delete Staff"
                     disabled={deleteLoading}
                   >
@@ -222,7 +222,7 @@ export default function ListStaff({
         isLoading={deleteLoading}
         onDelete={handleDeleteConfirm}
       />
-      
+
       {selectedStaff && (
         <AssignServicesDialog
           open={assignOpen}

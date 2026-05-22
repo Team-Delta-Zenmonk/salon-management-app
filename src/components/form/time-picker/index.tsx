@@ -35,10 +35,10 @@ const TimePicker = <T extends FieldValues>({
         control={control}
         render={({ field: { onChange, onBlur, value, ref }, fieldState: { error } }) => {
           const parsed: Dayjs | null = typeof value === "string" && value ? dayjs(value, "HH:mm") : null;
-          const pickerValue = parsed && parsed.isValid() ? parsed : null;
+          const pickerValue = parsed?.isValid() ? parsed : null;
 
           const handleTimeChange = (newValue: Dayjs | null) => {
-            if (!newValue || !newValue.isValid()) {
+            if (!newValue?.isValid()) {
               onChange("");
               handleChange?.();
               return;

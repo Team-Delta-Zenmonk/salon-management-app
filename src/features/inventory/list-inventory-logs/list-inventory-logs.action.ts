@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getTransactions } from "./list-inventory-logs.service";
+import { listInventoryLogsService } from "./list-inventory-logs.service";
 import { listInventoryLogsType } from "./list-inventory-logs.type";
 
 export const listInventoryLogsAction = createAsyncThunk(
@@ -9,13 +9,14 @@ export const listInventoryLogsAction = createAsyncThunk(
       page?: number;
       limit?: number;
       search?: string;
-      sortBy?: string;
+      sort_by?: string;
+      sort_order?: "ASC" | "DESC";
       item_uuid?: string;
-    } = {},
+    },
     thunkAPI
   ) => {
     try {
-      const res = await getTransactions(params);
+      const res = await listInventoryLogsService(params);
       return res;
     } catch (err: any) {
       return thunkAPI.rejectWithValue({

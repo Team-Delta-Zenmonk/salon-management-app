@@ -46,25 +46,11 @@ export default function VerifyEmail() {
     }
   });
 
-  if (!email) {
-    navigate("/unauthorized", { replace: true });
-    return null;
-  }
-
-  const handleResend = async () => {
-    try {
-      setResendLoading(true);
-      await resendOTP(email);
-      callSnack("OTP resent successfully", "success");
-      reset({ otp: "" });
-      setTimer(60);
-      setCanResend(false);
-    } catch (err: any) {
-      callSnack("Failed to resend OTP", "error");
-    } finally {
-      setResendLoading(false);
+  useEffect(() => {
+    if (!email) {
+      navigate("/unauthorized", { replace: true });
     }
-  };
+  }, [email, navigate]);
 
   useEffect(() => {
     if (timer > 0) {
@@ -76,6 +62,25 @@ export default function VerifyEmail() {
       setCanResend(true);
     }
   }, [timer]);
+
+  const handleResend = async () => {
+    try {
+      setResendLoading(true);
+      await resendOTP(email);
+      callSnack("OTP resent successfully", "success");
+      reset({ otp: "" });
+      setTimer(60);
+      setCanResend(false);
+    } catch {
+      callSnack("Failed to resend OTP", "error");
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  if (!email) {
+    return null;
+  }
 
   return (
     <FormProvider {...methods}>
@@ -96,7 +101,7 @@ export default function VerifyEmail() {
                   <Button
                     variant="outlined"
                     startIcon={
-                      <ShieldOutlinedIcon className={isLoading || resendLoading ? "text-gray-400" : "text-(--primary-900)!"}/>
+                      <ShieldOutlinedIcon className={isLoading || resendLoading ? "text-gray-400" : "text-(--primary-900)!"} />
                     }
                     onClick={handleResend}
                     disabled={isLoading || resendLoading}

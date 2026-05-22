@@ -52,7 +52,7 @@ const FilePicker = <T extends FieldValues>({
       if (inputRef.current) inputRef.current.value = "";
       return;
     }
-    
+
     try {
       const result = await uploadFn(file);
       onChange(result);
@@ -66,6 +66,50 @@ const FilePicker = <T extends FieldValues>({
   const clearFile = (onChange: (value: string | null) => void) => {
     onChange(null);
     if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const renderEndAdornment = (
+    loading: boolean,
+    value: any,
+    identifier: string,
+    disabled: boolean | undefined,
+    onChange: (value: string | null) => void,
+  ) => {
+    if (loading) {
+      return (
+        <CircularProgress
+          data-test-id={`loading-${identifier}`}
+          className={styles.adornmentLoading}
+          size={20}
+        />
+      );
+    }
+
+    if (value) {
+      return (
+        <IconButton
+          className={styles.adornmentIconButton}
+          data-test-id={`clear-btn-${identifier}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            clearFile(onChange);
+          }}
+          disabled={disabled}
+        >
+          <ClearIcon data-test-id={`clear-btn-icon-${identifier}`} />
+        </IconButton>
+      );
+    }
+
+    return (
+      <IconButton
+        disabled={disabled}
+        data-test-id={`upload-btn-${identifier}`}
+        className={styles.adornmentIconButton}
+      >
+        <UploadFileIcon data-test-id={`upload-btn-icon-${identifier}`} className="text-secondary-500" />
+      </IconButton>
+    );
   };
 
   return (
@@ -96,39 +140,11 @@ const FilePicker = <T extends FieldValues>({
               }}
               slotProps={{
                 root: {
-                  className: !value ? styles.inputRoot : "",
+                  className: value ? "" : styles.inputRoot,
                 },
               }}
               readOnly
-              endAdornment={
-                loading ? (
-                  <CircularProgress
-                    data-test-id={`loading-${identifier}`}
-                    className={styles.adornmentLoading}
-                    size={20}
-                  />
-                ) : value ? (
-                  <IconButton
-                    className={styles.adornmentIconButton}
-                    data-test-id={`clear-btn-${identifier}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearFile(onChange);
-                    }}
-                    disabled={disabled}
-                  >
-                    <ClearIcon data-test-id={`clear-btn-icon-${identifier}`} />
-                  </IconButton>
-                ) : (
-                  <IconButton
-                    disabled={disabled}
-                    data-test-id={`upload-btn-${identifier}`}
-                    className={styles.adornmentIconButton}
-                  >
-                    <UploadFileIcon data-test-id={`upload-btn-icon-${identifier}`} className="text-secondary-500" />
-                  </IconButton>
-                )
-              }
+              endAdornment={renderEndAdornment(loading, value, identifier, disabled, onChange)}
             />
             {error && (
               <FormHelperText data-test-id={`error-${identifier}`} error={Boolean(error)}>
@@ -140,7 +156,7 @@ const FilePicker = <T extends FieldValues>({
           <input
             ref={inputRef}
             data-test-id={`input-${identifier}`}
-            onChange={(e) => handleFileChange(e, (v) => onChange(v as any))}
+            onChange={(e) => handleFileChange(e, onChange)}
             accept={accept}
             hidden
             type="file"

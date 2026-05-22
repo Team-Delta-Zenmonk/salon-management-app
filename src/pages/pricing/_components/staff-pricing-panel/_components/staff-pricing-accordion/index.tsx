@@ -26,7 +26,7 @@ interface DialogContext {
   current?: StaffPricingType;
 }
 
-export default function StaffPricingAccordion({ selectedService }: { selectedService: ServiceType }) {
+export default function StaffPricingAccordion({ selectedService }: Readonly<{ selectedService: ServiceType }>) {
   const salonUUID = useAppSelector((state) => state.auth.salon.uuid);
   const staffState = useAppSelector((state: RootState) => state.staff);
   const staffs = staffState?.data ?? [];
@@ -52,7 +52,7 @@ export default function StaffPricingAccordion({ selectedService }: { selectedSer
         const rows = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
         const mapped = rows.map((r: any) => ({ staff_id: r.staff_id }));
         setServiceStaffMap((p) => ({ ...p, [serviceUuid]: mapped }));
-      } catch (e) {
+      } catch {
         callSnack("Failed to load staff for this service", "error");
         setServiceStaffMap((p) => ({ ...p, [serviceUuid]: [] }));
       } finally {
@@ -75,7 +75,7 @@ export default function StaffPricingAccordion({ selectedService }: { selectedSer
       const res = await listStaffServices(staff_uuid);
       const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
       setStaffServicesMap((p) => ({ ...p, [staff_uuid]: rows }));
-    } catch (e) {
+    } catch {
       callSnack("Failed to load staff pricing", "error");
       setStaffServicesMap((p) => ({ ...p, [staff_uuid]: [] }));
     } finally {

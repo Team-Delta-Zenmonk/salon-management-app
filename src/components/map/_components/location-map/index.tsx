@@ -23,7 +23,7 @@ function ClickHandler({ onClick }: { onClick?: (lat: number, lng: number) => voi
   return null;
 }
 
-export default function MapPicker({ value, onChange, height = 300, disabled }: MapPickerProps) {
+export default function MapPicker({ value, onChange, height = 300, disabled }: Readonly<MapPickerProps>) {
   const [position, setPosition] = useState<LatLngExpression | null>(
     value ? [value.lat, value.lng] : null
   );
@@ -36,7 +36,7 @@ export default function MapPicker({ value, onChange, height = 300, disabled }: M
     onChange?.(newPos);
   };
 
-  const center: LatLngExpression = position ?? [28.6139, 77.2090]; // Delhi
+  const center: LatLngExpression = position ?? [28.6139, 77.209];
 
   return (
     <MapContainer

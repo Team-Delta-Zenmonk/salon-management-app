@@ -18,7 +18,7 @@ const OTPInput = <T extends FieldValues>({
   const handleChange = (index: number, value: string, currentOtp: string, onChange: (value: string) => void) => {
     if (value && !/^\d$/.test(value)) return;
 
-    const otpArray = currentOtp ? currentOtp.split("") : Array(length).fill("");
+    const otpArray = currentOtp ? currentOtp.split("") : new Array(length).fill("");
     otpArray[index] = value;
     onChange(otpArray.join(""));
     if (value && index < length - 1) {
@@ -29,7 +29,7 @@ const OTPInput = <T extends FieldValues>({
   const handleKeyDown = (index: number, e: any, currentOtp: string, onChange: (value: string) => void) => {
     if (e.key === "Backspace") {
       e.preventDefault();
-      const otpArray = currentOtp ? currentOtp.split("") : Array(length).fill("");
+      const otpArray = currentOtp ? currentOtp.split("") : new Array(length).fill("");
 
       if (otpArray[index]) {
         otpArray[index] = "";
@@ -54,7 +54,7 @@ const OTPInput = <T extends FieldValues>({
 
     if (!/^\d+$/.test(pastedData)) return;
 
-    const otpArray = Array(length).fill("");
+    const otpArray = new Array(length).fill("");
     pastedData.split("").forEach((char, index) => {
       if (index < length) {
         otpArray[index] = char;
@@ -71,14 +71,14 @@ const OTPInput = <T extends FieldValues>({
       name={name}
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => {
-        const otpValues = value ? value.split("") : Array(length).fill("");
+        const otpValues = value ? value.split("") : new Array(length).fill("");
 
         return (
           <Box className={styles.otpContainer}>
             <Box className={styles.otpInputWrapper}>
               {Array.from({ length }).map((_, index) => (
                 <MuiTextField
-                  key={index}
+                  key={`otp-input-${index}`}
                   inputRef={(el) => (inputRefs.current[index] = el)}
                   type="text"
                   inputMode="numeric"

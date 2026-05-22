@@ -53,9 +53,9 @@ export const InputComponent = (props: InputComponentProps) => {
           input: {
             ...(startAdornment || endAdornment
               ? {
-                  startAdornment: startAdornment && <InputAdornment position="start">{startAdornment}</InputAdornment>,
-                  endAdornment: endAdornment && <InputAdornment position="end">{endAdornment}</InputAdornment>,
-                }
+                startAdornment: startAdornment && <InputAdornment position="start">{startAdornment}</InputAdornment>,
+                endAdornment: endAdornment && <InputAdornment position="end">{endAdornment}</InputAdornment>,
+              }
               : {}),
           },
           formHelperText: {
@@ -67,14 +67,14 @@ export const InputComponent = (props: InputComponentProps) => {
           const cleanedValue = e.target.value
             .split("\n")
             .reduce((acc, line, index) => {
-              if (line.trim() === "" && (index === 0 || acc[acc.length - 1] === "")) {
+              if (line.trim() === "" && (index === 0 || acc.at(-1) === "")) {
                 return acc;
               }
               acc.push(line.replace(/^\s+/, ""));
               return acc;
             }, [] as string[])
             .join("\n")
-            .replace(/[ \t]{2,}/g, " ");
+            .replaceAll(/[ \t]{2,}/g, " ");
           if (cleanedValue === value) return;
           onChange(cleanedValue);
         }}

@@ -46,10 +46,13 @@ export default function BookingPage() {
   const staffOptions = useMemo(
     () => [
       { label: "All Staff", value: ALL_STAFF_VALUE },
-      ...staff.map((s) => ({
-        label: `${s.first_name}${s.last_name ? ` ${s.last_name}` : ""}`,
-        value: s.uuid,
-      })),
+      ...staff.map((s) => {
+        const lastName = s.last_name ? ` ${s.last_name}` : "";
+        return {
+          label: `${s.first_name}${lastName}`,
+          value: s.uuid,
+        };
+      }),
     ],
     [staff],
   );

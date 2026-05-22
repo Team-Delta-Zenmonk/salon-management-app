@@ -35,7 +35,7 @@ export default function BookingDetailsDrawer({
   onClose,
   getStatusColor,
   onCancel,
-}: BookingDetailsDrawerProps) {
+}: Readonly<BookingDetailsDrawerProps>) {
   const dispatch = useAppDispatch();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -155,7 +155,7 @@ export default function BookingDetailsDrawer({
               Services ({booking?.booking_services?.length ?? 0})
             </Typography>
             {(booking?.booking_services ?? []).map((bs: any, idx: number) => (
-              <Box key={idx} className="rounded-xl border border-gray-200 p-3 shadow-sm">
+              <Box key={bs.service?.uuid ?? bs.service?.name} className="rounded-xl border border-gray-200 p-3 shadow-sm">
                 <Box className="flex items-center justify-between">
                   <Typography variant="body1" fontWeight="fontWeightMedium" className="text-gray-900">
                     {bs.service?.name || "Unknown Service"}

@@ -30,7 +30,7 @@ interface FormValues {
   service_uuids: string[];
 }
 
-export default function AssignServicesDialog({ open, onClose, staff, onAssigned }: AssignServicesDialogProps) {
+export default function AssignServicesDialog({ open, onClose, staff, onAssigned }: Readonly<AssignServicesDialogProps>) {
   const dispatch = useAppDispatch();
 
   const methods = useForm<FormValues>({
