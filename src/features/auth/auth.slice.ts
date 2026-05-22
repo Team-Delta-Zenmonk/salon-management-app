@@ -18,6 +18,7 @@ export interface Salon {
   logo?: string;
   type?: string;
   is_onboarded: boolean;
+  stripe_account_id?: string;
   created_at: string;
   updated_at: string;
 }

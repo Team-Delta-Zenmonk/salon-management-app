@@ -1,5 +1,15 @@
 import ContentCutIcon from "@mui/icons-material/ContentCut";
-import { Box, Typography } from "@mui/material";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { Box, Typography, Button } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { onboardStripeAction } from "../../features/stripe/onboard-stripe/onboard-stripe.action";
+import { getStripeDashboardLinkAction } from "../../features/stripe/get-dashboard-link/get-dashboard-link.action";
+import type { RootState } from "../../store/store";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Alert } from "../../components/alert";
+import { getSalonProfileAction } from "../../features/auth/profile/get-salon-profile/getSalonProfile.action";
 
 const stats = [
   {
@@ -36,8 +46,85 @@ const recentBookings = [
 ];
 
 export default function Dashboard() {
+  const dispatch = useAppDispatch();
+  const { salon } = useAppSelector((state: RootState) => state.auth);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("stripe_onboarded") === "true" && salon?.uuid) {
+      dispatch(getSalonProfileAction(salon.uuid));
+      searchParams.delete("stripe_onboarded");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, dispatch, setSearchParams, salon?.uuid]);
+
+  const handleStripeConnect = async () => {
+    try {
+      setIsConnecting(true);
+      const res = await dispatch(onboardStripeAction()).unwrap();
+      if (res?.message?.url) {
+        window.location.href = res.message.url;
+      }
+    } catch (error) {
+      console.error("Failed to connect stripe:", error);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const handleViewDashboard = async () => {
+    try {
+      const res = await dispatch(getStripeDashboardLinkAction()).unwrap();
+      if (res?.message?.url) {
+        window.open(res.message.url, "_blank");
+      }
+    } catch (error) {
+      console.error("Failed to fetch dashboard:", error);
+    }
+  };
+
   return (
     <Box className="space-y-8 flex flex-col">
+      {!salon?.stripe_account_id ? (
+        <Alert
+          variant="error"
+          icon={<ErrorOutlineIcon className="text-red-800!" />}
+          title="Action Required: Setup Payouts"
+          action={
+            <Button
+              variant="contained"
+              color="error"
+              className="w-full md:w-auto"
+              onClick={handleStripeConnect}
+              disabled={isConnecting}
+            >
+              {isConnecting ? "Redirecting..." : "Set up Bank Account (Stripe)"}
+            </Button>
+          }
+        >
+          Your salon is currently hidden from customers. Set up payouts to start accepting bookings.
+        </Alert>
+      ) : (
+        <Alert
+          variant="success"
+          icon={<CheckCircleOutlineIcon className="text-green-800!" />}
+          title="Payouts Enabled"
+          action={
+            <Button
+              variant="contained"
+              color="success"
+              className="w-full md:w-auto text-white shadow-sm"
+              onClick={handleViewDashboard}
+            >
+              View Stripe Earnings
+            </Button>
+          }
+        >
+          Your salon is visible and ready to accept payments.
+        </Alert>
+      )}
+
       <Box>
         <Typography className="text-(--primary-900) mb-2">Dashboard Overview</Typography>
         <Typography className="">Welcome back! Here's what's happening today.</Typography>
@@ -75,7 +162,9 @@ export default function Dashboard() {
                 <Typography className="text-(--primary-900)">{booking.time}</Typography>
                 <span
                   className={`inline-block px-3 py-1 rounded-full ${
-                    booking.status === "Confirmed" ? "bg-(--primary-900) text-white" : "bg-blue-100 text-(--primary-900)"
+                    booking.status === "Confirmed"
+                      ? "bg-(--primary-900) text-white"
+                      : "bg-blue-100 text-(--primary-900)"
                   }`}
                 >
                   {booking.status}
