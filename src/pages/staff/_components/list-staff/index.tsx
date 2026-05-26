@@ -2,6 +2,8 @@ import { Box, Typography, Avatar, Chip, IconButton, Divider } from "@mui/materia
 import { EditOutlined, DeleteOutlined, PhoneOutlined, EmailOutlined, CalendarTodayOutlined } from "@mui/icons-material";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useState } from "react";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import type { Staff } from "../../../../features/staff/staff.slice";
 import { useAppDispatch } from "../../../../store/hooks";
 import StaffDialog from "../staff-dialog";
@@ -11,6 +13,16 @@ import { callSnack } from "../../../../components/snackbar";
 import { removeStaffService } from "../../../../features/staff/remove-staff/remove-staff.service";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import AssignServicesDialog from "../assign-services-dialog";
+
+dayjs.extend(customParseFormat);
+
+const formatDisplayDate = (date: string) => {
+  const parsed = dayjs(date, "DD-MM-YYYY", true);
+  if (parsed.isValid()) return parsed.format("DD MMM YYYY");
+  const fallback = dayjs(date);
+  if (fallback.isValid()) return fallback.format("DD MMM YYYY");
+  return "—";
+};
 
 interface ListStaffProps {
   staffs: Staff[];
@@ -177,7 +189,7 @@ export default function ListStaff({
                     <Typography className="text-gray-600 text-sm font-medium">Joined</Typography>
                   </Box>
                   <Typography className="text-gray-900 fontWeightMedium">
-                    {new Date(staff.joining_date).toLocaleDateString()}
+                    {formatDisplayDate(staff.joining_date)}
                   </Typography>
                 </Box>
 
@@ -185,7 +197,7 @@ export default function ListStaff({
                   <Box className="flex items-center justify-between p-3 bg-red-50/50 rounded-xl">
                     <Typography className="text-gray-600 text-sm font-medium">End Date</Typography>
                     <Typography className="text-red-600 fontWeightMedium">
-                      {new Date(staff.end_date).toLocaleDateString()}
+                      {formatDisplayDate(staff.end_date)}
                     </Typography>
                   </Box>
                 )}

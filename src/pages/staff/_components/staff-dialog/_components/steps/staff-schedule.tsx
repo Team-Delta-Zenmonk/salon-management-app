@@ -19,13 +19,13 @@ export default function StaffSchedule({
 
   const setDayClosed = (day: DayKey, closed: boolean) => {
     if (closed) {
-      setValue(`active_hours.${day}` as any, null, { shouldDirty: true, shouldValidate: true });
+      setValue(`active_hours.${day}` as any, null, { shouldDirty: true });
       return;
     }
     setValue(
       `active_hours.${day}` as any,
       { start_time: "", end_time: "" },
-      { shouldDirty: true, shouldValidate: true }
+      { shouldDirty: true }
     );
   };
 

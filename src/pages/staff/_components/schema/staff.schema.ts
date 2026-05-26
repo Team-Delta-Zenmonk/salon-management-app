@@ -2,14 +2,18 @@ import * as z from "zod";
 import { CloudinaryFileSchema } from "../../../../common/cloudinary.schema";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { GENDER } from "../../../../common/enums/gender.enum";
 
-const parseDateString = (val: any) => {
-  if (typeof val === "string" && val.includes("-")) {
-    const parts = val.split("-");
-    if (parts.length === 3 && parts[2].length === 4) {
-      return dayjs(`${parts[2]}-${parts[1]}-${parts[0]}`);
-    }
+dayjs.extend(customParseFormat);
+
+const DATE_FORMAT = "DD-MM-YYYY";
+
+const parseDateString = (val: any): dayjs.Dayjs => {
+  if (typeof val === "string" && val) {
+    const parsed = dayjs(val, DATE_FORMAT, true);
+    if (parsed.isValid()) return parsed;
+    return dayjs(val);
   }
   return dayjs(val);
 };
@@ -23,6 +27,18 @@ const BusinessDaySchema = z
       message: "Valid time (HH:MM) required",
     }),
   })
+  .refine(
+    (data) => {
+      if (!data.start_time || !data.end_time) return true;
+      const [startHours, startMinutes] = data.start_time.split(":").map(Number);
+      const [endHours, endMinutes] = data.end_time.split(":").map(Number);
+      return endHours * 60 + endMinutes > startHours * 60 + startMinutes;
+    },
+    {
+      message: "End time must be after start time",
+      path: ["end_time"],
+    }
+  )
   .nullable()
   .optional();
 
