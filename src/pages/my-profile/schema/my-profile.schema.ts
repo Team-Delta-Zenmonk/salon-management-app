@@ -4,6 +4,14 @@ import { VALIDATE_PATTERN } from "../../../common/validate-pattern";
 const BusinessDaySchema = z.object({
   start_time: z.string().min(1, "Required"),
   end_time: z.string().min(1, "Required"),
+}).refine((data) => {
+  if (!data.start_time || !data.end_time) return true;
+  const [startHours, startMinutes] = data.start_time.split(':').map(Number);
+  const [endHours, endMinutes] = data.end_time.split(':').map(Number);
+  return (endHours * 60 + endMinutes) > (startHours * 60 + startMinutes);
+}, {
+  message: "End time must be after start time",
+  path: ["end_time"]
 }).nullable();
 
 export const MyProfileSchema = z.object({

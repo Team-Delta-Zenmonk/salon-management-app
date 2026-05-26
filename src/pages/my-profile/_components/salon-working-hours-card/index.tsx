@@ -132,7 +132,7 @@ const DayEditRow = ({ dayKey, label, isOpen, control, onToggle }: { dayKey: stri
     </Box>
 
     {isOpen && (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <TimePicker
             name={`business_hours.${dayKey}.start_time` as any}
@@ -141,7 +141,7 @@ const DayEditRow = ({ dayKey, label, isOpen, control, onToggle }: { dayKey: stri
             placeholder="Start"
           />
         </Box>
-        <Typography color="text.secondary">-</Typography>
+        <Typography color="text.secondary" sx={{ mt: 1.5 }}>-</Typography>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <TimePicker
             name={`business_hours.${dayKey}.end_time` as any}

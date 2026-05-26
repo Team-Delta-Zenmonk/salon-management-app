@@ -15,8 +15,8 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const { salon } = useAppSelector((state: RootState) => state.auth);
 
   return (
-    <AppBar position="static" elevation={0} color="transparent">
-      <Toolbar disableGutters className="min-h-14">
+    <AppBar position="static" elevation={0} color="transparent" className="border-b border-gray-200 h-[72px] justify-center">
+      <Toolbar disableGutters className="px-4">
         {!isDesktop && onMenuClick && (
           <IconButton edge="start" onClick={onMenuClick} className="mr-2" aria-label="open sidebar">
             <MenuIcon />

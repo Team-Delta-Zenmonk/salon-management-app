@@ -21,8 +21,8 @@ const Sidebar = ({ drawerWidth, mobileOpen, onToggleSidebar, isDesktop }: Sideba
   const { salon } = useAppSelector((state: RootState) => state.auth);
   const drawerContent = (
     <Box className="flex flex-col h-full">
-      <Box className="border-b border-gray-200 p-3">
-        <Stack direction="row" spacing={2} alignItems="center">
+      <Box className="border-b border-gray-200 h-[72px] flex items-center px-4 shrink-0">
+        <Stack direction="row" spacing={2} alignItems="center" className="w-full">
           <Box className="flex items-center justify-center w-10 h-10 rounded-full bg-(--primary-900)!">
             <ContentCutIcon className="text-white!" />
           </Box>
