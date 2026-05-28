@@ -287,7 +287,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
             <Button onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" form="edit-product-form" disabled={loading}>
+            <Button type="submit" form="edit-product-form" disabled={loading} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined}>
               {loading ? "Saving..." : "Save"}
             </Button>
           </DialogActions>

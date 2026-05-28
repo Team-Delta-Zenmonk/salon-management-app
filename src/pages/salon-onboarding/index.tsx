@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
-import { Box, Button, LinearProgress } from "@mui/material";
+import { Box, Button, LinearProgress, CircularProgress } from "@mui/material";
 import OwnerStep from "./_components/onboarding-steps/owner-step";
 import SalonStep from "./_components/onboarding-steps/salon-step";
 import AddressStep from "./_components/onboarding-steps/address-step";
@@ -111,8 +111,8 @@ export default function SalonOnboarding() {
             <Button variant="outlined" disabled={activeStep === 0} onClick={handleBack}>
               Back
             </Button>
-            <Button variant="contained" onClick={handleNext} disabled={isLoading} loading={isLoading}>
-              {activeStep === TOTAL_STEPS - 1 ? "Finish" : "Next"}
+            <Button variant="contained" onClick={handleNext} disabled={isLoading} startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+              {activeStep === TOTAL_STEPS - 1 ? (isLoading ? "Finishing..." : "Finish") : (isLoading ? "Processing..." : "Next")}
             </Button>
           </Box>
         </Box>

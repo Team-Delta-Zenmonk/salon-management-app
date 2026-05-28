@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
 import { persistor } from "../../store/store";
@@ -30,12 +30,12 @@ const LogoutButton = () => {
       variant="text"
       color="error"
       fullWidth
-      startIcon={<LogoutIcon className="text-red-600!" />}
+      startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <LogoutIcon className="text-red-600!" />}
       onClick={handleLogout}
       className="flex-start border-2"
       disabled={isLoading}
     >
-      Logout
+      {isLoading ? "Logging out..." : "Logout"}
     </Button>
   );
 };

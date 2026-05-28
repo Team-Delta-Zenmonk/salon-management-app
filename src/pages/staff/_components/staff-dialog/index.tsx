@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, CircularProgress } from "@mui/material";
 import clsx from "clsx";
 import { FormProvider, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
@@ -171,8 +171,8 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
                 Next
               </Button>
             ) : (
-              <Button type="button" variant="contained" onClick={() => onSubmit()} disabled={isLoading}>
-                {mode === "create" ? "Create" : "Save"}
+              <Button type="button" variant="contained" onClick={() => onSubmit()} disabled={isLoading} startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+                {mode === "create" ? (isLoading ? "Creating..." : "Create") : (isLoading ? "Saving..." : "Save")}
               </Button>
             )}
           </DialogActions>

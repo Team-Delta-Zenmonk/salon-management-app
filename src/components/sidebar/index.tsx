@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import { navigationItems } from "../../layouts/navigation";
 import CustomDrawer from "../drawer";
@@ -19,6 +19,8 @@ type SidebarProps = {
 
 const Sidebar = ({ drawerWidth, mobileOpen, onToggleSidebar, isDesktop }: SidebarProps) => {
   const { salon } = useAppSelector((state: RootState) => state.auth);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
   const drawerContent = (
     <Box className="flex flex-col h-full">
       <Box className="border-b border-gray-200 h-[72px] flex items-center px-4 shrink-0">
@@ -27,8 +29,14 @@ const Sidebar = ({ drawerWidth, mobileOpen, onToggleSidebar, isDesktop }: Sideba
             <ContentCutIcon className="text-white!" />
           </Box>
           <Box className="min-w-0 flex-1">
-            <Tooltip title={salon?.owner_name || "Salon Manager"} disableHoverListener={!shouldShowTooltip(salon?.owner_name || "Salon Manager", "160px")}>
-              <Typography variant="subtitle1" fontWeight={600} color="primary" className="truncate" sx={{ textTransform: "capitalize" }}>
+            <Tooltip title={salon?.owner_name || "Salon Manager"} open={tooltipOpen} onClose={() => setTooltipOpen(false)} disableHoverListener>
+              <Typography
+                onMouseEnter={(e) => {
+                  if (shouldShowTooltip(e.currentTarget)) setTooltipOpen(true);
+                }}
+                onMouseLeave={() => setTooltipOpen(false)}
+                variant="subtitle1" fontWeight={600} color="primary" className="truncate" sx={{ textTransform: "capitalize" }}
+              >
                 {salon?.owner_name || "Salon Manager"}
               </Typography>
             </Tooltip>

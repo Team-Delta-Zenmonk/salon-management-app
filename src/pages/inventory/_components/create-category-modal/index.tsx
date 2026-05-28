@@ -8,6 +8,7 @@ import {
   Box,
   Typography,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import clsx from "clsx";
@@ -119,7 +120,7 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
           <Button onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button type="submit" form="create-category-form" disabled={loading}>
+          <Button type="submit" form="create-category-form" disabled={loading} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined}>
             {loading ? "Creating..." : "Create"}
           </Button>
         </DialogActions>

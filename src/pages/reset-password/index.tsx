@@ -2,7 +2,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ResetPasswordSchema, type ResetPasswordForm } from "./schema/reset-password.schema";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, CircularProgress } from "@mui/material";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import PasswordField from "../../components/form/password-field";
@@ -76,8 +76,8 @@ export default function ResetPassword() {
               </Box>
             </Box>
             <Box className="w-full flex items-center justify-center">
-              <Button variant="contained" disabled={isLoading} fullWidth type="submit" loading={isLoading}>
-                Reset Password
+              <Button variant="contained" disabled={isLoading} fullWidth type="submit" startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+                {isLoading ? "Resetting..." : "Reset Password"}
               </Button>
             </Box>
             <Box className="flex justify-center items-center">

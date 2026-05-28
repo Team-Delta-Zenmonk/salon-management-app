@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -19,6 +19,102 @@ import type { InventoryTransaction } from "../../../../features/inventory/invent
 import styles from "../inventory-cards.module.scss";
 import { TransactionCard } from "../transaction-card";
 import { shouldShowTooltip } from "../../../../common/shouldShowTooltip";
+
+/** Row component so each row gets its own tooltip state */
+const TransactionTableRow: React.FC<{
+  item: InventoryTransaction;
+  onRowClick?: (item: any) => void;
+}> = ({ item, onRowClick }) => {
+  const [nameTooltipOpen, setNameTooltipOpen] = useState(false);
+  const [variantTooltipOpen, setVariantTooltipOpen] = useState(false);
+
+  const variantText = (item.item?.variant_name && item.item?.unit)
+    ? `${item.item.variant_name} ${item.item.unit}`
+    : "-";
+
+  return (
+    <TableRow
+      hover
+      onClick={() => onRowClick?.(item)}
+      sx={{ cursor: onRowClick ? "pointer" : "default" }}
+    >
+      <TableCell sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1 }}>
+        <Tooltip
+          title={item.item.name}
+          open={nameTooltipOpen}
+          onClose={() => setNameTooltipOpen(false)}
+          disableHoverListener
+          arrow
+          placement="top"
+        >
+          <Box
+            onMouseEnter={(e) => {
+              if (shouldShowTooltip(e.currentTarget)) setNameTooltipOpen(true);
+            }}
+            onMouseLeave={() => setNameTooltipOpen(false)}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              fontWeight: "semiBold"
+            }}
+          >
+            {item.item.name}
+          </Box>
+        </Tooltip>
+      </TableCell>
+      <TableCell>
+        <Tooltip
+          title={variantText}
+          open={variantTooltipOpen}
+          onClose={() => setVariantTooltipOpen(false)}
+          disableHoverListener
+          arrow
+          placement="top"
+        >
+          <Box
+            onMouseEnter={(e) => {
+              if (variantText !== "-" && shouldShowTooltip(e.currentTarget)) setVariantTooltipOpen(true);
+            }}
+            onMouseLeave={() => setVariantTooltipOpen(false)}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {variantText}
+          </Box>
+        </Tooltip>
+      </TableCell>
+      <TableCell>
+        <Typography variant="paragraphMd">
+          {item.ordered_date ? dayjs(item.ordered_date).format("MMM DD, YYYY") : "N/A"}
+        </Typography>
+      </TableCell>
+      <TableCell>
+        <Typography variant="paragraphMd">
+          {item.received_date ? dayjs(item.received_date).format("MMM DD, YYYY") : "N/A"}
+        </Typography>
+      </TableCell>
+      <TableCell align="right">
+        <Typography variant="paragraphMd">{item.ordered_quantity}</Typography>
+      </TableCell>
+      <TableCell align="right">
+        <Typography variant="paragraphMd">{item.received_quantity}</Typography>
+      </TableCell>
+      <TableCell align="right">
+        <Typography variant="paragraphMd">{item.damaged_quantity}</Typography>
+      </TableCell>
+      <TableCell align="right">
+        <Typography variant="paragraphMd">{item.returned_quantity}</Typography>
+      </TableCell>
+      <TableCell align="right">
+        <Typography variant="paragraphMd">₹{Number.parseFloat(item.bill_amount || "0").toFixed(2)}</Typography>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 interface TransactionsTableProps {
   data: InventoryTransaction[];
@@ -74,82 +170,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
               </TableHead>
               <TableBody>
                 {data.map((item) => (
-                  <TableRow
-                    key={item.uuid}
-                    hover
-                    onClick={() => onRowClick?.(item)}
-                    sx={{ cursor: onRowClick ? "pointer" : "default" }}
-                  >
-                    <TableCell sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1 }}>
-                      <Tooltip
-                        title={item.item.name}
-                        disableHoverListener={!shouldShowTooltip(item.item.name, "200px")}
-                        arrow
-                        placement="top"
-                      >
-                        <Box
-                          sx={{
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            fontWeight: "semiBold"
-                          }}
-                        >
-                          {item.item.name}
-                        </Box>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>
-                      {(() => {
-                        const variantText = (item.item?.variant_name && item.item?.unit)
-                          ? `${item.item.variant_name} ${item.item.unit}`
-                          : "-";
-                        return (
-                          <Tooltip
-                            title={variantText}
-                            disableHoverListener={variantText === "-" || !shouldShowTooltip(variantText, "100px")}
-                            arrow
-                            placement="top"
-                          >
-                            <Box
-                              sx={{
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap"
-                              }}
-                            >
-                              {variantText}
-                            </Box>
-                          </Tooltip>
-                        );
-                      })()}
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="paragraphMd">
-                        {item.ordered_date ? dayjs(item.ordered_date).format("MMM DD, YYYY") : "N/A"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="paragraphMd">
-                        {item.received_date ? dayjs(item.received_date).format("MMM DD, YYYY") : "N/A"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Typography variant="paragraphMd">{item.ordered_quantity}</Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Typography variant="paragraphMd">{item.received_quantity}</Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Typography variant="paragraphMd">{item.damaged_quantity}</Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Typography variant="paragraphMd">{item.returned_quantity}</Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Typography variant="paragraphMd">₹{Number.parseFloat(item.bill_amount || "0").toFixed(2)}</Typography>
-                    </TableCell>
-                  </TableRow>
+                  <TransactionTableRow key={item.uuid} item={item} onRowClick={onRowClick} />
                 ))}
                 {data.length === 0 && (
                   <TableRow>

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, FormControlLabel, Switch } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, FormControlLabel, Switch, CircularProgress } from "@mui/material";
 import clsx from "clsx";
 import { FormProvider, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
@@ -329,8 +329,12 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
             <Button onClick={onClose} disabled={isLoading}>
               Back
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {mode === "create" ? "Create" : "Save"}
+            <Button 
+              type="submit" 
+              disabled={isLoading} 
+              startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}
+            >
+              {mode === "create" ? (isLoading ? "Creating..." : "Create") : (isLoading ? "Saving..." : "Save")}
             </Button>
           </DialogActions>
         </form>

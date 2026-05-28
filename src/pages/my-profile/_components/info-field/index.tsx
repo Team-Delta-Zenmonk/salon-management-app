@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Typography, Tooltip } from "@mui/material";
 import type { Control } from "react-hook-form";
 import TextField from "../../../../components/form/textfield";
@@ -26,6 +26,8 @@ const InfoField: React.FC<InfoFieldProps> = ({
   label, value, name, rules, isEditing, control,
   type = "text", disabled = false, fullWidth = false, multiline = false, rows = 1, placeholder, maxLength, pattern
 }) => {
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
   const renderValue = () => {
     if (isEditing) {
       return (
@@ -61,8 +63,12 @@ const InfoField: React.FC<InfoFieldProps> = ({
     }
 
     return (
-      <Tooltip title={value || "-"} disableHoverListener={!shouldShowTooltip(value || "-", "250px")}>
+      <Tooltip title={value || "-"} open={tooltipOpen} onClose={() => setTooltipOpen(false)} disableHoverListener>
         <Typography
+          onMouseEnter={(e) => {
+            if (shouldShowTooltip(e.currentTarget)) setTooltipOpen(true);
+          }}
+          onMouseLeave={() => setTooltipOpen(false)}
           variant="paragraphLg"
           color="text.primary"
           sx={{ fontWeight: "medium", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}

@@ -58,6 +58,49 @@ interface StockTableProps {
   fetchMore: () => void;
 }
 
+/** Wrapper that uses the controlled tooltip pattern for text overflow */
+const OverflowTooltipText: React.FC<{
+  text: string;
+  typographyProps?: Record<string, any>;
+}> = ({ text, typographyProps = {} }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <Tooltip title={text} open={open} onClose={() => setOpen(false)} disableHoverListener>
+      <Typography
+        onMouseEnter={(e) => {
+          if (shouldShowTooltip(e.currentTarget)) setOpen(true);
+        }}
+        onMouseLeave={() => setOpen(false)}
+        {...typographyProps}
+      >
+        {text}
+      </Typography>
+    </Tooltip>
+  );
+};
+
+/** Wrapper for Chip with overflow tooltip */
+const OverflowTooltipChip: React.FC<{
+  label: string;
+  chipSx?: Record<string, any>;
+}> = ({ label, chipSx = {} }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <Tooltip title={label} open={open} onClose={() => setOpen(false)} disableHoverListener>
+      <Chip
+        onMouseEnter={(e) => {
+          const labelEl = e.currentTarget.querySelector('.MuiChip-label') as HTMLElement;
+          if (shouldShowTooltip(labelEl)) setOpen(true);
+        }}
+        onMouseLeave={() => setOpen(false)}
+        label={label}
+        size="small"
+        sx={chipSx}
+      />
+    </Tooltip>
+  );
+};
+
 export const StockTable: React.FC<StockTableProps> = ({
   data,
   loading,
@@ -125,7 +168,7 @@ export const StockTable: React.FC<StockTableProps> = ({
           {data.map((item) => {
             const brandLabel = item.brand || "";
             const categoryLabel = item.category?.name || "";
-            const variantLabel = item.variant_name || "";
+            const variantLabel = [item.variant_name, item.unit].filter(Boolean).join(" ");
 
             return (
               <div
@@ -144,30 +187,30 @@ export const StockTable: React.FC<StockTableProps> = ({
 
                   <div className={styles.stockInfo} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                     <Box sx={{ minWidth: 0, width: "100%", display: "flex", flexDirection: "column" }}>
-                      <Tooltip title={item.name} disableHoverListener={!shouldShowTooltip(item.name, "180px")}>
-                        <Typography
-                          variant="h6"
-                          fontWeight="bold"
-                          color="secondary.900"
-                          sx={{
+                      <OverflowTooltipText
+                        text={item.name}
+                        typographyProps={{
+                          variant: "h6",
+                          fontWeight: "bold",
+                          color: "secondary.900",
+                          sx: {
                             textTransform: "capitalize",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
                             lineHeight: 1.2,
                             width: "100%",
-                          }}
-                        >
-                          {item.name}
-                        </Typography>
-                      </Tooltip>
+                          },
+                        }}
+                      />
                       {brandLabel && (
-                        <Tooltip title={brandLabel} disableHoverListener={!shouldShowTooltip(brandLabel, "180px")}>
-                          <Typography
-                            variant="paragraphSm"
-                            color="secondary.500"
-                            fontWeight="semiBold"
-                            sx={{
+                        <OverflowTooltipText
+                          text={brandLabel}
+                          typographyProps={{
+                            variant: "paragraphSm",
+                            color: "secondary.500",
+                            fontWeight: "semiBold",
+                            sx: {
                               textTransform: "uppercase",
                               letterSpacing: 0.5,
                               overflow: "hidden",
@@ -175,53 +218,45 @@ export const StockTable: React.FC<StockTableProps> = ({
                               whiteSpace: "nowrap",
                               mt: "2px",
                               width: "100%",
-                            }}
-                          >
-                            {brandLabel}
-                          </Typography>
-                        </Tooltip>
+                            },
+                          }}
+                        />
                       )}
                     </Box>
                     <Box sx={{ display: "flex", gap: "8px", flexWrap: "wrap", width: "100%", mt: 1 }}>
                       {categoryLabel && (
-                        <Tooltip title={categoryLabel} disableHoverListener={!shouldShowTooltip(categoryLabel, "120px")}>
-                          <Chip
-                            label={categoryLabel}
-                            size="small"
-                            sx={{
-                              bgcolor: "info.50",
-                              color: "info.700",
-                              typography: "paragraphTable",
-                              maxWidth: "120px",
-                              "& .MuiChip-label": {
-                                px: 1,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              },
-                            }}
-                          />
-                        </Tooltip>
+                        <OverflowTooltipChip
+                          label={categoryLabel}
+                          chipSx={{
+                            bgcolor: "info.50",
+                            color: "info.700",
+                            typography: "paragraphTable",
+                            maxWidth: "120px",
+                            "& .MuiChip-label": {
+                              px: 1,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            },
+                          }}
+                        />
                       )}
                       {variantLabel && (
-                        <Tooltip title={variantLabel} disableHoverListener={!shouldShowTooltip(variantLabel, "100px")}>
-                          <Chip
-                            label={variantLabel}
-                            size="small"
-                            sx={{
-                              bgcolor: "info.50",
-                              color: "info.700",
-                              typography: "paragraphSm",
-                              maxWidth: "100px",
-                              "& .MuiChip-label": {
-                                px: 1,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              },
-                            }}
-                          />
-                        </Tooltip>
+                        <OverflowTooltipChip
+                          label={variantLabel}
+                          chipSx={{
+                            bgcolor: "info.50",
+                            color: "info.700",
+                            typography: "paragraphSm",
+                            maxWidth: "100px",
+                            "& .MuiChip-label": {
+                              px: 1,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            },
+                          }}
+                        />
                       )}
                     </Box>
                   </div>

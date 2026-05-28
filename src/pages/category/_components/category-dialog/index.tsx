@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, CircularProgress } from "@mui/material";
 import clsx from "clsx";
 import { FormProvider, useForm } from "react-hook-form";
 import { categorySchema, type categoryForm } from "../schema/create-category.schema";
@@ -158,8 +158,8 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
             <Button onClick={onClose} disabled={isLoading}>
               Back
             </Button>
-            <Button type="submit" disabled={isLoading} loading={isLoading}>
-              {mode === "create" ? "Create" : "Save"}
+            <Button type="submit" disabled={isLoading} startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+              {mode === "create" ? (isLoading ? "Creating..." : "Create") : (isLoading ? "Saving..." : "Save")}
             </Button>
           </DialogActions>
         </form>

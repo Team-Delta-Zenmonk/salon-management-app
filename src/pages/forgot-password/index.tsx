@@ -1,6 +1,6 @@
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, CircularProgress } from "@mui/material";
 import { ForgotPasswordSchema, type ForgotPasswordForm } from "./schema/forgot-password.schema";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import TextField from "../../components/form/textfield";
@@ -61,8 +61,8 @@ export default function ForgotPassword() {
               </Box>
             </Box>
             <Box className="w-full flex items-center justify-center">
-              <Button variant="contained" disabled={isLoading} fullWidth type="submit" loading={isLoading}>
-                Send Resend Link
+              <Button variant="contained" disabled={isLoading} fullWidth type="submit" startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+                {isLoading ? "Sending..." : "Send Reset Link"}
               </Button>
             </Box>
             <Box className="flex justify-center items-center">

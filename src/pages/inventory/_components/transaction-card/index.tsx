@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Typography, Tooltip } from "@mui/material";
 import dayjs from "dayjs";
 import type { InventoryTransaction } from "../../../../features/inventory/inventory-log.slice";
@@ -17,6 +17,9 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({ item, onRowCli
 
   const variantSuffix = variantLabel ? ` (${variantLabel})` : "";
   const fullTitle = `${item.item.name}${variantSuffix}`;
+
+  const [titleTooltipOpen, setTitleTooltipOpen] = useState(false);
+
   return (
     <div
       className={styles.transactionCard}
@@ -37,13 +40,19 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({ item, onRowCli
         <Box sx={{ width: "100%", minWidth: 0, overflow: "hidden" }}>
           <Tooltip
             title={fullTitle}
-            disableHoverListener={!shouldShowTooltip(fullTitle, "250px")}
+            open={titleTooltipOpen}
+            onClose={() => setTitleTooltipOpen(false)}
+            disableHoverListener
             arrow
             placement="top"
             enterDelay={200}
             leaveDelay={0}
           >
             <Typography
+              onMouseEnter={(e) => {
+                if (shouldShowTooltip(e.currentTarget)) setTitleTooltipOpen(true);
+              }}
+              onMouseLeave={() => setTitleTooltipOpen(false)}
               variant="h6"
               fontWeight="bold"
               color="secondary.900"

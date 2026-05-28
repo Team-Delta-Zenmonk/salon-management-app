@@ -20,6 +20,7 @@ import styles from "./my-profile.module.scss";
 const MyProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state: RootState) => state.auth);
 
@@ -66,6 +67,7 @@ const MyProfile = () => {
   const { control, handleSubmit, reset, setValue, clearErrors, watch } = methods;
 
   const onSubmit = async (data: SalonProfileForm) => {
+    setIsSaving(true);
     try {
       const { email, logo, address, ...updateData } = data;
 
@@ -94,6 +96,8 @@ const MyProfile = () => {
       }
     } catch {
       callSnack("An error occurred during update", "error");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -135,11 +139,12 @@ const MyProfile = () => {
                 </Button>
                 <Button
                   variant="contained"
-                  startIcon={<SaveIcon sx={{ color: "common.white" }} />}
+                  startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon sx={{ color: "common.white" }} />}
                   onClick={handleSubmit(onSubmit, (errors) => console.log("Form Errors:", errors))}
                   sx={{ borderRadius: "8px", px: 3, py: 1.25, boxShadow: "none", whiteSpace: "nowrap" }}
+                  disabled={isSaving}
                 >
-                  Save Changes
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </Button>
               </>
             ) : (

@@ -5,6 +5,7 @@ import {
   Button,
   DialogContent,
   DialogActions,
+  CircularProgress,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,7 +56,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
       brand: "",
       variant_name: "",
       unit: "",
-      unit_price: "",
+      unit_price: 0,
       item_type: "product",
       logo: null as any,
       min_stock_level: 0,
@@ -200,7 +201,6 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                   name="unit_price"
                   control={control}
                   label="Unit Price"
-                  placeholder="0.00"
                   disabled={loading}
                 />
               </Box>
@@ -225,7 +225,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
         <Button onClick={onBack} disabled={loading}>
           Back
         </Button>
-        <Button type="submit" form="add-item-form" disabled={loading}>
+        <Button type="submit" form="add-item-form" disabled={loading} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined}>
           {loading ? "Creating..." : "Create"}
         </Button>
       </DialogActions>

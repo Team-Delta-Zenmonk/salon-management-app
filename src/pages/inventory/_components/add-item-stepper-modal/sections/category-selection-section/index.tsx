@@ -5,6 +5,7 @@ import {
   Button,
   DialogContent,
   DialogActions,
+  CircularProgress,
 } from "@mui/material";
 import clsx from "clsx";
 import { useForm } from "react-hook-form";
@@ -149,6 +150,7 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
               variant="outlined"
               size="small"
               sx={{ fontSize: "14px", fontWeight: 600 }}
+              startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
             >
               {loading ? "Loading..." : "Load More"}
             </Button>

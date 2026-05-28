@@ -1,6 +1,6 @@
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button } from "@mui/material";
+import { Box, Button, CircularProgress } from "@mui/material";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import { useEffect, useState } from "react";
 import { VerifyEmailSchema, type VerifyEmailForm } from "./schema/verify-email.schema";
@@ -101,7 +101,11 @@ export default function VerifyEmail() {
                   <Button
                     variant="outlined"
                     startIcon={
-                      <ShieldOutlinedIcon className={isLoading || resendLoading ? "text-gray-400" : "text-(--primary-900)!"} />
+                      resendLoading ? (
+                        <CircularProgress size={20} color="inherit" />
+                      ) : (
+                        <ShieldOutlinedIcon className={isLoading || resendLoading ? "text-gray-400" : "text-(--primary-900)!"} />
+                      )
                     }
                     onClick={handleResend}
                     disabled={isLoading || resendLoading}
@@ -114,8 +118,14 @@ export default function VerifyEmail() {
               </Box>
             </Box>
             <Box>
-              <Button type="submit" className="w-full" disabled={isLoading || resendLoading} variant="contained">
-                Verify & Continue
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading || resendLoading} 
+                variant="contained"
+                startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}
+              >
+                {isLoading ? "Verifying..." : "Verify & Continue"}
               </Button>
             </Box>
             <Box className="text-center">

@@ -2,7 +2,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignUpSchema, type SignUpForm } from "./schema/signup.schema";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, CircularProgress } from "@mui/material";
 import TextField from "../../components/form/textfield";
 import { useState } from "react";
 import PasswordField from "../../components/form/password-field";
@@ -108,8 +108,8 @@ export default function SignUp() {
               </Box>
             </Box>
             <Box className="w-full flex items-center justify-center">
-              <Button variant="contained" disabled={isLoading} fullWidth type="submit" loading={isLoading}>
-                Register
+              <Button variant="contained" disabled={isLoading} fullWidth type="submit" startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+                {isLoading ? "Registering..." : "Register"}
               </Button>
             </Box>
             <Box className="flex justify-center items-center">

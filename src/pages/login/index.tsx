@@ -1,6 +1,6 @@
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, CircularProgress } from "@mui/material";
 import { LoginSchema, type LoginForm } from "./schema/login.schema";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import TextField from "../../components/form/textfield";
@@ -88,8 +88,8 @@ export default function Login() {
               </Box>
             </Box>
             <Box className="w-full flex items-center justify-center">
-              <Button variant="contained" disabled={isLoading} fullWidth type="submit" loading={isLoading}>
-                Login
+              <Button variant="contained" disabled={isLoading} fullWidth type="submit" startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
             </Box>
             <Box className="flex justify-center items-center">

@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Avatar, IconButton } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Avatar, IconButton, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useState } from "react";
 import styles from "./confirm-predefine-dialog.module.scss";
@@ -88,8 +88,8 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
         <Button onClick={onClose} disabled={isLoading} variant="outlined">
           Cancel
         </Button>
-        <Button onClick={handleCreate} disabled={isLoading} loading={isLoading} variant="contained">
-          Create Category
+        <Button onClick={handleCreate} disabled={isLoading} variant="contained" startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+          {isLoading ? "Creating..." : "Create Category"}
         </Button>
       </DialogActions>
     </Dialog>

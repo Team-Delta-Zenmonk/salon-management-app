@@ -8,6 +8,7 @@ import {
   Box,
   Typography,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { callSnack } from "../../../../components/snackbar";
@@ -55,11 +56,14 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
   const orderedDate = watch("ordered_date");
   const receivedDate = watch("received_date");
 
-  const options = stockItems.map((item: InventoryItem) => ({
-    label: `${item.name} - ${item.variant_name || 'Standard'} (${item.brand || 'No Brand'})`,
-    value: item.uuid,
-    item_uuid: item.uuid,
-  }));
+  const options = stockItems.map((item: InventoryItem) => {
+    const variantStr = [item.variant_name, item.unit].filter(Boolean).join(" ");
+    return {
+      label: `${item.name} - ${variantStr || 'Standard'} (${item.brand || 'No Brand'})`,
+      value: item.uuid,
+      item_uuid: item.uuid,
+    };
+  });
 
   useEffect(() => {
     if (open) {
@@ -280,7 +284,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
           <Button onClick={onClose} disabled={loading} sx={{ fontWeight: "bold" }}>
             CANCEL
           </Button>
-          <Button type="submit" variant="contained" disabled={loading || !itemUuid} sx={{ fontWeight: "bold", px: 3 }}>
+          <Button type="submit" variant="contained" disabled={loading || !itemUuid} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined} sx={{ fontWeight: "bold", px: 3 }}>
             {loading ? "SAVING..." : (transactionToEdit ? "UPDATE TRANSACTION" : "LOG TRANSACTION")}
           </Button>
         </DialogActions>
