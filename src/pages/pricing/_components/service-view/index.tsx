@@ -11,7 +11,10 @@ export default function ServiceView() {
   const serviceState = useAppSelector((state: RootState) => state.service);
   const allServices = serviceState?.data ?? [];
   const parentServices = useMemo(() => allServices.filter((s: any) => !s.parent_id), [allServices]);
-  const [selectedServiceUuid, setSelectedServiceUuid] = useState<string | null>(null);
+  const [selectedServiceUuid, setSelectedServiceUuid] = useState<string | null>(() => {
+    const parentServicesInit = (serviceState?.data ?? []).filter((s: any) => !s.parent_id);
+    return parentServicesInit.length > 0 ? parentServicesInit[0].uuid : null;
+  });
   const [subServicesByParentUuid, setSubServicesByParentUuid] = useState<Record<string, ServiceType[]>>({});
   const [subServicesLoadingByParentUuid, setSubServicesLoadingByParentUuid] = useState<Record<string, boolean>>({});
 

@@ -7,16 +7,18 @@ import { listStaffAction } from "../../features/staff/list-staff/list-staff.acti
 import ServiceView from "./_components/service-view";
 import StaffView from "./_components/staff-view";
 
+export type ViewMode = "service" | "staff";
+
 export default function StaffServiceManagementPage() {
   const dispatch = useAppDispatch();
-  const [viewMode, setViewMode] = useState<"service" | "staff">("service");
+  const [viewMode, setViewMode] = useState<ViewMode>("service");
 
   useEffect(() => {
     dispatch(listServicesAction({ page: 1, limit: 1000 }));
     dispatch(listStaffAction({ page: 1, limit: 1000 }));
   }, [dispatch]);
 
-  const handleViewChange = (event: React.MouseEvent<HTMLElement>, newMode: "service" | "staff" | null) => {
+  const handleViewChange = (event: React.MouseEvent<HTMLElement>, newMode: ViewMode | null) => {
     if (newMode !== null) {
       setViewMode(newMode);
     }
@@ -42,15 +44,15 @@ export default function StaffServiceManagementPage() {
           size="small"
           className="bg-white"
         >
-          <ToggleButton value="service" aria-label="by service" className="px-4 py-1.5 capitalize">
+          <ToggleButton value="service" aria-label="by service" className="px-4 py-1.5 capitalize whitespace-nowrap">
             <CategoryOutlined fontSize="small" className="mr-2" />
-            <Typography variant="body2" fontWeight="medium">
+            <Typography variant="body2" fontWeight="medium" className="whitespace-nowrap">
               By Service
             </Typography>
           </ToggleButton>
-          <ToggleButton value="staff" aria-label="by staff" className="px-4 py-1.5 capitalize">
+          <ToggleButton value="staff" aria-label="by staff" className="px-4 py-1.5 capitalize whitespace-nowrap">
             <PersonOutline fontSize="small" className="mr-2" />
-            <Typography variant="body2" fontWeight="medium">
+            <Typography variant="body2" fontWeight="medium" className="whitespace-nowrap">
               By Staff
             </Typography>
           </ToggleButton>

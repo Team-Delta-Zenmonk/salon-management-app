@@ -1,10 +1,16 @@
 import { Box } from "@mui/material";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useAppSelector } from "../../../../store/hooks";
+import type { RootState } from "../../../../store/store";
 import StaffSidebar from "../staff-sidebar";
 import StaffServicesPanel from "../staff-services-panel";
 
 export default function StaffView() {
-  const [selectedStaffUuid, setSelectedStaffUuid] = useState<string | null>(null);
+  const staffState = useAppSelector((state: RootState) => state.staff);
+  const staffs = staffState?.data ?? [];
+  const [selectedStaffUuid, setSelectedStaffUuid] = useState<string | null>(() => {
+    return staffs.length > 0 ? staffs[0].uuid : null;
+  });
 
   return (
     <Box className="flex flex-1 min-h-0 gap-6 w-full flex-col lg:flex-row">

@@ -1,11 +1,11 @@
-import { Box, Typography, IconButton, CircularProgress, Tooltip, Avatar, Button } from "@mui/material";
+import { Box, Typography, IconButton, CircularProgress, Tooltip, Avatar } from "@mui/material";
 import { EditOutlined, DeleteOutline, PersonOutline, PersonAddOutlined } from "@mui/icons-material";
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "../../../../../../store/hooks";
 import type { ServiceType, StaffPricingType } from "../../../../types/staff-service.types";
 import type { RootState } from "../../../../../../store/store";
-import { listStaffServices } from "../../../../../../features/staff/list-services/list-services.service";
+import { listServiceStaff } from "../../../../../../features/service/list-staff/list-staff.service";
 import { callSnack } from "../../../../../../components/snackbar";
 import { assignStaffToService } from "../../../../../../features/staff-service/staff-service.service";
 import { unassignStaffFromService } from "../../../../../../features/staff-service/unassign-staff-service.service";
@@ -21,51 +21,49 @@ interface DialogContext {
 
 export default function StaffPricingCards({
   selectedService,
-  onAssignStaff,
-}: Readonly<{ selectedService: ServiceType; onAssignStaff?: () => void }>) {
+}: Readonly<{ selectedService: ServiceType }>) {
   const staffState = useAppSelector((state: RootState) => state.staff);
   const staffs = staffState?.data ?? [];
+  const salonUUID = useAppSelector((state: RootState) => state.auth.salon.uuid);
 
   const servicesToShow = useMemo(() => {
     const children = selectedService.children ?? [];
     return children.length > 0 ? children : [selectedService];
   }, [selectedService]);
 
-  const [staffServicesMap, setStaffServicesMap] = useState<Record<string, StaffPricingType[] | undefined>>({});
-  const [staffPricingLoading, setStaffPricingLoading] = useState<Record<string, boolean>>({});
+  const [serviceStaffsMap, setServiceStaffsMap] = useState<Record<string, StaffPricingType[]>>({});
+  const [servicePricingLoading, setServicePricingLoading] = useState<Record<string, boolean>>({});
   const [initialLoading, setInitialLoading] = useState(true);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogContext, setDialogContext] = useState<DialogContext | null>(null);
 
   useEffect(() => {
-    if (staffs.length === 0) {
+    if (servicesToShow.length === 0 || !salonUUID) {
       setInitialLoading(false);
       return;
     }
 
     const loadAll = async () => {
-      await Promise.allSettled(staffs.map((staff) => ensureStaffServicesLoaded(staff.uuid)));
+      await Promise.allSettled(servicesToShow.map(async (svc) => {
+        if (serviceStaffsMap[svc.uuid] !== undefined || servicePricingLoading[svc.uuid]) return;
+
+        try {
+          setServicePricingLoading((p) => ({ ...p, [svc.uuid]: true }));
+          const res = await listServiceStaff(svc.uuid, salonUUID);
+          const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
+          setServiceStaffsMap((p) => ({ ...p, [svc.uuid]: rows }));
+        } catch {
+          setServiceStaffsMap((p) => ({ ...p, [svc.uuid]: [] }));
+        } finally {
+          setServicePricingLoading((p) => ({ ...p, [svc.uuid]: false }));
+        }
+      }));
       setInitialLoading(false);
     };
 
     loadAll();
-  }, [staffs]);
-
-  const ensureStaffServicesLoaded = async (staff_uuid: string) => {
-    if (staffServicesMap[staff_uuid] !== undefined || staffPricingLoading[staff_uuid]) return;
-
-    try {
-      setStaffPricingLoading((p) => ({ ...p, [staff_uuid]: true }));
-      const res = await listStaffServices(staff_uuid);
-      const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
-      setStaffServicesMap((p) => ({ ...p, [staff_uuid]: rows }));
-    } catch {
-      setStaffServicesMap((p) => ({ ...p, [staff_uuid]: [] }));
-    } finally {
-      setStaffPricingLoading((p) => ({ ...p, [staff_uuid]: false }));
-    }
-  };
+  }, [servicesToShow, salonUUID]);
 
   const handleOpenEdit = async (staff_uuid: string, service: ServiceType, current?: StaffPricingType) => {
     const staff = staffs.find((s: any) => s.uuid === staff_uuid);
@@ -99,9 +97,10 @@ export default function StaffPricingCards({
           },
         ],
       });
-      const res = await listStaffServices(staff_uuid);
+      // Refresh only the affected service
+      const res = await listServiceStaff(service_uuid, salonUUID);
       const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
-      setStaffServicesMap((p) => ({ ...p, [staff_uuid]: rows }));
+      setServiceStaffsMap((p) => ({ ...p, [service_uuid]: rows }));
 
       callSnack("Pricing updated successfully", "success");
     } catch (e: any) {
@@ -112,12 +111,13 @@ export default function StaffPricingCards({
     }
   };
 
-  const handleRemove = async (staff_uuid: string, staffServiceUuid: string) => {
+  const handleRemove = async (service_uuid: string, staffServiceUuid: string) => {
     try {
       await unassignStaffFromService({ staff_services: [staffServiceUuid], cascade: false });
-      const res = await listStaffServices(staff_uuid);
+      // Refresh only the affected service
+      const res = await listServiceStaff(service_uuid, salonUUID);
       const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
-      setStaffServicesMap((p) => ({ ...p, [staff_uuid]: rows }));
+      setServiceStaffsMap((p) => ({ ...p, [service_uuid]: rows }));
       callSnack("Staff unassigned successfully", "success");
     } catch (e: any) {
       callSnack(e?.response?.data?.message || "Failed to unassign staff", "error");
@@ -133,10 +133,8 @@ export default function StaffPricingCards({
   }
 
   const hasAnyAssignments = servicesToShow.some((service) => {
-    return staffs.some((staff) => {
-      const staffRows = staffServicesMap[staff.uuid] ?? [];
-      return staffRows.some((row: any) => row.service_id === service.id);
-    });
+    const assignedRows = serviceStaffsMap[service.uuid] ?? [];
+    return assignedRows.length > 0;
   });
 
   if (!hasAnyAssignments) {
@@ -149,11 +147,6 @@ export default function StaffPricingCards({
         <Typography className="text-gray-500 text-sm mt-1 mb-4 max-w-sm">
           No staff members are assigned to provide this service yet.
         </Typography>
-        {onAssignStaff && (
-          <Button variant="outlined" onClick={onAssignStaff}>
-            Assign Staff
-          </Button>
-        )}
       </Box>
     );
   }
@@ -161,11 +154,13 @@ export default function StaffPricingCards({
   return (
     <Box className="flex flex-col gap-6">
       {servicesToShow.map((service) => {
-        const assignedStaffs = staffs.flatMap((staff) => {
-          const staffRows = staffServicesMap[staff.uuid] ?? [];
-          const staffServiceRow = staffRows.find((row: any) => row.service_id === service.id);
-          return staffServiceRow ? [{ staff, staffServiceRow }] : [];
-        });
+        const assignedRows = serviceStaffsMap[service.uuid] ?? [];
+        if (assignedRows.length === 0) return null;
+
+        const assignedStaffs = assignedRows.map((row) => {
+           const staff = staffs.find(s => s.id === row.staff_id) || staffs.find(s => s.uuid === row.staff_uuid);
+           return { staff, staffServiceRow: row };
+        }).filter((item): item is { staff: any, staffServiceRow: StaffPricingType } => Boolean(item.staff));
 
         if (assignedStaffs.length === 0) return null;
 
@@ -179,14 +174,14 @@ export default function StaffPricingCards({
               </Typography>
             )}
 
-            <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
+            <Box className="grid grid-cols-1 2xl:grid-cols-2 gap-3">
               {assignedStaffs.map(({ staff, staffServiceRow }) => {
                 const staff_name = `${staff.first_name} ${staff.last_name || ""}`.trim();
 
                 return (
                   <Box
                     key={staff.uuid}
-                    className="border border-gray-200 rounded-lg p-4 flex items-center justify-between bg-white shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-shadow hover:shadow-md"
+                    className="border border-gray-200 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-shadow hover:shadow-md"
                   >
                     <Box className="flex items-center gap-3 min-w-0 pr-4">
                       <Avatar src={staff.photos?.url} className="w-10 h-10 bg-gray-100 text-gray-500">
@@ -196,11 +191,11 @@ export default function StaffPricingCards({
                         <Typography fontWeight="bold" className="text-gray-900 truncate">
                           {staff_name}
                         </Typography>
-                        <Box className="flex items-center gap-2 mt-1">
+                        <Box className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                           <Typography
                             variant="caption"
                             className={clsx(
-                              "px-1.5 py-0.5 rounded font-medium",
+                              "px-1.5 py-0.5 rounded font-medium whitespace-nowrap",
                               staffServiceRow.price_type === "fixed"
                                 ? "bg-green-100 text-green-700"
                                 : staffServiceRow.price_type === "from"
@@ -210,11 +205,11 @@ export default function StaffPricingCards({
                           >
                             {staffServiceRow.price_type}
                           </Typography>
-                          <Typography className="text-xs text-gray-500 font-medium">
+                          <Typography className="text-xs text-gray-500 font-medium whitespace-nowrap">
                             ₹{staffServiceRow.price ?? "-"}
                           </Typography>
                           <Typography className="text-xs text-gray-400">•</Typography>
-                          <Typography className="text-xs text-gray-500 font-medium">
+                          <Typography className="text-xs text-gray-500 font-medium whitespace-nowrap">
                             {staffServiceRow.duration ?? "-"} min
                           </Typography>
                         </Box>
@@ -235,7 +230,7 @@ export default function StaffPricingCards({
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleRemove(staff.uuid, staffServiceRow.uuid!)}
+                          onClick={() => handleRemove(service.uuid, staffServiceRow.uuid!)}
                           className="hover:bg-red-50"
                         >
                           <DeleteOutline fontSize="small" />
@@ -264,3 +259,4 @@ export default function StaffPricingCards({
     </Box>
   );
 }
+

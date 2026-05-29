@@ -151,7 +151,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
 
   return (
     <Box className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col min-h-full">
-      <Box className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <Box className="flex flex-wrap items-start sm:items-center justify-between gap-4 mb-6">
         <Box>
           <Typography variant="h6" fontWeight="bold" className="text-(--primary-900)">
             {`${selectedStaff.first_name} ${selectedStaff.last_name || ""}`.trim()}'s Services
@@ -195,7 +195,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                 {group.parent.name}
               </Typography>
 
-              <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
+              <Box className="grid grid-cols-1 2xl:grid-cols-2 gap-3">
                 {group.services.map((svc) => (
                   <Box
                     key={svc.uuid}
@@ -209,11 +209,11 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                         <Typography fontWeight="bold" className="text-gray-900 truncate">
                           {svc.name}
                         </Typography>
-                        <Box className="flex items-center gap-2 mt-1">
+                        <Box className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                           <Typography
                             variant="caption"
                             className={clsx(
-                              "px-1.5 py-0.5 rounded font-medium",
+                              "px-1.5 py-0.5 rounded font-medium whitespace-nowrap",
                               svc.pricing.price_type === "fixed"
                                 ? "bg-green-100 text-green-700"
                                 : svc.pricing.price_type === "from"
@@ -223,11 +223,11 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                           >
                             {svc.pricing.price_type}
                           </Typography>
-                          <Typography className="text-xs text-gray-500 font-medium">
+                          <Typography className="text-xs text-gray-500 font-medium whitespace-nowrap">
                             ₹{svc.pricing.price ?? "-"}
                           </Typography>
                           <Typography className="text-xs text-gray-400">•</Typography>
-                          <Typography className="text-xs text-gray-500 font-medium">
+                          <Typography className="text-xs text-gray-500 font-medium whitespace-nowrap">
                             {svc.pricing.duration ?? "-"} min
                           </Typography>
                         </Box>
