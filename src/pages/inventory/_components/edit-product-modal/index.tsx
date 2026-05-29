@@ -142,17 +142,15 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          bgcolor: "primary.900",
-          color: "common.white",
           py: 2,
           px: 3,
         }}
       >
-        <Typography variant="titleMd" fontWeight="bold">
+        <Typography variant="titleMd" fontWeight="bold" color="primary.900">
           Edit Item
         </Typography>
         <IconButton onClick={onClose} edge="end" size="small" disabled={loading}>
-          <CloseIcon fontSize="small" sx={{ color: "common.white" }} />
+          <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
 

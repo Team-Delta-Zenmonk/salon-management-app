@@ -199,7 +199,9 @@ export default function ListServices({
               <Box key={service.uuid} className="bg-white border border-gray-300 rounded-lg p-6">
                 <Box className="flex justify-between items-start">
                   <Box className="flex gap-4">
-                    {service.logo && <Avatar src={service.logo} alt={service.name} />}
+                    <Avatar src={service.logo || undefined} alt={service.name}>
+                      {!service.logo && service.name ? service.name.charAt(0).toUpperCase() : null}
+                    </Avatar>
                     <Box>
                       <Typography className="text-(--primary-900)" fontWeight="bold">
                         {service.name}
@@ -248,7 +250,9 @@ export default function ListServices({
                           className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex justify-between items-start"
                         >
                           <Box className="flex gap-3">
-                            {sub.logo && <Avatar src={sub.logo} alt={sub.name} />}
+                            <Avatar src={sub.logo || undefined} alt={sub.name}>
+                              {!sub.logo && sub.name ? sub.name.charAt(0).toUpperCase() : null}
+                            </Avatar>
                             <Box>
                               <Typography fontWeight="bold">{sub.name}</Typography>
                               {sub.description && (

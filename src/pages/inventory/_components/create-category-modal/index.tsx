@@ -86,17 +86,15 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          bgcolor: "primary.900",
-          color: "common.white",
           py: 2,
           px: 3,
         }}
       >
-        <Typography variant="titleMd" fontWeight="bold">
+        <Typography variant="titleMd" fontWeight="bold" color="primary.900">
           Create New Category
         </Typography>
         <IconButton onClick={onClose} edge="end" size="small" disabled={loading}>
-          <CloseIcon fontSize="small" sx={{ color: "common.white" }} />
+          <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
 

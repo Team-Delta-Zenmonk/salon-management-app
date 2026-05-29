@@ -69,17 +69,15 @@ export const AddItemStepperModal: React.FC<AddItemStepperModalProps> = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          bgcolor: "primary.900",
-          color: "common.white",
           py: 2,
           px: 3,
         }}
       >
-        <Typography variant="titleMd" fontWeight="bold">
+        <Typography variant="titleMd" fontWeight="bold" color="primary.900">
           Add New Item
         </Typography>
         <IconButton onClick={handleClose} edge="end" size="small">
-          <CloseIcon fontSize="small" sx={{ color: "common.white" }} />
+          <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
 

@@ -26,8 +26,8 @@ const ProfileEditMode: React.FC<ProfileEditModeProps> = ({
 }) => {
   return (
     <>
-      <Box sx={{ bgcolor: "primary.main", p: 3, borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Typography variant="h5" color="common.white" fontWeight="bold">
+      <Box sx={{ p: 3, pb: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Typography variant="h5" color="primary.900" fontWeight="bold">
           Edit Salon Details
         </Typography>
       </Box>

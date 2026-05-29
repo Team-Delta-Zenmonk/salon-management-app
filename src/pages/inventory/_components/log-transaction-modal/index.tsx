@@ -156,16 +156,15 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          bgcolor: "primary.900",
           py: 2,
           px: 3,
         }}
       >
-        <Typography variant="titleMd" fontWeight="bold" color="common.white">
+        <Typography variant="titleMd" fontWeight="bold" color="primary.900">
           {transactionToEdit ? "Edit Stock Entry" : "Add Stock Entry"}
         </Typography>
-        <IconButton onClick={onClose} edge="end" sx={{ color: "common.white" }}>
-          <CloseIcon fontSize="small" sx={{ color: "common.white" }} />
+        <IconButton onClick={onClose} edge="end">
+          <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>

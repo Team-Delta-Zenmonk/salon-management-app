@@ -76,17 +76,15 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          bgcolor: "primary.900",
-          color: "common.white",
           py: 2,
           px: 3,
         }}
       >
-        <Typography variant="titleMd" fontWeight="bold">
+        <Typography variant="titleMd" fontWeight="bold" color="primary.900">
           Decrease Stock
         </Typography>
         <IconButton onClick={onClose} edge="end">
-          <CloseIcon fontSize="small" sx={{ color: "common.white" }} />
+          <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
 
