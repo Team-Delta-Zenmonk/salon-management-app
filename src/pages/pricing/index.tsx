@@ -11,7 +11,7 @@ export type ViewMode = "service" | "staff";
 
 export default function StaffServiceManagementPage() {
   const dispatch = useAppDispatch();
-  const [viewMode, setViewMode] = useState<ViewMode>("service");
+  const [viewMode, setViewMode] = useState<ViewMode>("staff");
 
   useEffect(() => {
     dispatch(listServicesAction({ page: 1, limit: 1000 }));
@@ -44,16 +44,16 @@ export default function StaffServiceManagementPage() {
           size="small"
           className="bg-white"
         >
-          <ToggleButton value="service" aria-label="by service" className="px-4 py-1.5 capitalize whitespace-nowrap">
-            <CategoryOutlined fontSize="small" className="mr-2" />
-            <Typography variant="body2" fontWeight="medium" className="whitespace-nowrap">
-              By Service
-            </Typography>
-          </ToggleButton>
           <ToggleButton value="staff" aria-label="by staff" className="px-4 py-1.5 capitalize whitespace-nowrap">
             <PersonOutline fontSize="small" className="mr-2" />
             <Typography variant="body2" fontWeight="medium" className="whitespace-nowrap">
               By Staff
+            </Typography>
+          </ToggleButton>
+          <ToggleButton value="service" aria-label="by service" className="px-4 py-1.5 capitalize whitespace-nowrap">
+            <CategoryOutlined fontSize="small" className="mr-2" />
+            <Typography variant="body2" fontWeight="medium" className="whitespace-nowrap">
+              By Service
             </Typography>
           </ToggleButton>
         </ToggleButtonGroup>

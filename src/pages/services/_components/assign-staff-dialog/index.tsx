@@ -61,38 +61,56 @@ export default function AssignStaffDialog({
   useEffect(() => {
     if (!open) return;
     setLoading(true);
+    setAssignedStaffServices([]);
+    reset({ staff_ids: [] });
     dispatch(listStaffAction({ page: 1, limit: 1000 }));
-    listServiceStaff(serviceUuid, salonUUID)
-      .then((res) => {
-        setAssignedStaffServices(res || []);
+
+    const parentServiceObj = allServices.find((s) => s.uuid === serviceUuid);
+    const childrenServices = parentServiceObj
+      ? allServices.filter((s) => s.parent_id && String(s.parent_id) === String(parentServiceObj.id))
+      : [];
+    const serviceUuidsToQuery = [serviceUuid, ...childrenServices.map((s) => s.uuid)];
+
+    Promise.allSettled(serviceUuidsToQuery.map((uuid) => listServiceStaff(uuid, salonUUID)))
+      .then((results) => {
+        const allRows: any[] = [];
+        results.forEach((result) => {
+          if (result.status === "fulfilled") {
+            const res = result.value;
+            const rows = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
+            allRows.push(...rows);
+          }
+        });
+        setAssignedStaffServices(allRows);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [open, serviceUuid]);
+  }, [open, serviceUuid, salonUUID, dispatch, reset, allServices]);
 
   const staffIdToUuidMap = useMemo(() => {
     return new Map(allStaff.map((s) => [s.id, s.uuid]));
   }, [allStaff]);
 
   const assignedStaffMap = useMemo(() => {
-    return new Map(
-      assignedStaffServices
-        .map((ss) => {
-          const staffUuid = staffIdToUuidMap.get(ss.staff_id);
-          return staffUuid ? [staffUuid, ss] : null;
-        })
-        .filter(Boolean) as [string, any][],
-    );
+    const map = new Map<string, any[]>();
+    assignedStaffServices.forEach((ss) => {
+      const staffUuid = ss.staff_uuid || staffIdToUuidMap.get(ss.staff_id);
+      if (!staffUuid) return;
+      const existing = map.get(staffUuid) || [];
+      existing.push(ss);
+      map.set(staffUuid, existing);
+    });
+    return map;
   }, [assignedStaffServices, staffIdToUuidMap]);
 
   useEffect(() => {
-    if (!assignedStaffServices.length || !allStaff.length) return;
+    if (!allStaff.length) return;
 
     reset({
       staff_ids: Array.from(assignedStaffMap.keys()),
     });
-  }, [assignedStaffMap, allStaff]);
+  }, [assignedStaffMap, allStaff, reset]);
 
   const staffOptions = useMemo(() => {
     return allStaff.map((staff: any) => ({
@@ -111,18 +129,8 @@ export default function AssignStaffDialog({
       const childrenServices = parentServiceObj
         ? allServices.filter((s) => s.parent_id && String(s.parent_id) === String(parentServiceObj.id))
         : [];
-
       const allServicesToAssign = [
-        ...(childrenServices.length === 0
-          ? [
-              {
-                uuid: serviceUuid,
-                price_type: service.price_type,
-                price: service.price,
-                duration: service.duration,
-              },
-            ]
-          : []),
+        { uuid: serviceUuid, price_type: service.price_type, price: service.price, duration: service.duration },
         ...childrenServices.map((s) => ({
           uuid: s.uuid,
           price_type: s.price_type,
@@ -146,9 +154,14 @@ export default function AssignStaffDialog({
           });
         });
 
-      const toUnassign = Array.from(assignedStaffMap.entries())
+      const toUnassign: string[] = [];
+      Array.from(assignedStaffMap.entries())
         .filter(([staffUuid]) => !selectedStaffUuids.includes(staffUuid))
-        .map(([, staffService]) => staffService.uuid);
+        .forEach(([, records]) => {
+          records.forEach((record: any) => {
+            if (record.uuid) toUnassign.push(record.uuid);
+          });
+        });
 
       if (toAssign.length > 0) {
         await assignStaffToService({ staff_services: toAssign });
@@ -173,7 +186,7 @@ export default function AssignStaffDialog({
       open={open}
       onClose={(event, reason) => {
         if (saving && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        close();
+        onClose();
       }}
       fullWidth
       maxWidth="sm"

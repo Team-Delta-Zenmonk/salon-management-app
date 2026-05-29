@@ -20,16 +20,6 @@ export default function StaffPricingPanel({ selectedService }: Readonly<{ select
 
   return (
     <Box className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col min-h-full">
-      <Box className="flex flex-wrap items-start sm:items-center justify-between gap-4 mb-6">
-        <Box>
-          <Typography variant="h6" fontWeight="bold" className="text-(--primary-900)">
-            {selectedService.name} Staff Pricing
-          </Typography>
-          <Typography className="text-gray-600 text-sm">
-            View staff price & duration for this service and its subservices.
-          </Typography>
-        </Box>
-      </Box>
       <StaffPricingCards selectedService={selectedService} />
     </Box>
   );

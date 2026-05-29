@@ -164,7 +164,7 @@ export default function AssignServicesDialog({
       open={open}
       onClose={(event, reason) => {
         if (saving && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        close();
+        onClose();
       }}
       fullWidth
       maxWidth="sm"

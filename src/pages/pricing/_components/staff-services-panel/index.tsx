@@ -180,12 +180,9 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
           <Typography variant="h6" className="text-gray-700 font-medium">
             No Services Assigned
           </Typography>
-          <Typography className="text-gray-500 text-sm mt-1 mb-4 max-w-sm">
+          <Typography className="text-gray-500 text-sm mt-1 max-w-sm">
             This staff member doesn't provide any services yet.
           </Typography>
-          <Button variant="outlined" onClick={() => setAssignDialogOpen(true)}>
-            Assign Services
-          </Button>
         </Box>
       ) : (
         <Box className="flex flex-col gap-6">
