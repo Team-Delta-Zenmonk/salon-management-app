@@ -21,6 +21,7 @@ import { createItemCategoryService as createItemCategory } from "../../../../fea
 import type { ItemCategory } from "../../../../features/inventory/types/category.type";
 import { createCategorySchema } from "../schema/create-category.schema";
 import type { UseFormSetValue } from "react-hook-form";
+import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 
 interface CreateCategoryModalProps {
   open: boolean;
@@ -110,8 +111,9 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
               control={control}
               label="Category Name"
               placeholder="Enter category name"
-              maxLength={20}
+              maxLength={30}
               disabled={loading}
+              pattern={VALIDATE_PATTERN.alphabet}
             />
           </Box>
         </DialogContent>

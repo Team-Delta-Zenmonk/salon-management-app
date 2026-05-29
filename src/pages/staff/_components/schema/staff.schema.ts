@@ -4,6 +4,7 @@ import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { GENDER } from "../../../../common/enums/gender.enum";
+import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 
 dayjs.extend(customParseFormat);
 
@@ -55,8 +56,8 @@ const ActiveHoursSchema = z
   .optional();
 
 export const StaffSchema = z.object({
-  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }),
-  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }),
+  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(30, { message: "Max 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(30, { message: "Max 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
   email: z
     .string({ message: "Required" })
     .min(1, { message: "Required" })
@@ -89,7 +90,7 @@ export const StaffSchema = z.object({
       },
       { message: "Invalid date" }
     ),
-  title: z.string({ message: "Required" }).min(1, { message: "Required" }),
+  title: z.string({ message: "Required" }).min(1, { message: "Required" }).max(30, { message: "Max 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed " }),
   joining_date: z
     .any()
     .refine((val) => val !== null && val !== undefined && val !== "", {
@@ -114,7 +115,7 @@ export const StaffSchema = z.object({
       { message: "Invalid date" }
     ),
 
-  address: z.string({ message: "Required" }).min(1, { message: "Required" }),
+  address: z.string({ message: "Required" }).min(1, { message: "Required" }).max(100, { message: "Address must be less than 100 characters" }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Invalid characters in address" }),
   emergency_contact: z.object({
     name: z.string({ message: "Required" }).min(1, { message: "Required" }),
     phone: z

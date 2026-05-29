@@ -111,7 +111,7 @@ export default function ListStaff({
           ) : null
         }
       >
-        <Box className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(320px,1fr))]">
+        <Box className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {staffs.map((staff) => (
             <Box
               key={staff.uuid}
@@ -121,10 +121,10 @@ export default function ListStaff({
                 <Box className="flex items-center gap-4 flex-1 min-w-0">
                   <Avatar src={staff.photos?.url} alt={getFullName(staff)} />
                   <Box className="min-w-0 flex-1">
-                    <Typography className="text-(--primary-900)" fontWeight="bold">
+                    <Typography className="text-(--primary-900) truncate" fontWeight="bold">
                       {getFullName(staff)}
                     </Typography>
-                    <Typography className="text-gray-600 text-sm">{staff.title}</Typography>
+                    <Typography className="text-gray-600 text-sm truncate">{staff.title}</Typography>
                   </Box>
                 </Box>
 
@@ -159,19 +159,19 @@ export default function ListStaff({
               <Divider className="my-6" />
 
               <Box className="space-y-4 mb-6">
-                <Box className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <Box className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl min-w-0">
                   <PhoneOutlined className="text-xl text-gray-500 shrink-0" />
-                  <Box>
-                    <Typography className="fontWeightBold text-gray-900">{staff.phone_number}</Typography>
+                  <Box className="min-w-0 flex-1">
+                    <Typography className="fontWeightBold text-gray-900 truncate">{staff.phone_number}</Typography>
                     {staff.additional_phone_number && (
-                      <Typography className="text-gray-500 text-sm">{staff.additional_phone_number}</Typography>
+                      <Typography className="text-gray-500 text-sm truncate">{staff.additional_phone_number}</Typography>
                     )}
                   </Box>
                 </Box>
 
-                <Box className="flex items-center gap-3 p-3 bg-blue-50/50 rounded-xl">
+                <Box className="flex items-center gap-3 p-3 bg-blue-50/50 rounded-xl min-w-0">
                   <EmailOutlined className="text-xl text-gray-500 shrink-0" />
-                  <Typography className="text-gray-900 font-medium truncate">{staff.email}</Typography>
+                  <Typography className="text-gray-900 font-medium truncate flex-1 min-w-0">{staff.email}</Typography>
                 </Box>
               </Box>
 

@@ -130,7 +130,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
       onSuccess();
       onClose();
     } catch (error: any) {
-      callSnack(error?.response?.data?.message || `Failed to ${transactionToEdit ? "update" : "log"} transaction`, "error");
+      callSnack(error?.response?.data?.errors?.[0]?.message || `Failed to ${transactionToEdit ? "update" : "log"} transaction`, "error");
     } finally {
       setLoading(false);
     }

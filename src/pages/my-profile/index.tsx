@@ -14,7 +14,6 @@ import ProfileInfoCard from "./_components/profile-info-card";
 import SalonWorkingHoursCard from "./_components/salon-working-hours-card";
 import { MyProfileSchema, type SalonProfileForm } from "./schema/my-profile.schema";
 import { DAYS_MAP } from "./_components/constants/business-hours.constants";
-import styles from "./my-profile.module.scss";
 
 
 const MyProfile = () => {
@@ -116,8 +115,8 @@ const MyProfile = () => {
 
   return (
     <FormProvider {...methods}>
-      <Box className="flex flex-col gap-8 pb-12">
-        <Box className={styles.stickyHeader}>
+      <Box className="flex flex-col flex-1 min-h-0 w-full">
+        <Box className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 shrink-0 gap-4">
           <Box>
             <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900) mb-2">
               My Profile
@@ -159,25 +158,27 @@ const MyProfile = () => {
             )}
           </Box>
         </Box>
-        <Grid container spacing={4} sx={{ alignItems: "flex-start" }}>
-          <Grid size={{ xs: 12, lg: 8 }}>
-            <ProfileInfoCard
-              isEditing={isEditing}
-              control={control}
-              salon={salon}
-              setValue={setValue}
-              clearErrors={clearErrors}
-            />
+        <Box className="flex-1 min-h-0 overflow-y-auto pb-12">
+          <Grid container spacing={4} sx={{ alignItems: "flex-start" }}>
+            <Grid size={{ xs: 12, lg: 8 }}>
+              <ProfileInfoCard
+                isEditing={isEditing}
+                control={control}
+                salon={salon}
+                setValue={setValue}
+                clearErrors={clearErrors}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 4 }}>
+              <SalonWorkingHoursCard
+                isEditing={isEditing}
+                control={control}
+                watch={watch}
+                setValue={setValue}
+              />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12, lg: 4 }}>
-            <SalonWorkingHoursCard
-              isEditing={isEditing}
-              control={control}
-              watch={watch}
-              setValue={setValue}
-            />
-          </Grid>
-        </Grid>
+        </Box>
       </Box>
     </FormProvider>
   );

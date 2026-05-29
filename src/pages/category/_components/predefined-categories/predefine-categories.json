@@ -1,62 +1,34 @@
 [
   {
     "name": "Haircut & Styling",
-    "description": "Professional haircuts, styling, blow-dry, and hair finishing services",
-    "logo": "https://res.cloudinary.com/demo/image/upload/haircut-icon.png"
+    "description": "Professional haircuts, styling, blow-dry, and hair finishing services"
   },
   {
     "name": "Hair Coloring",
-    "description": "Hair coloring, highlights, balayage, global color, and root touch-ups",
-    "logo": "https://res.cloudinary.com/demo/image/upload/hair-color-icon.png"
+    "description": "Hair coloring, highlights, balayage, global color, and root touch-ups"
   },
   {
     "name": "Facial & Skincare",
-    "description": "Facials, clean-ups, skin treatments, and advanced skincare services",
-    "logo": "https://res.cloudinary.com/demo/image/upload/facial-icon.png"
+    "description": "Facials, clean-ups, skin treatments, and advanced skincare services"
   },
   {
     "name": "Manicure & Pedicure",
-    "description": "Nail care services including manicure, pedicure, gel polish, and nail art",
-    "logo": "https://res.cloudinary.com/demo/image/upload/nail-care-icon.png"
+    "description": "Nail care services including manicure, pedicure, gel polish, and nail art"
   },
   {
     "name": "Makeup",
-    "description": "Party makeup, bridal makeup, and professional makeup services",
-    "logo": "https://res.cloudinary.com/demo/image/upload/makeup-icon.png"
+    "description": "Party makeup, bridal makeup, and professional makeup services"
   },
   {
     "name": "Waxing",
-    "description": "Full body waxing and hair removal services for smooth skin",
-    "logo": "https://res.cloudinary.com/demo/image/upload/waxing-icon.png"
+    "description": "Full body waxing and hair removal services for smooth skin"
   },
   {
     "name": "Massage & Spa",
-    "description": "Relaxing body massage, spa therapies, and wellness treatments",
-    "logo": "https://res.cloudinary.com/demo/image/upload/spa-icon.png"
+    "description": "Relaxing body massage, spa therapies, and wellness treatments"
   },
   {
     "name": "Bridal & Grooming Packages",
-    "description": "Complete bridal, pre-bridal, and grooming packages for special occasions",
-    "logo": "https://res.cloudinary.com/demo/image/upload/bridal-icon.png"
-  },
-  {
-    "name": "Makeup",
-    "description": "Party makeup, bridal makeup, and professional makeup services",
-    "logo": "https://res.cloudinary.com/demo/image/upload/makeup-icon.png"
-  },
-  {
-    "name": "Waxing",
-    "description": "Full body waxing and hair removal services for smooth skin",
-    "logo": "https://res.cloudinary.com/demo/image/upload/waxing-icon.png"
-  },
-  {
-    "name": "Massage & Spa",
-    "description": "Relaxing body massage, spa therapies, and wellness treatments",
-    "logo": "https://res.cloudinary.com/demo/image/upload/spa-icon.png"
-  },
-  {
-    "name": "Bridal & Grooming Packages",
-    "description": "Complete bridal, pre-bridal, and grooming packages for special occasions",
-    "logo": "https://res.cloudinary.com/demo/image/upload/bridal-icon.png"
+    "description": "Complete bridal, pre-bridal, and grooming packages for special occasions"
   }
 ]

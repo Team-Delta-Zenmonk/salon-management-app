@@ -29,6 +29,7 @@ import { listServiceStaff } from "../../../../features/service/list-staff/list-s
 import { createBookingAction } from "../../../../features/booking/create-booking/create-booking.action";
 import { updateBookingAction } from "../../../../features/booking/update-booking/update-booking.action";
 import dayjs from "dayjs";
+import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 
 interface BookingDialogProps {
   open: boolean;
@@ -260,7 +261,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       }
       onClose();
     } catch (error: any) {
-      const errorMessage = error?.message || error?.error || "Failed to save booking";
+      const errorMessage = error || "Failed to save booking";
       callSnack(errorMessage, "error");
     } finally {
       setIsLoading(false);
@@ -300,6 +301,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Enter name"
                   control={control as any}
                   identifier="booking-customer-name"
+                  maxLength={30}
+                  pattern={VALIDATE_PATTERN.alphabet}
                 />
               </Box>
               <Box className="flex flex-col gap-1.5">
@@ -313,6 +316,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Enter phone number"
                   control={control as any}
                   identifier="booking-customer-phone"
+                  maxLength={10}
+                  pattern={VALIDATE_PATTERN.number}
                 />
               </Box>
             </Box>

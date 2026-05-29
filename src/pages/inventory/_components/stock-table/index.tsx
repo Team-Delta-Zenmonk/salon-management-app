@@ -58,46 +58,204 @@ interface StockTableProps {
   fetchMore: () => void;
 }
 
-/** Wrapper that uses the controlled tooltip pattern for text overflow */
-const OverflowTooltipText: React.FC<{
-  text: string;
-  typographyProps?: Record<string, any>;
-}> = ({ text, typographyProps = {} }) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <Tooltip title={text} open={open} onClose={() => setOpen(false)} disableHoverListener>
-      <Typography
-        onMouseEnter={(e) => {
-          if (shouldShowTooltip(e.currentTarget)) setOpen(true);
-        }}
-        onMouseLeave={() => setOpen(false)}
-        {...typographyProps}
-      >
-        {text}
-      </Typography>
-    </Tooltip>
-  );
-};
 
-/** Wrapper for Chip with overflow tooltip */
-const OverflowTooltipChip: React.FC<{
-  label: string;
-  chipSx?: Record<string, any>;
-}> = ({ label, chipSx = {} }) => {
-  const [open, setOpen] = useState(false);
+const StockCard: React.FC<{
+  item: InventoryItem;
+  onDecreaseClick: (e: React.MouseEvent, item: InventoryItem) => void;
+  onEditClick: (e: React.MouseEvent, item: InventoryItem) => void;
+  getStockColor: (item: InventoryItem) => string;
+  theme: any;
+}> = ({ item, onDecreaseClick, onEditClick, getStockColor, theme }) => {
+  const [nameTooltipOpen, setNameTooltipOpen] = useState(false);
+  const [brandTooltipOpen, setBrandTooltipOpen] = useState(false);
+  const [categoryTooltipOpen, setCategoryTooltipOpen] = useState(false);
+  const [variantTooltipOpen, setVariantTooltipOpen] = useState(false);
+
+  const brandLabel = item.brand || "";
+  const categoryLabel = item.category?.name || "";
+  const variantLabel = [item.variant_name, item.unit].filter(Boolean).join(" ");
+
   return (
-    <Tooltip title={label} open={open} onClose={() => setOpen(false)} disableHoverListener>
-      <Chip
-        onMouseEnter={(e) => {
-          const labelEl = e.currentTarget.querySelector('.MuiChip-label') as HTMLElement;
-          if (shouldShowTooltip(labelEl)) setOpen(true);
-        }}
-        onMouseLeave={() => setOpen(false)}
-        label={label}
-        size="small"
-        sx={chipSx}
-      />
-    </Tooltip>
+    <div
+      className={styles.stockCard}
+      style={{ cursor: "default" }}
+      tabIndex={0}
+    >
+      <div className={styles.stockCardInner}>
+        <Avatar
+          src={item.logo || ""}
+          alt={item.name}
+          className={styles.stockAvatar}
+          sx={{ width: 56, height: 56 }}
+        />
+
+        <div className={styles.stockInfo} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+          <Box sx={{ minWidth: 0, width: "100%", display: "flex", flexDirection: "column" }}>
+            <Tooltip title={item.name} open={nameTooltipOpen} onClose={() => setNameTooltipOpen(false)} disableHoverListener>
+              <Typography
+                onMouseEnter={(e) => {
+                  if (shouldShowTooltip(e.currentTarget)) setNameTooltipOpen(true);
+                }}
+                onMouseLeave={() => setNameTooltipOpen(false)}
+                variant="h6"
+                fontWeight="bold"
+                color="secondary.900"
+                sx={{
+                  textTransform: "capitalize",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  lineHeight: 1.2,
+                  width: "100%",
+                }}
+              >
+                {item.name}
+              </Typography>
+            </Tooltip>
+            {brandLabel && (
+              <Tooltip title={brandLabel} open={brandTooltipOpen} onClose={() => setBrandTooltipOpen(false)} disableHoverListener>
+                <Typography
+                  onMouseEnter={(e) => {
+                    if (shouldShowTooltip(e.currentTarget)) setBrandTooltipOpen(true);
+                  }}
+                  onMouseLeave={() => setBrandTooltipOpen(false)}
+                  variant="paragraphSm"
+                  color="secondary.500"
+                  fontWeight="semiBold"
+                  sx={{
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    mt: "2px",
+                    width: "100%",
+                  }}
+                >
+                  {brandLabel}
+                </Typography>
+              </Tooltip>
+            )}
+          </Box>
+          <Box sx={{ display: "flex", gap: "8px", flexWrap: "wrap", width: "100%", mt: 1 }}>
+            {categoryLabel && (
+              <Tooltip title={categoryLabel} open={categoryTooltipOpen} onClose={() => setCategoryTooltipOpen(false)} disableHoverListener>
+                <Chip
+                  onMouseEnter={(e) => {
+                    const labelEl = e.currentTarget.querySelector('.MuiChip-label') as HTMLElement;
+                    if (shouldShowTooltip(labelEl)) setCategoryTooltipOpen(true);
+                  }}
+                  onMouseLeave={() => setCategoryTooltipOpen(false)}
+                  label={categoryLabel}
+                  size="small"
+                  sx={{
+                    bgcolor: "info.50",
+                    color: "info.700",
+                    typography: "paragraphTable",
+                    maxWidth: "120px",
+                    "& .MuiChip-label": {
+                      px: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    },
+                  }}
+                />
+              </Tooltip>
+            )}
+            {variantLabel && (
+              <Tooltip title={variantLabel} open={variantTooltipOpen} onClose={() => setVariantTooltipOpen(false)} disableHoverListener>
+                <Chip
+                  onMouseEnter={(e) => {
+                    const labelEl = e.currentTarget.querySelector('.MuiChip-label') as HTMLElement;
+                    if (shouldShowTooltip(labelEl)) setVariantTooltipOpen(true);
+                  }}
+                  onMouseLeave={() => setVariantTooltipOpen(false)}
+                  label={variantLabel}
+                  size="small"
+                  sx={{
+                    bgcolor: "info.50",
+                    color: "info.700",
+                    typography: "paragraphSm",
+                    maxWidth: "100px",
+                    "& .MuiChip-label": {
+                      px: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    },
+                  }}
+                />
+              </Tooltip>
+            )}
+          </Box>
+        </div>
+        <IconButton
+          size="medium"
+          onClick={(e) => onEditClick(e, item)}
+          sx={{ alignSelf: "flex-start", bgcolor: "common.white" }}
+        >
+          <EditOutlinedIcon fontSize="medium" sx={{ color: "primary.900" }} />
+        </IconButton>
+      </div>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        px={3}
+        py={2}
+        borderTop="1px solid"
+        borderColor="divider"
+        bgcolor="background.default"
+      >
+        <Box>
+          <Typography variant="paragraphSm" color="secondary.500" fontWeight="semiBold" sx={{ textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }} display="block">
+            Min Stock
+          </Typography>
+          <Typography variant="paragraphLg" color="error.600" fontWeight="bold">
+            {item.min_stock_level || "-"}
+          </Typography>
+        </Box>
+
+        <Box textAlign="center">
+          <Typography variant="paragraphSm" color="secondary.500" fontWeight="semiBold" sx={{ textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }} display="block">
+            Price
+          </Typography>
+          <Typography variant="paragraphLg" color="primary.900" fontWeight="bold">
+            ₹{Number(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </Typography>
+        </Box>
+
+        <Box textAlign="right" display="flex" flexDirection="column" alignItems="flex-end">
+          <Typography variant="paragraphSm" color="secondary.500" fontWeight="semiBold" sx={{ textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }} display="block">
+            In Stock
+          </Typography>
+          <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1.5}>
+            <StockProgressBar
+              current={item.current_stock}
+              min={item.min_stock_level}
+              errorColor={theme.palette.error.main}
+              successColor={theme.palette.success.main}
+            />
+            <Box display="flex" alignItems="baseline" gap={0.5}>
+              <Typography variant="h4" fontWeight="bold" color={getStockColor(item)}>
+                {item.current_stock}
+              </Typography>
+              <Typography variant="paragraphSm" color="secondary.500" fontWeight="semiBold" sx={{ textTransform: "uppercase" }}>
+                Units
+              </Typography>
+            </Box>
+            <IconButton
+              size="small"
+              onClick={(e) => onDecreaseClick(e, item)}
+              sx={{ ml: 1, bgcolor: "common.white" }}
+            >
+              <RemoveCircleOutlineIcon fontSize="small" sx={{ color: "primary.900" }} />
+            </IconButton>
+          </Box>
+        </Box>
+      </Box>
+    </div>
   );
 };
 
@@ -153,7 +311,7 @@ export const StockTable: React.FC<StockTableProps> = ({
             <CircularProgress size={24} />
           </Box>
         }
-        scrollableTarget="inventoryScrollDiv"
+        scrollableTarget="inventoryScrollableDiv"
         endMessage={
           !hasMore && data.length > 0 ? (
             <Box sx={{ textAlign: "center", py: 2 }}>
@@ -165,169 +323,16 @@ export const StockTable: React.FC<StockTableProps> = ({
         }
       >
         <Box display="grid" gridTemplateColumns={{ xs: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={2}>
-          {data.map((item) => {
-            const brandLabel = item.brand || "";
-            const categoryLabel = item.category?.name || "";
-            const variantLabel = [item.variant_name, item.unit].filter(Boolean).join(" ");
-
-            return (
-              <div
-                key={item.uuid}
-                className={styles.stockCard}
-                style={{ cursor: "default" }}
-                tabIndex={0}
-              >
-                <div className={styles.stockCardInner}>
-                  <Avatar
-                    src={item.logo || ""}
-                    alt={item.name}
-                    className={styles.stockAvatar}
-                    sx={{ width: 56, height: 56 }}
-                  />
-
-                  <div className={styles.stockInfo} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                    <Box sx={{ minWidth: 0, width: "100%", display: "flex", flexDirection: "column" }}>
-                      <OverflowTooltipText
-                        text={item.name}
-                        typographyProps={{
-                          variant: "h6",
-                          fontWeight: "bold",
-                          color: "secondary.900",
-                          sx: {
-                            textTransform: "capitalize",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            lineHeight: 1.2,
-                            width: "100%",
-                          },
-                        }}
-                      />
-                      {brandLabel && (
-                        <OverflowTooltipText
-                          text={brandLabel}
-                          typographyProps={{
-                            variant: "paragraphSm",
-                            color: "secondary.500",
-                            fontWeight: "semiBold",
-                            sx: {
-                              textTransform: "uppercase",
-                              letterSpacing: 0.5,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              mt: "2px",
-                              width: "100%",
-                            },
-                          }}
-                        />
-                      )}
-                    </Box>
-                    <Box sx={{ display: "flex", gap: "8px", flexWrap: "wrap", width: "100%", mt: 1 }}>
-                      {categoryLabel && (
-                        <OverflowTooltipChip
-                          label={categoryLabel}
-                          chipSx={{
-                            bgcolor: "info.50",
-                            color: "info.700",
-                            typography: "paragraphTable",
-                            maxWidth: "120px",
-                            "& .MuiChip-label": {
-                              px: 1,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            },
-                          }}
-                        />
-                      )}
-                      {variantLabel && (
-                        <OverflowTooltipChip
-                          label={variantLabel}
-                          chipSx={{
-                            bgcolor: "info.50",
-                            color: "info.700",
-                            typography: "paragraphSm",
-                            maxWidth: "100px",
-                            "& .MuiChip-label": {
-                              px: 1,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            },
-                          }}
-                        />
-                      )}
-                    </Box>
-                  </div>
-                  <IconButton
-                    size="medium"
-                    onClick={(e) => handleEditClick(e, item)}
-                    sx={{ alignSelf: "flex-start", bgcolor: "common.white" }}
-                  >
-                    <EditOutlinedIcon fontSize="medium" sx={{ color: "primary.900" }} />
-                  </IconButton>
-                </div>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  px={3}
-                  py={2}
-                  borderTop="1px solid"
-                  borderColor="divider"
-                  bgcolor="background.default"
-                >
-                  <Box>
-                    <Typography variant="paragraphSm" color="secondary.500" fontWeight="semiBold" sx={{ textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }} display="block">
-                      Min Stock
-                    </Typography>
-                    <Typography variant="paragraphLg" color="error.600" fontWeight="bold">
-                      {item.min_stock_level || "-"}
-                    </Typography>
-                  </Box>
-
-                  <Box textAlign="center">
-                    <Typography variant="paragraphSm" color="secondary.500" fontWeight="semiBold" sx={{ textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }} display="block">
-                      Price
-                    </Typography>
-                    <Typography variant="paragraphLg" color="primary.900" fontWeight="bold">
-                      ₹{Number(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </Typography>
-                  </Box>
-
-                  <Box textAlign="right" display="flex" flexDirection="column" alignItems="flex-end">
-                    <Typography variant="paragraphSm" color="secondary.500" fontWeight="semiBold" sx={{ textTransform: "uppercase", letterSpacing: 0.5, mb: 0.5 }} display="block">
-                      In Stock
-                    </Typography>
-                    <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1.5}>
-                      <StockProgressBar
-                        current={item.current_stock}
-                        min={item.min_stock_level}
-                        errorColor={theme.palette.error.main}
-                        successColor={theme.palette.success.main}
-                      />
-                      <Box display="flex" alignItems="baseline" gap={0.5}>
-                        <Typography variant="h4" fontWeight="bold" color={getStockColor(item)}>
-                          {item.current_stock}
-                        </Typography>
-                        <Typography variant="paragraphSm" color="secondary.500" fontWeight="semiBold" sx={{ textTransform: "uppercase" }}>
-                          Units
-                        </Typography>
-                      </Box>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleDecreaseClick(e, item)}
-                        sx={{ ml: 1, bgcolor: "common.white" }}
-                      >
-                        <RemoveCircleOutlineIcon fontSize="small" sx={{ color: "primary.900" }} />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                </Box>
-              </div>
-            );
-          })}
+          {data.map((item) => (
+            <StockCard
+              key={item.uuid}
+              item={item}
+              onDecreaseClick={handleDecreaseClick}
+              onEditClick={handleEditClick}
+              getStockColor={getStockColor}
+              theme={theme}
+            />
+          ))}
 
           {data.length === 0 && (
             <Box gridColumn="1 / -1" textAlign="center" py={4}>

@@ -151,7 +151,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   const hasMore = data.length < total;
 
   return (
-    <Box className="flex flex-col flex-1 min-h-0 px-8 pb-8 space-y-6">
+    <Box className="flex flex-col flex-1 min-h-0 px-4 md:px-8 pb-8 space-y-6">
       <FormProvider {...methods}>
         <Box className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <SearchBar onSearch={setSearchQuery} placeholder="Search Service..." />

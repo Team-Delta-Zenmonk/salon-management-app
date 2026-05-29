@@ -43,7 +43,7 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
   const [loading, setLoading] = useState(false);
   const [createCategoryOpen, setCreateCategoryOpen] = useState(false);
 
-  const { control, watch, setValue } = useForm({
+  const { control, watch, setValue, getValues } = useForm({
     defaultValues: {
       category_uuid: selectedCategory?.uuid || "",
     },
@@ -169,7 +169,12 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
 
       <CreateCategoryModal
         open={createCategoryOpen}
-        onClose={() => setCreateCategoryOpen(false)}
+        onClose={() => {
+          setCreateCategoryOpen(false);
+          if (getValues("category_uuid") === "create_new") {
+            setValue("category_uuid", selectedCategory?.uuid || "");
+          }
+        }}
         onSuccess={handleCreateCategorySuccess}
         setValue={setValue}
       />

@@ -116,6 +116,7 @@ const ProfileEditMode: React.FC<ProfileEditModeProps> = ({
               isEditing={true}
               control={control}
               fullWidth
+              maxLength={100}
             />
           </Grid>
           <Grid size={{ xs: 12 }}>
@@ -153,7 +154,7 @@ const ProfileEditMode: React.FC<ProfileEditModeProps> = ({
             multiline
             rows={4}
             fullWidth
-            maxLength={100}
+            maxLength={300}
             placeholder="Tell us about your salon"
           />
         </Grid>

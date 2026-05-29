@@ -1,7 +1,7 @@
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { onboardStripeAction } from "../../features/stripe/onboard-stripe/onboard-stripe.action";
 import { getStripeDashboardLinkAction } from "../../features/stripe/get-dashboard-link/get-dashboard-link.action";
@@ -50,10 +50,14 @@ export default function Dashboard() {
   const { salon } = useAppSelector((state: RootState) => state.auth);
   const [searchParams, setSearchParams] = useSearchParams();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     if (searchParams.get("stripe_onboarded") === "true" && salon?.uuid) {
-      dispatch(getSalonProfileAction(salon.uuid));
+      setIsVerifying(true);
+      dispatch(getSalonProfileAction(salon.uuid)).finally(() => {
+        setTimeout(() => setIsVerifying(false), 5000);
+      });
       searchParams.delete("stripe_onboarded");
       setSearchParams(searchParams, { replace: true });
     }
@@ -86,7 +90,15 @@ export default function Dashboard() {
 
   return (
     <Box className="space-y-8 flex flex-col">
-      {!salon?.stripe_account_id ? (
+      {isVerifying ? (
+        <Alert
+          variant="warning"
+          icon={<CircularProgress size={24} color="inherit" />}
+          title="Verifying Payouts Setup"
+        >
+          Stripe is currently verifying your account for payments. This may take a few moments.
+        </Alert>
+      ) : !salon?.stripe_account_id ? (
         <Alert
           variant="error"
           icon={<ErrorOutlineIcon className="text-red-800!" />}
@@ -161,11 +173,9 @@ export default function Dashboard() {
               <Box className="text-right">
                 <Typography className="text-(--primary-900)">{booking.time}</Typography>
                 <span
-                  className={`inline-block px-3 py-1 rounded-full ${
-                    booking.status === "Confirmed"
-                      ? "bg-(--primary-900) text-white"
-                      : "bg-blue-100 text-(--primary-900)"
-                  }`}
+                  className={`inline-block px-3 py-1 rounded-full ${booking.status === "Confirmed" ? "bg-(--primary-900) text-white"
+                    : "bg-blue-100 text-(--primary-900)"
+                    }`}
                 >
                   {booking.status}
                 </span>

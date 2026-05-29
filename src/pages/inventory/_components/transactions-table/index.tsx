@@ -20,7 +20,6 @@ import styles from "../inventory-cards.module.scss";
 import { TransactionCard } from "../transaction-card";
 import { shouldShowTooltip } from "../../../../common/shouldShowTooltip";
 
-/** Row component so each row gets its own tooltip state */
 const TransactionTableRow: React.FC<{
   item: InventoryTransaction;
   onRowClick?: (item: any) => void;
@@ -142,7 +141,9 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
   fetchMore,
 }) => {
 
-  if (loading && data.length === 0) {
+  const displayData = !isMobile ? data.slice((page - 1) * limit, page * limit) : data;
+
+  if (loading && displayData.length === 0) {
     return (
       <div className={styles.loadingWrapper}>
         <CircularProgress />
@@ -169,10 +170,10 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.map((item) => (
+                {displayData.map((item) => (
                   <TransactionTableRow key={item.uuid} item={item} onRowClick={onRowClick} />
                 ))}
-                {data.length === 0 && (
+                {displayData.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={9} align="center" sx={{ py: 3 }}>
                       <Typography variant="paragraphMd" color="text.secondary">
@@ -198,10 +199,10 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
       {isMobile && (
         <Box sx={{ width: "100%", maxWidth: "100%", overflow: "hidden", minWidth: 0, display: "block" }}>
           <InfiniteScroll
-            dataLength={data.length}
+            dataLength={displayData.length}
             next={fetchMore}
             hasMore={hasMore}
-            scrollableTarget="logScrollDiv"
+            scrollableTarget="inventoryScrollableDiv"
             style={{ width: "100%", overflow: "visible" }}
             loader={
               <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
@@ -209,7 +210,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
               </Box>
             }
             endMessage={
-              !hasMore && data.length > 0 ? (
+              !hasMore && displayData.length > 0 ? (
                 <Box sx={{ textAlign: "center", py: 2 }}>
                   <Typography variant="paragraphSm" color="text.secondary">
                     No more transactions to load
@@ -219,10 +220,10 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
             }
           >
             <div className={styles.cardList}>
-              {data.map((item) => (
+              {displayData.map((item) => (
                 <TransactionCard key={item.uuid} item={item} onRowClick={onRowClick} />
               ))}
-              {data.length === 0 && (
+              {displayData.length === 0 && (
                 <div className={styles.emptyState}>
                   <Typography variant="paragraphMd" color="text.secondary">
                     No transactions found.

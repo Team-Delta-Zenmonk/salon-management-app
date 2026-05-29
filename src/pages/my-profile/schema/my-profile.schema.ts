@@ -28,7 +28,7 @@ export const MyProfileSchema = z.object({
     .min(1, "Required")
     .length(10, "Must be 10 digits")
     .regex(VALIDATE_PATTERN.number, "Only numbers allowed"),
-  about: z.string().max(100, "Maximum 100 characters").regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
+  about: z.string().max(300, "Maximum 100 characters").regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
   type: z.string(),
   address: z.object({
     address: z.string().min(1, "Required"),

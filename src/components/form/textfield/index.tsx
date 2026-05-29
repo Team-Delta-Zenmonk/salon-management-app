@@ -52,7 +52,7 @@ const TextField = <T extends FieldValues>({
   const handleInput = (e: any) => {
     if (extraSpacesNotAllowed) {
       const input = e.target;
-      const cleaned = input.value.replaceAll(/^\s+/, "").replaceAll(/\s{2,}/g, " ");
+      const cleaned = input.value.replace(/^\s+/, "").replaceAll(/\s{2,}/g, " ");
       if (input.value !== cleaned) {
         const diff = input.value.length - cleaned.length;
         const caretPos = Math.max(input.selectionStart - diff, 0);

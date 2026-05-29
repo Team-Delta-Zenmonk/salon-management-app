@@ -18,6 +18,7 @@ import type { RootState } from "../../../../store/store";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { createServiceService } from "../../../../features/service/create-service/create-service.service";
 import { updateServiceAction } from "../../../../features/service/update-service/update-service.action";
+import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 
 interface ServiceDialogProps {
   open: boolean;
@@ -103,8 +104,9 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
       onCreated?.();
       onClose();
     } catch (err: any) {
+      console.log(err?.response?.data?.errors?.[0]?.message);
       callSnack(
-        err?.response?.data?.message || (mode === "create" ? "Service Creation Failed" : "Service Update Failed"),
+        err?.response?.data?.errors?.[0]?.message || (mode === "create" ? "Service Creation Failed" : "Service Update Failed"),
         "error"
       );
     } finally {
@@ -186,6 +188,8 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 control={control}
                 identifier="service-name"
                 disabled={isLoading}
+                maxLength={30}
+                pattern={VALIDATE_PATTERN.alphabet}
               />
             </Box>
 
@@ -198,6 +202,8 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 control={control}
                 identifier="service-description"
                 disabled={isLoading}
+                maxLength={100}
+                pattern={VALIDATE_PATTERN.alphabet}
               />
             </Box>
 
@@ -329,9 +335,9 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
             <Button onClick={onClose} disabled={isLoading}>
               Back
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isLoading} 
+            <Button
+              type="submit"
+              disabled={isLoading}
               startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}
             >
               {mode === "create" ? (isLoading ? "Creating..." : "Create") : (isLoading ? "Saving..." : "Save")}

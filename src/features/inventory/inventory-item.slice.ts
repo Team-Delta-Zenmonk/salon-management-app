@@ -41,12 +41,12 @@ export const inventoryItemSlice = createSlice({
     builder.addCase(listInventoryItemsAction.fulfilled, (state, action) => {
       const { data, total, page, limit } = action.payload;
 
-      if (action.meta.arg.page && action.meta.arg.page > 1) {
+      if (page === 1) {
+        state.data = data;
+      } else {
         const existingUuids = new Set(state.data.map((item) => item.uuid));
         const newItems = data.filter((item: InventoryItem) => !existingUuids.has(item.uuid));
         state.data = [...state.data, ...newItems];
-      } else {
-        state.data = data;
       }
 
       state.total = total;

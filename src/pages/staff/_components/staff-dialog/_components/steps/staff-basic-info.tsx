@@ -6,6 +6,7 @@ import TextField from "../../../../../../components/form/textfield";
 import DatePicker from "../../../../../../components/form/date-picker";
 import Select from "../../../../../../components/form/select";
 import { GenderOptions } from "../../../../../../common/enums/gender.enum";
+import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
 
 export default function StaffBasicInformation({ control, disabled }: Readonly<{ control: Control<StaffForm>; disabled: boolean }>) {
   return (
@@ -20,6 +21,8 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
             control={control}
             identifier="staff-first"
             disabled={disabled}
+            pattern={VALIDATE_PATTERN.alphabet}
+            maxLength={30}
           />
         </Box>
 
@@ -32,6 +35,8 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
             control={control}
             identifier="staff-last"
             disabled={disabled}
+            pattern={VALIDATE_PATTERN.alphabet}
+            maxLength={30}
           />
         </Box>
       </Box>
@@ -46,6 +51,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
             control={control}
             identifier="staff-email"
             disabled={disabled}
+            maxLength={50}
           />
         </Box>
 
@@ -73,7 +79,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
             control={control}
             identifier="staff-phone"
             disabled={disabled}
-            pattern={/^\d*$/}
+            pattern={VALIDATE_PATTERN.number}
             maxLength={10}
           />
         </Box>

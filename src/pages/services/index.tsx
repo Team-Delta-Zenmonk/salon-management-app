@@ -26,7 +26,7 @@ export default function Services() {
 
   return (
     <Box className="flex flex-col flex-1 min-h-0 w-full">
-      <Box className="flex justify-between items-start px-8 pb-6 shrink-0">
+      <Box className="flex flex-wrap justify-between items-center px-4 md:px-8 pb-6 shrink-0 gap-4">
         <Box>
           <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900) mb-2">
             Service Management

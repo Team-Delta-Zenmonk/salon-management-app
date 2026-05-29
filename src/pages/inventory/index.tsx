@@ -14,6 +14,7 @@ import { AddItemStepperModal } from "./_components/add-item-stepper-modal";
 import { InventoryFilters } from "./_components/inventory-filters";
 import { fetchItemCategoriesAction } from "../../features/inventory/list-inventory-items-category/list-inventory-items-category.action";
 import type { InventoryTransaction } from "../../features/inventory/inventory-log.slice";
+import styles from "./inventory.module.scss";
 
 const PAGE_LIMIT = 10;
 
@@ -138,6 +139,23 @@ export default function Inventory() {
     }
   };
 
+  const handleTransactionPageChange = async (_event: unknown, newPage: number) => {
+    if (transactionLoading) return;
+    setTransactionLoading(true);
+    try {
+      await dispatch(listInventoryLogsAction({
+        page: newPage + 1, // TablePagination is 0-based, API is 1-based
+        limit: PAGE_LIMIT,
+        search: debouncedSearch,
+        ...getSortParams(sortBy),
+      })).unwrap();
+    } catch (error) {
+      console.error("Error fetching transactions page:", error);
+    } finally {
+      setTransactionLoading(false);
+    }
+  };
+
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSearchParams({ tab: newValue === 0 ? "logs" : "stock" });
   };
@@ -181,53 +199,53 @@ export default function Inventory() {
   const transactionHasMore = Number(transactionTotal) > 0 && transactionData.length < Number(transactionTotal);
 
   return (
-    <Box p={{ xs: 2, sm: 3 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={1}>
-        <Typography variant="h4" fontWeight="bold">
-          Inventory
-        </Typography>
-        <Box display="flex" gap={2} flexWrap="wrap">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AssignmentIcon sx={{ color: "common.white" }} />}
-            onClick={() => setIsLogTransactionOpen(true)}
-            sx={{ fontWeight: "bold" }}
-          >
-            Add Stock Entry
-          </Button>
+    <Box className="flex flex-col flex-1 min-h-0 w-full pb-12">
+      <Box className={styles.stickyContainer}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={1}>
+          <Typography variant="h4" fontWeight="bold">
+            Inventory
+          </Typography>
+          <Box display="flex" gap={2} flexWrap="wrap">
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AssignmentIcon sx={{ color: "common.white" }} />}
+              onClick={() => setIsLogTransactionOpen(true)}
+              sx={{ fontWeight: "bold" }}
+            >
+              Add Stock Entry
+            </Button>
+          </Box>
+        </Box>
+
+        <InventoryFilters
+          activeTab={activeTab}
+          searchTerm={searchTerm}
+          onSearch={setSearchTerm}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          categoryUuid={categoryUuid}
+          onCategoryChange={setCategoryUuid}
+          itemType={itemType}
+          onItemTypeChange={setItemType}
+          categories={categories}
+        />
+
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs value={activeTab} onChange={handleTabChange} aria-label="inventory tabs">
+            <Tab label="Inventory Logs" />
+            <Tab label="Current Stocks" />
+          </Tabs>
         </Box>
       </Box>
 
-      <InventoryFilters
-        activeTab={activeTab}
-        searchTerm={searchTerm}
-        onSearch={setSearchTerm}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        categoryUuid={categoryUuid}
-        onCategoryChange={setCategoryUuid}
-        itemType={itemType}
-        onItemTypeChange={setItemType}
-        categories={categories}
-      />
-
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="inventory tabs">
-          <Tab label="Inventory Logs" />
-          <Tab label="Current Stocks" />
-        </Tabs>
-      </Box>
-
-      {activeTab === 1 && (
+      <Box className="flex-1 min-h-0 overflow-y-auto" id="inventoryScrollableDiv">
+        {activeTab === 1 && (
         <>
           <Box sx={{ color: "primary.900", mb: 1, fontWeight: "bold", px: 1 }}>
             Total Items ({stockTotal})
           </Box>
-          <Box
-            id="inventoryScrollDiv"
-            sx={{ height: "calc(100vh - 420px)", overflowY: "auto", pr: 1 }}
-          >
+          <Box sx={{ pr: 1 }}>
             <StockTable
               data={stockData}
               loading={stockLoading}
@@ -241,10 +259,7 @@ export default function Inventory() {
 
       {activeTab === 0 && (
         <Box
-          id="logScrollDiv"
           sx={{
-            height: "calc(100vh - 420px)",
-            overflowY: "auto",
             pr: 1,
             width: "100%",
             maxWidth: "100%",
@@ -256,7 +271,7 @@ export default function Inventory() {
             total={transactionTotal}
             page={transactionPage}
             limit={PAGE_LIMIT}
-            onPageChange={() => { }}
+            onPageChange={handleTransactionPageChange}
             loading={transactionLoading}
             onRowClick={handleTransactionRowClick}
             isMobile={isMobile}
@@ -265,6 +280,7 @@ export default function Inventory() {
           />
         </Box>
       )}
+      </Box>
 
       <AddItemStepperModal
         open={isCreateItemOpen}

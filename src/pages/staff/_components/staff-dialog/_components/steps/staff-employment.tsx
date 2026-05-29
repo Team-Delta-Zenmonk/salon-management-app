@@ -5,6 +5,7 @@ import TextField from "../../../../../../components/form/textfield";
 import DatePicker from "../../../../../../components/form/date-picker";
 import FilePicker from "../../../../../../components/form/file-picker";
 import { uploadImages } from "../../../../../../features/upload-images/upload-images.service";
+import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
 
 export default function StaffEmployment({ control, disabled }: Readonly<{ control: Control<StaffForm>; disabled: boolean }>) {
   return (
@@ -19,6 +20,8 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             control={control}
             identifier="staff-title"
             disabled={disabled}
+            pattern={VALIDATE_PATTERN.alphabet}
+            maxLength={30}
           />
         </Box>
 
@@ -70,6 +73,8 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           control={control}
           identifier="staff-address"
           disabled={disabled}
+          pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
+          maxLength={100}
         />
       </Box>
 
@@ -83,6 +88,8 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             control={control}
             identifier="staff-ec-name"
             disabled={disabled}
+            pattern={VALIDATE_PATTERN.alphabet}
+            maxLength={30}
           />
         </Box>
 
@@ -95,6 +102,8 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             control={control}
             identifier="staff-ec-phone"
             disabled={disabled}
+            pattern={VALIDATE_PATTERN.number}
+            maxLength={10}
           />
         </Box>
       </Box>

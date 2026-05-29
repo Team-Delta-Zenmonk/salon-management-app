@@ -25,7 +25,6 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
       await createCategoryService({
         name: category.name,
         description: category.description,
-        logo: category.logo,
       });
       await dispatch(listCategoriesAction({ page: 1, limit: 20 })).unwrap();
       callSnack("Category created successfully", "success");
@@ -63,7 +62,9 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
       <DialogContent className={styles.dialogContent}>
         <Box className="flex flex-col gap-6 py-4">
           <Box className="flex items-center gap-4">
-            <Avatar src={category.logo} alt={category.name} sx={{ width: 80, height: 80 }} />
+            <Avatar alt={category.name} sx={{ width: 80, height: 80, fontSize: 32 }}>
+              {category.name.charAt(0).toUpperCase()}
+            </Avatar>
             <Box className="flex-1">
               <Typography variant="h6" fontWeight="bold" className="text-(--primary-900) mb-1">
                 {category.name}
@@ -78,7 +79,7 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
           <Box className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <Typography variant="body2" className="text-blue-900">
               <strong>Note:</strong> Clicking "Create Category" will add this category to your categories list with the
-              predefined name, description, and logo.
+              predefined name and description.
             </Typography>
           </Box>
         </Box>

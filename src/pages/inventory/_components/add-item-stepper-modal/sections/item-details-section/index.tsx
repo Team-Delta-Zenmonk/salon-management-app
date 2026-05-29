@@ -19,6 +19,7 @@ import { callSnack } from "../../../../../../components/snackbar";
 import { createInventoryItemService as createInventoryItem } from "../../../../../../features/inventory/create-inventory-item/create-inventory-item.service";
 import type { ItemCategory } from "../../../../../../features/inventory/types/category.type";
 import { inventoryItemSchema } from "../../../schema/inventory-item.schema";
+import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
 
 interface ItemDetailsSectionProps {
   selectedCategory: ItemCategory | null;
@@ -121,6 +122,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 placeholder="e.g., Haircare Shampoo"
                 maxLength={30}
                 disabled={loading}
+                pattern={VALIDATE_PATTERN.alphabet}
               />
             </Box>
 
@@ -133,8 +135,9 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 control={control}
                 label="Brand Name"
                 placeholder="e.g., BrandName"
-                maxLength={20}
+                maxLength={30}
                 disabled={loading}
+                pattern={VALIDATE_PATTERN.alphabet}
               />
             </Box>
 
