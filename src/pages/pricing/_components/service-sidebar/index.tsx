@@ -1,66 +1,27 @@
-import { Box, Typography, IconButton, Collapse, CircularProgress } from "@mui/material";
-import { ExpandMore, ChevronRight } from "@mui/icons-material";
-import { useState } from "react";
+import { Box, Typography, Avatar } from "@mui/material";
 import clsx from "clsx";
 import type { ServiceType } from "../../types/staff-service.types";
+import { CategoryOutlined } from "@mui/icons-material";
+import { useEffect } from "react";
 
 interface ServiceSideBarProps {
   services: ServiceType[];
   selectedServiceUuid: string | null;
   onSelectService: (uuid: string) => void;
-  onExpandParent: (uuid: string) => Promise<void> | void;
-  loadingMap: Record<string, boolean>;
+  onExpandParent?: (uuid: string) => Promise<void> | void;
+  loadingMap?: Record<string, boolean>;
 }
 
 export default function ServiceSidebar({
   services,
   selectedServiceUuid,
   onSelectService,
-  onExpandParent,
-  loadingMap,
 }: Readonly<ServiceSideBarProps>) {
-  const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
-
-  const toggle = async (uuid: string) => {
-    const next = !openMap[uuid];
-    setOpenMap((p) => ({ ...p, [uuid]: next }));
-    if (next) await onExpandParent(uuid);
-  };
-
-  const renderChildren = (s: ServiceType, loading: boolean) => {
-    if (loading) {
-      return (
-        <Box className="flex items-center gap-2 text-gray-500 text-sm py-2">
-          <CircularProgress size={16} /> Loading subservices...
-        </Box>
-      );
+  useEffect(() => {
+    if (services.length > 0 && !selectedServiceUuid) {
+      onSelectService(services[0].uuid);
     }
-
-    if ((s.children?.length ?? 0) === 0) {
-      return (
-        <Typography className="text-sm text-gray-500 py-1">No sub-services</Typography>
-      );
-    }
-
-    return (
-      <>
-        <Typography className="text-xs text-gray-500 font-medium">Sub-services</Typography>
-        {s.children!.map((child) => (
-          <Box key={child.uuid} className="p-2 border border-gray-200 rounded-md bg-white">
-            <Typography className="truncate text-sm font-medium text-gray-800">
-              {child.name}
-            </Typography>
-            <Typography className="text-xs text-gray-500">
-              Base: ₹{child.price ?? "-"} · {child.duration ?? "-"}m · {child.price_type ?? "-"}
-            </Typography>
-            <Typography className="text-xs text-sky-800 mt-1">
-              Adjust staff pricing from the right panel
-            </Typography>
-          </Box>
-        ))}
-      </>
-    );
-  };
+  }, [services, selectedServiceUuid, onSelectService]);
 
   return (
     <Box className="h-full flex flex-col">
@@ -68,60 +29,51 @@ export default function ServiceSidebar({
         <Typography fontWeight="bold" className="text-(--primary-900)">
           Services
         </Typography>
-        <Typography className="text-xs text-gray-500 mt-1">Main services and their sub-services.</Typography>
+        <Typography className="text-xs text-gray-500 mt-1">
+          Select a main service to manage its assigned staff.
+        </Typography>
       </Box>
 
       <Box className="flex-1 min-h-0 overflow-y-auto px-3 pb-4">
-        <Box className="flex flex-col gap-2">
+        <Box className="flex flex-col gap-2 mt-2">
           {services.map((s) => {
             const isSelected = selectedServiceUuid === s.uuid;
-            const isOpen = !!openMap[s.uuid];
-            const loading = !!loadingMap[s.uuid];
 
             return (
-              <Box key={s.uuid} className="flex flex-col">
-                <Box
+              <Box
+                key={s.uuid}
+                className={clsx(
+                  "flex items-center gap-3 p-3 rounded-md cursor-pointer border transition-colors",
+                  isSelected
+                    ? "bg-indigo-50 border-indigo-200 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+                    : "bg-white border-gray-200 hover:bg-gray-50",
+                )}
+                onClick={() => onSelectService(s.uuid)}
+              >
+                <Avatar
+                  src={s.logo ?? undefined}
                   className={clsx(
-                    "flex items-center gap-2 p-2 rounded-md cursor-pointer border",
-                    isSelected ? "bg-indigo-50 border-indigo-200" : "bg-white border-gray-200 hover:bg-gray-50"
+                    "w-10 h-10 text-sm",
+                    isSelected ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-400",
                   )}
-                  onClick={() => onSelectService(s.uuid)}
                 >
-                  <Box className="w-[34px] flex items-center justify-center shrink-0">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggle(s.uuid);
-                      }}
-                    >
-                      {isOpen ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
-                    </IconButton>
-                  </Box>
+                  <CategoryOutlined fontSize="small" />
+                </Avatar>
 
-                  <Box className="min-w-0 flex-1">
-                    <Typography className="truncate" fontWeight={isSelected ? "bold" : "medium"}>
-                      {s.name}
-                    </Typography>
-                    <Typography className="text-xs text-gray-500 truncate">
-                      Base: ₹{s.price ?? "-"} · {s.duration ?? "-"}m · {s.price_type ?? "-"}
-                    </Typography>
-                  </Box>
+                <Box className="min-w-0 flex-1">
+                  <Typography className="truncate text-sm text-gray-900" fontWeight={isSelected ? "bold" : "medium"}>
+                    {s.name}
+                  </Typography>
+                  <Typography className="text-xs text-gray-500 truncate">
+                    Base: ₹{s.price ?? "-"} · {s.duration ?? "-"}m
+                  </Typography>
                 </Box>
-
-                <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                  <Box className="pl-[34px] pb-2 pr-2">
-                    <Box className="ml-2 border-l border-gray-200 pl-4 flex flex-col gap-2">
-                      {renderChildren(s, loading)}
-                    </Box>
-                  </Box>
-                </Collapse>
               </Box>
             );
           })}
 
           {services.length === 0 && (
-            <Box className="border border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500 text-sm">
+            <Box className="border border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500 text-sm mt-2">
               No services available.
             </Box>
           )}

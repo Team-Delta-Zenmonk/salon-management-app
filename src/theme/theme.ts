@@ -537,6 +537,15 @@ const theme = createTheme({
         },
       },
     },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        label: {
+          fontSize: "14px",
+          fontWeight: 500,
+          color: "var(--secondary)",
+        },
+      },
+    },
     MuiFormLabel: {
       styleOverrides: {
         root: {
@@ -598,6 +607,7 @@ const theme = createTheme({
     MuiCheckbox: {
       styleOverrides: {
         root: {
+          padding: "8px",
           color: "var(--secondary-700)",
           "&.Mui-checked": {
             color: "var(--primary)",

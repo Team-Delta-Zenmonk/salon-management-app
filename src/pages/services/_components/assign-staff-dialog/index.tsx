@@ -20,6 +20,7 @@ import { assignStaffToService } from "../../../../features/staff-service/staff-s
 import { unassignStaffFromService } from "../../../../features/staff-service/unassign-staff-service.service";
 import styles from "./list-staff.module.scss";
 import clsx from "clsx";
+
 interface AssignStaffDialogProps {
   open: boolean;
   onClose: () => void;
@@ -51,6 +52,7 @@ export default function AssignStaffDialog({
   const { handleSubmit, reset } = methods;
 
   const { data: allStaff } = useAppSelector((state: RootState) => state.staff);
+  const { data: allServices } = useAppSelector((state: RootState) => state.service);
   const salonUUID = useAppSelector((state) => state.auth.salon.uuid);
   const [assignedStaffServices, setAssignedStaffServices] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
@@ -59,7 +61,7 @@ export default function AssignStaffDialog({
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    dispatch(listStaffAction({}));
+    dispatch(listStaffAction({ page: 1, limit: 1000 }));
     listServiceStaff(serviceUuid, salonUUID)
       .then((res) => {
         setAssignedStaffServices(res || []);
@@ -80,7 +82,7 @@ export default function AssignStaffDialog({
           const staffUuid = staffIdToUuidMap.get(ss.staff_id);
           return staffUuid ? [staffUuid, ss] : null;
         })
-        .filter(Boolean) as [string, any][]
+        .filter(Boolean) as [string, any][],
     );
   }, [assignedStaffServices, staffIdToUuidMap]);
 
@@ -104,15 +106,45 @@ export default function AssignStaffDialog({
 
     try {
       const selectedStaffUuids = values.staff_ids;
-      const toAssign = selectedStaffUuids
+
+      const parentServiceObj = allServices.find((s) => s.uuid === serviceUuid);
+      const childrenServices = parentServiceObj
+        ? allServices.filter((s) => s.parent_id && String(s.parent_id) === String(parentServiceObj.id))
+        : [];
+
+      const allServicesToAssign = [
+        ...(childrenServices.length === 0
+          ? [
+              {
+                uuid: serviceUuid,
+                price_type: service.price_type,
+                price: service.price,
+                duration: service.duration,
+              },
+            ]
+          : []),
+        ...childrenServices.map((s) => ({
+          uuid: s.uuid,
+          price_type: s.price_type,
+          price: s.price ? Number(s.price) : undefined,
+          duration: s.duration ? Number(s.duration) : undefined,
+        })),
+      ];
+
+      const toAssign: any[] = [];
+      selectedStaffUuids
         .filter((staffUuid) => !assignedStaffMap.has(staffUuid))
-        .map((staffUuid) => ({
-          service_uuid: serviceUuid,
-          staff_uuid: staffUuid,
-          price_type: service.price_type,
-          price: service.price,
-          duration: service.duration,
-        }));
+        .forEach((staffUuid) => {
+          allServicesToAssign.forEach((srv) => {
+            toAssign.push({
+              service_uuid: srv.uuid,
+              staff_uuid: staffUuid,
+              price_type: srv.price_type,
+              price: srv.price,
+              duration: srv.duration,
+            });
+          });
+        });
 
       const toUnassign = Array.from(assignedStaffMap.entries())
         .filter(([staffUuid]) => !selectedStaffUuids.includes(staffUuid))
@@ -123,7 +155,7 @@ export default function AssignStaffDialog({
       }
 
       if (toUnassign.length > 0) {
-        await unassignStaffFromService({ staff_services: toUnassign });
+        await unassignStaffFromService({ staff_services: toUnassign, cascade: true });
       }
 
       callSnack("Staff assignment updated successfully", "success");
@@ -147,44 +179,47 @@ export default function AssignStaffDialog({
       maxWidth="sm"
       classes={{ paper: styles.dialog }}
     >
-      <DialogTitle>Assign Staff</DialogTitle>
+      <DialogTitle sx={{ pb: 0 }} className={styles.dialogTitle}>
+        Assign Staff
+      </DialogTitle>
 
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent className={clsx(styles.dialogContent)}>
-            {loading ? (
-              <Box className="flex justify-center py-6">
-                <CircularProgress />
-              </Box>
-            ) : (
-              <>
-                <Typography variant="body2">Select staff members to assign to this service</Typography>
+        <DialogContent dividers className={clsx(styles.dialogContent)} sx={{ maxHeight: 400, overflowY: "auto" }}>
+          {loading ? (
+            <Box className="flex justify-center py-6">
+              <CircularProgress />
+            </Box>
+          ) : (
+            <form id="assign-staff-form" onSubmit={handleSubmit(onSubmit)}>
+              <Typography variant="body2" className="text-(--app-muted) mb-4">
+                Select staff members to assign to this service
+              </Typography>
 
-                <CheckboxGroup
-                  name="staff_ids"
-                  control={methods.control}
-                  identifier="assign-staff"
-                  options={staffOptions}
-                  optionGap={2}
-                />
-              </>
-            )}
-          </DialogContent>
+              <CheckboxGroup
+                name="staff_ids"
+                control={methods.control}
+                identifier="assign-staff"
+                options={staffOptions}
+                optionGap={2}
+              />
+            </form>
+          )}
+        </DialogContent>
 
-          <DialogActions className={styles.dialogActions}>
-            <Button onClick={onClose} disabled={saving}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={saving}
-              startIcon={saving ? <CircularProgress size={18} /> : null}
-            >
-              Save
-            </Button>
-          </DialogActions>
-        </form>
+        <DialogActions className={styles.dialogActions}>
+          <Button onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="assign-staff-form"
+            variant="contained"
+            disabled={saving}
+            startIcon={saving ? <CircularProgress size={18} /> : null}
+          >
+            Save
+          </Button>
+        </DialogActions>
       </FormProvider>
     </Dialog>
   );

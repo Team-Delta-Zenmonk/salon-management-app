@@ -13,13 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
 import { callSnack } from "../../../../components/snackbar";
-import CheckboxGroup from "../../../../components/form/checkbox";
+import CheckboxTree from "../../../../components/form/checkbox-tree";
 import { listServicesAction } from "../../../../features/service/list-services/list-service.action";
 import { listStaffServices } from "../../../../features/staff/list-services/list-services.service";
 import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
 import { unassignStaffFromService } from "../../../../features/staff-service/unassign-staff-service.service";
 import styles from "./assign-services.module.scss";
 import clsx from "clsx";
+
 interface AssignServicesDialogProps {
   open: boolean;
   onClose: () => void;
@@ -30,7 +31,12 @@ interface FormValues {
   service_uuids: string[];
 }
 
-export default function AssignServicesDialog({ open, onClose, staff, onAssigned }: Readonly<AssignServicesDialogProps>) {
+export default function AssignServicesDialog({
+  open,
+  onClose,
+  staff,
+  onAssigned,
+}: Readonly<AssignServicesDialogProps>) {
   const dispatch = useAppDispatch();
 
   const methods = useForm<FormValues>({
@@ -50,7 +56,7 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
 
     setLoading(true);
 
-    dispatch(listServicesAction({}));
+    dispatch(listServicesAction({ page: 1, limit: 1000 }));
 
     listStaffServices(staff.uuid)
       .then((res) => {
@@ -72,7 +78,7 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
           const serviceUuid = serviceIdToUuidMap.get(ss.service_id);
           return serviceUuid ? [serviceUuid, ss] : null;
         })
-        .filter(Boolean) as [string, any][]
+        .filter(Boolean) as [string, any][],
     );
   }, [assignedStaffServices, serviceIdToUuidMap]);
 
@@ -85,9 +91,24 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
   }, [assignedServiceMap, services, reset]);
 
   const serviceOptions = useMemo(() => {
-    return services.map((service) => ({
+    const rootServices = services.filter((s) => s.parent_id === null);
+
+    const subServicesMap = services.reduce<Record<string, any[]>>((acc, s) => {
+      if (s.parent_id) {
+        const pId = String(s.parent_id);
+        acc[pId] = acc[pId] || [];
+        acc[pId].push(s);
+      }
+      return acc;
+    }, {});
+
+    return rootServices.map((service) => ({
       label: service.name,
       value: service.uuid,
+      children: (subServicesMap[String(service.id)] || []).map((sub) => ({
+        label: sub.name,
+        value: sub.uuid,
+      })),
     }));
   }, [services]);
 
@@ -95,7 +116,13 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
     setSaving(true);
 
     try {
-      const selectedServiceUuids = values.service_uuids;
+      const selectedServiceUuids = values.service_uuids.filter((uuid) => {
+        const service = services.find((s) => s.uuid === uuid);
+        if (!service) return false;
+        const hasChildren = services.some((s) => s.parent_id && String(s.parent_id) === String(service.id));
+        return !hasChildren;
+      });
+
       const toAssign = selectedServiceUuids
         .filter((serviceUuid) => !assignedServiceMap.has(serviceUuid))
         .map((serviceUuid) => {
@@ -143,44 +170,46 @@ export default function AssignServicesDialog({ open, onClose, staff, onAssigned 
       maxWidth="sm"
       classes={{ paper: styles.dialog }}
     >
-      <DialogTitle>Assign Services</DialogTitle>
+      <DialogTitle sx={{ pb: 0 }} className={styles.dialogTitle}>
+        Assign Services
+      </DialogTitle>
 
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent className={clsx(styles.dialogContent)}>
-            {loading ? (
-              <Box className="flex justify-center py-6">
-                <CircularProgress />
-              </Box>
-            ) : (
-              <>
-                <Typography variant="body2">Select services to assign to this staff member</Typography>
+        <DialogContent dividers className={clsx(styles.dialogContent)} sx={{ maxHeight: 400, overflowY: "auto" }}>
+          {loading ? (
+            <Box className="flex justify-center py-6">
+              <CircularProgress />
+            </Box>
+          ) : (
+            <form id="assign-services-form" onSubmit={handleSubmit(onSubmit)}>
+              <Typography variant="body2" className="text-(--app-muted) mb-4">
+                Select services to assign to this staff member
+              </Typography>
 
-                <CheckboxGroup
-                  name="service_uuids"
-                  control={methods.control}
-                  identifier="assign-services"
-                  options={serviceOptions}
-                  optionGap={2}
-                />
-              </>
-            )}
-          </DialogContent>
+              <CheckboxTree
+                name="service_uuids"
+                control={methods.control}
+                identifier="assign-services"
+                options={serviceOptions}
+              />
+            </form>
+          )}
+        </DialogContent>
 
-          <DialogActions className={styles.dialogActions}>
-            <Button onClick={onClose} disabled={saving}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={saving}
-              startIcon={saving ? <CircularProgress size={18} /> : null}
-            >
-              Save
-            </Button>
-          </DialogActions>
-        </form>
+        <DialogActions className={styles.dialogActions}>
+          <Button onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="assign-services-form"
+            variant="contained"
+            disabled={saving}
+            startIcon={saving ? <CircularProgress size={18} /> : null}
+          >
+            Save
+          </Button>
+        </DialogActions>
       </FormProvider>
     </Dialog>
   );

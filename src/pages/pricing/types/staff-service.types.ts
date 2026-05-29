@@ -7,6 +7,7 @@ export type ServiceType = {
   price_type?: PriceType;
   price?: number;
   duration?: number;
+  logo?: string | null;
   children?: ServiceType[];
 };
 

@@ -1,10 +1,10 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import type { StaffPricingType } from "../../../../types/staff-service.types";
-import Select from "../../../../../../components/form/select";
-import { PriceTypeOptions } from "../../../../../../common/enums/price-type.enum";
-import TextField from "../../../../../../components/form/textfield";
+import type { StaffPricingType } from "../../types/staff-service.types";
+import Select from "../../../../components/form/select";
+import { PriceTypeOptions } from "../../../../common/enums/price-type.enum";
+import TextField from "../../../../components/form/textfield";
 
 type DialogContext = {
   staff_name: string;
@@ -25,7 +25,12 @@ type FormValues = {
   duration: string | number;
 };
 
-export default function StaffServicePricingDialog({ open, onClose, context, onSave }: Readonly<StaffServicePricingDialogProps>) {
+export default function StaffServicePricingDialog({
+  open,
+  onClose,
+  context,
+  onSave,
+}: Readonly<StaffServicePricingDialogProps>) {
   const { staff_name, service_name, current } = context;
   const [loading, setLoading] = useState(false);
 
@@ -37,7 +42,14 @@ export default function StaffServicePricingDialog({ open, onClose, context, onSa
     },
   });
 
-  const { handleSubmit, control, reset, watch, setValue, formState: { isDirty } } = methods;
+  const {
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    setValue,
+    formState: { isDirty },
+  } = methods;
 
   const priceType = watch("price_type");
   const isFree = priceType === "free";

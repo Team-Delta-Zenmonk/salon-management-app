@@ -1,6 +1,7 @@
 import { axiosInstance } from "../../config/axios";
 interface BulkUnassignPayload {
   staff_services: string[];
+  cascade?: boolean;
 }
 
 export const unassignStaffFromService = async (payload: BulkUnassignPayload) => {

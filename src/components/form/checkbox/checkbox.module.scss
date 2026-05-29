@@ -1,16 +1,5 @@
-.checkbox {
-  background-color: var(--white);
-  padding: 10px;
-  margin-right: 2px;
-}
-
-.checkboxLabel {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-  color: var(--secondary);
-}
-
-.checkboxControlLabel{
-  margin-right: 32px !important;
+.checkboxControlLabel {
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
 }
