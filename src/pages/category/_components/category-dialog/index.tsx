@@ -55,7 +55,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
 
       if (mode === "create") {
         await createCategoryService({
-          name: data?.name,
+          name: data?.name?.trim().toLowerCase(),
           description: data?.description,
           logo: logoUrl
         });
@@ -67,7 +67,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
           updateCategoryAction({
             uuid: category?.uuid,
             body: {
-              name: data?.name,
+              name: data?.name?.trim().toLowerCase(),
               description: data?.description,
               logo: logoUrl
             },
@@ -118,9 +118,9 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 name="name"
                 control={control}
                 identifier="category-name"
-                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
+                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
                 disabled={isLoading}
-                maxLength={30}
+                maxLength={50}
               />
             </Box>
 
@@ -133,7 +133,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 control={control}
                 identifier="category-description"
                 disabled={isLoading}
-                pattern={VALIDATE_PATTERN.alphabet}
+                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
                 maxLength={100}
               />
             </Box>

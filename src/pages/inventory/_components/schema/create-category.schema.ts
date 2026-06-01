@@ -5,7 +5,7 @@ export const createCategorySchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "Required").max(30, "Max 30 characters")
+    .min(1, "Required").max(50, "Max 50 characters")
     .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, "Only alphanumeric, spaces, hyphens, apostrophes, and dots allowed"),
 });
 

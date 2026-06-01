@@ -109,9 +109,9 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
               control={control}
               label="Category Name"
               placeholder="Enter category name"
-              maxLength={30}
+              maxLength={50}
               disabled={loading}
-              pattern={VALIDATE_PATTERN.alphabet}
+              pattern={VALIDATE_PATTERN.alphabetWithSpecial}
             />
           </Box>
         </DialogContent>

@@ -8,7 +8,7 @@ export const bookingServiceSchema = z.object({
 });
 
 export const bookingSchema = z.object({
-  customer_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(30, { message: "Max 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  customer_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(50, { message: "Max 50 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
   customer_phone: z.string({ message: "Required" }).min(10, { message: "Phone number must be at least 10 digits" }).regex(/^\d{10}$/, { message: "Phone number must be exactly 10 digits" }),
   services: z.array(bookingServiceSchema).min(1, { message: "At least one service is required" }),
   booking_date: z.any(),

@@ -86,7 +86,15 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
   const watchedServices = useWatch({ control, name: "services" });
 
-  const allServiceOptions = useMemo(() => services.map((s) => ({ label: s.name, value: String(s.id) })), [services]);
+  const allServiceOptions = useMemo(() => {
+    const parentIds = new Set<number>();
+    services.forEach((s: any) => {
+      if (s.parent_id) parentIds.add(s.parent_id);
+    });
+    return services
+      .filter((s: any) => !parentIds.has(s.id))
+      .map((s: any) => ({ label: s.name, value: String(s.id) }));
+  }, [services]);
 
   const getServiceOptionsForRow = useCallback(
     (rowIndex: number) => {
@@ -234,7 +242,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
       const payload = {
         admin_booking: {
-          name: values.customer_name,
+          name: values.customer_name?.trim().toLowerCase(),
           phone: values.customer_phone,
         },
         booking_date: bookingDate.format("YYYY-MM-DD"),
@@ -268,7 +276,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     }
   };
 
-  const canAddMore = fields.length < services.length;
+  const canAddMore = fields.length < allServiceOptions.length;
 
   return (
     <Dialog
@@ -301,7 +309,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Enter name"
                   control={control as any}
                   identifier="booking-customer-name"
-                  maxLength={30}
+                  maxLength={50}
                   pattern={VALIDATE_PATTERN.alphabet}
                 />
               </Box>

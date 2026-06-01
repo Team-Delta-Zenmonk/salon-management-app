@@ -6,8 +6,8 @@ import { DISCOUNT_TYPE } from "../../../../common/enums/discount-type.enum";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 
 export const serviceSchema = z.object({
-  name: z.string({ message: "Required" }).min(2, { message: "Minimum 2 characters" }).max(30, { message: "Maximum 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
-  description: z.string({ message: "Required" }).min(2, { message: "Minimum 2 characters" }).max(100, { message: "Maximum 100 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  name: z.string({ message: "Required" }).min(2, { message: "Minimum 2 characters" }).max(50, { message: "Maximum 30 characters" }).regex(VALIDATE_PATTERN.alphabetWithSpecial, { message: "Only alphabets and special characters are allowed" }),
+  description: z.string({ message: "Required" }).min(2, { message: "Minimum 2 characters" }).max(100, { message: "Maximum 100 characters" }).regex(VALIDATE_PATTERN.alphabetWithSpecial, { message: "Only alphabets and special characters are allowed" }),
   logo: CloudinaryFileSchema.nullable().optional(),
   category_id: z.string().optional().nullable(),
   duration: z.string({ message: "Required" }).min(1, { message: "Required" }),

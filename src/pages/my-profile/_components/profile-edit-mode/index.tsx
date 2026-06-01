@@ -57,7 +57,7 @@ const ProfileEditMode: React.FC<ProfileEditModeProps> = ({
               name="name"
               isEditing={true}
               control={control}
-              maxLength={30}
+              maxLength={50}
               pattern={VALIDATE_PATTERN.alphabet}
               rules={{ required: "Salon name is required" } as any}
             />
@@ -69,7 +69,7 @@ const ProfileEditMode: React.FC<ProfileEditModeProps> = ({
               name="owner_name"
               isEditing={true}
               control={control}
-              maxLength={30}
+              maxLength={50}
               pattern={VALIDATE_PATTERN.alphabet}
               rules={{ required: "Owner name is required" } as any}
             />

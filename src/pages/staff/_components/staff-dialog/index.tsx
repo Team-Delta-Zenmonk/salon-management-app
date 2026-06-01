@@ -70,8 +70,8 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
       const photos = data.photos || (mode === "update" ? staff?.photos : undefined);
 
       const payload = {
-        first_name: data.first_name,
-        last_name: data.last_name,
+        first_name: data.first_name?.trim().toLowerCase(),
+        last_name: data.last_name ? data.last_name.trim().toLowerCase() : undefined,
         email: data.email,
         phone_number: data.phone_number,
         additional_phone_number: data.additional_phone_number ?? null,

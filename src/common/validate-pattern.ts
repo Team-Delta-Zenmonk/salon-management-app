@@ -8,4 +8,5 @@ export const VALIDATE_PATTERN = {
   uppercase: /[A-Z]/,
   lowercase: /[a-z]/,
   specialChar: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
+  alphabetWithSpecial: /^(?!.* {2})[A-Za-zÀ-ÖØ-öø-ÿĀ-žƀ-ƶǍ-ǰȀ-ȳẽẼṅṄǹǸẏẎ@#$%^&*()_+\-={}|\\:;"'<>,.?/!`~ ]*$/,
 };

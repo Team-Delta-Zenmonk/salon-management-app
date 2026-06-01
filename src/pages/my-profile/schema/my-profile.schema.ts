@@ -17,11 +17,11 @@ const BusinessDaySchema = z.object({
 export const MyProfileSchema = z.object({
   name: z.string()
     .min(1, "Required")
-    .max(30, "Max 30 characters")
+    .max(50, "Max 50 characters")
     .regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
   owner_name: z.string()
     .min(1, "Required")
-    .max(30, "Max 30 characters")
+    .max(50, "Max 50 characters")
     .regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
   email: z.string().email(),
   phone: z.string()

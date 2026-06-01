@@ -56,8 +56,8 @@ const ActiveHoursSchema = z
   .optional();
 
 export const StaffSchema = z.object({
-  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(30, { message: "Max 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
-  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(30, { message: "Max 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(50, { message: "Max 50 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(50, { message: "Max 50 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
   email: z
     .string({ message: "Required" })
     .min(1, { message: "Required" })
@@ -90,7 +90,7 @@ export const StaffSchema = z.object({
       },
       { message: "Invalid date" }
     ),
-  title: z.string({ message: "Required" }).min(1, { message: "Required" }).max(30, { message: "Max 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed " }),
+  title: z.string({ message: "Required" }).min(1, { message: "Required" }).max(50, { message: "Max 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed " }),
   joining_date: z
     .any()
     .refine((val) => val !== null && val !== undefined && val !== "", {

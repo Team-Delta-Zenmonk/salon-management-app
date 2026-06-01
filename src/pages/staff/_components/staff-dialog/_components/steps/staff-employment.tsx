@@ -21,7 +21,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             identifier="staff-title"
             disabled={disabled}
             pattern={VALIDATE_PATTERN.alphabet}
-            maxLength={30}
+            maxLength={50}
           />
         </Box>
 
@@ -89,7 +89,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             identifier="staff-ec-name"
             disabled={disabled}
             pattern={VALIDATE_PATTERN.alphabet}
-            maxLength={30}
+            maxLength={50}
           />
         </Box>
 

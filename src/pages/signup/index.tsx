@@ -26,7 +26,7 @@ export default function SignUp() {
 
       const result = await registerSalon({
         email: data.email,
-        name: data.salon_name,
+        name: data.salon_name?.trim().toLowerCase(),
         password: data.password,
       });
 

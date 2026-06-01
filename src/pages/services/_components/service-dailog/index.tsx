@@ -47,7 +47,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
   const buildPayload = (data: ServiceForm, logoUrl: string | undefined) => {
     const payload: any = {
-      name: data.name,
+      name: data.name?.trim().toLowerCase(),
       description: data.description,
       gender: data.gender,
       price_type: data.price_type,
@@ -188,8 +188,8 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 control={control}
                 identifier="service-name"
                 disabled={isLoading}
-                maxLength={30}
-                pattern={VALIDATE_PATTERN.alphabet}
+                maxLength={50}
+                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
             </Box>
 
@@ -203,7 +203,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 identifier="service-description"
                 disabled={isLoading}
                 maxLength={100}
-                pattern={VALIDATE_PATTERN.alphabet}
+                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
             </Box>
 

@@ -1,4 +1,4 @@
-import { Box, Typography, Avatar, Chip, IconButton, Divider } from "@mui/material";
+import { Box, Typography, Avatar, Chip, IconButton } from "@mui/material";
 import { EditOutlined, DeleteOutlined, PhoneOutlined, EmailOutlined, CalendarTodayOutlined } from "@mui/icons-material";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useState } from "react";
@@ -111,96 +111,86 @@ export default function ListStaff({
           ) : null
         }
       >
-        <Box className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <Box className="flex flex-col gap-4">
           {staffs.map((staff) => (
             <Box
               key={staff.uuid}
-              className="bg-white border border-gray-200 rounded-lg p-6 w-full hover:shadow-md transition-shadow"
+              className="bg-white border border-gray-200 rounded-lg p-5 w-full"
             >
-              <Box className="flex items-start justify-between gap-4 mb-6">
-                <Box className="flex items-center gap-4 flex-1 min-w-0">
-                  <Avatar src={staff.photos?.url} alt={getFullName(staff)} />
+              <Box className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+                <Box className="flex items-center gap-4 min-w-0 md:w-[220px] md:shrink-0">
+                  <Avatar src={staff.photos?.url} alt={getFullName(staff)} sx={{ width: 44, height: 44 }} />
                   <Box className="min-w-0 flex-1">
-                    <Typography className="text-(--primary-900) truncate" fontWeight="bold">
+                    <Typography className="text-(--primary-900) truncate" fontWeight="bold" fontSize="0.95rem">
                       {getFullName(staff)}
                     </Typography>
-                    <Typography className="text-gray-600 text-sm truncate">{staff.title}</Typography>
+                    <Typography className="text-gray-500 text-sm truncate">{staff.title}</Typography>
                   </Box>
                 </Box>
 
-                <Box className="flex gap-2 shrink-0">
+                <Box className="flex flex-col md:flex-row gap-3 md:gap-6 flex-1 min-w-0">
+                  <Box className="flex items-center gap-2 min-w-0 md:flex-1">
+                    <PhoneOutlined className="text-lg text-gray-400 shrink-0" />
+                    <Box className="min-w-0 flex-1">
+                      <Typography className="text-gray-800 text-sm truncate">{staff.phone_number}</Typography>
+                      {staff.additional_phone_number && (
+                        <Typography className="text-gray-400 text-xs truncate">{staff.additional_phone_number}</Typography>
+                      )}
+                    </Box>
+                  </Box>
+
+                  <Box className="flex items-center gap-2 min-w-0 md:flex-1">
+                    <EmailOutlined className="text-lg text-gray-400 shrink-0" />
+                    <Typography className="text-gray-800 text-sm truncate flex-1 min-w-0">{staff.email}</Typography>
+                  </Box>
+                </Box>
+
+                <Box className="flex flex-wrap items-center gap-3 md:gap-4 md:shrink-0">
+                  {getGenderChip(staff.gender)}
+
+                  <Box className="flex items-center gap-1.5">
+                    <CalendarTodayOutlined className="text-base text-gray-400" />
+                    <Typography className="text-gray-600 text-sm">
+                      {formatDisplayDate(staff.joining_date)}
+                    </Typography>
+                  </Box>
+
+                  {staff.end_date && (
+                    <Typography className="text-red-500 text-sm font-medium">
+                      End: {formatDisplayDate(staff.end_date)}
+                    </Typography>
+                  )}
+                </Box>
+
+                <Box className="flex items-center gap-1 md:shrink-0 md:ml-auto">
                   <IconButton
                     title="Assign Services"
+                    size="small"
                     onClick={() => {
                       setSelectedStaff(staff);
                       setAssignOpen(true);
                     }}
                     disabled={deleteLoading}
                   >
-                    <AssignmentTurnedInOutlinedIcon className="text-purple-800!" />
+                    <AssignmentTurnedInOutlinedIcon className="text-purple-800!" fontSize="small" />
                   </IconButton>
                   <IconButton
                     onClick={() => handleEdit(staff)}
                     title="Edit Staff"
+                    size="small"
                     disabled={deleteLoading}
                   >
-                    <EditOutlined className="text-(--primary-800)!" />
+                    <EditOutlined className="text-(--primary-800)!" fontSize="small" />
                   </IconButton>
                   <IconButton
                     onClick={() => handleDelete(staff)}
                     title="Delete Staff"
+                    size="small"
                     disabled={deleteLoading}
                   >
-                    <DeleteOutlined className="text-(--error-800)!" />
+                    <DeleteOutlined className="text-(--error-800)!" fontSize="small" />
                   </IconButton>
                 </Box>
-              </Box>
-
-              <Divider className="my-6" />
-
-              <Box className="space-y-4 mb-6">
-                <Box className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl min-w-0">
-                  <PhoneOutlined className="text-xl text-gray-500 shrink-0" />
-                  <Box className="min-w-0 flex-1">
-                    <Typography className="fontWeightBold text-gray-900 truncate">{staff.phone_number}</Typography>
-                    {staff.additional_phone_number && (
-                      <Typography className="text-gray-500 text-sm truncate">{staff.additional_phone_number}</Typography>
-                    )}
-                  </Box>
-                </Box>
-
-                <Box className="flex items-center gap-3 p-3 bg-blue-50/50 rounded-xl min-w-0">
-                  <EmailOutlined className="text-xl text-gray-500 shrink-0" />
-                  <Typography className="text-gray-900 font-medium truncate flex-1 min-w-0">{staff.email}</Typography>
-                </Box>
-              </Box>
-
-              <Divider className="my-6" />
-
-              <Box className="space-y-4">
-                <Box className="flex items-center justify-between p-3 bg-green-50/50 rounded-xl">
-                  <Typography className="text-gray-600 text-sm font-medium">Gender</Typography>
-                  {getGenderChip(staff.gender)}
-                </Box>
-
-                <Box className="flex items-center justify-between p-3 bg-indigo-50/50 rounded-xl">
-                  <Box className="flex items-center gap-2">
-                    <CalendarTodayOutlined className="text-lg text-gray-500" />
-                    <Typography className="text-gray-600 text-sm font-medium">Joined</Typography>
-                  </Box>
-                  <Typography className="text-gray-900 fontWeightMedium">
-                    {formatDisplayDate(staff.joining_date)}
-                  </Typography>
-                </Box>
-
-                {staff.end_date && (
-                  <Box className="flex items-center justify-between p-3 bg-red-50/50 rounded-xl">
-                    <Typography className="text-gray-600 text-sm font-medium">End Date</Typography>
-                    <Typography className="text-red-600 fontWeightMedium">
-                      {formatDisplayDate(staff.end_date)}
-                    </Typography>
-                  </Box>
-                )}
               </Box>
             </Box>
           ))}

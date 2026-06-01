@@ -22,7 +22,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
             identifier="staff-first"
             disabled={disabled}
             pattern={VALIDATE_PATTERN.alphabet}
-            maxLength={30}
+            maxLength={50}
           />
         </Box>
 
@@ -36,7 +36,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
             identifier="staff-last"
             disabled={disabled}
             pattern={VALIDATE_PATTERN.alphabet}
-            maxLength={30}
+            maxLength={50}
           />
         </Box>
       </Box>

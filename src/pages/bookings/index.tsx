@@ -57,16 +57,18 @@ export default function BookingPage() {
     [staff],
   );
 
-  const serviceOptions = useMemo(
-    () => [
+  const serviceOptions = useMemo(() => {
+    const parentIds = new Set<number>();
+    services.forEach((s: any) => {
+      if (s.parent_id) parentIds.add(s.parent_id);
+    });
+    return [
       { label: "All Services", value: ALL_SERVICES_VALUE },
-      ...services.map((s) => ({
-        label: s.name,
-        value: s.uuid,
-      })),
-    ],
-    [services],
-  );
+      ...services
+        .filter((s: any) => !parentIds.has(s.id))
+        .map((s: any) => ({ label: s.name, value: s.uuid })),
+    ];
+  }, [services]);
 
   const mappedBookings = useMemo(() => {
     return bookings.map((booking) => {

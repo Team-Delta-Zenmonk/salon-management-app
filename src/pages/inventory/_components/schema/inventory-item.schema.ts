@@ -6,13 +6,13 @@ export const inventoryItemSchema = z.object({
     .string()
     .trim()
     .min(1, "Required")
-    .max(30, "Max 30 characters")
+    .max(30, "Max 50 characters")
     .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, "Only alphanumeric, spaces, hyphens, apostrophes, and dots allowed"),
   brand: z
     .string()
     .trim()
     .min(1, "Required")
-    .max(30, "Max 30 characters")
+    .max(30, "Max 50 characters")
     .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, "Only alphanumeric, spaces, hyphens, apostrophes, and dots allowed"),
   item_type: z.string().min(1, "Required"),
   category_id: z.string().min(1, "Required").optional().or(z.literal("")),

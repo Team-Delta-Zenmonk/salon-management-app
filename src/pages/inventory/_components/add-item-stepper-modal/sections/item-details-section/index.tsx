@@ -120,9 +120,9 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 control={control}
                 label="Item Name"
                 placeholder="e.g., Haircare Shampoo"
-                maxLength={30}
+                maxLength={50}
                 disabled={loading}
-                pattern={VALIDATE_PATTERN.alphabet}
+                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
             </Box>
 
@@ -135,9 +135,9 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 control={control}
                 label="Brand Name"
                 placeholder="e.g., BrandName"
-                maxLength={30}
+                maxLength={50}
                 disabled={loading}
-                pattern={VALIDATE_PATTERN.alphabet}
+                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
             </Box>
 

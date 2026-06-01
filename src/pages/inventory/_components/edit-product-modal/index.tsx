@@ -170,7 +170,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                   control={control}
                   type="text"
                   label="Item Name"
-                  maxLength={30}
+                  maxLength={50}
                   disabled={loading}
                 />
               </Box>
@@ -183,7 +183,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                   control={control}
                   type="text"
                   label="Brand"
-                  maxLength={20}
+                  maxLength={50}
                   disabled={loading}
                 />
               </Box>
@@ -237,7 +237,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     control={control}
                     type="text"
                     label="Variant / Size"
-                    maxLength={20}
+                    maxLength={5}
                     disabled={loading}
                   />
                 </Box>
