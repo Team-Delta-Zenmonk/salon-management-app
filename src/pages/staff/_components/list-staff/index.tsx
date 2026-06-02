@@ -1,5 +1,10 @@
 import { Box, Typography, Avatar, Chip, IconButton } from "@mui/material";
-import { EditOutlined, DeleteOutlined, PhoneOutlined, EmailOutlined, CalendarTodayOutlined } from "@mui/icons-material";
+import { 
+  EditOutlined, 
+  DeleteOutlined, 
+  PhoneOutlined, 
+  EmailOutlined, 
+} from "@mui/icons-material";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useState } from "react";
 import dayjs from "dayjs";
@@ -13,6 +18,7 @@ import { callSnack } from "../../../../components/snackbar";
 import { removeStaffService } from "../../../../features/staff/remove-staff/remove-staff.service";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import AssignServicesDialog from "../assign-services-dialog";
+import StaffDetailsDialog from "../staff-details-dialog";
 
 dayjs.extend(customParseFormat);
 
@@ -23,6 +29,101 @@ const formatDisplayDate = (date: string) => {
   if (fallback.isValid()) return fallback.format("DD MMM YYYY");
   return "—";
 };
+
+const getFullName = (staff: Staff) => `${staff.first_name} ${staff.last_name || ""}`.trim();
+
+const getGenderChip = (gender: string) => (
+  <Chip label={gender} size="small" color="primary" variant="outlined" className="capitalize h-6 text-xs" />
+);
+
+function StaffCard({
+  staff,
+  onClick,
+  onEdit,
+  onDelete,
+  onAssign,
+  deleteLoading,
+}: {
+  staff: Staff;
+  onClick: () => void;
+  onEdit: (staff: Staff) => void;
+  onDelete: (staff: Staff) => void;
+  onAssign: (staff: Staff) => void;
+  deleteLoading: boolean;
+}) {
+  return (
+    <Box 
+      className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col cursor-pointer" 
+      onClick={onClick}
+    >
+      <Box className="p-5">
+        <Box className="flex items-center gap-4">
+          <Avatar src={staff.photos?.url} alt={getFullName(staff)} sx={{ width: 64, height: 64 }} />
+          <Box className="flex-1 min-w-0">
+            <Typography className="text-(--primary-900) font-bold text-lg truncate capitalize">
+              {getFullName(staff)}
+            </Typography>
+            <Typography className="text-gray-500 text-sm truncate">
+              {staff.title || 'Staff Member'}
+            </Typography>
+            <Box className="mt-2 flex items-center gap-2">
+              {getGenderChip(staff.gender)}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box className="px-5 pb-5 flex flex-col gap-4 flex-1">
+        <Box className="grid grid-cols-1 gap-3 flex-1">
+          <Box className="flex items-center gap-3">
+            <Box className="w-8 h-8 flex items-center justify-center text-gray-500 shrink-0">
+              <PhoneOutlined fontSize="small" />
+            </Box>
+            <Box className="min-w-0 flex-1">
+              <Typography className="text-sm font-medium text-gray-800 truncate">{staff.phone_number}</Typography>
+            </Box>
+          </Box>
+
+          {staff.email && (
+            <Box className="flex items-center gap-3">
+              <Box className="w-8 h-8 flex items-center justify-center text-gray-500 shrink-0">
+                <EmailOutlined fontSize="small" />
+              </Box>
+              <Typography className="text-sm font-medium text-gray-800 truncate min-w-0 flex-1">{staff.email}</Typography>
+            </Box>
+          )}
+        </Box>
+
+        <Box className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 mt-auto">
+          <IconButton
+            title="Assign Services"
+            onClick={(e) => { e.stopPropagation(); onAssign(staff); }}
+            disabled={deleteLoading}
+            size="small"
+          >
+            <AssignmentTurnedInOutlinedIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            title="Edit Staff"
+            onClick={(e) => { e.stopPropagation(); onEdit(staff); }}
+            disabled={deleteLoading}
+            size="small"
+          >
+            <EditOutlined fontSize="small" />
+          </IconButton>
+          <IconButton
+            title="Delete Staff"
+            onClick={(e) => { e.stopPropagation(); onDelete(staff); }}
+            disabled={deleteLoading}
+            size="small"
+          >
+            <DeleteOutlined fontSize="small" />
+          </IconButton>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
 
 interface ListStaffProps {
   staffs: Staff[];
@@ -42,6 +143,7 @@ export default function ListStaff({
   const dispatch = useAppDispatch();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
@@ -81,15 +183,9 @@ export default function ListStaff({
     }
   };
 
-  const getFullName = (staff: Staff) => `${staff.first_name} ${staff.last_name || ""}`.trim();
-
-  const getGenderChip = (gender: string) => (
-    <Chip label={gender} size="small" color="primary" variant="outlined" className="capitalize" />
-  );
-
   return (
     <>
-      <Box className="text-(--primary-900) mb-4">
+      <Box className="text-(--primary-900) mb-4 font-medium text-lg">
         Staff List ({total})
       </Box>
 
@@ -98,108 +194,43 @@ export default function ListStaff({
         next={fetchMoreStaff}
         hasMore={hasMore}
         loader={
-          <Box className="flex justify-center py-4">
+          <Box className="flex justify-center py-4 w-full">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
           </Box>
         }
         scrollableTarget="scrollableDiv"
         endMessage={
           staffs.length > 0 ? (
-            <Box className="text-center py-4 text-gray-500">
+            <Box className="text-center py-6 w-full text-gray-500">
               <Typography variant="body2">No more staff to load</Typography>
             </Box>
           ) : null
         }
       >
-        <Box className="flex flex-col gap-4">
+        <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-1">
           {staffs.map((staff) => (
-            <Box
+            <StaffCard
               key={staff.uuid}
-              className="bg-white border border-gray-200 rounded-lg p-5 w-full"
-            >
-              <Box className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-                <Box className="flex items-center gap-4 min-w-0 md:w-[220px] md:shrink-0">
-                  <Avatar src={staff.photos?.url} alt={getFullName(staff)} sx={{ width: 44, height: 44 }} />
-                  <Box className="min-w-0 flex-1">
-                    <Typography className="text-(--primary-900) truncate" fontWeight="bold" fontSize="0.95rem">
-                      {getFullName(staff)}
-                    </Typography>
-                    <Typography className="text-gray-500 text-sm truncate">{staff.title}</Typography>
-                  </Box>
-                </Box>
-
-                <Box className="flex flex-col md:flex-row gap-3 md:gap-6 flex-1 min-w-0">
-                  <Box className="flex items-center gap-2 min-w-0 md:flex-1">
-                    <PhoneOutlined className="text-lg text-gray-400 shrink-0" />
-                    <Box className="min-w-0 flex-1">
-                      <Typography className="text-gray-800 text-sm truncate">{staff.phone_number}</Typography>
-                      {staff.additional_phone_number && (
-                        <Typography className="text-gray-400 text-xs truncate">{staff.additional_phone_number}</Typography>
-                      )}
-                    </Box>
-                  </Box>
-
-                  <Box className="flex items-center gap-2 min-w-0 md:flex-1">
-                    <EmailOutlined className="text-lg text-gray-400 shrink-0" />
-                    <Typography className="text-gray-800 text-sm truncate flex-1 min-w-0">{staff.email}</Typography>
-                  </Box>
-                </Box>
-
-                <Box className="flex flex-wrap items-center gap-3 md:gap-4 md:shrink-0">
-                  {getGenderChip(staff.gender)}
-
-                  <Box className="flex items-center gap-1.5">
-                    <CalendarTodayOutlined className="text-base text-gray-400" />
-                    <Typography className="text-gray-600 text-sm">
-                      {formatDisplayDate(staff.joining_date)}
-                    </Typography>
-                  </Box>
-
-                  {staff.end_date && (
-                    <Typography className="text-red-500 text-sm font-medium">
-                      End: {formatDisplayDate(staff.end_date)}
-                    </Typography>
-                  )}
-                </Box>
-
-                <Box className="flex items-center gap-1 md:shrink-0 md:ml-auto">
-                  <IconButton
-                    title="Assign Services"
-                    size="small"
-                    onClick={() => {
-                      setSelectedStaff(staff);
-                      setAssignOpen(true);
-                    }}
-                    disabled={deleteLoading}
-                  >
-                    <AssignmentTurnedInOutlinedIcon className="text-purple-800!" fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => handleEdit(staff)}
-                    title="Edit Staff"
-                    size="small"
-                    disabled={deleteLoading}
-                  >
-                    <EditOutlined className="text-(--primary-800)!" fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => handleDelete(staff)}
-                    title="Delete Staff"
-                    size="small"
-                    disabled={deleteLoading}
-                  >
-                    <DeleteOutlined className="text-(--error-800)!" fontSize="small" />
-                  </IconButton>
-                </Box>
-              </Box>
-            </Box>
+              staff={staff}
+              onClick={() => {
+                setSelectedStaff(staff);
+                setDetailsDialogOpen(true);
+              }}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onAssign={(staff) => {
+                setSelectedStaff(staff);
+                setAssignOpen(true);
+              }}
+              deleteLoading={deleteLoading}
+            />
           ))}
         </Box>
       </InfiniteScroll>
 
       {staffs.length === 0 && (
-        <Box className="bg-gray-200 border border-gray-400 rounded-lg p-8 text-center mt-4">
-          <Typography>No staff found. Create your first staff member!</Typography>
+        <Box className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-10 text-center mt-4">
+          <Typography className="text-gray-500 font-medium">No staff found. Create your first staff member!</Typography>
         </Box>
       )}
 
@@ -241,6 +272,28 @@ export default function ListStaff({
           }}
         />
       )}
+
+      <StaffDetailsDialog 
+        open={detailsDialogOpen} 
+        onClose={() => {
+          setDetailsDialogOpen(false);
+          setSelectedStaff(null);
+        }} 
+        staff={selectedStaff}
+        onEdit={(staff) => {
+          setDetailsDialogOpen(false);
+          handleEdit(staff);
+        }}
+        onDelete={(staff) => {
+          setDetailsDialogOpen(false);
+          handleDelete(staff);
+        }}
+        onAssign={(staff) => {
+          setDetailsDialogOpen(false);
+          setSelectedStaff(staff);
+          setAssignOpen(true);
+        }}
+      />
     </>
   );
 }

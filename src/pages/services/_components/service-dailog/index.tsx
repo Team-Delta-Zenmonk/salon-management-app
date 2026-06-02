@@ -104,7 +104,6 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
       onCreated?.();
       onClose();
     } catch (err: any) {
-      console.log(err?.response?.data?.errors?.[0]?.message);
       callSnack(
         err?.response?.data?.errors?.[0]?.message || (mode === "create" ? "Service Creation Failed" : "Service Update Failed"),
         "error"
