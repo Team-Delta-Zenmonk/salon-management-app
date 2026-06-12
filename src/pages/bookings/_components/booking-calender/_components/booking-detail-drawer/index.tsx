@@ -104,17 +104,43 @@ export default function BookingDetailsDrawer({
           </Box>
 
           <Box className="px-4 pb-4 flex items-center justify-between">
-            <Chip
-              label={booking?.status ? booking.status.toUpperCase() : "—"}
-              size="small"
-              sx={{
-                bgcolor: `${statusColor}15`,
-                color: statusColor,
-                border: `1px solid ${statusColor}40`,
-                fontWeight: 700,
-                letterSpacing: 0.4,
-              }}
-            />
+            <Box className="flex items-center gap-2">
+              <Chip
+                label={booking?.status ? booking.status.toUpperCase() : "—"}
+                size="small"
+                sx={{
+                  bgcolor: `${statusColor}15`,
+                  color: statusColor,
+                  border: `1px solid ${statusColor}40`,
+                  fontWeight: 700,
+                  letterSpacing: 0.4,
+                }}
+              />
+              {booking?.payment_policy === "pay_at_venue" && (
+                <Chip
+                  label="Unpaid (Pay at Venue)"
+                  size="small"
+                  color="warning"
+                  sx={{ fontWeight: 700 }}
+                />
+              )}
+              {booking?.payment_policy === "partial_deposit" && booking?.deposit_amount != null && (
+                <Chip
+                  label={`Deposit: ₹${booking.deposit_amount}`}
+                  size="small"
+                  color="info"
+                  sx={{ fontWeight: 700 }}
+                />
+              )}
+              {booking?.payment_policy === "full_upfront" && booking?.amount_paid_online != null && (
+                <Chip
+                  label={`Paid Full: ₹${booking.amount_paid_online}`}
+                  size="small"
+                  color="success"
+                  sx={{ fontWeight: 700 }}
+                />
+              )}
+            </Box>
 
             {timeInfo && (
               <Box className="flex items-center gap-2 text-gray-600">

@@ -14,6 +14,7 @@ export const bookingSchema = z.object({
   booking_date: z.any(),
   booking_start_time: z.string({ message: "Required" }).min(1, { message: "Required" }),
   status: z.enum(Object.values(BOOKING_STATUS) as [string, ...string[]]).optional(),
+  payment_preference: z.enum(["pay_at_venue", "full_upfront"]),
 });
 
 export type BookingFormValues = z.infer<typeof bookingSchema>;

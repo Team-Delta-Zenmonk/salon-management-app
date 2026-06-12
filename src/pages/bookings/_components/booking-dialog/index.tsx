@@ -74,6 +74,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       booking_date: new Date(),
       booking_start_time: "",
       status: BOOKING_STATUS.CONFIRMED,
+      payment_preference: "pay_at_venue",
     },
   });
 
@@ -85,6 +86,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   });
 
   const watchedServices = useWatch({ control, name: "services" });
+  const watchedPaymentPreference = useWatch({ control, name: "payment_preference" });
 
   const allServiceOptions = useMemo(() => {
     const parentIds = new Set<number>();
@@ -253,6 +255,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
           sequence: i + 1,
         })),
         status: values.status,
+        payment_preference: values.payment_preference,
       };
 
       if (mode === "create") {
@@ -436,6 +439,50 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   </Typography>
                 </Box>
               )}
+            </Box>
+
+            <Divider className="my-4" />
+
+            <Box className="flex flex-col gap-2">
+              <Typography variant="body2" fontWeight="bold">
+                Payment
+              </Typography>
+              <Box className="flex gap-3">
+                {[
+                  { value: "pay_at_venue", label: "Pay at Venue" },
+                  { value: "full_upfront", label: "Already Paid" },
+                ].map((option) => {
+                  const selected = watchedPaymentPreference === option.value;
+                  return (
+                    <Box
+                      key={option.value}
+                      onClick={() => methods.setValue("payment_preference", option.value as any)}
+                      className={clsx(
+                        "flex-1 flex items-center gap-2.5 px-4 py-3 rounded-lg border cursor-pointer transition-all",
+                        selected
+                          ? "border-[var(--primary-900)] bg-[var(--primary-50)]"
+                          : "border-gray-200 bg-gray-50 hover:border-gray-300",
+                      )}
+                    >
+                      <Box
+                        className={clsx(
+                          "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                          selected ? "border-[var(--primary-900)]" : "border-gray-300",
+                        )}
+                      >
+                        {selected && <Box className="w-2 h-2 rounded-full bg-[var(--primary-900)]" />}
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        fontWeight={selected ? "bold" : "medium"}
+                        className={selected ? "text-[var(--primary-900)]" : "text-gray-600"}
+                      >
+                        {option.label}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
             </Box>
 
             <Divider className="my-4" />

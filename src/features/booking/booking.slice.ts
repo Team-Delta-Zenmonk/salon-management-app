@@ -58,13 +58,15 @@ export interface BookingState {
   total: number;
   page: number;
   limit: number;
+  loading: boolean;
 }
 
 const initialState: BookingState = {
   data: [],
   total: 0,
   page: 1,
-  limit: 50,
+  limit: 12,
+  loading: false,
 };
 
 export const bookingSlice = createSlice({
@@ -75,15 +77,36 @@ export const bookingSlice = createSlice({
       state.data = [];
       state.total = 0;
       state.page = 1;
+      state.limit = 12;
+      state.loading = false;
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(listBookingsAction.pending, (state) => {
+      state.loading = true;
+    });
     builder.addCase(listBookingsAction.fulfilled, (state, action) => {
-      state.data = action.payload;
+      const { data, pagination } = action.payload;
+      state.data = data;
+      if (pagination) {
+        state.total = pagination.total || 0;
+        state.page = pagination.page || 1;
+        state.limit = pagination.limit || 12;
+      }
+      state.loading = false;
+    });
+    builder.addCase(listBookingsAction.rejected, (state) => {
+      state.loading = false;
     });
 
     builder.addCase(createBookingAction.fulfilled, (state, action) => {
-      state.data.unshift(action.payload.data);
+      const createdBooking = action.payload.data;
+      const bookingExists = state.data.some((booking) => booking.uuid === createdBooking.uuid);
+
+      if (!bookingExists) {
+        state.data.unshift(createdBooking);
+        state.total += 1;
+      }
     });
 
     builder.addCase(updateBookingAction.fulfilled, (state, action) => {
@@ -94,7 +117,12 @@ export const bookingSlice = createSlice({
     });
 
     builder.addCase(deleteBookingAction.fulfilled, (state, action) => {
+      const previousLength = state.data.length;
       state.data = state.data.filter((b) => b.uuid !== action.meta.arg.uuid);
+
+      if (state.data.length < previousLength) {
+        state.total = Math.max(0, state.total - 1);
+      }
     });
   },
 });

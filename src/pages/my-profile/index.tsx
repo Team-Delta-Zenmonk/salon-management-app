@@ -12,6 +12,7 @@ import { callSnack } from "../../components/snackbar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ProfileInfoCard from "./_components/profile-info-card";
 import SalonWorkingHoursCard from "./_components/salon-working-hours-card";
+import PaymentPolicyCard from "./_components/payment-policy-card";
 import { MyProfileSchema, type SalonProfileForm } from "./schema/my-profile.schema";
 import { DAYS_MAP } from "./_components/constants/business-hours.constants";
 
@@ -59,7 +60,9 @@ const MyProfile = () => {
       },
       logo: salon?.logo ? { url: salon.logo, filename: "Logo" } : null,
       photos: salon?.photos || [],
-      business_hours: getMappedInitialHours()
+      business_hours: getMappedInitialHours(),
+      payment_policy: salon?.payment_policy || "full_upfront",
+      deposit_percentage: salon?.deposit_percentage || undefined
     }
   });
 
@@ -83,6 +86,8 @@ const MyProfile = () => {
         latitude: address.latitude?.toString().trim() || null,
         longitude: address.longitude?.toString().trim() || null,
         logo: logo?.url || null,
+        payment_policy: data.payment_policy,
+        deposit_percentage: data.payment_policy === "partial_deposit" ? Number(data.deposit_percentage) : null,
       };
 
       const resultAction = await dispatch(updateSalonProfileAction(payload));
@@ -167,6 +172,12 @@ const MyProfile = () => {
                 salon={salon}
                 setValue={setValue}
                 clearErrors={clearErrors}
+              />
+              <PaymentPolicyCard
+                isEditing={isEditing}
+                control={control}
+                watch={watch}
+                onEdit={() => setIsEditing(true)}
               />
             </Grid>
             <Grid size={{ xs: 12, lg: 4 }}>

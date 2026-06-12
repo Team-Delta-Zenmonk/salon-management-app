@@ -5,14 +5,15 @@ export interface GetBookingsParams {
   filter?: BookingFilter;
   page?: number;
   limit?: number;
+  view?: "calendar" | "table";
+  payment_policy?: string;
+  staff_uuid?: string;
+  service_uuid?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 export const getBookingsService = async (params: GetBookingsParams) => {
-  const queryParams = new URLSearchParams();
-  if (params.filter) queryParams.append("filter", params.filter);
-  if (params.page) queryParams.append("page", params.page.toString());
-  if (params.limit) queryParams.append("limit", params.limit.toString());
-
-  const response = await axiosInstance.get(`/bookings?${queryParams.toString()}`);
-  return response.data.data;
+  const response = await axiosInstance.get("/bookings", { params });
+  return response.data;
 };

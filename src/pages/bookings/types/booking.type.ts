@@ -40,5 +40,8 @@ export type Booking = {
     name?: string;
     phone?: string;
   };
+  payment_policy?: 'pay_at_venue' | 'partial_deposit' | 'full_upfront';
+  deposit_amount?: number;
+  amount_paid_online?: number;
   [key: string]: any;
 };

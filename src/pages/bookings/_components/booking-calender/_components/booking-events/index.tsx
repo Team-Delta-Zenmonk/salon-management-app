@@ -17,10 +17,26 @@ export default function BookingEvent({ booking, color, isCancelled }: Readonly<B
       <Box className={styles.customerName}>{booking.customer_name}</Box>
       <Box className={styles.serviceName}>{booking.service_name}</Box>
 
-      <Box className={styles.statusBadge} sx={{ backgroundColor: `${color}20` }}>
-        <Box className={styles.statusText} sx={{ color: color }}>
-          {booking.status}
+      <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}>
+        <Box className={styles.statusBadge} sx={{ backgroundColor: `${color}20` }}>
+          <Box className={styles.statusText} sx={{ color: color }}>
+            {booking.status}
+          </Box>
         </Box>
+        {booking.payment_policy === "pay_at_venue" && booking.status === "confirmed" && (
+          <Box className={styles.statusBadge} sx={{ backgroundColor: "warning.light" }}>
+            <Box className={styles.statusText} sx={{ color: "warning.dark" }}>
+              Pay at Venue
+            </Box>
+          </Box>
+        )}
+        {booking.payment_policy === "partial_deposit" && booking.deposit_amount != null && (
+          <Box className={styles.statusBadge} sx={{ backgroundColor: "info.light" }}>
+            <Box className={styles.statusText} sx={{ color: "info.dark" }}>
+              Dep: ₹{booking.deposit_amount}
+            </Box>
+          </Box>
+        )}
       </Box>
 
       <Box className={styles.staffInfo}>

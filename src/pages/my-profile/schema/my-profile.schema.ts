@@ -47,6 +47,24 @@ export const MyProfileSchema = z.object({
     saturday: BusinessDaySchema,
     sunday: BusinessDaySchema,
   }),
+  payment_policy: z.enum(["pay_at_venue", "partial_deposit", "full_upfront"]),
+  deposit_percentage: z.number().optional(),
+}).superRefine((data, ctx) => {
+  if (data.payment_policy === "partial_deposit") {
+    if (data.deposit_percentage == null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Deposit percentage is required",
+        path: ["deposit_percentage"],
+      });
+    } else if (data.deposit_percentage < 1 || data.deposit_percentage > 99) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Must be between 1 and 99",
+        path: ["deposit_percentage"],
+      });
+    }
+  }
 });
 
 export type SalonProfileForm = z.infer<typeof MyProfileSchema>;
