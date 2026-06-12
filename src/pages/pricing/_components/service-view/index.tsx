@@ -89,8 +89,8 @@ export default function ServiceView() {
   );
 
   return (
-    <Box className="flex flex-1 min-h-0 gap-6 w-full flex-col lg:flex-row">
-      <Box className="bg-white border border-gray-200 rounded-lg w-full lg:w-[380px] flex flex-col min-h-0 shadow-sm">
+    <Box className="flex flex-1 min-h-0 w-full flex-col lg:flex-row">
+      <Box className="w-full lg:w-[340px] flex flex-col min-h-0 border-r border-[var(--border-subtle)] bg-[var(--surface-muted)]">
         <Box className="flex-1 min-h-0 overflow-y-auto">
           <ServiceSidebar
             services={servicesTree}
@@ -102,8 +102,8 @@ export default function ServiceView() {
         </Box>
       </Box>
 
-      <Box className="flex-1 min-w-0 flex flex-col min-h-0">
-        <Box className="flex-1 min-h-0 overflow-y-auto">
+      <Box className="flex-1 min-w-0 flex flex-col min-h-0 bg-[var(--surface)]">
+        <Box className="flex-1 min-h-0 overflow-y-auto p-8">
           <StaffPricingPanel selectedService={selectedService} />
         </Box>
       </Box>

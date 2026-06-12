@@ -167,6 +167,7 @@ export default function BookingDetailsDrawer({
               {booking?.customer_email && (
                 <InfoRow icon={<EmailOutlinedIcon fontSize="small" />} label="Email" value={booking.customer_email} />
               )}
+
               {booking?.customer_phone && (
                 <InfoRow icon={<PhoneOutlinedIcon fontSize="small" />} label="Phone" value={booking.customer_phone} />
               )}
@@ -183,7 +184,7 @@ export default function BookingDetailsDrawer({
             {(booking?.booking_services ?? []).map((bs: any, idx: number) => (
               <Box key={bs.service?.uuid ?? bs.service?.name} className="rounded-xl border border-gray-200 p-3 shadow-sm">
                 <Box className="flex items-center justify-between">
-                  <Typography variant="body1" fontWeight="fontWeightMedium" className="text-gray-900">
+                  <Typography variant="body1" fontWeight="fontWeightMedium" textTransform="capitalize" className="text-gray-900">
                     {bs.service?.name || "Unknown Service"}
                   </Typography>
                   <Typography variant="body2" fontWeight="bold" color="primary">

@@ -71,6 +71,7 @@ const TextField = <T extends FieldValues>({
       render={({ field: { onChange, value, onBlur, ref, ...others }, fieldState: { error } }) => (
         <MuiTextField
           fullWidth
+          size="medium"
           disabled={disabled}
           error={Boolean(error) && showError}
           placeholder={placeholder}

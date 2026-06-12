@@ -8,8 +8,8 @@ export default function CreateStaff() {
 
   return (
     <>
-      <Button variant="contained" startIcon={<AddOutlinedIcon className="text-white!" />} onClick={() => setOpen(true)}>
-        <Typography fontWeight="medium">Add</Typography>
+      <Button variant="contained" onClick={() => setOpen(true)}>
+        <Typography >Add</Typography>
       </Button>
 
       <StaffDialog open={open} onClose={() => setOpen(false)} mode="create" />

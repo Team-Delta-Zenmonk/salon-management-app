@@ -20,25 +20,26 @@ export default function PredefinedCategoriesSection() {
 
   return (
     <>
-      <Box className="shrink-0 min-h-0 px-4 md:px-8 pb-6 flex flex-col gap-3">
+      <Box className="shrink-0 min-h-0 pb-6 flex flex-col gap-3">
         <Typography variant="body2" className="text-gray-600 mb-4">
           Click on any template below to view details and create a category
         </Typography>
 
         <Box className="flex flex-wrap gap-3">
           {predefinedCategoriesData.map((category, index) => (
-            <Chip
+            <Box
               key={category.name}
-              label={category.name}
               onClick={() => handleCategoryClick(category)}
-              variant="outlined"
-              className="cursor-pointer hover:bg-gray-100 py-3"
-              avatar={
-                <Avatar alt={category.name}>
-                  {category.name.charAt(0).toUpperCase()}
-                </Avatar>
-              }
-            />
+              className="flex items-center gap-1.5 pr-3 pl-1 py-1 bg-white border border-[var(--border-subtle)] rounded-xl cursor-pointer hover:border-[var(--primary-main)] hover:shadow-sm transition-all group"            >
+              <Box
+                className="w-6 h-6 rounded bg-[var(--primary-50)] text-[var(--primary-900)] flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-[var(--primary-900)] group-hover:text-white transition-colors"
+              >
+                {category.name.charAt(0).toUpperCase()}
+              </Box>
+              <Typography className="text-xs font-semibold text-[var(--primary-900)] select-none">
+                {category.name}
+              </Typography>
+            </Box>
           ))}
         </Box>
       </Box>

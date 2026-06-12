@@ -7,6 +7,7 @@ import BookingCalendar from "./_components/booking-calender";
 import BookingTable from "./_components/booking-table";
 import BookingReceiptDialog from "./_components/booking-receipt-dialog";
 import CreateBooking from "./_components/create-booking";
+import PageHeader from "../../components/page-header";
 import type { Booking, BookingStatus } from "./types/booking.type";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { listBookingsAction } from "../../features/booking/get-bookings/get-bookings.action";
@@ -22,6 +23,7 @@ import type { GetBookingsParams } from "../../features/booking/get-bookings/get-
 interface FilterForm {
   staff: string;
   service: string;
+  payment: string;
 }
 
 export default function BookingPage() {
@@ -30,36 +32,32 @@ export default function BookingPage() {
   const { data: services } = useAppSelector((state) => state.service);
   const { data: bookings, total, page: statePage, limit, loading } = useAppSelector((state) => state.booking);
   const [viewMode, setViewMode] = useState<"calendar" | "table">("calendar");
-  const [paymentFilter, setPaymentFilter] = useState<string>("ALL");
   const [receiptBooking, setReceiptBooking] = useState<Booking | null>(null);
   const [tablePage, setTablePage] = useState(1);
 
-  // Calendar date range from FullCalendar's datesSet
   const [calendarRange, setCalendarRange] = useState<[Date, Date] | null>(null);
 
   const { control, watch } = useForm<FilterForm>({
     defaultValues: {
       staff: ALL_STAFF_VALUE,
       service: ALL_SERVICES_VALUE,
+      payment: "ALL",
     },
   });
 
   const selectedStaff = watch("staff");
   const selectedService = watch("service");
+  const paymentFilter = watch("payment");
 
   useEffect(() => {
     dispatch(listStaffAction({ page: 1, limit: 100 }));
     dispatch(listServicesAction({ page: 1, limit: 100 }));
   }, [dispatch]);
 
-  // Build and dispatch server-side query
   const fetchBookings = useCallback(() => {
     const params: GetBookingsParams = {};
 
-    // View mode
     params.view = viewMode;
-
-    // Payment filter
     if (paymentFilter !== "ALL") {
       const policyMap: Record<string, string> = {
         FULLY_PAID: "full_upfront",
@@ -69,12 +67,10 @@ export default function BookingPage() {
       params.payment_policy = policyMap[paymentFilter];
     }
 
-    // Staff filter
     if (selectedStaff !== ALL_STAFF_VALUE) {
       params.staff_uuid = selectedStaff;
     }
 
-    // Service filter
     if (selectedService !== ALL_SERVICES_VALUE) {
       params.service_uuid = selectedService;
     }
@@ -84,11 +80,9 @@ export default function BookingPage() {
         params.start_date = calendarRange[0].toISOString();
         params.end_date = calendarRange[1].toISOString();
       } else {
-        // Default: current month
         params.filter = "month";
       }
     } else {
-      // Table view: paginated, sorted by created_at DESC
       params.page = Number(tablePage);
       params.limit = 12;
       params.filter = "month";
@@ -101,7 +95,6 @@ export default function BookingPage() {
     fetchBookings();
   }, [fetchBookings]);
 
-  // Reset table page when filters change
   const isFirstRender = useRef(true);
   useEffect(() => {
     if (isFirstRender.current) {
@@ -140,7 +133,13 @@ export default function BookingPage() {
     ];
   }, [services]);
 
-  // Map raw bookings to display format (no client-side filtering)
+  const paymentOptions = [
+    { label: "All Bookings", value: "ALL" },
+    { label: "Fully Paid", value: "FULLY_PAID" },
+    { label: "Deposited", value: "DEPOSITED" },
+    { label: "Pay at Venue", value: "PAY_AT_VENUE" },
+  ];
+
   const mappedBookings = useMemo(() => {
     return bookings.map((booking) => {
       const bookingServices = booking.booking_services ?? [];
@@ -169,11 +168,11 @@ export default function BookingPage() {
 
       return {
         ...booking,
-        customer_name: customerName,
+        customer_name: customerName.replace(/\b\w/g, (c) => c.toUpperCase()),
         customer_email: customerEmail,
         customer_phone: customerPhone,
-        service_name: serviceNames.length > 0 ? serviceNames.join(", ") : "Unknown Service",
-        staff_name: staffNames.length > 0 ? staffNames.join(", ") : "Unknown",
+        service_name: serviceNames.length > 0 ? serviceNames.join(", ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Unknown Service",
+        staff_name: staffNames.length > 0 ? staffNames.join(", ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Unknown",
         start_time: booking.booking_start_time,
         end_time: booking.booking_end_time,
         created_by: booking.created_by,
@@ -198,32 +197,24 @@ export default function BookingPage() {
   };
 
   const handleTablePageChange = (_event: unknown, newPage: number) => {
-    // newPage is 0-based from TablePagination, convert to 1-based
     setTablePage(Number(newPage) + 1);
   };
 
   return (
-    <Box className="flex flex-col flex-1 min-h-0 w-full space-y-6 bg-gray-50 px-8 pb-6">
-      <Box className="flex justify-between items-start shrink-0">
-        <Box>
-          <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900) mb-2">
-            Booking Calendar
-          </Typography>
-          <Typography className="text-gray-600">
-            Manage appointments • Today: <span className="font-semibold text-gray-900">{todayBookingsCount}</span>{" "}
-            confirmed bookings
-          </Typography>
-        </Box>
-        <CreateBooking />
-      </Box>
+    <Box className="flex flex-col flex-1 min-h-0 w-full space-y-6">
+      <PageHeader
+        title="Booking Workspace"
+        subtitle={`Manage Bookings • Today: ${todayBookingsCount} confirmed bookings`}
+        action={<CreateBooking />}
+      />
 
-      <Box className="flex items-center gap-4 flex-wrap bg-white p-3 rounded-xl border border-gray-200">
+      <Box className="flex flex-col md:flex-row md:items-center gap-4">
         <Box className="flex items-center gap-3 flex-1 min-w-0">
           <Box className="w-[180px]">
             <Select
               name="staff"
               control={control}
-              placeholder="Select Staff"
+              placeholder="All Staff"
               options={staffOptions}
               identifier="booking-staff-filter"
               translate={false}
@@ -234,64 +225,26 @@ export default function BookingPage() {
             <Select
               name="service"
               control={control}
-              placeholder="Select Service"
+              placeholder="All Services"
               options={serviceOptions}
               identifier="booking-service-filter"
               translate={false}
               disabled={serviceOptions.length === 1}
             />
           </Box>
-          <Box className="h-6 w-px bg-gray-300 mx-2"></Box>
-          <Box className="flex items-center gap-3">
-            <Typography variant="caption" fontWeight="bold" className="text-gray-400 uppercase tracking-wider">
-              FILTER PAYMENT:
-            </Typography>
-            <Box className="flex bg-white rounded-lg p-0.5 border border-gray-100 shadow-sm gap-[2px]">
-              <Button
-                variant={paymentFilter === "ALL" ? "contained" : "text"}
-                size="small"
-                onClick={() => setPaymentFilter("ALL")}
-                className={`min-w-0 px-3 py-1.5 rounded-md text-[11px] font-bold uppercase shadow-none transition-all ${
-                  paymentFilter === "ALL" ? "bg-[var(--primary-800)] text-white" : "text-[var(--primary-800)] hover:bg-[var(--primary-50)]"
-                }`}
-              >
-                All Bookings
-              </Button>
-              <Button
-                variant={paymentFilter === "FULLY_PAID" ? "contained" : "text"}
-                size="small"
-                onClick={() => setPaymentFilter("FULLY_PAID")}
-                className={`min-w-0 px-3 py-1.5 rounded-md text-[11px] font-bold uppercase shadow-none transition-all ${
-                  paymentFilter === "FULLY_PAID" ? "bg-[var(--primary-800)] text-white" : "text-[var(--primary-800)] hover:bg-[var(--primary-50)]"
-                }`}
-              >
-                Fully Paid
-              </Button>
-              <Button
-                variant={paymentFilter === "DEPOSITED" ? "contained" : "text"}
-                size="small"
-                onClick={() => setPaymentFilter("DEPOSITED")}
-                className={`min-w-0 px-3 py-1.5 rounded-md text-[11px] font-bold uppercase shadow-none transition-all ${
-                  paymentFilter === "DEPOSITED" ? "bg-[var(--primary-800)] text-white" : "text-[var(--primary-800)] hover:bg-[var(--primary-50)]"
-                }`}
-              >
-                Deposited
-              </Button>
-              <Button
-                variant={paymentFilter === "PAY_AT_VENUE" ? "contained" : "text"}
-                size="small"
-                onClick={() => setPaymentFilter("PAY_AT_VENUE")}
-                className={`min-w-0 px-3 py-1.5 rounded-md text-[11px] font-bold uppercase shadow-none transition-all ${
-                  paymentFilter === "PAY_AT_VENUE" ? "bg-[var(--primary-800)] text-white" : "text-[var(--primary-800)] hover:bg-[var(--primary-50)]"
-                }`}
-              >
-                Pay at Venue
-              </Button>
-            </Box>
+          <Box className="w-[180px]">
+            <Select
+              name="payment"
+              control={control}
+              placeholder="All Bookings"
+              options={paymentOptions}
+              identifier="booking-payment-filter"
+              translate={false}
+            />
           </Box>
         </Box>
 
-        <Box className="flex items-center ml-auto">
+        <Box className="flex items-center">
           <ToggleButtonGroup
             value={viewMode}
             exclusive
@@ -299,17 +252,17 @@ export default function BookingPage() {
               if (newMode !== null) setViewMode(newMode);
             }}
             size="small"
-            className="bg-gray-50 p-1 rounded-lg border border-gray-200"
+            className="bg-[var(--surface-muted)] p-1 rounded-lg border border-[var(--border-subtle)]"
           >
             <ToggleButton
               value="calendar"
-              className={`border-none px-2.5 py-1.5 rounded-md !transition-all ${viewMode === "calendar" ? "!bg-white !shadow-sm !text-gray-900" : "!text-gray-400"}`}
+              className={`border-none px-3 py-1.5 rounded-md !transition-all ${viewMode === "calendar" ? "!bg-[var(--surface)] !shadow-sm !text-[var(--text-primary)] border border-[var(--border-subtle)]!" : "!text-[var(--text-muted)]"}`}
             >
               <CalendarMonthIcon fontSize="small" />
             </ToggleButton>
             <ToggleButton
               value="table"
-              className={`border-none px-2.5 py-1.5 rounded-md !transition-all ${viewMode === "table" ? "!bg-white !shadow-sm !text-gray-900" : "!text-gray-400"}`}
+              className={`border-none px-3 py-1.5 rounded-md !transition-all ${viewMode === "table" ? "!bg-[var(--surface)] !shadow-sm !text-[var(--text-primary)] border border-[var(--border-subtle)]!" : "!text-[var(--text-muted)]"}`}
             >
               <FormatListBulletedIcon fontSize="small" />
             </ToggleButton>
@@ -318,7 +271,7 @@ export default function BookingPage() {
       </Box>
 
       {viewMode === "calendar" ? (
-        <Box className="flex-1 bg-white shadow-sm p-2 border border-gray-300 rounded-lg">
+        <Box className="flex-1 bg-[var(--surface)] shadow-sm p-3 border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
           <BookingCalendar
             bookings={mappedBookings}
             onDateRangeChange={handleCalendarDateRangeChange}
@@ -340,10 +293,10 @@ export default function BookingPage() {
         </Box>
       )}
 
-      <BookingReceiptDialog 
-        open={Boolean(receiptBooking)} 
-        onClose={() => setReceiptBooking(null)} 
-        booking={receiptBooking} 
+      <BookingReceiptDialog
+        open={Boolean(receiptBooking)}
+        onClose={() => setReceiptBooking(null)}
+        booking={receiptBooking}
       />
     </Box>
   );

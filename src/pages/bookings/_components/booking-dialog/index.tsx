@@ -547,9 +547,9 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   Saving...
                 </Box>
               ) : mode === "create" ? (
-                "Create Booking"
+                "Create"
               ) : (
-                "Save Changes"
+                "Save"
               )}
             </Button>
           </DialogActions>

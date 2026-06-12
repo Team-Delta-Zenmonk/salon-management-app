@@ -162,7 +162,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
           </DialogContent>
 
           <DialogActions className={styles.dialogActions}>
-            <Button type="button" onClick={back} disabled={isLoading}>
+            <Button type="button" variant="outlined" onClick={back} disabled={isLoading}>
               {step === 0 ? "Cancel" : "Back"}
             </Button>
 

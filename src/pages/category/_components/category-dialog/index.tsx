@@ -99,7 +99,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
         className={clsx(styles.dialogTitle)}
         id="alert-dialog-title"
         fontWeight="fontWeightMedium"
-        variant="h5"
+        variant="h2"
       >
         {mode === "create" ? "Create Category" : "Update Category"}
       </DialogTitle>
@@ -158,10 +158,10 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
           </DialogContent>
 
           <DialogActions className={clsx(styles.dialogActions, "px-2 py-1 pb-2")}>
-            <Button onClick={onClose} disabled={isLoading}>
+            <Button onClick={onClose} disabled={isLoading} variant="outlined">
               Back
             </Button>
-            <Button type="submit" disabled={isLoading} startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+            <Button type="submit" variant="contained" disabled={isLoading} startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
               {mode === "create" ? (isLoading ? "Creating..." : "Create") : (isLoading ? "Saving..." : "Save")}
             </Button>
           </DialogActions>

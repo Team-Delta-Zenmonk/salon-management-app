@@ -1,47 +1,7 @@
 .stickyContainer {
-  position: sticky;
-  top: -24px;
-  z-index: 1100;
-  background-color: var(--secondary-50);
-  padding-top: 24px;
-  padding-bottom: 16px;
-  
-  margin-top: -30px;
-  margin-left: -16px;
-  margin-right: -16px;
-  padding-left: 16px;
-  padding-right: 16px;
-
-  @media (min-width: 700px) {
-    margin-left: -24px;
-    margin-right: -24px;
-    padding-left: 24px;
-    padding-right: 24px;
-  }
+  /* Removed sticky positioning and background color to align with Layout var(--background) */
 }
 
 .stickyHeader {
-  position: sticky;
-  top: -24px;
-  z-index: 1100;
-  background-color: var(--secondary-50);
-  padding-top: 24px;
-  padding-bottom: 16px;
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: center;
-
-  margin-top: -30px;
-  margin-left: -16px;
-  margin-right: -16px;
-  padding-left: 16px;
-  padding-right: 16px;
-
-  @media (min-width: 700px) {
-    margin-left: -24px;
-    margin-right: -24px;
-    padding-left: 24px;
-    padding-right: 24px;
-  }
+  /* Removed sticky positioning and background color to align with Layout var(--background) */
 }

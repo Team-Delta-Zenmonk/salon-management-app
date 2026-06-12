@@ -109,7 +109,7 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
   }, [selectedCategory?.uuid, setValue]);
 
   const categoryOptions = [
-    { value: "create_new", label: "+ Create New Category" },
+    { value: "create_new", label: "+ New Category" },
     ...categories.map((cat) => ({
       value: cat.uuid,
       label: cat.name,

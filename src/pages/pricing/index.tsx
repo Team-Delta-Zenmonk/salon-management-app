@@ -1,11 +1,13 @@
-import { Box, Typography, Divider, ToggleButtonGroup, ToggleButton } from "@mui/material";
+import { Box, Typography, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { useEffect, useState } from "react";
-import { PersonOutline, CategoryOutlined } from "@mui/icons-material";
+import { PersonOutline, ContentCutOutlined } from "@mui/icons-material";
 import { useAppDispatch } from "../../store/hooks";
 import { listServicesAction } from "../../features/service/list-services/list-service.action";
 import { listStaffAction } from "../../features/staff/list-staff/list-staff.action";
 import ServiceView from "./_components/service-view";
 import StaffView from "./_components/staff-view";
+import PageHeader from "../../components/page-header";
+
 
 export type ViewMode = "service" | "staff";
 
@@ -26,42 +28,40 @@ export default function StaffServiceManagementPage() {
 
   return (
     <Box className="flex flex-col w-full h-full gap-6">
-      <Box className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-8">
-        <Box>
-          <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900)">
-            Staff Service Pricing
-          </Typography>
-          <Typography className="text-gray-600">
-            Manage which staff provide each service and set custom pricing or durations.
-          </Typography>
-        </Box>
-
-        <ToggleButtonGroup
+      <PageHeader
+        title="Staff Service Pricing"
+        subtitle={`Establish customizable pricing, commissions, or durations based on specific team assignments.`}
+        action={<ToggleButtonGroup
           value={viewMode}
           exclusive
           onChange={handleViewChange}
           aria-label="view mode"
           size="small"
-          className="bg-white"
+          className="bg-[var(--surface-muted)] p-1.5 rounded-2xl border border-[var(--border-subtle)] shrink-0"
         >
-          <ToggleButton value="staff" aria-label="by staff" className="px-4 py-1.5 capitalize whitespace-nowrap">
+          <ToggleButton
+            value="staff"
+            aria-label="by staff"
+            className={`border-none px-6 py-2 rounded-xl !transition-all capitalize whitespace-nowrap ${viewMode === "staff" ? "!bg-[var(--surface)] !shadow-sm !text-[var(--text-primary)] font-bold" : "!text-[var(--text-muted)] hover:!bg-[var(--surface-muted)]"}`}
+          >
             <PersonOutline fontSize="small" className="mr-2" />
-            <Typography variant="body2" fontWeight="medium" className="whitespace-nowrap">
+            <Typography variant="body2" fontWeight="bold" className="whitespace-nowrap uppercase tracking-wider text-xs">
               By Staff
             </Typography>
           </ToggleButton>
-          <ToggleButton value="service" aria-label="by service" className="px-4 py-1.5 capitalize whitespace-nowrap">
-            <CategoryOutlined fontSize="small" className="mr-2" />
-            <Typography variant="body2" fontWeight="medium" className="whitespace-nowrap">
+          <ToggleButton
+            value="service"
+            aria-label="by service"
+            className={`border-none px-6 py-2 rounded-xl !transition-all capitalize whitespace-nowrap ${viewMode === "service" ? "!bg-[var(--surface)] !shadow-sm !text-[var(--text-primary)] font-bold" : "!text-[var(--text-muted)] hover:!bg-[var(--surface-muted)]"}`}
+          >
+            <ContentCutOutlined fontSize="small" className="mr-2" />
+            <Typography variant="body2" fontWeight="bold" className="whitespace-nowrap uppercase tracking-wider text-xs">
               By Service
             </Typography>
           </ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
-
-      <Divider />
-
-      <Box className="flex-1 min-h-0 flex flex-col w-full px-8 pb-8">
+        </ToggleButtonGroup>}
+      />
+      <Box className="flex-1 min-h-0 flex flex-col w-full bg-[var(--surface)] rounded-3xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
         {viewMode === "service" ? <ServiceView /> : <StaffView />}
       </Box>
     </Box>

@@ -73,7 +73,7 @@ export default function ListCategories({
 
   return (
     <>
-      <Box className="text-(--primary-900) mb-4">
+      <Box className="text-[var(--text-muted)] mb-4 font-semibold text-sm uppercase tracking-wider">
         Categories List ({total})
       </Box>
 
@@ -89,52 +89,60 @@ export default function ListCategories({
         scrollableTarget="scrollableDiv"
         endMessage={
           categories.length > 0 ? (
-            <Box className="text-center py-4 text-gray-500">
+            <Box className="text-center py-4 text-[var(--text-muted)]">
               <Typography variant="body2">No more categories to load</Typography>
             </Box>
           ) : null
         }
       >
-        <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {categories.map((category) => (
             <Box
               key={category.uuid}
-              className="bg-white border border-gray-300 rounded-lg p-6 hover:shadow-md transition-shadow"
+              className="bg-[var(--surface)] rounded-[20px] shadow-sm border border-[var(--border-subtle)] relative flex flex-col overflow-hidden"
             >
-              <Box className="flex items-start justify-between mb-4">
-                <Box className="flex items-center gap-4">
-                  <Box>
-                    <Avatar src={category.logo || undefined} alt={category.name} />
+              <Box className="p-6 flex-1 flex flex-col">
+                <Box className="flex items-center gap-4 mb-4">
+                  <Box className="w-12 h-12 rounded-full bg-[#FFEDD5] text-[#1E293B] flex items-center justify-center font-bold text-lg shrink-0 overflow-hidden border border-[#FDBA74] shadow-sm">
+                    {category.logo ? (
+                      <img src={category.logo} alt={category.name} className="w-full h-full object-cover" />
+                    ) : (
+                      category.name.substring(0, 1).toUpperCase()
+                    )}
                   </Box>
-                  <Box>
-                    <Typography className="text-(--primary-900)" fontWeight="bold">
-                      {category.name}
-                    </Typography>
+                  <Typography className="text-[var(--text-primary)] capitalize text-lg truncate" fontWeight={700}>
+                    {category.name}
+                  </Typography>
+                </Box>
+
+                <Typography className="text-[var(--text-muted)] text-sm line-clamp-2 leading-relaxed mb-6">
+                  {category.description || "No description available."}
+                </Typography>
+
+                <Box className="flex items-center justify-between pt-5 border-t border-dashed border-[var(--border-subtle)] mt-auto">
+                  <Typography className="text-[var(--text-muted)] text-xs font-bold">
+                    {dayjs(category.created_at).format("MMM DD, YYYY")}
+                  </Typography>
+                  <Box className="flex gap-2">
+                    <IconButton
+                      size="medium"
+                      aria-label="edit"
+                      onClick={() => handleUpdateClick(category)}
+                      disabled={deleteLoading}
+                      className="text-[var(--text-muted)] border border-[var(--border-subtle)] rounded-xl"
+                    >
+                      <ModeEditOutlineOutlinedIcon />
+                    </IconButton>
+                    <IconButton
+                      size="medium"
+                      aria-label="delete"
+                      onClick={() => handleDeleteClick(category)}
+                      disabled={deleteLoading}
+                      className="text-[var(--text-muted)] border border-[var(--border-subtle)] rounded-xl"
+                    >
+                      <DeleteOutlinedIcon />
+                    </IconButton>
                   </Box>
-                </Box>
-              </Box>
-
-              <Box className="text-gray-600 mb-4">{category.description}</Box>
-
-              <Box className="flex items-center justify-between pt-4 border-t border-blue-100">
-                <Box className="text-gray-500">
-                  Created On: {dayjs(category.created_at).format("MMM DD, YYYY")}
-                </Box>
-                <Box className="flex gap-2">
-                  <IconButton
-                    aria-label="edit"
-                    onClick={() => handleUpdateClick(category)}
-                    disabled={deleteLoading}
-                  >
-                    <ModeEditOutlineOutlinedIcon className="text-(--primary-800)!" />
-                  </IconButton>
-                  <IconButton
-                    aria-label="delete"
-                    onClick={() => handleDeleteClick(category)}
-                    disabled={deleteLoading}
-                  >
-                    <DeleteOutlinedIcon className="text-(--error-800)!" />
-                  </IconButton>
                 </Box>
               </Box>
             </Box>
@@ -143,8 +151,8 @@ export default function ListCategories({
       </InfiniteScroll>
 
       {categories.length === 0 && (
-        <Box className="bg-gray-200 border border-gray-400 rounded-lg p-8 text-center mt-4">
-          <Typography>No categories found. Create your first category!</Typography>
+        <Box className="bg-[var(--surface-muted)] border border-dashed border-[var(--border-subtle)] rounded-[20px] p-10 text-center mt-4">
+          <Typography className="text-[var(--text-muted)] font-medium">No categories found. Create your first category!</Typography>
         </Box>
       )}
 

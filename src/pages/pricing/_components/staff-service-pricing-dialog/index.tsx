@@ -85,7 +85,7 @@ export default function StaffServicePricingDialog({
     <Dialog open={open} onClose={loading ? undefined : onClose} fullWidth maxWidth="xs">
       <DialogTitle>
         Edit Pricing
-        <Typography className="text-gray-500 text-sm mt-1">
+        <Typography className="text-[var(--text-muted)] text-sm mt-1">
           {staff_name} · {service_name}
         </Typography>
       </DialogTitle>

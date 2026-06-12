@@ -11,7 +11,7 @@ interface BookingEventProps {
 export default function BookingEvent({ booking, color, isCancelled }: Readonly<BookingEventProps>) {
   return (
     <Box
-      className={`${styles.bookingEvent} ${isCancelled ? styles.cancelled : styles.confirmed}`}
+      className={`${styles.bookingEvent} ${styles[booking.status] || ""}`}
       sx={{ borderLeft: `4px solid ${color}` }}
     >
       <Box className={styles.customerName}>{booking.customer_name}</Box>
@@ -31,8 +31,8 @@ export default function BookingEvent({ booking, color, isCancelled }: Readonly<B
           </Box>
         )}
         {booking.payment_policy === "partial_deposit" && booking.deposit_amount != null && (
-          <Box className={styles.statusBadge} sx={{ backgroundColor: "info.light" }}>
-            <Box className={styles.statusText} sx={{ color: "info.dark" }}>
+          <Box className={styles.statusBadge} sx={{ backgroundColor: "primary.light" }}>
+            <Box className={styles.statusText} sx={{ color: "primary.dark" }}>
               Dep: ₹{booking.deposit_amount}
             </Box>
           </Box>

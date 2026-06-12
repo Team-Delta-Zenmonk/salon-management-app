@@ -73,7 +73,7 @@ const ProfileViewMode: React.FC<ProfileViewModeProps> = ({
                 sx={{
                   width: "100%",
                   height: "100%",
-                  borderRadius: "12px",
+                  borderRadius: "8px",
                   objectFit: "cover"
                 }}
               />
@@ -96,7 +96,7 @@ const ProfileViewMode: React.FC<ProfileViewModeProps> = ({
 
           <Box className={styles.titleAndOwnerBox}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-              <Typography variant="h5" fontWeight="bold" color="text.primary" textTransform="capitalize">
+              <Typography fontWeight="800" className="text-[var(--text-primary)] capitalize flex items-center gap-2">
                 {salon?.name || "-"}
               </Typography>
               {salon?.type && (
@@ -122,7 +122,7 @@ const ProfileViewMode: React.FC<ProfileViewModeProps> = ({
               <PersonIcon sx={{ fontSize: 16, color: "primary.main" }} />
               <Typography variant="paragraphSm" color="text.secondary">
                 Managed by{" "}
-                <Typography component="span" variant="paragraphSm" fontWeight="600" color="text.primary">
+                <Typography component="span" fontWeight="800" className="text-[var(--text-primary)] capitalize">
                   {salon?.owner_name || "-"}
                 </Typography>
               </Typography>

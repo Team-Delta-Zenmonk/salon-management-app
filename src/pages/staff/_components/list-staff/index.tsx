@@ -1,9 +1,9 @@
-import { Box, Typography, Avatar, Chip, IconButton } from "@mui/material";
-import { 
-  EditOutlined, 
-  DeleteOutlined, 
-  PhoneOutlined, 
-  EmailOutlined, 
+import { Box, Typography, Avatar, IconButton, CircularProgress } from "@mui/material";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PhoneOutlined,
+  EmailOutlined,
 } from "@mui/icons-material";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useState } from "react";
@@ -32,9 +32,6 @@ const formatDisplayDate = (date: string) => {
 
 const getFullName = (staff: Staff) => `${staff.first_name} ${staff.last_name || ""}`.trim();
 
-const getGenderChip = (gender: string) => (
-  <Chip label={gender} size="small" color="primary" variant="outlined" className="capitalize h-6 text-xs" />
-);
 
 function StaffCard({
   staff,
@@ -52,73 +49,76 @@ function StaffCard({
   deleteLoading: boolean;
 }) {
   return (
-    <Box 
-      className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col cursor-pointer" 
+    <Box
+      className="bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[20px] overflow-hidden flex flex-col cursor-pointer transition-all"
       onClick={onClick}
     >
-      <Box className="p-5">
-        <Box className="flex items-center gap-4">
-          <Avatar src={staff.photos?.url} alt={getFullName(staff)} sx={{ width: 64, height: 64 }} />
-          <Box className="flex-1 min-w-0">
-            <Typography className="text-(--primary-900) font-bold text-lg truncate capitalize">
-              {getFullName(staff)}
-            </Typography>
-            <Typography className="text-gray-500 text-sm truncate">
-              {staff.title || 'Staff Member'}
-            </Typography>
-            <Box className="mt-2 flex items-center gap-2">
-              {getGenderChip(staff.gender)}
-            </Box>
-          </Box>
+      <Box className="p-6 flex items-center gap-4 border-b border-dashed border-[var(--border-subtle)] bg-[var(--surface)]">
+        <Avatar src={staff.photos?.url} alt={getFullName(staff)} sx={{ width: 56, height: 56, backgroundColor: "var(--surface-muted)", color: "var(--text-primary)", fontWeight: "bold" }} />
+        <Box className="min-w-0 flex-1">
+          <Typography className="text-[var(--text-primary)] capitalize text-lg" fontWeight={700}>
+            {getFullName(staff)}
+          </Typography>
+          <Typography className="text-[var(--text-muted)] text-[15px] truncate font-medium">
+            {staff.title || "Staff Member"}
+          </Typography>
         </Box>
       </Box>
 
-      <Box className="px-5 pb-5 flex flex-col gap-4 flex-1">
-        <Box className="grid grid-cols-1 gap-3 flex-1">
-          <Box className="flex items-center gap-3">
-            <Box className="w-8 h-8 flex items-center justify-center text-gray-500 shrink-0">
-              <PhoneOutlined fontSize="small" />
+      <Box className="p-6 flex flex-col flex-1 bg-[var(--surface)]">
+        <Box className="grid grid-cols-1 gap-4 flex-1 mb-6">
+          <Box className="flex items-center gap-4">
+            <Box className="w-8 h-8 flex items-center justify-center text-[var(--text-muted)] shrink-0 bg-[var(--surface)] rounded-lg border border-[var(--border-subtle)]">
+              <PhoneOutlined sx={{ fontSize: 16 }} />
             </Box>
             <Box className="min-w-0 flex-1">
-              <Typography className="text-sm font-medium text-gray-800 truncate">{staff.phone_number}</Typography>
+              <Typography className="text-[15px] text-[var(--text-primary)] truncate" fontWeight={500}>{staff.phone_number}</Typography>
             </Box>
           </Box>
 
           {staff.email && (
-            <Box className="flex items-center gap-3">
-              <Box className="w-8 h-8 flex items-center justify-center text-gray-500 shrink-0">
-                <EmailOutlined fontSize="small" />
+            <Box className="flex items-center gap-4">
+              <Box className="w-8 h-8 flex items-center justify-center text-[var(--text-muted)] shrink-0 bg-[var(--surface)] rounded-lg border border-[var(--border-subtle)]">
+                <EmailOutlined sx={{ fontSize: 16 }} />
               </Box>
-              <Typography className="text-sm font-medium text-gray-800 truncate min-w-0 flex-1">{staff.email}</Typography>
+              <Typography className="text-[15px] text-[var(--text-primary)] truncate" fontWeight={500}>{staff.email}</Typography>
             </Box>
           )}
         </Box>
 
-        <Box className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 mt-auto">
-          <IconButton
-            title="Assign Services"
-            onClick={(e) => { e.stopPropagation(); onAssign(staff); }}
-            disabled={deleteLoading}
-            size="small"
-          >
-            <AssignmentTurnedInOutlinedIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            title="Edit Staff"
-            onClick={(e) => { e.stopPropagation(); onEdit(staff); }}
-            disabled={deleteLoading}
-            size="small"
-          >
-            <EditOutlined fontSize="small" />
-          </IconButton>
-          <IconButton
-            title="Delete Staff"
-            onClick={(e) => { e.stopPropagation(); onDelete(staff); }}
-            disabled={deleteLoading}
-            size="small"
-          >
-            <DeleteOutlined fontSize="small" />
-          </IconButton>
+        <Box className="flex items-center justify-between mt-auto">
+          <Box className="px-3 py-1.5 border border-[var(--border-subtle)] rounded-lg text-[13px] font-semibold text-[var(--text-primary)] bg-[var(--surface)]">
+            {staff.gender ? staff.gender.charAt(0).toUpperCase() + staff.gender.slice(1) : "Unspecified"}
+          </Box>
+          <Box className="flex gap-2">
+            <IconButton
+              title="Assign Services"
+              size="medium"
+              onClick={(e) => { e.stopPropagation(); onAssign(staff); }}
+              disabled={deleteLoading}
+              className="text-[var(--text-muted)] border border-[var(--border-subtle)] hover:border-[var(--primary-main)] hover:text-[var(--primary-main)] transition-colors rounded-xl"
+            >
+              <AssignmentTurnedInOutlinedIcon />
+            </IconButton>
+            <IconButton
+              title="Edit Staff"
+              size="medium"
+              onClick={(e) => { e.stopPropagation(); onEdit(staff); }}
+              disabled={deleteLoading}
+              className="text-[var(--text-muted)] border border-[var(--border-subtle)] hover:border-[var(--primary-main)] hover:text-[var(--primary-main)] transition-colors rounded-xl"
+            >
+              <EditOutlined />
+            </IconButton>
+            <IconButton
+              title="Delete Staff"
+              size="medium"
+              onClick={(e) => { e.stopPropagation(); onDelete(staff); }}
+              disabled={deleteLoading}
+              className="text-[var(--text-muted)] border border-[var(--border-subtle)] hover:border-[var(--error-600)] hover:text-[var(--error-600)] transition-colors rounded-xl"
+            >
+              <DeleteOutlined />
+            </IconButton>
+          </Box>
         </Box>
       </Box>
     </Box>
@@ -185,8 +185,8 @@ export default function ListStaff({
 
   return (
     <>
-      <Box className="text-(--primary-900) mb-4 font-medium text-lg">
-        Staff List ({total})
+      <Box className="text-[var(--text-muted)] mb-4 font-semibold text-sm uppercase tracking-wider">
+        Staff Members ({total})
       </Box>
 
       <InfiniteScroll
@@ -195,13 +195,13 @@ export default function ListStaff({
         hasMore={hasMore}
         loader={
           <Box className="flex justify-center py-4 w-full">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+            <CircularProgress size={24} />
           </Box>
         }
         scrollableTarget="scrollableDiv"
         endMessage={
           staffs.length > 0 ? (
-            <Box className="text-center py-6 w-full text-gray-500">
+            <Box className="text-center py-6 w-full text-[var(--text-muted)]">
               <Typography variant="body2">No more staff to load</Typography>
             </Box>
           ) : null
@@ -229,8 +229,8 @@ export default function ListStaff({
       </InfiniteScroll>
 
       {staffs.length === 0 && (
-        <Box className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-10 text-center mt-4">
-          <Typography className="text-gray-500 font-medium">No staff found. Create your first staff member!</Typography>
+        <Box className="bg-[var(--surface-muted)] border border-dashed border-[var(--border-subtle)] rounded-[20px] p-10 text-center mt-4">
+          <Typography className="text-[var(--text-muted)] font-medium">No staff found. Create your first staff member!</Typography>
         </Box>
       )}
 
@@ -273,12 +273,12 @@ export default function ListStaff({
         />
       )}
 
-      <StaffDetailsDialog 
-        open={detailsDialogOpen} 
+      <StaffDetailsDialog
+        open={detailsDialogOpen}
         onClose={() => {
           setDetailsDialogOpen(false);
           setSelectedStaff(null);
-        }} 
+        }}
         staff={selectedStaff}
         onEdit={(staff) => {
           setDetailsDialogOpen(false);

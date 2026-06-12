@@ -199,7 +199,7 @@ const SalonWorkingHoursCard: React.FC<SalonWorkingHoursCardProps> = ({ isEditing
           </Box>
           <Box>
             <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900) mb-2">
-              My Profile
+             Salon Working Hours
             </Typography>
             <Typography variant="paragraphXs" color="text.secondary">
               Weekly schedule slots

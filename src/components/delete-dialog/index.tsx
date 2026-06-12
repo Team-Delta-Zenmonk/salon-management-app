@@ -1,4 +1,5 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CircularProgress } from "@mui/material";
+import { Dialog, DialogContent, DialogActions, Button, Typography, CircularProgress, Box } from "@mui/material";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 
 interface DeleteDialogProps {
@@ -25,19 +26,32 @@ export default function DeleteDialog({
         if (reason === "backdropClick" || reason === "escapeKeyDown") return;
         onClose();
       }}
+      PaperProps={{
+        sx: {
+          padding: "12px",
+          borderRadius: "16px",
+          maxWidth: "420px",
+          width: "100%"
+        }
+      }}
     >
-      <DialogTitle>
-        <Typography fontWeight="fontWeightBold">{title}</Typography>
-      </DialogTitle>
+      <Box className="flex flex-col items-center pt-6 pb-2 px-4">
+        <Box className="w-14 h-14 rounded-full bg-[var(--error-50)] flex items-center justify-center mb-4 ring-8 ring-[var(--error-50)]/50">
+          <WarningAmberIcon className="text-[var(--error-600)]" fontSize="large" />
+        </Box>
+        <Typography variant="h5" fontWeight="bold" className="text-center text-[var(--text-primary)] mb-2">
+          {title}
+        </Typography>
+      </Box>
 
-      <DialogContent className="py-2">
-        <Typography>
+      <DialogContent className="py-2 px-6 text-center overflow-visible">
+        <Typography variant="body2" className="text-[var(--text-muted)] leading-relaxed">
           Are you sure you want to delete <strong>"{itemName}"</strong>? This action cannot be undone.
         </Typography>
       </DialogContent>
 
-      <DialogActions className="gap-2 p-3">
-        <Button onClick={onClose} disabled={isLoading} variant="outlined">
+      <DialogActions className="gap-3 p-6 flex-col sm:flex-row mt-2">
+        <Button onClick={onClose} disabled={isLoading} variant="outlined" className="w-full sm:w-1/2" sx={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
           Cancel
         </Button>
         <Button
@@ -45,7 +59,9 @@ export default function DeleteDialog({
           variant="contained"
           onClick={onDelete}
           disabled={isLoading}
-          startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
+          className="w-full sm:w-1/2"
+          disableElevation
+          startIcon={isLoading ? <CircularProgress size={18} color="inherit" /> : null}
         >
           {isLoading ? "Deleting..." : "Delete"}
         </Button>

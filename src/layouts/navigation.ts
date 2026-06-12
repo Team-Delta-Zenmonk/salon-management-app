@@ -18,7 +18,6 @@ export type NavItem = {
 };
 
 export const navigationItems: NavItem[] = [
-  { name: "My Profile", path: "/my-profile", icon: AccountCircleIcon },
   { name: "Dashboard", path: "/dashboard", icon: DashboardIcon },
   { name: "Categories", path: "/categories", icon: CategoryOutlinedIcon },
   { name: "Services", path: "/services", icon: DesignServicesIcon },
@@ -29,5 +28,4 @@ export const navigationItems: NavItem[] = [
   { name: "Customers", path: "/customers", icon: PersonOutlineIcon },
   { name: "Inventory", path: "/inventory", icon: Inventory2Icon },
   { name: "Reports", path: "/reports", icon: BarChartIcon },
-  { name: "Notifications", path: "/notifications", icon: NotificationsNoneIcon },
 ];

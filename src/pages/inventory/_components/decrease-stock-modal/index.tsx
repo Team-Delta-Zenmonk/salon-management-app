@@ -127,7 +127,6 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
             variant="contained"
             color="primary"
             disabled={loading}
-            sx={{ fontWeight: "bold", px: 3 }}
           >
             {loading ? "DECREASING..." : "DECREASE STOCK"}
           </Button>

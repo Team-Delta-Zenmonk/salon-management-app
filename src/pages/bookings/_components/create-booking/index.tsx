@@ -8,8 +8,8 @@ export default function CreateBooking() {
 
   return (
     <>
-      <Button variant="contained" startIcon={<AddOutlinedIcon className="text-white!" />} onClick={() => setOpen(true)}>
-        <Typography fontWeight="medium">Create</Typography>
+      <Button variant="contained" onClick={() => setOpen(true)}>
+        <Typography>Create</Typography>
       </Button>
       <BookingDialog open={open} onClose={() => setOpen(false)} mode="create" />
     </>

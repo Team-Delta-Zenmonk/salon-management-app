@@ -55,7 +55,6 @@ export default function AssignServicesDialog({
     if (!open) return;
 
     setLoading(true);
-
     dispatch(listServicesAction({ page: 1, limit: 1000 }));
 
     listStaffServices(staff.uuid)
@@ -84,10 +83,7 @@ export default function AssignServicesDialog({
 
   useEffect(() => {
     if (!services.length) return;
-
-    reset({
-      service_uuids: Array.from(assignedServiceMap.keys()),
-    });
+    reset({ service_uuids: Array.from(assignedServiceMap.keys()) });
   }, [assignedServiceMap, services, reset]);
 
   const serviceOptions = useMemo(() => {
@@ -127,7 +123,6 @@ export default function AssignServicesDialog({
         .filter((serviceUuid) => !assignedServiceMap.has(serviceUuid))
         .map((serviceUuid) => {
           const service = services.find((s) => s.uuid === serviceUuid);
-
           return {
             staff_uuid: staff.uuid,
             service_uuid: serviceUuid,
@@ -141,13 +136,8 @@ export default function AssignServicesDialog({
         .filter(([serviceUuid]) => !selectedServiceUuids.includes(serviceUuid))
         .map(([, staffService]) => staffService.uuid);
 
-      if (toAssign.length > 0) {
-        await assignStaffToService({ staff_services: toAssign });
-      }
-
-      if (toUnassign.length > 0) {
-        await unassignStaffFromService({ staff_services: toUnassign });
-      }
+      if (toAssign.length > 0) await assignStaffToService({ staff_services: toAssign });
+      if (toUnassign.length > 0) await unassignStaffFromService({ staff_services: toUnassign });
 
       callSnack("Services updated successfully", "success");
       onAssigned?.();
@@ -170,22 +160,46 @@ export default function AssignServicesDialog({
       maxWidth="sm"
       classes={{ paper: styles.dialog }}
     >
-      <DialogTitle sx={{ pb: 0 }} className={styles.dialogTitle}>
-        Assign Services
+      <DialogTitle sx={{ pt: 2.5, pb: 1.5, px: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box>
+            <Typography variant="h5" fontWeight="bold" color="var(--primary-900)">
+              Assign Services
+            </Typography>
+            <Typography variant="caption" color="var(--text-muted)">
+              Select services for this staff member
+            </Typography>
+          </Box>
+        </Box>
       </DialogTitle>
 
       <FormProvider {...methods}>
-        <DialogContent dividers className={clsx(styles.dialogContent)} sx={{ maxHeight: 400, overflowY: "auto" }}>
+        <DialogContent
+          className={clsx(styles.dialogContent)}
+          sx={{
+            px: 3,
+            pt: 2,
+            pb: 1,
+            maxHeight: 380,
+            overflowY: "auto",
+            borderTop: "1px solid var(--border-subtle)",
+          }}
+        >
           {loading ? (
-            <Box className="flex justify-center py-6">
-              <CircularProgress />
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", py: 8, gap: 1.5 }}>
+              <CircularProgress size={28} thickness={4} />
+              <Typography variant="caption" color="var(--text-muted)">
+                Loading services...
+              </Typography>
+            </Box>
+          ) : serviceOptions.length === 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", py: 8, gap: 1 }}>
+              <Typography variant="body2" color="var(--text-muted)">
+                No services available to assign.
+              </Typography>
             </Box>
           ) : (
             <form id="assign-services-form" onSubmit={handleSubmit(onSubmit)}>
-              <Typography variant="body2" className="text-(--app-muted) mb-4">
-                Select services to assign to this staff member
-              </Typography>
-
               <CheckboxTree
                 name="service_uuids"
                 control={methods.control}
@@ -196,8 +210,19 @@ export default function AssignServicesDialog({
           )}
         </DialogContent>
 
-        <DialogActions className={styles.dialogActions}>
-          <Button onClick={onClose} disabled={saving}>
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            borderTop: "1px solid var(--border-subtle)",
+            gap: 1,
+          }}
+        >
+          <Button
+            onClick={onClose}
+            disabled={saving}
+            variant="outlined"
+          >
             Cancel
           </Button>
           <Button
@@ -205,9 +230,9 @@ export default function AssignServicesDialog({
             form="assign-services-form"
             variant="contained"
             disabled={saving}
-            startIcon={saving ? <CircularProgress size={18} /> : null}
+            startIcon={saving ? <CircularProgress size={16} thickness={4} color="inherit" /> : null}
           >
-            Save
+            {saving ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
       </FormProvider>

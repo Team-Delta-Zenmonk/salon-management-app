@@ -41,7 +41,7 @@ const CheckboxGroup = <T extends FieldValues>({
             {options.map(({ label, value, disabled }) => (
               <FormControlLabel
                 key={`${label} ${value}`}
-                label={label}
+                label={label.replace(/\b\w/g, (c) => c.toUpperCase())}
                 className={styles.checkboxControlLabel}
                 classes={{ label: styles.checkboxLabel }}
                 control={

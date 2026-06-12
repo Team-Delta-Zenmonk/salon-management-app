@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress, IconButton } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
 import { persistor } from "../../store/store";
@@ -7,7 +7,7 @@ import { callSnack } from "../snackbar";
 import { useAppDispatch } from "../../store/hooks";
 import { logout } from "../../features/auth/auth.slice";
 
-const LogoutButton = () => {
+const LogoutButton = ({ isCollapsed }: { isCollapsed?: boolean }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useAppDispatch();
@@ -16,7 +16,7 @@ const LogoutButton = () => {
     try {
       setIsLoading(true);
       persistor.purge();
-      dispatch(logout())
+      dispatch(logout());
       navigate("/login", { replace: true });
     } catch {
       callSnack("Error during logout", "error");
@@ -24,6 +24,14 @@ const LogoutButton = () => {
       setIsLoading(false);
     }
   };
+
+  if (isCollapsed) {
+    return (
+      <IconButton color="error" onClick={handleLogout} disabled={isLoading} className="w-full h-10 rounded-xl bg-red-50 hover:bg-red-100">
+        {isLoading ? <CircularProgress size={20} color="inherit" /> : <LogoutIcon className="text-red-600!" />}
+      </IconButton>
+    );
+  }
 
   return (
     <Button
@@ -34,6 +42,7 @@ const LogoutButton = () => {
       onClick={handleLogout}
       className="flex-start border-2"
       disabled={isLoading}
+      sx={{ justifyContent: 'flex-start' }}
     >
       {isLoading ? "Logging out..." : "Logout"}
     </Button>

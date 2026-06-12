@@ -12,8 +12,8 @@ export default function CreateService({ onCreatedOrUpdated }: Readonly<CreateSer
 
   return (
     <>
-      <Button variant="contained" startIcon={<AddOutlinedIcon className="text-white!" />} onClick={() => setOpen(true)}>
-        <Typography fontWeight="medium">Add</Typography>
+      <Button variant="contained" onClick={() => setOpen(true)} >
+        <Typography  >Add</Typography>
       </Button>
 
       <ServiceDialog open={open} onClose={() => setOpen(false)} mode="create" onCreated={onCreatedOrUpdated} />

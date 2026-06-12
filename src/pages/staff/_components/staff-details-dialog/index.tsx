@@ -1,23 +1,23 @@
 import { useState } from 'react';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  Button, 
-  Typography, 
-  Box, 
-  Avatar, 
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Box,
+  Avatar,
   Divider,
   Chip,
   Tabs,
   Tab,
   IconButton
 } from "@mui/material";
-import { 
-  PhoneOutlined, 
-  EmailOutlined, 
-  LocationOnOutlined, 
+import {
+  PhoneOutlined,
+  EmailOutlined,
+  LocationOnOutlined,
   CakeOutlined,
   EditOutlined,
   DeleteOutlined,
@@ -72,9 +72,9 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-export default function StaffDetailsDialog({ 
-  open, 
-  onClose, 
+export default function StaffDetailsDialog({
+  open,
+  onClose,
   staff,
   onEdit,
   onDelete,
@@ -92,11 +92,11 @@ export default function StaffDetailsDialog({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="sm" 
-      fullWidth 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
       PaperProps={{ sx: { borderRadius: 3 } }}
       className={styles.dialogContainer}
     >
@@ -106,7 +106,7 @@ export default function StaffDetailsDialog({
             <Avatar src={staff.photos?.url} alt={fullName} sx={{ width: 64, height: 64 }} />
             <Box className={styles.staffDetails}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                <Typography variant="h6" className={styles.staffName}>
+                <Typography variant="h3" className={styles.staffName}>
                   {fullName}
                 </Typography>
                 <Chip label={staff.gender} size="small" color="primary" className="capitalize text-xs" />
@@ -149,8 +149,8 @@ export default function StaffDetailsDialog({
       </DialogTitle>
 
       <Box className={styles.tabsContainer}>
-        <Tabs 
-          value={tabValue} 
+        <Tabs
+          value={tabValue}
           onChange={handleTabChange}
           aria-label="staff details tabs"
           variant="scrollable"
@@ -208,7 +208,7 @@ export default function StaffDetailsDialog({
                 <EmailOutlined className={styles.infoIcon} />
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="caption" className={styles.infoLabel}>Email Address</Typography>
-                  <Typography variant="body2"  sx={{ wordBreak: 'break-all' }}>{staff.email}</Typography>
+                  <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>{staff.email}</Typography>
                 </Box>
               </Box>
             )}
@@ -259,8 +259,8 @@ export default function StaffDetailsDialog({
               const hours = staff.active_hours?.[day];
               const dayLabel = day.charAt(0).toUpperCase() + day.slice(1, 3);
               return (
-                <Box 
-                  key={day} 
+                <Box
+                  key={day}
                   className={styles.scheduleItem}
                 >
                   <Typography variant="body2" className={styles.dayLabel}>{dayLabel}</Typography>
@@ -279,10 +279,10 @@ export default function StaffDetailsDialog({
 
       <Divider />
       <DialogActions className={clsx(styles.dialogFooter, "p-4")}>
-        <Button 
-          onClick={onClose} 
-          variant="contained" 
-          disableElevation 
+        <Button
+          onClick={onClose}
+          variant="contained"
+          disableElevation
           size="small"
           className={styles.closeButtonFooter}
         >

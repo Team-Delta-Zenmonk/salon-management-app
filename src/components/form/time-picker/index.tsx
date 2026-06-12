@@ -4,8 +4,9 @@ import clsx from "clsx";
 import dayjs, { type Dayjs } from "dayjs";
 import { Controller, type FieldValues } from "react-hook-form";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { TimePicker as MuiTimePicker } from "@mui/x-date-pickers/TimePicker";
+import { MobileTimePicker as MuiTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { renderMultiSectionDigitalClockTimeView } from "@mui/x-date-pickers/timeViewRenderers";
 import styles from "./time-picker.module.scss";
 import type { CustomDateTimePickerProps } from "./time.picker.type";
 
@@ -57,6 +58,11 @@ const TimePicker = <T extends FieldValues>({
                 disabled={disabled}
                 minTime={minDateTime ?? undefined}
                 maxTime={maxDateTime ?? undefined}
+                viewRenderers={{
+                  hours: renderMultiSectionDigitalClockTimeView as any,
+                  minutes: renderMultiSectionDigitalClockTimeView as any,
+                  seconds: renderMultiSectionDigitalClockTimeView as any,
+                }}
                 slots={{ openPickerIcon }}
                 slotProps={{
                   textField: {

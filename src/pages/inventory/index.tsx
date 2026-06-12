@@ -15,6 +15,7 @@ import { InventoryFilters } from "./_components/inventory-filters";
 import { fetchItemCategoriesAction } from "../../features/inventory/list-inventory-items-category/list-inventory-items-category.action";
 import type { InventoryTransaction } from "../../features/inventory/inventory-log.slice";
 import styles from "./inventory.module.scss";
+import PageHeader from "../../components/page-header";
 
 const PAGE_LIMIT = 10;
 
@@ -201,22 +202,21 @@ export default function Inventory() {
   return (
     <Box className="flex flex-col flex-1 min-h-0 w-full pb-12">
       <Box className={styles.stickyContainer}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={1}>
-          <Typography variant="h4" fontWeight="bold">
-            Inventory
-          </Typography>
-          <Box display="flex" gap={2} flexWrap="wrap">
+        <PageHeader
+          title="Inventory Management"
+          subtitle="Manage your stock and track inventory logs."
+          action={
             <Button
               variant="contained"
               color="primary"
-              startIcon={<AssignmentIcon sx={{ color: "common.white" }} />}
               onClick={() => setIsLogTransactionOpen(true)}
-              sx={{ fontWeight: "bold" }}
+              disableElevation
+              sx={{ fontWeight: "medium" }}
             >
-              Add Stock Entry
+              <Typography>Add</Typography>
             </Button>
-          </Box>
-        </Box>
+          }
+        />
 
         <InventoryFilters
           activeTab={activeTab}
@@ -233,19 +233,19 @@ export default function Inventory() {
 
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={activeTab} onChange={handleTabChange} aria-label="inventory tabs">
-            <Tab label="Inventory Logs" />
-            <Tab label="Current Stocks" />
+            <Tab label="Inventory Logs" sx={{ fontSize: "1rem", fontWeight: 600, textTransform: "capitalize" }} />
+            <Tab label="Current Stocks" sx={{ fontSize: "1rem", fontWeight: 600, textTransform: "capitalize" }} />
           </Tabs>
         </Box>
       </Box>
 
-      <Box className="flex-1 min-h-0 overflow-y-auto" id="inventoryScrollableDiv">
+      <Box className="flex-1 min-h-0 overflow-y-auto pt-6 px-1" id="inventoryScrollableDiv">
         {activeTab === 1 && (
         <>
-          <Box sx={{ color: "primary.900", mb: 1, fontWeight: "bold", px: 1 }}>
+          <Box className="text-[var(--text-muted)] mb-4 font-semibold text-sm uppercase tracking-wider">
             Total Items ({stockTotal})
           </Box>
-          <Box sx={{ pr: 1 }}>
+          <Box>
             <StockTable
               data={stockData}
               loading={stockLoading}

@@ -60,13 +60,13 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
       </DialogTitle>
 
       <DialogContent className={styles.dialogContent}>
-        <Box className="flex flex-col gap-6 py-4">
-          <Box className="flex items-center gap-4">
+        <Box className="flex flex-col mt-2">
+          <Box className="flex items-center gap-5 mb-4">
             <Avatar alt={category.name} sx={{ width: 80, height: 80, fontSize: 32 }}>
               {category.name.charAt(0).toUpperCase()}
             </Avatar>
             <Box className="flex-1">
-              <Typography variant="h6" fontWeight="bold" className="text-(--primary-900) mb-1">
+              <Typography variant="h4" fontWeight="bold" className="text-(--primary-900) mb-1">
                 {category.name}
               </Typography>
               <Typography variant="body2" className="text-gray-600">
@@ -74,10 +74,10 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
               </Typography>
             </Box>
           </Box>
-          <Box className="border-t border-gray-300" />
+          <Box className="border-t border-gray-200 mb-4" />
 
-          <Box className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <Typography variant="body2" className="text-blue-900">
+          <Box className="bg-(--primary-50) border border-(--primary-100) rounded-lg p-4">
+            <Typography variant="body2" className="text-(--primary-900)">
               <strong>Note:</strong> Clicking "Create Category" will add this category to your categories list with the
               predefined name and description.
             </Typography>
@@ -90,7 +90,7 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
           Cancel
         </Button>
         <Button onClick={handleCreate} disabled={isLoading} variant="contained" startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
-          {isLoading ? "Creating..." : "Create Category"}
+          {isLoading ? "Creating..." : "Create"}
         </Button>
       </DialogActions>
     </Dialog>

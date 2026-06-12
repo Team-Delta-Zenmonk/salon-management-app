@@ -73,7 +73,7 @@ const SearchStaff = () => {
   const hasMore = data.length < total;
 
   return (
-    <Box className="flex flex-col flex-1 min-h-0 px-4 md:px-8 pb-8 space-y-6">
+    <Box className="flex flex-col flex-1 min-h-0 space-y-6">
       <Box>
         <SearchBar onSearch={setSearchQuery} placeholder="Search Staff" />
       </Box>

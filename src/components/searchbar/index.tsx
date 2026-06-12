@@ -37,7 +37,7 @@ const SearchBar = ({ onSearch, placeholder }: SearchBarProps) => {
   return (
     <TextField
       size="medium"
-      sx={{ maxWidth: "700px !important", width: "100%" }}
+      sx={{ maxWidth: "400px !important", width: "100%" }}
       placeholder={placeholder}
       value={searchQuery}
       onChange={handleOnChange}

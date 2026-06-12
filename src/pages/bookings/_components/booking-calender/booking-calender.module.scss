@@ -8,13 +8,48 @@
     }
 
     .fc-toolbar-title {
-      color: var(--primary);
+      color: var(--text-primary);
+      font-size: 1.125rem !important;
+      font-weight: 600 !important;
+    }
+
+    .fc-button-primary {
+      background-color: var(--surface) !important;
+      color: var(--text-primary) !important;
+      border: 1px solid var(--border-subtle) !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+      text-transform: capitalize !important;
+      font-weight: 500 !important;
+      padding: 6px 12px !important;
+      border-radius: 6px !important;
+      transition: all 0.2s !important;
+
+      &:hover {
+        background-color: var(--surface-muted) !important;
+        border-color: var(--border-subtle) !important;
+      }
+      
+      &:not(:disabled).fc-button-active,
+      &:not(:disabled):active {
+        background-color: var(--surface-muted) !important;
+        color: var(--primary) !important;
+        border-color: var(--primary) !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05) !important;
+      }
+    }
+
+    .fc-button-group {
+      .fc-button-primary {
+        border-radius: 0 !important;
+        &:first-child { border-radius: 6px 0 0 6px !important; }
+        &:last-child { border-radius: 0 6px 6px 0 !important; }
+      }
     }
 
     .fc-timegrid-event {
       border: none !important;
       border-radius: 6px !important;
-      overflow: hidden !important;
+      overflow: visible !important;
       margin-bottom: 2px !important;
     }
 

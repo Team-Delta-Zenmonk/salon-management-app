@@ -14,7 +14,7 @@ export default function InfoRow({ icon, label, value }: Readonly<InfoRowProps>) 
         <Typography variant="caption" className="text-gray-500">
           {label}
         </Typography>
-        <Typography className="text-gray-900 font-medium wrap-anywhere">{value}</Typography>
+        <Typography className="text-gray-900 capitalize font-medium wrap-anywhere">{value}</Typography>
       </Box>
     </Box>
   );

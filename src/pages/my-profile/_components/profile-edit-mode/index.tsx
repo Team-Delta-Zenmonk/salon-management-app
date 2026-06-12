@@ -156,6 +156,7 @@ const ProfileEditMode: React.FC<ProfileEditModeProps> = ({
             fullWidth
             maxLength={300}
             placeholder="Tell us about your salon"
+            pattern={VALIDATE_PATTERN.alphabetWithSpecial}
           />
         </Grid>
       </Box>

@@ -59,7 +59,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
   const options = stockItems.map((item: InventoryItem) => {
     const variantStr = [item.variant_name, item.unit].filter(Boolean).join(" ");
     return {
-      label: `${item.name} - ${variantStr || 'Standard'} (${item.brand || 'No Brand'})`,
+      label: `${item.name} - ${variantStr || 'Standard'}`,
       value: item.uuid,
       item_uuid: item.uuid,
     };
@@ -172,7 +172,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
           <Box display="flex" flexDirection="column" gap={3}>
             <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2} alignItems={{ xs: "stretch", sm: "center" }}>
               <Box className="flex flex-col gap-2" flex={1}>
-                <Typography variant="titleSm" fontWeight="bold">Search Inventory Item</Typography>
+                <Typography variant="titleSm" fontWeight="bold">Select Inventory Item</Typography>
                 <Select
                   name="item_uuid"
                   control={control}
@@ -184,7 +184,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
               </Box>
               {!transactionToEdit && (
                 <Button variant="outlined" onClick={onAddNewItem} sx={{ mt: { xs: 0, sm: 4 } }}>
-                  + Add New Item
+                  <Typography>+ New Item</Typography>
                 </Button>
               )}
             </Box>
@@ -284,7 +284,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
             CANCEL
           </Button>
           <Button type="submit" variant="contained" disabled={loading || !itemUuid} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined} sx={{ fontWeight: "bold", px: 3 }}>
-            {loading ? "SAVING..." : (transactionToEdit ? "UPDATE TRANSACTION" : "LOG TRANSACTION")}
+            {loading ? "SAVING..." : (transactionToEdit ? "Save" : "Add")}
           </Button>
         </DialogActions>
 

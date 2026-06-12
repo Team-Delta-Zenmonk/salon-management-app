@@ -30,7 +30,7 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
     const total = booking.total_price || booking.booking_services?.reduce((sum, s) => sum + (Number(s.price) || 0), 0) || 0;
     const policy = booking.payment_policy;
     const onlinePaid = booking.amount_paid_online || 0;
-    
+
     let paid = 0;
     let label = "UNKNOWN";
     let strategy = "Unknown";
@@ -63,7 +63,7 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
       experimental: { bg: "bg-[var(--experimental-50)]", text: "text-[var(--experimental-800)]", border: "border-[var(--experimental-200)]", dot: "bg-[var(--experimental-500)]", progress: "bg-[var(--experimental-800)]" },
       secondary: { bg: "bg-[var(--secondary-50)]", text: "text-[var(--secondary-800)]", border: "border-[var(--secondary-200)]", dot: "bg-[var(--secondary-500)]", progress: "bg-[var(--secondary-400)]" }
     };
-    
+
     const styles = themeStyles[themeKey];
 
     return { total, paid, remaining, label, percentage, strategy, styles };
@@ -103,39 +103,39 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
             {label}
           </Typography>
         </Box>
-        <IconButton size="small" onClick={onClose} className="text-gray-400">
+        <IconButton size="small" onClick={onClose} className="text-[var(--text-muted)]">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
       <DialogContent className="px-6 pb-2 pt-4">
         <Box className="mb-6">
-          <Typography variant="h5" fontWeight="bold" className="text-gray-900 mb-1">
+          <Typography variant="h5" fontWeight="bold" className="text-[var(--text-primary)] mb-1">
             {booking.customer_name}
           </Typography>
-          <Typography variant="body2" className="text-gray-500">
+          <Typography variant="body2" className="text-[var(--text-muted)]">
             {booking.service_name}
           </Typography>
         </Box>
 
         <Box className="grid grid-cols-2 gap-4 mb-6">
           <Box>
-            <Typography variant="caption" fontWeight="bold" className="text-gray-400 uppercase tracking-wider mb-2 block">
+            <Typography variant="caption" fontWeight="bold" className="text-[var(--text-muted)] uppercase tracking-wider mb-2 block">
               APPOINTMENT TIME
             </Typography>
-            <Box className="flex items-center gap-2 text-gray-700">
-              <AccessTimeIcon fontSize="small" className="text-gray-400" />
+            <Box className="flex items-center gap-2 text-[var(--text-primary)]">
+              <AccessTimeIcon fontSize="small" className="text-[var(--text-muted)]" />
               <Typography variant="body2" fontWeight="medium">
                 {formattedDate} • {formattedTime}
               </Typography>
             </Box>
           </Box>
           <Box>
-            <Typography variant="caption" fontWeight="bold" className="text-gray-400 uppercase tracking-wider mb-2 block">
+            <Typography variant="caption" fontWeight="bold" className="text-[var(--text-muted)] uppercase tracking-wider mb-2 block">
               ASSIGNED STAFF
             </Typography>
-            <Box className="flex items-center gap-2 text-gray-700">
-              <PersonOutlineIcon fontSize="small" className="text-gray-400" />
+            <Box className="flex items-center gap-2 text-[var(--text-primary)]">
+              <PersonOutlineIcon fontSize="small" className="text-[var(--text-muted)]" />
               <Typography variant="body2" fontWeight="medium">
                 {booking.staff_name}
               </Typography>
@@ -143,37 +143,37 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
           </Box>
         </Box>
 
-        <Box className="bg-gray-50 rounded-xl p-5 mb-6">
-          <Typography variant="body2" fontWeight="bold" className="text-gray-600 mb-3">
+        <Box className="bg-[var(--surface-muted)] rounded-xl p-5 mb-6">
+          <Typography variant="body2" fontWeight="bold" className="text-[var(--text-muted)] mb-3">
             Payment Progress
           </Typography>
-          <Box className="w-full bg-gray-200 rounded-full h-2.5 mb-3 overflow-hidden">
+          <Box className="w-full bg-[var(--secondary-200)] rounded-full h-2.5 mb-3 overflow-hidden">
             <Box
               className={`h-full rounded-full transition-all duration-500 ${styles.progress}`}
               style={{ width: `${percentage}%` }}
             ></Box>
           </Box>
           <Box className="flex justify-between items-center text-sm">
-            <Typography variant="body2" className="text-gray-600">
-              Paid: <span className="font-bold text-gray-900">₹{paid.toFixed(2)}</span>
+            <Typography variant="body2" className="text-[var(--text-muted)]">
+              Paid: <span className="font-bold text-[var(--text-primary)]">₹{paid.toFixed(2)}</span>
             </Typography>
-            <Typography variant="body2" className="text-gray-600">
-              Remaining: <span className="font-bold text-gray-900">₹{remaining.toFixed(2)}</span>
+            <Typography variant="body2" className="text-[var(--text-muted)]">
+              Remaining: <span className="font-bold text-[var(--text-primary)]">₹{remaining.toFixed(2)}</span>
             </Typography>
           </Box>
         </Box>
 
-        <Box className="flex justify-between items-center py-4 border-b border-gray-100">
-          <Typography variant="body2" className="text-gray-500">
+        <Box className="flex justify-between items-center py-4 border-b border-[var(--border-subtle)]">
+          <Typography variant="body2" className="text-[var(--text-muted)]">
             Service Cost
           </Typography>
-          <Typography variant="body1" fontWeight="bold" className="text-gray-900">
+          <Typography variant="body1" fontWeight="bold" className="text-[var(--text-primary)]">
             ₹{total.toFixed(2)}
           </Typography>
         </Box>
 
-        <Box className="flex justify-between items-center py-4 border-b border-gray-100">
-          <Typography variant="body2" className="text-gray-500">
+        <Box className="flex justify-between items-center py-4 border-b border-[var(--border-subtle)]">
+          <Typography variant="body2" className="text-[var(--text-muted)]">
             Payment Strategy
           </Typography>
           <Box className={`px-2.5 py-1 rounded-md text-xs font-bold border ${styles.bg} ${styles.border} ${styles.text}`}>
@@ -182,7 +182,7 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
         </Box>
 
         <Box className="flex justify-between items-center py-4">
-          <Typography variant="body2" className="text-gray-500">
+          <Typography variant="body2" className="text-[var(--text-muted)]">
             Transaction Status
           </Typography>
           <Box className="flex items-center gap-1.5">
@@ -194,19 +194,18 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
         </Box>
 
       </DialogContent>
-      <DialogActions className="p-4 bg-gray-50 flex justify-end gap-3 rounded-b-2xl border-t border-gray-100">
+      <DialogActions className="p-4 bg-[var(--surface-muted)] flex justify-end gap-3 rounded-b-2xl border-t border-[var(--border-subtle)]">
         {remaining > 0 && booking.status !== BOOKING_STATUS.CANCELLED ? (
           <>
-            <Button onClick={onClose} variant="outlined" className="text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-none font-semibold px-6 py-2 rounded-xl capitalize">
+            <Button onClick={onClose} variant="outlined" className="text-[var(--text-muted)] border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-muted)] shadow-none font-semibold px-6 py-2 rounded-xl capitalize">
               Dismiss
             </Button>
-            <Button variant="contained" className="bg-[var(--info-600)] text-white hover:bg-[var(--info-700)] shadow-none font-semibold px-6 py-2 rounded-xl capitalize flex items-center gap-2">
-              <CreditCardIcon fontSize="small" />
+            <Button variant="contained" className="bg-[var(--info-600)] text-white shadow-none font-semibold px-6 py-2 rounded-xl capitalize flex items-center gap-2">
               Collect Remaining ₹{remaining.toFixed(0)}
             </Button>
           </>
         ) : (
-          <Button onClick={onClose} variant="contained" className="bg-gray-200 text-gray-700 hover:bg-gray-300 shadow-none font-semibold px-6 py-2 rounded-lg capitalize">
+          <Button onClick={onClose} variant="contained" className="bg-[var(--secondary-200)] text-[var(--text-primary)] hover:bg-[var(--secondary-300)] shadow-none font-semibold px-6 py-2 rounded-lg capitalize">
             Close Receipt
           </Button>
         )}
