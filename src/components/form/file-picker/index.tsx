@@ -2,13 +2,10 @@ import ClearIcon from "@mui/icons-material/Clear";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import {
   CircularProgress,
-  FormControl,
-  FormHelperText,
   IconButton,
-  InputLabel,
-  OutlinedInput,
   Stack,
 } from "@mui/material";
+import MuiTextField from "@mui/material/TextField";
 import { useRef, useState, type ChangeEvent, type MouseEvent } from "react";
 import { Controller, type FieldValues } from "react-hook-form";
 import type { FilePickerProps } from "./file-picker.type";
@@ -118,40 +115,33 @@ const FilePicker = <T extends FieldValues>({
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <Stack data-test-id={identifier}>
-          <FormControl disabled={disabled || loading} variant="outlined" className={styles.formControl} size="small">
-            <InputLabel
-              sx={{ marginTop: value ? 0 : "6.5px" }}
-              shrink={Boolean(value)}
-              error={Boolean(error)}
-              data-test-id={`label-${identifier}`}
-            >
-              {label}
-            </InputLabel>
-
-            <OutlinedInput
-              error={Boolean(error)}
-              onClick={(e: MouseEvent<HTMLDivElement>) => openFilePicker(e, Boolean(value))}
-              label={label}
-              value={value?.filename ?? ""}
-              className={styles.inputField}
-              data-test-id={`text-input-${identifier}`}
-              inputProps={{
-                className: styles.input,
-              }}
-              slotProps={{
-                root: {
-                  className: value ? "" : styles.inputRoot,
-                },
-              }}
-              readOnly
-              endAdornment={renderEndAdornment(loading, value, identifier, disabled, onChange)}
-            />
-            {error && (
-              <FormHelperText data-test-id={`error-${identifier}`} error={Boolean(error)}>
-                {error.message}
-              </FormHelperText>
-            )}
-          </FormControl>
+          <MuiTextField
+            disabled={disabled || loading}
+            variant="outlined"
+            size="medium"
+            error={Boolean(error)}
+            helperText={error?.message}
+            label={label}
+            value={value?.filename ?? ""}
+            onClick={(e: MouseEvent<HTMLDivElement>) => openFilePicker(e, Boolean(value))}
+            slotProps={{
+              input: {
+                readOnly: true,
+                endAdornment: renderEndAdornment(loading, value, identifier, disabled, onChange),
+                className: value ? "" : styles.inputRoot,
+                sx: { cursor: 'pointer', paddingRight: '8px' }
+              },
+              htmlInput: {
+                "data-test-id": `text-input-${identifier}`,
+                sx: { cursor: 'pointer' }
+              },
+              inputLabel: {
+                shrink: Boolean(value),
+                "data-test-id": `label-${identifier}`
+              } as any
+            }}
+            fullWidth
+          />
 
           <input
             ref={inputRef}

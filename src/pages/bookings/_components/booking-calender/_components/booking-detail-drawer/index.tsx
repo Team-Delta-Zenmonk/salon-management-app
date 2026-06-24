@@ -116,30 +116,6 @@ export default function BookingDetailsDrawer({
                   letterSpacing: 0.4,
                 }}
               />
-              {booking?.payment_policy === "pay_at_venue" && (
-                <Chip
-                  label="Unpaid (Pay at Venue)"
-                  size="small"
-                  color="warning"
-                  sx={{ fontWeight: 700 }}
-                />
-              )}
-              {booking?.payment_policy === "partial_deposit" && booking?.deposit_amount != null && (
-                <Chip
-                  label={`Deposit: ₹${booking.deposit_amount}`}
-                  size="small"
-                  color="info"
-                  sx={{ fontWeight: 700 }}
-                />
-              )}
-              {booking?.payment_policy === "full_upfront" && booking?.amount_paid_online != null && (
-                <Chip
-                  label={`Paid Full: ₹${booking.amount_paid_online}`}
-                  size="small"
-                  color="success"
-                  sx={{ fontWeight: 700 }}
-                />
-              )}
             </Box>
 
             {timeInfo && (

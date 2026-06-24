@@ -5,6 +5,7 @@ import { listBookingsAction } from "./get-bookings/get-bookings.action";
 import { createBookingAction } from "./create-booking/create-booking.action";
 import { updateBookingAction } from "./update-booking/update-booking.action";
 import { deleteBookingAction } from "./delete-booking/delete-booking.action";
+import { collectRemainingPaymentAction } from "./collect-remaning-payment/collect-remaining-payment.action";
 
 export interface BookingService {
   id: number;
@@ -41,6 +42,9 @@ export interface Booking {
   booking_end_time: string;
   booking_date: string;
   created_by: BookingSource;
+  payment_policy?: 'pay_at_venue' | 'partial_deposit' | 'full_upfront';
+  deposit_amount?: number;
+  amount_paid_online?: number;
   admin_booking?: {
     name: string;
     phone: string;
@@ -122,6 +126,13 @@ export const bookingSlice = createSlice({
 
       if (state.data.length < previousLength) {
         state.total = Math.max(0, state.total - 1);
+      }
+    });
+
+    builder.addCase(collectRemainingPaymentAction.fulfilled, (state, action) => {
+      const index = state.data.findIndex((b) => b.uuid === action.payload.data.uuid);
+      if (index !== -1) {
+        state.data[index] = action.payload.data;
       }
     });
   },

@@ -180,6 +180,12 @@ export default function BookingPage() {
     });
   }, [bookings]);
 
+  const liveReceiptBooking = useMemo(() => {
+    if (!receiptBooking) return null;
+    const found = mappedBookings.find((b) => b.uuid === receiptBooking.uuid);
+    return found ?? receiptBooking;
+  }, [mappedBookings, receiptBooking]);
+
   const getStatusColor = (status: BookingStatus): string => {
     return BOOKING_STATUS_COLORS[status] ?? "#6b7280";
   };
@@ -296,7 +302,7 @@ export default function BookingPage() {
       <BookingReceiptDialog
         open={Boolean(receiptBooking)}
         onClose={() => setReceiptBooking(null)}
-        booking={receiptBooking}
+        booking={liveReceiptBooking}
       />
     </Box>
   );

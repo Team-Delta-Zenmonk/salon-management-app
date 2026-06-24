@@ -16,6 +16,8 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import dayjs from "dayjs";
 import type { Booking } from "../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
+import { collectRemainingPaymentAction } from "../../../../features/booking/collect-remaning-payment/collect-remaining-payment.action";
+import { useAppDispatch } from "../../../../store/hooks";
 
 interface BookingReceiptDialogProps {
   open: boolean;
@@ -25,6 +27,7 @@ interface BookingReceiptDialogProps {
 
 export default function BookingReceiptDialog({ open, onClose, booking }: Readonly<BookingReceiptDialogProps>) {
   if (!booking) return null;
+  const dispatch = useAppDispatch();
 
   const getPaymentDetails = () => {
     const total = booking.total_price || booking.booking_services?.reduce((sum, s) => sum + (Number(s.price) || 0), 0) || 0;
@@ -34,7 +37,7 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
     let paid = 0;
     let label = "UNKNOWN";
     let strategy = "Unknown";
-    let themeKey: "success" | "warning" | "experimental" | "secondary" = "secondary";
+    let themeKey: "success" | "warning" | "experimental" | "error" | "secondary" | "primary" = "secondary";
 
     if (policy === "full_upfront" || (onlinePaid > 0 && onlinePaid >= total)) {
       paid = total;
@@ -43,12 +46,11 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
       themeKey = "success";
     } else if (policy === "partial_deposit" || (onlinePaid > 0 && onlinePaid < total)) {
       paid = onlinePaid || booking.deposit_amount || 0;
-      const percent = total > 0 ? Math.round((paid / total) * 100) : 0;
-      label = `${percent}% DEPOSITED`;
+      label = "PARTIAL DEPOSIT";
       strategy = "Partial Deposit";
-      themeKey = "warning";
+      themeKey = "primary";
     } else if (policy === "pay_at_venue" || (!policy && onlinePaid === 0)) {
-      paid = 0;
+      paid = booking.deposit_amount || 0;
       label = "PAY AT VENUE";
       strategy = "Pay at Venue";
       themeKey = "experimental";
@@ -57,16 +59,24 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
     const remaining = Math.max(0, total - paid);
     const percentage = total > 0 ? Math.round((paid / total) * 100) : 0;
 
+    let progressThemeKey: "success" | "warning" | "error" | "secondary" = "secondary";
+    if (percentage === 100) progressThemeKey = "success";
+    else if (percentage > 0) progressThemeKey = "warning";
+    else progressThemeKey = "error";
+
     const themeStyles = {
       success: { bg: "bg-[var(--success-50)]", text: "text-[var(--success-800)]", border: "border-[var(--success-200)]", dot: "bg-[var(--success-500)]", progress: "bg-[var(--success-600)]" },
       warning: { bg: "bg-[var(--warning-50)]", text: "text-[var(--warning-800)]", border: "border-[var(--warning-300)]", dot: "bg-[var(--warning-500)]", progress: "bg-[var(--warning-500)]" },
       experimental: { bg: "bg-[var(--experimental-50)]", text: "text-[var(--experimental-800)]", border: "border-[var(--experimental-200)]", dot: "bg-[var(--experimental-500)]", progress: "bg-[var(--experimental-800)]" },
+      error: { bg: "bg-[var(--error-50)]", text: "text-[var(--error-800)]", border: "border-[var(--error-200)]", dot: "bg-[var(--error-500)]", progress: "bg-[var(--error-600)]" },
+      primary: { bg: "bg-[var(--primary-50)]", text: "text-[var(--primary-800)]", border: "border-[var(--primary-200)]", dot: "bg-[var(--primary-500)]", progress: "bg-[var(--primary-600)]" },
       secondary: { bg: "bg-[var(--secondary-50)]", text: "text-[var(--secondary-800)]", border: "border-[var(--secondary-200)]", dot: "bg-[var(--secondary-500)]", progress: "bg-[var(--secondary-400)]" }
     };
 
     const styles = themeStyles[themeKey];
+    const progressStyles = themeStyles[progressThemeKey];
 
-    return { total, paid, remaining, label, percentage, strategy, styles };
+    return { total, paid, remaining, label, percentage, strategy, styles, progressStyles };
   };
 
   const getStatusDetails = (status: string) => {
@@ -88,11 +98,16 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
     };
   };
 
-  const { total, paid, remaining, label, percentage, strategy, styles } = getPaymentDetails();
+  const { total, paid, remaining, label, percentage, strategy, styles, progressStyles } = getPaymentDetails();
   const statusDetails = getStatusDetails(booking.status);
 
   const formattedDate = dayjs(booking.start_time).format("MMMM D, YYYY");
   const formattedTime = dayjs(booking.start_time).format("h:mm A");
+
+  const handleCollectRemainingPayment = async (uuid: string) => {
+    console.log("uuid in dispatch", uuid);
+    await dispatch(collectRemainingPaymentAction({ uuid }));
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ style: { borderRadius: 16 } }}>
@@ -149,7 +164,7 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
           </Typography>
           <Box className="w-full bg-[var(--secondary-200)] rounded-full h-2.5 mb-3 overflow-hidden">
             <Box
-              className={`h-full rounded-full transition-all duration-500 ${styles.progress}`}
+              className={`h-full rounded-full transition-all duration-500 ${progressStyles.progress}`}
               style={{ width: `${percentage}%` }}
             ></Box>
           </Box>
@@ -172,18 +187,9 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
           </Typography>
         </Box>
 
-        <Box className="flex justify-between items-center py-4 border-b border-[var(--border-subtle)]">
-          <Typography variant="body2" className="text-[var(--text-muted)]">
-            Payment Strategy
-          </Typography>
-          <Box className={`px-2.5 py-1 rounded-md text-xs font-bold border ${styles.bg} ${styles.border} ${styles.text}`}>
-            {strategy === "Partial Deposit" ? `${percentage}% Deposited` : strategy}
-          </Box>
-        </Box>
-
         <Box className="flex justify-between items-center py-4">
           <Typography variant="body2" className="text-[var(--text-muted)]">
-            Transaction Status
+            Booking Status
           </Typography>
           <Box className="flex items-center gap-1.5">
             <Box className={`w-2 h-2 rounded-full ${statusDetails.dot}`}></Box>
@@ -200,7 +206,7 @@ export default function BookingReceiptDialog({ open, onClose, booking }: Readonl
             <Button onClick={onClose} variant="outlined" className="text-[var(--text-muted)] border-[var(--border-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-muted)] shadow-none font-semibold px-6 py-2 rounded-xl capitalize">
               Dismiss
             </Button>
-            <Button variant="contained" className="bg-[var(--info-600)] text-white shadow-none font-semibold px-6 py-2 rounded-xl capitalize flex items-center gap-2">
+            <Button variant="contained" className="bg-[var(--info-600)] text-white shadow-none font-semibold px-6 py-2 rounded-xl capitalize flex items-center gap-2" onClick={() => handleCollectRemainingPayment(booking.uuid)}>
               Collect Remaining ₹{remaining.toFixed(0)}
             </Button>
           </>

@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import type { LatLngExpression, LeafletMouseEvent } from "leaflet";
+import { useTheme } from "@mui/material/styles";
 
 export type LatLngValue = {
   lat: number;
@@ -12,6 +13,7 @@ type MapPickerProps = {
   onChange?: (value: LatLngValue) => void;
   height?: number | string;
   disabled?: boolean;
+  flyTo?: LatLngValue | null;
 };
 
 function ClickHandler({ onClick }: { onClick?: (lat: number, lng: number) => void }) {
@@ -23,10 +25,30 @@ function ClickHandler({ onClick }: { onClick?: (lat: number, lng: number) => voi
   return null;
 }
 
-export default function MapPicker({ value, onChange, height = 300, disabled }: Readonly<MapPickerProps>) {
+/** Watches the flyTo prop and animates the map to the new location */
+function FlyToHandler({ flyTo }: { flyTo?: LatLngValue | null }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (flyTo) {
+      map.flyTo([flyTo.lat, flyTo.lng], 15, { duration: 1.5 });
+    }
+  }, [flyTo, map]);
+
+  return null;
+}
+
+export default function MapPicker({ value, onChange, height = 300, disabled, flyTo }: Readonly<MapPickerProps>) {
+  const theme = useTheme();
   const [position, setPosition] = useState<LatLngExpression | null>(
     value ? [value.lat, value.lng] : null
   );
+
+  useEffect(() => {
+    if (value) {
+      setPosition([value.lat, value.lng]);
+    }
+  }, [value]);
 
   const handleSelect = (lat: number, lng: number) => {
     if (disabled) return;
@@ -42,7 +64,7 @@ export default function MapPicker({ value, onChange, height = 300, disabled }: R
     <MapContainer
       center={center}
       zoom={position ? 15 : 11}
-      style={{ height, width: "100%", borderRadius: 8, overflow: "hidden" }}
+      style={{ height, width: "100%", borderRadius: theme.shape.borderRadius, overflow: "hidden" }}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -50,6 +72,7 @@ export default function MapPicker({ value, onChange, height = 300, disabled }: R
       />
 
       <ClickHandler onClick={handleSelect} />
+      <FlyToHandler flyTo={flyTo} />
 
       {position && <Marker position={position} />}
     </MapContainer>

@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { LatLngValue } from "./_components/location-map";
 import MapPicker from "./_components/location-map";
+import AddressAutocomplete from "./_components/address-autocomplete";
 import { Box } from "@mui/material";
 import { reverseGeocode } from "../../features/maps/mapbox-geocode.service";
+import type { GeocodeSuggestion } from "../../features/maps/mapbox-geocode.service";
 
 type LocationMapProps = {
   control: any;
@@ -15,6 +18,8 @@ type LocationMapProps = {
 };
 
 export default function LocationMap({ control, latitude, longitude, label, disabled, setValue, clearErrors }: Readonly<LocationMapProps>) {
+  const [flyTo, setFlyTo] = useState<LatLngValue | null>(null);
+
   const handleLocationChange = async (
     coords: LatLngValue,
     latFieldOnChange: (v: any) => void,
@@ -31,6 +36,25 @@ export default function LocationMap({ control, latitude, longitude, label, disab
       clearErrors("address.address");
     }
   };
+
+  const handleAutocompleteSelect = (
+    suggestion: GeocodeSuggestion,
+    latFieldOnChange: (v: any) => void,
+    lngFieldOnChange: (v: any) => void
+  ) => {
+    const { lat, lng, placeName } = suggestion;
+
+    // Update form fields
+    latFieldOnChange(lat);
+    lngFieldOnChange(lng);
+    setValue("address.address", placeName);
+    setValue("address.map_link", `https://www.google.com/maps?q=${lat},${lng}`);
+    clearErrors("address.address");
+
+    // Fly the map to the selected location
+    setFlyTo({ lat, lng });
+  };
+
   return (
     <Box className="space-y-2">
       {label && <Box className=" text-lg font-semibold mb-2">{label}</Box>}
@@ -46,13 +70,22 @@ export default function LocationMap({ control, latitude, longitude, label, disab
                 latField.value != null && lngField.value != null ? { lat: latField.value, lng: lngField.value } : null;
 
               return (
-                <MapPicker
-                  value={value}
-                  disabled={disabled}
-                  onChange={(coords) => {
-                    handleLocationChange(coords, latField.onChange, lngField.onChange);
-                  }}
-                />
+                <>
+                  <AddressAutocomplete
+                    disabled={disabled}
+                    onSelect={(suggestion) =>
+                      handleAutocompleteSelect(suggestion, latField.onChange, lngField.onChange)
+                    }
+                  />
+                  <MapPicker
+                    value={value}
+                    disabled={disabled}
+                    flyTo={flyTo}
+                    onChange={(coords) => {
+                      handleLocationChange(coords, latField.onChange, lngField.onChange);
+                    }}
+                  />
+                </>
               );
             }}
           />

@@ -4,13 +4,10 @@ import {
   Box,
   Chip,
   CircularProgress,
-  FormControl,
-  FormHelperText,
   IconButton,
-  InputLabel,
-  OutlinedInput,
   Stack,
 } from "@mui/material";
+import MuiTextField from "@mui/material/TextField";
 import { useRef, useState, type ChangeEvent, type MouseEvent } from "react";
 import { Controller, type FieldValues } from "react-hook-form";
 import { callSnack } from "../../snackbar";
@@ -142,41 +139,33 @@ const FileMultiPicker = <T extends FieldValues>({
 
         return (
           <Stack data-test-id={identifier} spacing={1}>
-            <FormControl disabled={disabled || loading} variant="outlined" className={styles.formControl} size="small">
-              <InputLabel
-                sx={{ marginTop: arr.length ? 0 : "6.5px" }}
-                shrink={arr.length > 0}
-                error={Boolean(error)}
-                data-test-id={`label-${identifier}`}
-              >
-                {label}
-              </InputLabel>
-
-              <OutlinedInput
-                error={Boolean(error)}
-                onClick={openFilePicker}
-                label={label}
-                value={arr.length ? `${arr.length} file(s) selected` : ""}
-                className={styles.inputField}
-                data-test-id={`text-input-${identifier}`}
-                inputProps={{
-                  className: styles.input,
-                }}
-                slotProps={{
-                  root: {
-                    className: arr.length ? "" : styles.inputRoot,
-                  },
-                }}
-                readOnly
-                endAdornment={renderEndAdornment(loading, arr, identifier, disabled, onChange)}
-              />
-
-              {error && (
-                <FormHelperText data-test-id={`error-${identifier}`} error>
-                  {error.message}
-                </FormHelperText>
-              )}
-            </FormControl>
+            <MuiTextField
+              disabled={disabled || loading}
+              variant="outlined"
+              size="medium"
+              error={Boolean(error)}
+              helperText={error?.message}
+              label={label}
+              value={arr.length ? `${arr.length} file(s) selected` : ""}
+              onClick={openFilePicker}
+              slotProps={{
+                input: {
+                  readOnly: true,
+                  endAdornment: renderEndAdornment(loading, arr, identifier, disabled, onChange),
+                  className: arr.length ? "" : styles.inputRoot,
+                  sx: { cursor: 'pointer', paddingRight: '8px' }
+                },
+                htmlInput: {
+                  "data-test-id": `text-input-${identifier}`,
+                  sx: { cursor: 'pointer' }
+                },
+                inputLabel: {
+                  shrink: arr.length > 0,
+                  "data-test-id": `label-${identifier}`
+                } as any
+              }}
+              fullWidth
+            />
 
             {arr.length > 0 && (
               <Box mt={1} display="flex" gap={1} flexWrap="wrap">
