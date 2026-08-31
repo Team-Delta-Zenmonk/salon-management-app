@@ -1,45 +1,48 @@
-import ContentCutIcon from "@mui/icons-material/ContentCut";
-import { Box, Button, Typography } from "@mui/material";
+import { Scissors } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Unauthorized() {
   const handleGoBack = () => {
     globalThis.history.back();
   };
+  
   return (
-    <Box className="min-h-screen bg-white flex items-center justify-center p-4">
-      <Box className="max-w-lg w-full text-center rounded-xl border border-[#e5e5e5] p-6">
-        <Box className="flex justify-center mb-6">
-          <Box className="w-24 h-24 bg-(--primary-900)! rounded-full flex items-center justify-center">
-            <ContentCutIcon className="text-white!" />
-          </Box>
-        </Box>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="max-w-lg w-full text-center rounded-xl border border-border p-6 shadow-sm bg-card">
+        <div className="flex justify-center mb-6">
+          <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center">
+            <Scissors className="text-primary-foreground w-12 h-12" />
+          </div>
+        </div>
 
-        <Box className="mb-4">
-          <Typography className="text-blue-900" variant="h1">403</Typography>
-        </Box>
-        <Typography className="text-gray-900 mb-3">Access Denied</Typography>
-        <Box className="text-gray-600 mb-8">
+        <div className="mb-4">
+          <h1 className="text-6xl font-bold text-foreground">403</h1>
+        </div>
+        <h2 className="text-2xl font-semibold text-foreground mb-3">Access Denied</h2>
+        <div className="text-muted-foreground mb-8">
           You don't have permission to access this page. This area is restricted to authorized users only.
-        </Box>
-        <Box className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-8 text-left">
-          <Typography className="text-gray-700 mb-2">This might have happened because:</Typography>
-          <ul className="text-gray-600 space-y-1 ml-4">
-            <li>• You don't have the required permissions</li>
-            <li>• Your session has expired</li>
-            <li>• This feature is restricted to administrators</li>
-            <li>• Your account hasn't been fully activated</li>
+        </div>
+        
+        <div className="bg-muted border border-border rounded-lg p-4 mb-8 text-left">
+          <h3 className="text-foreground font-medium mb-2">This might have happened because:</h3>
+          <ul className="text-muted-foreground space-y-1 ml-4 list-disc list-inside">
+            <li>You don't have the required permissions</li>
+            <li>Your session has expired</li>
+            <li>This feature is restricted to administrators</li>
+            <li>Your account hasn't been fully activated</li>
           </ul>
-        </Box>
-        <Box className="flex flex-col sm:flex-row gap-3 justify-center">
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button
-            variant="contained"
+            variant="outline"
             onClick={handleGoBack}
-            className="px-6 py-2.5 border border-blue-900 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+            className="px-8"
           >
             Go Back
           </Button>
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }

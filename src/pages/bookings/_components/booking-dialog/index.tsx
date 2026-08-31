@@ -1,23 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  IconButton,
-  Divider,
-  CircularProgress,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
-import clsx from "clsx";
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../../components/ui/dialog";
+import { Button } from "../../../../components/ui/button";
+import { Separator } from "../../../../components/ui/separator";
+import { Plus, X, Loader2 } from "lucide-react";
 import { FormProvider, useForm, useFieldArray, useWatch, type SubmitHandler } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
-import styles from "./booking-dialog.module.scss";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
 import { bookingSchema, type BookingFormValues } from "../../schema/booking.schema";
@@ -30,6 +24,7 @@ import { createBookingAction } from "../../../../features/booking/create-booking
 import { updateBookingAction } from "../../../../features/booking/update-booking/update-booking.action";
 import dayjs from "dayjs";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
+import BookingServiceRow from "./_components/booking-service-row";
 
 interface BookingDialogProps {
   open: boolean;
@@ -281,27 +276,24 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   return (
     <Dialog
       open={open}
-      onClose={(event, reason) => {
-        if (isLoading && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          if (isLoading) return;
+          onClose();
+        }
       }}
-      className={styles.dialogContainer}
-      classes={{ paper: styles.dialog }}
-      maxWidth="md"
-      fullWidth
     >
-      <DialogTitle className={clsx(styles.dialogTitle)} fontWeight="fontWeightMedium" variant="h5">
-        {mode === "create" ? "Create Booking" : "Update Booking"}
-      </DialogTitle>
+      <DialogContent className="sm:max-w-[680px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+            {mode === "create" ? "Create Booking" : "Update Booking"}
+          </DialogTitle>
+        </DialogHeader>
 
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit as any)}>
-          <DialogContent className={clsx("flex flex-col py-4 px-6", styles.dialogContent)}>
-            <Box className="grid grid-cols-2 gap-4">
-              <Box className="flex flex-col gap-1.5">
-                <Typography variant="body2" fontWeight="bold">
-                  Customer Name
-                </Typography>
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(onSubmit as any)}>
+            <div className="flex flex-col py-5 px-6 gap-5 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
+              <div className="grid grid-cols-2 gap-5">
                 <TextField
                   type="text"
                   name="customer_name"
@@ -312,11 +304,6 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   maxLength={50}
                   pattern={VALIDATE_PATTERN.alphabet}
                 />
-              </Box>
-              <Box className="flex flex-col gap-1.5">
-                <Typography variant="body2" fontWeight="bold">
-                  Customer Phone
-                </Typography>
                 <TextField
                   type="text"
                   name="customer_phone"
@@ -327,187 +314,127 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   maxLength={10}
                   pattern={VALIDATE_PATTERN.number}
                 />
-              </Box>
-            </Box>
+              </div>
 
-            <Divider className="my-4" />
+              <Separator className="my-1 border-border/50" />
 
-            <Box>
-              <Box className="flex items-center justify-between mb-3">
-                <Typography variant="body2" fontWeight="bold">
-                  Services ({fields.length})
-                </Typography>
-                {canAddMore && (
-                  <Button
-                    size="small"
-                    variant="text"
-                    startIcon={<AddIcon sx={{ fontSize: 18 }} />}
-                    onClick={handleAddService}
-                    sx={{ textTransform: "none", fontWeight: 600, fontSize: "0.8rem" }}
-                  >
-                    Add Service
-                  </Button>
-                )}
-              </Box>
-
-              <Box className="flex flex-col gap-2.5">
-                {fields.map((field, index) => {
-                  const rowServiceOptions = getServiceOptionsForRow(index);
-                  const staffOptions = getStaffOptions(index);
-                  const staffLoading = isStaffLoading(index);
-                  const selectedStaff = getStaffService(index, watchedServices?.[index]?.staff_id);
-
-                  return (
-                    <Box
-                      key={field.id}
-                      className="rounded-lg border border-gray-200 px-4 pt-3 pb-3 relative"
-                      sx={{
-                        bgcolor: "grey.50",
-                        transition: "border-color 0.15s",
-                        "&:hover": { borderColor: "grey.400" },
-                      }}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-semibold text-foreground/80">Services ({fields.length})</span>
+                  {canAddMore && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      type="button"
+                      onClick={handleAddService}
+                      className="font-medium text-xs h-8 rounded-full shadow-sm hover:shadow-md transition-shadow bg-muted hover:bg-muted/80 border-border"
                     >
-                      <Box className="flex items-start gap-3">
-                        <Box className="flex-1 min-w-0">
-                          <Select
-                            name={`services.${index}.service_id`}
-                            placeholder="Select Service"
-                            identifier={`booking-service-${index}`}
-                            options={rowServiceOptions}
-                            translate={false}
-                            control={control as any}
-                          />
-                        </Box>
+                      <Plus className="h-3.5 w-3.5 mr-1.5" />
+                      Add Service
+                    </Button>
+                  )}
+                </div>
 
-                        <Box className="flex-1 min-w-0">
-                          <Select
-                            name={`services.${index}.staff_id`}
-                            placeholder={staffLoading ? "Loading..." : "Select Staff"}
-                            identifier={`booking-staff-${index}`}
-                            options={staffOptions}
-                            translate={false}
-                            disabled={!watchedServices?.[index]?.service_id || staffLoading}
-                            control={control as any}
-                          />
-                        </Box>
+                <div className="flex flex-col gap-3">
+                  {fields.map((field, index) => (
+                    <BookingServiceRow
+                      key={field.id}
+                      index={index}
+                      control={control}
+                      serviceOptions={getServiceOptionsForRow(index)}
+                      staffOptions={getStaffOptions(index)}
+                      staffLoading={isStaffLoading(index)}
+                      selectedStaff={getStaffService(index, watchedServices?.[index]?.staff_id)}
+                      showRemoveButton={fields.length > 1}
+                      onRemove={() => handleRemoveService(index)}
+                      watchedServiceId={watchedServices?.[index]?.service_id}
+                    />
+                  ))}
+                </div>
 
-                        {fields.length > 1 && (
-                          <IconButton
-                            size="small"
-                            onClick={() => handleRemoveService(index)}
-                            sx={{
-                              mt: 0.75,
-                              width: 30,
-                              height: 30,
-                              color: "grey.500",
-                              "&:hover": { bgcolor: "grey.200", color: "grey.700" },
-                            }}
-                          >
-                            <CloseIcon sx={{ fontSize: 16 }} />
-                          </IconButton>
-                        )}
-                      </Box>
+                {totals.count > 0 && (
+                  <div className="mt-4 rounded-xl py-3 px-5 flex items-center justify-between bg-primary/5 border border-primary/20 shadow-inner">
+                    <span className="text-xs font-semibold text-primary/70">
+                      {totals.count} service{totals.count > 1 ? "s" : ""} · {totals.totalDuration} mins total
+                    </span>
+                    <span className="text-sm font-bold text-primary">
+                      {formatPrice(totals.totalPrice)}
+                    </span>
+                  </div>
+                )}
+              </div>
 
-                      {selectedStaff && (
-                        <Box className="flex items-center gap-3 mt-2 pl-0.5">
-                          <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                            {Number(selectedStaff.duration)} mins
-                          </Typography>
-                          <Typography variant="caption" fontWeight="bold" color="primary">
-                            {formatPrice(Number(selectedStaff.price))}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  );
-                })}
-              </Box>
+              <Separator className="my-1 border-border/50" />
 
-              {totals.count > 0 && (
-                <Box
-                  className="mt-3 rounded-lg py-2.5 px-4 flex items-center justify-between"
-                  sx={{ bgcolor: "primary.50", border: "1px solid", borderColor: "primary.100" }}
-                >
-                  <Typography variant="caption" fontWeight="medium" sx={{ color: "text.secondary" }}>
-                    {totals.count} service{totals.count > 1 ? "s" : ""} · {totals.totalDuration} mins total
-                  </Typography>
-                  <Typography variant="body2" fontWeight="bold" color="primary">
-                    {formatPrice(totals.totalPrice)}
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-
-            <Divider className="my-4" />
-
-            <Box className="grid grid-cols-2 gap-4">
-              <Box className="flex flex-col gap-1.5">
-                <Typography variant="body2" fontWeight="bold">
-                  Date
-                </Typography>
+              <div className="grid grid-cols-2 gap-5">
                 <DatePicker
                   name="booking_date"
-                  placeholder="Booking Date"
+                  label="Booking Date"
+                  placeholder="Select Date"
                   control={control as any}
                   identifier="booking-date"
                 />
-              </Box>
-              <Box className="flex flex-col gap-1.5">
-                <Typography variant="body2" fontWeight="bold">
-                  Time
-                </Typography>
                 <TimePicker
                   name="booking_start_time"
-                  placeholder="Start Time"
+                  label="Start Time"
+                  placeholder="Select Time"
                   control={control as any}
                   identifier="booking-start-time"
                 />
-              </Box>
-            </Box>
+              </div>
 
-            {mode === "update" && (
-              <>
-                <Divider className="my-4" />
-                <Box className="flex flex-col gap-1.5">
-                  <Typography variant="body2" fontWeight="bold">
-                    Status
-                  </Typography>
-                  <Select
-                    name="status"
-                    placeholder="Select Status"
-                    identifier="booking-status"
-                    options={[
-                      { label: "Confirmed", value: BOOKING_STATUS.CONFIRMED },
-                      { label: "Completed", value: BOOKING_STATUS.COMPLETED },
-                      { label: "Cancelled", value: BOOKING_STATUS.CANCELLED },
-                    ]}
-                    translate={false}
-                    control={control as any}
-                  />
-                </Box>
-              </>
-            )}
-          </DialogContent>
-
-          <DialogActions className={clsx(styles.dialogActions, "px-6 py-4")}>
-            <Button onClick={onClose} disabled={isLoading} variant="outlined">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading} variant="contained">
-              {isLoading ? (
-                <Box className="flex items-center gap-2">
-                  <CircularProgress size={16} color="inherit" />
-                  Saving...
-                </Box>
-              ) : mode === "create" ? (
-                "Create Booking"
-              ) : (
-                "Save Changes"
+              {mode === "update" && (
+                <>
+                  <Separator className="my-1 border-border/50" />
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-sm font-semibold text-foreground/80">Status</span>
+                    <Select
+                      name="status"
+                      placeholder="Select Status"
+                      identifier="booking-status"
+                      options={[
+                        { label: "Confirmed", value: BOOKING_STATUS.CONFIRMED },
+                        { label: "Completed", value: BOOKING_STATUS.COMPLETED },
+                        { label: "Cancelled", value: BOOKING_STATUS.CANCELLED },
+                      ]}
+                      translate={false}
+                      control={control as any}
+                    />
+                  </div>
+                </>
               )}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+            </div>
+
+            <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+              <Button
+                type="button"
+                onClick={onClose}
+                disabled={isLoading}
+                variant="outline"
+                className="rounded-full px-6"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </div>
+                ) : mode === "create" ? (
+                  "Create Booking"
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </FormProvider>
+      </DialogContent>
     </Dialog>
   );
 }

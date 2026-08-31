@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
@@ -6,13 +5,14 @@ import { listSubServicesService } from "../../../../features/service/list-sub-se
 import type { ServiceType } from "../../types/staff-service.types";
 import ServiceSidebar from "../service-sidebar";
 import StaffPricingPanel from "../staff-pricing-panel";
+import type { Service } from "../../../../features/service/service.slice";
 
 export default function ServiceView() {
   const serviceState = useAppSelector((state: RootState) => state.service);
-  const allServices = serviceState?.data ?? [];
-  const parentServices = useMemo(() => allServices.filter((s: any) => !s.parent_id), [allServices]);
+  const allServices = useMemo(() => serviceState?.data ?? [], [serviceState?.data]);
+  const parentServices = useMemo(() => allServices.filter((s: Service) => !s.parent_id), [allServices]);
   const [selectedServiceUuid, setSelectedServiceUuid] = useState<string | null>(() => {
-    const parentServicesInit = (serviceState?.data ?? []).filter((s: any) => !s.parent_id);
+    const parentServicesInit = (serviceState?.data ?? []).filter((s: Service) => !s.parent_id);
     return parentServicesInit.length > 0 ? parentServicesInit[0].uuid : null;
   });
   const [subServicesByParentUuid, setSubServicesByParentUuid] = useState<Record<string, ServiceType[]>>({});
@@ -34,7 +34,7 @@ export default function ServiceView() {
         const res = await listSubServicesService(parentUuid);
         const rows = Array.isArray(res) ? res : (res?.rows ?? []);
 
-        const subServices: ServiceType[] = rows.map((c: any) => ({
+        const subServices: ServiceType[] = rows.map((c: Service) => ({
           id: c.id,
           uuid: c.uuid,
           name: c.name,
@@ -69,13 +69,13 @@ export default function ServiceView() {
   const servicesTree: ServiceType[] = useMemo(
     () =>
       parentServices.map(
-        (p: any): ServiceType => ({
+        (p: Service): ServiceType => ({
           id: p.id,
           uuid: p.uuid,
           name: p.name,
           price_type: p.price_type,
           price: p.price,
-          duration: p.duration,
+          duration: p.duration ? Number(p.duration) : undefined,
           logo: p.logo,
           children: subServicesByParentUuid[p.uuid] ?? [],
         }),
@@ -89,9 +89,9 @@ export default function ServiceView() {
   );
 
   return (
-    <Box className="flex flex-1 min-h-0 gap-6 w-full flex-col lg:flex-row">
-      <Box className="bg-white border border-gray-200 rounded-lg w-full lg:w-[380px] flex flex-col min-h-0 shadow-sm">
-        <Box className="flex-1 min-h-0 overflow-y-auto">
+    <div className="flex flex-1 min-h-0 gap-6 w-full flex-col lg:flex-row items-stretch">
+      <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl w-full lg:w-[380px] flex flex-col min-h-[500px] lg:min-h-0 shadow-sm overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <ServiceSidebar
             services={servicesTree}
             selectedServiceUuid={selectedServiceUuid}
@@ -99,14 +99,15 @@ export default function ServiceView() {
             onExpandParent={handleExpandParent}
             loadingMap={subServicesLoadingByParentUuid}
           />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Box className="flex-1 min-w-0 flex flex-col min-h-0">
-        <Box className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl shadow-sm overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <StaffPricingPanel selectedService={selectedService} />
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
+

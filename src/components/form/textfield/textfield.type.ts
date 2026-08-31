@@ -1,6 +1,5 @@
-import type { ChangeEvent, FocusEvent } from "react";
+import type { ChangeEvent, FocusEvent, ReactElement } from "react";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import type { SvgIconProps } from "@mui/material";
 
 export type CustomTextFieldProps<T extends FieldValues> = {
   type: string;
@@ -17,8 +16,8 @@ export type CustomTextFieldProps<T extends FieldValues> = {
   rules?: any;
   identifier: string;
   loading?: boolean;
-  endAdornment?: React.ReactElement<SvgIconProps>;
-  startAdornment?: React.ReactElement<SvgIconProps>;
+  endAdornment?: ReactElement;
+  startAdornment?: ReactElement;
   endAdornmentClassName?: string;
   endAdornmentToolTipText?: string;
   onEndAdornmentClick?: (value: string) => void;

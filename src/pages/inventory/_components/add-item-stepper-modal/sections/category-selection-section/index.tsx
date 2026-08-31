@@ -1,16 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-} from "@mui/material";
-import clsx from "clsx";
+import { Button } from "../../../../../../components/ui/button";
+import { Loader2, Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
-import Select from "../../../../../../components/form/select";
-import styles from "../../../inventory-dialog.module.scss";
 import { CreateCategoryModal } from "../../../create-category-modal";
 import { callSnack } from "../../../../../../components/snackbar";
 import type { ItemCategory } from "../../../../../../features/inventory/types/category.type";
@@ -22,8 +13,6 @@ interface CategorySelectionSectionProps {
   onCategorySelect: (category: ItemCategory) => void;
   onNext: () => void;
   onClose: () => void;
-  activeStep: number;
-  steps: string[];
 }
 
 export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> = ({
@@ -31,8 +20,6 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
   onCategorySelect,
   onNext,
   onClose,
-  activeStep,
-  steps,
 }) => {
   const dispatch = useAppDispatch();
   const {
@@ -43,13 +30,11 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
   const [loading, setLoading] = useState(false);
   const [createCategoryOpen, setCreateCategoryOpen] = useState(false);
 
-  const { control, watch, setValue, getValues } = useForm({
+  const { setValue } = useForm({
     defaultValues: {
       category_uuid: selectedCategory?.uuid || "",
     },
   });
-
-  const categoryUuid = watch("category_uuid");
 
   const fetchCategories = useCallback(
     async (pageNum: number) => {
@@ -58,7 +43,7 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
         await dispatch(
           fetchItemCategoriesAction({
             page: pageNum,
-            limit: 10,
+            limit: 12, // slightly larger limit to fit grid nicely
           })
         ).unwrap();
       } catch (error) {
@@ -90,32 +75,10 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
   };
 
   useEffect(() => {
-    if (categoryUuid) {
-      if (categoryUuid === "create_new") {
-        setCreateCategoryOpen(true);
-      } else {
-        const found = categories.find((cat) => cat.uuid === categoryUuid);
-        if (found) {
-          handleCategorySelect(found);
-        }
-      }
-    } else {
-      onCategorySelect(null as any);
+    if (categories.length === 0) {
+      fetchCategories(1);
     }
-  }, [categoryUuid, categories]);
-
-  useEffect(() => {
-    setValue("category_uuid", selectedCategory?.uuid || "");
-  }, [selectedCategory?.uuid, setValue]);
-
-  const categoryOptions = [
-    { value: "create_new", label: "+ Create New Category" },
-    ...categories.map((cat) => ({
-      value: cat.uuid,
-      label: cat.name,
-      ...cat,
-    })),
-  ] as any[];
+  }, [categories.length, fetchCategories]);
 
   const handleLoadMore = () => {
     if (categories.length < total) {
@@ -125,56 +88,92 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
 
   return (
     <>
-      <DialogContent className={clsx("flex flex-col py-1 px-3", styles.dialogContent)}>
-        <Box className="flex flex-col gap-2 mt-2">
-          <Typography fontWeight="bold" variant="titleSm">Select or Create Category</Typography>
-          <Typography variant="paragraphSm" color="text.secondary" sx={{ mb: 1 }}>
-            Select a category or create a new one
-          </Typography>
+      <div className="p-6 pb-24 flex flex-col gap-6 h-full">
+        <div className="flex flex-col gap-1.5">
+          <h3 className="font-bold text-base text-foreground">Select Product Category</h3>
+          <p className="text-xs text-muted-foreground">
+            Choose a category to organize this inventory item.
+          </p>
+        </div>
 
-          <Select
-            name="category_uuid"
-            control={control}
-            placeholder="Select Category"
-            identifier="item-category-select"
-            options={categoryOptions}
-            disabled={loading}
-          />
-        </Box>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {/* Create New Category Card */}
+          <button
+            type="button"
+            onClick={() => setCreateCategoryOpen(true)}
+            className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-border/85 hover:border-primary/50 hover:bg-primary/[0.02] rounded-2xl transition-all duration-300 group text-center cursor-pointer min-h-[130px] gap-3"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+              <Plus className="w-5 h-5" />
+            </div>
+            <div className="font-bold text-xs text-foreground/80 group-hover:text-primary transition-colors">
+              Create New Category
+            </div>
+          </button>
+
+          {/* List existing Categories */}
+          {categories.map((category) => {
+            const isSelected = selectedCategory?.uuid === category.uuid;
+            return (
+              <button
+                key={category.uuid}
+                type="button"
+                onClick={() => handleCategorySelect(category)}
+                className={`flex flex-col items-center justify-center p-5 border rounded-2xl transition-all duration-300 text-center cursor-pointer min-h-[130px] gap-3 group relative overflow-hidden ${
+                  isSelected
+                    ? "border-primary bg-primary/[0.03] text-primary shadow-sm"
+                    : "border-border bg-card/45 hover:bg-muted/40 hover:border-border/100"
+                }`}
+              >
+                {isSelected && (
+                  <div className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-primary" />
+                )}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                  isSelected 
+                    ? "bg-primary/10 text-primary" 
+                    : "bg-muted/50 text-muted-foreground group-hover:text-foreground group-hover:bg-muted/75"
+                }`}>
+                  {category.name ? category.name.charAt(0).toUpperCase() : "?"}
+                </div>
+                <div className={`font-bold text-xs transition-colors truncate max-w-full px-2 ${
+                  isSelected ? "text-primary" : "text-foreground/80 group-hover:text-foreground"
+                }`}>
+                  {category.name}
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
         {categories.length < total && (
-          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+          <div className="flex justify-center mt-2">
             <Button
+              type="button"
               onClick={handleLoadMore}
               disabled={loading}
-              variant="outlined"
-              size="small"
-              sx={{ fontSize: "14px", fontWeight: 600 }}
-              startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
+              variant="outline"
+              size="sm"
+              className="text-xs font-semibold rounded-full px-4"
             >
+              {loading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
               {loading ? "Loading..." : "Load More"}
             </Button>
-          </Box>
+          </div>
         )}
-      </DialogContent>
+      </div>
 
-      <DialogActions className={clsx(styles.dialogActions, "px-2 py-1 pb-2")}>
-        <Button onClick={onClose} disabled={loading}>
+      <div className="absolute bottom-0 left-0 right-0 px-6 py-4 border-t border-border bg-muted/20 flex justify-end gap-2 shrink-0">
+        <Button type="button" variant="ghost" onClick={onClose} disabled={loading} className="font-bold rounded-full">
           Cancel
         </Button>
-        <Button onClick={onNext} disabled={!selectedCategory || loading}>
+        <Button type="button" onClick={onNext} disabled={!selectedCategory || loading} className="font-bold px-6 rounded-full">
           Next
         </Button>
-      </DialogActions>
+      </div>
 
       <CreateCategoryModal
         open={createCategoryOpen}
-        onClose={() => {
-          setCreateCategoryOpen(false);
-          if (getValues("category_uuid") === "create_new") {
-            setValue("category_uuid", selectedCategory?.uuid || "");
-          }
-        }}
+        onClose={() => setCreateCategoryOpen(false)}
         onSuccess={handleCreateCategorySuccess}
         setValue={setValue}
       />

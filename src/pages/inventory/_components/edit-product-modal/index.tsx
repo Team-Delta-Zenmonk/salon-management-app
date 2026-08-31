@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  Box,
-  Typography,
-  Button,
-  CircularProgress,
-  IconButton,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import clsx from "clsx";
-import styles from "../inventory-dialog.module.scss";
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../../components/ui/dialog";
+import { Button } from "../../../../components/ui/button";
+import { Loader2 } from "lucide-react";
 import { getInventoryItemService as getSingleInventoryItem } from "../../../../features/inventory/get-inventory-item/get-inventory-item.service";
 import { updateInventoryItemService as updateInventoryItem } from "../../../../features/inventory/update-inventory-item/update-inventory-item.service";
 import { callSnack } from "../../../../components/snackbar";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextField from "../../../../components/form/textfield";
 import FilePicker from "../../../../components/form/file-picker";
 import { uploadImages } from "../../../../features/upload-images/upload-images.service";
 import type { InventoryItem } from "../../../../features/inventory/inventory-item.slice";
 import Select from "../../../../components/form/select";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { inventoryItemSchema } from "../schema/inventory-item.schema";
+import { useAppSelector } from "../../../../store/hooks";
+import { inventoryItemSchema, type InventoryItemForm } from "../schema/inventory-item.schema";
 
 interface EditProductModalProps {
   open: boolean;
@@ -44,33 +39,26 @@ const UNITS = ["ml", "l", "g", "kg", "pieces", "box", "bottle", "tube"].map((u) 
 }));
 
 export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClose, inventoryItem, onSuccess }) => {
-  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [itemDetails, setItemDetails] = useState<InventoryItem | null>(null);
   const categories = useAppSelector((state) => state.itemsCategory.data) ?? [];
 
-  const { control, handleSubmit, reset } = useForm({
-    resolver: zodResolver(inventoryItemSchema),
+  const { control, handleSubmit, reset } = useForm<InventoryItemForm>({
+    resolver: zodResolver(inventoryItemSchema) as unknown as Resolver<InventoryItemForm>,
     defaultValues: {
       name: "",
       brand: "",
       category_id: "",
       item_type: "",
-      logo: undefined as any,
+      logo: undefined,
       variant_name: "",
       unit: "",
-      unit_price: "",
+      unit_price: 0,
       min_stock_level: 0,
     },
   });
 
-  useEffect(() => {
-    if (open && inventoryItem) {
-      fetchItemDetails(inventoryItem.uuid);
-    }
-  }, [open, inventoryItem, categories.length, dispatch]);
-
-  const fetchItemDetails = async (uuid: string) => {
+  const fetchItemDetails = React.useCallback(async (uuid: string) => {
     setLoading(true);
     try {
       const data = await getSingleInventoryItem(uuid);
@@ -92,9 +80,15 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
     } finally {
       setLoading(false);
     }
-  };
+  }, [reset]);
 
-  const onSubmit = async (data: any) => {
+  useEffect(() => {
+    if (open && inventoryItem) {
+      fetchItemDetails(inventoryItem.uuid);
+    }
+  }, [open, inventoryItem, fetchItemDetails]);
+
+  const onSubmit = async (data: InventoryItemForm) => {
     if (!inventoryItem) return;
 
     setLoading(true);
@@ -114,11 +108,12 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
       callSnack("Inventory item updated successfully", "success");
       onSuccess();
       onClose();
-    } catch (error: any) {
-      if (error?.response?.status === 409) {
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } } };
+      if (err?.response?.status === 409) {
         callSnack("Item already exists in inventory", "error");
       } else {
-        callSnack(error?.response?.data?.message || "Failed to update item", "error");
+        callSnack(err?.response?.data?.message || "Failed to update item", "error");
       }
     } finally {
       setLoading(false);
@@ -128,109 +123,80 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
   if (!inventoryItem) return null;
 
   return (
-    <Dialog
-      open={open}
-      onClose={(event, reason) => {
-        if (loading && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
-      }}
-      className={styles.dialogContainer}
-      classes={{ paper: styles.dialogLg }}
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          py: 2,
-          px: 3,
-        }}
-      >
-        <Typography variant="titleMd" fontWeight="bold" color="primary.900">
-          Edit Item
-        </Typography>
-        <IconButton onClick={onClose} edge="end" size="small" disabled={loading}>
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
+    <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
+      <DialogContent className="sm:max-w-xl p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+            Edit Item
+          </DialogTitle>
+        </DialogHeader>
 
-      {loading && !itemDetails ? (
-        <DialogContent className={clsx("flex justify-center items-center py-6", styles.dialogContent)}>
-          <CircularProgress />
-        </DialogContent>
-      ) : (
-        <form onSubmit={handleSubmit(onSubmit)} id="edit-product-form">
-          <DialogContent className={clsx("flex flex-col py-1 px-3", styles.dialogContent)}>
-            <Box display="flex" flexDirection="column" gap={3}>
-              <Box className="flex flex-col gap-2">
-                <Typography variant="titleSm" fontWeight="bold">Item Name</Typography>
-                <TextField
-                  identifier="edit-name"
-                  name="name"
-                  control={control}
-                  type="text"
-                  label="Item Name"
-                  maxLength={50}
-                  disabled={loading}
-                />
-              </Box>
+        {loading && !itemDetails ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} id="edit-product-form">
+            <div className="flex flex-col py-5 px-6 gap-5 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
+              <TextField
+                identifier="edit-name"
+                name="name"
+                control={control}
+                type="text"
+                label="Item Name"
+                maxLength={50}
+                disabled={loading}
+              />
 
-              <Box className="flex flex-col gap-2">
-                <Typography variant="titleSm" fontWeight="bold">Brand</Typography>
-                <TextField
-                  identifier="edit-brand"
-                  name="brand"
-                  control={control}
-                  type="text"
-                  label="Brand"
-                  maxLength={50}
-                  disabled={loading}
-                />
-              </Box>
+              <TextField
+                identifier="edit-brand"
+                name="brand"
+                control={control}
+                type="text"
+                label="Brand"
+                maxLength={50}
+                disabled={loading}
+              />
 
-              <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-                <Box flex={1} className="flex flex-col gap-2">
-                  <Typography variant="titleSm" fontWeight="bold">Item Type</Typography>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
                   <Select
                     name="item_type"
                     control={control}
                     placeholder="Item Type"
                     identifier="edit-item-type"
+                    label="Item Type"
                     options={ITEM_TYPES}
                     disabled={loading}
                   />
-                </Box>
-                <Box flex={1} className="flex flex-col gap-2">
-                  <Typography variant="titleSm" fontWeight="bold">Category</Typography>
+                </div>
+                <div className="flex-1">
                   <Select
                     name="category_id"
                     control={control}
                     placeholder="Select Category"
                     identifier="edit-category"
+                    label="Category"
                     options={categories.map((cat) => ({
                       label: cat.name,
                       value: cat.uuid,
                     }))}
                     disabled={loading}
                   />
-                </Box>
-              </Box>
+                </div>
+              </div>
 
-              <Box className="flex flex-col gap-2">
-                <Typography variant="titleSm" fontWeight="bold">Item Image</Typography>
-                <FilePicker
-                  name="logo"
-                  control={control}
-                  identifier="edit-product-logo"
-                  label="Item Image"
-                  uploadFn={uploadImages}
-                  disabled={loading}
-                />
-              </Box>
+              <FilePicker
+                name="logo"
+                control={control}
+                identifier="edit-product-logo"
+                label="Item Image"
+                uploadFn={uploadImages}
+                disabled={loading}
+              />
 
-              <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-                <Box flex={1} className="flex flex-col gap-2">
-                  <Typography variant="titleSm" fontWeight="bold">Variant / Size</Typography>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
                   <TextField
                     identifier="edit-variant_name"
                     name="variant_name"
@@ -240,23 +206,22 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     maxLength={5}
                     disabled={loading}
                   />
-                </Box>
-                <Box flex={1} className="flex flex-col gap-2">
-                  <Typography variant="titleSm" fontWeight="bold">Unit</Typography>
+                </div>
+                <div className="flex-1">
                   <Select
                     name="unit"
                     control={control}
                     placeholder="Select Unit"
                     identifier="edit-unit"
+                    label="Unit"
                     options={UNITS}
                     disabled={loading}
                   />
-                </Box>
-              </Box>
+                </div>
+              </div>
 
-              <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-                <Box flex={1} className="flex flex-col gap-2">
-                  <Typography variant="titleSm" fontWeight="bold">Unit Price</Typography>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
                   <TextField
                     identifier="edit-unit_price"
                     name="unit_price"
@@ -265,9 +230,8 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     label="Unit Price"
                     disabled={loading}
                   />
-                </Box>
-                <Box flex={1} className="flex flex-col gap-2">
-                  <Typography variant="titleSm" fontWeight="bold">Min Stock Level</Typography>
+                </div>
+                <div className="flex-1">
                   <TextField
                     identifier="edit-min_stock_level"
                     name="min_stock_level"
@@ -276,21 +240,33 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     label="Min Stock Level"
                     disabled={loading}
                   />
-                </Box>
-              </Box>
-            </Box>
-          </DialogContent>
+                </div>
+              </div>
+            </div>
 
-          <DialogActions className={clsx(styles.dialogActions, "px-2 py-1 pb-2")}>
-            <Button onClick={onClose} disabled={loading}>
-              Cancel
-            </Button>
-            <Button type="submit" form="edit-product-form" disabled={loading} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined}>
-              {loading ? "Saving..." : "Save"}
-            </Button>
-          </DialogActions>
-        </form>
-      )}
+            <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
+                className="rounded-full px-6 font-semibold"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                form="edit-product-form"
+                disabled={loading}
+                className="rounded-full px-6 font-semibold shadow-md hover:shadow-lg transition-all"
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
     </Dialog>
   );
 };

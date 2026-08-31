@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-  CircularProgress,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../../components/ui/dialog";
+import { Button } from "../../../../components/ui/button";
+import { Loader2 } from "lucide-react";
 import { callSnack } from "../../../../components/snackbar";
 import { createInventoryLogService as logTransaction } from "../../../../features/inventory/create-inventory-log/create-inventory-log.service";
 import { useAppSelector } from "../../../../store/hooks";
@@ -18,19 +15,19 @@ import { updateInventoryLogService as updateTransaction } from "../../../../feat
 import type { InventoryItem } from "../../../../features/inventory/inventory-item.slice";
 import type { InventoryTransaction } from "../../../../features/inventory/inventory-log.slice";
 import dayjs from "dayjs";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextField from "../../../../components/form/textfield";
 import DatePicker from "../../../../components/form/date-picker";
 import Select from "../../../../components/form/select";
-import { inventoryLogSchema } from "../schema/inventory-log.schema";
+import { inventoryLogSchema, type InventoryLogForm } from "../schema/inventory-log.schema";
 
 interface LogTransactionModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
   transactionToEdit?: InventoryTransaction | null;
-  createdItem?: any;
+  createdItem?: InventoryItem | null;
   onAddNewItem?: () => void;
 }
 
@@ -38,8 +35,8 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
   const [loading, setLoading] = useState(false);
   const stockItems = useAppSelector((state) => state.inventoryItem.data);
 
-  const { control, handleSubmit, reset, watch, trigger } = useForm({
-    resolver: zodResolver(inventoryLogSchema),
+  const { control, handleSubmit, reset, watch, trigger } = useForm<InventoryLogForm>({
+    resolver: zodResolver(inventoryLogSchema) as unknown as Resolver<InventoryLogForm>,
     defaultValues: {
       item_uuid: "",
       ordered_date: "",
@@ -76,7 +73,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
           received_quantity: transactionToEdit.received_quantity || 0,
           damaged_quantity: transactionToEdit.damaged_quantity || 0,
           returned_quantity: transactionToEdit.returned_quantity || 0,
-          bill_amount: transactionToEdit.bill_amount || 0,
+          bill_amount: Number(transactionToEdit.bill_amount) || 0,
         });
       } else if (createdItem) {
         reset({
@@ -105,7 +102,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
   }, [open, reset, transactionToEdit, createdItem]);
 
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: InventoryLogForm) => {
     setLoading(true);
     try {
       const payload = {
@@ -129,75 +126,52 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
 
       onSuccess();
       onClose();
-    } catch (error: any) {
-      callSnack(error?.response?.data?.errors?.[0]?.message || `Failed to ${transactionToEdit ? "update" : "log"} transaction`, "error");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { errors?: { message: string }[] } } };
+      callSnack(err?.response?.data?.errors?.[0]?.message || `Failed to ${transactionToEdit ? "update" : "log"} transaction`, "error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{
-        paper: {
-          sx: {
-            orderRadius: "8px",
-            overflow: "hidden",
-          },
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          py: 2,
-          px: 3,
-        }}
-      >
-        <Typography variant="titleMd" fontWeight="bold" color="primary.900">
-          {transactionToEdit ? "Edit Stock Entry" : "Add Stock Entry"}
-        </Typography>
-        <IconButton onClick={onClose} edge="end">
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogContent>
-          <Box display="flex" flexDirection="column" gap={3}>
-            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2} alignItems={{ xs: "stretch", sm: "center" }}>
-              <Box className="flex flex-col gap-2" flex={1}>
-                <Typography variant="titleSm" fontWeight="bold">Search Inventory Item</Typography>
+    <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
+      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+            {transactionToEdit ? "Edit Stock Entry" : "Add Stock Entry"}
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col py-5 px-6 gap-5 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
+            <div className="flex flex-col sm:flex-row gap-4 items-end">
+              <div className="flex-1 w-full">
                 <Select
                   name="item_uuid"
                   control={control}
                   placeholder="Select Inventory Item"
                   identifier="transaction-item-select"
+                  label="Search Inventory Item"
                   options={options}
                   disabled={false}
                 />
-              </Box>
+              </div>
               {!transactionToEdit && (
-                <Button variant="outlined" onClick={onAddNewItem} sx={{ mt: { xs: 0, sm: 4 } }}>
+                <Button type="button" variant="outline" onClick={onAddNewItem} className="font-bold shrink-0 h-10 px-4">
                   + Add New Item
                 </Button>
               )}
-            </Box>
+            </div>
 
             {itemUuid && (
-              <Box display="flex" flexDirection="column" gap={3}>
-                <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-                  <Box flex={1} className="flex flex-col gap-2">
-                    <Typography variant="titleSm" fontWeight="bold">Ordered Date</Typography>
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
                     <DatePicker
                       identifier="ordered_date"
                       name="ordered_date"
                       control={control}
+                      label="Ordered Date"
                       placeholder="Ordered Date"
                       format="YYYY-MM-DD"
                       disableFuture
@@ -207,23 +181,22 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                         }
                       }}
                     />
-                  </Box>
-                  <Box flex={1} className="flex flex-col gap-2">
-                    <Typography variant="titleSm" fontWeight="bold">Received Date</Typography>
+                  </div>
+                  <div className="flex-1">
                     <DatePicker
                       identifier="received_date"
                       name="received_date"
                       control={control}
+                      label="Received Date"
                       placeholder="Received Date"
                       format="YYYY-MM-DD"
                       disableFuture
                       minDate={orderedDate ? dayjs(orderedDate) : undefined}
                     />
-                  </Box>
-                </Box>
-                <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-                  <Box flex={1} className="flex flex-col gap-2">
-                    <Typography variant="titleSm" fontWeight="bold">Ordered Quantity</Typography>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
                     <TextField
                       identifier="ordered_quantity"
                       name="ordered_quantity"
@@ -231,9 +204,8 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                       type="number"
                       label="Ordered Quantity"
                     />
-                  </Box>
-                  <Box flex={1} className="flex flex-col gap-2">
-                    <Typography variant="titleSm" fontWeight="bold">Received Quantity</Typography>
+                  </div>
+                  <div className="flex-1">
                     <TextField
                       identifier="received_quantity"
                       name="received_quantity"
@@ -241,11 +213,10 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                       type="number"
                       label="Received Quantity"
                     />
-                  </Box>
-                </Box>
-                <Box display="flex" gap={2}>
-                  <Box flex={1} className="flex flex-col gap-2">
-                    <Typography variant="titleSm" fontWeight="bold">Damaged Quantity</Typography>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
                     <TextField
                       identifier="damaged_quantity"
                       name="damaged_quantity"
@@ -253,9 +224,8 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                       type="number"
                       label="Damaged Quantity"
                     />
-                  </Box>
-                  <Box flex={1} className="flex flex-col gap-2">
-                    <Typography variant="titleSm" fontWeight="bold">Returned Quantity</Typography>
+                  </div>
+                  <div className="flex-1">
                     <TextField
                       identifier="returned_quantity"
                       name="returned_quantity"
@@ -263,10 +233,9 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                       type="number"
                       label="Returned Quantity"
                     />
-                  </Box>
-                </Box>
-                <Box className="flex flex-col gap-2">
-                  <Typography variant="titleSm" fontWeight="bold">Bill Amount</Typography>
+                  </div>
+                </div>
+                <div>
                   <TextField
                     identifier="bill_amount"
                     name="bill_amount"
@@ -274,21 +243,31 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                     type="number"
                     label="Bill Amount"
                   />
-                </Box>
-              </Box>
+                </div>
+              </div>
             )}
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, px: 3, borderTop: "1px solid", borderColor: "divider" }}>
-          <Button onClick={onClose} disabled={loading} sx={{ fontWeight: "bold" }}>
-            CANCEL
-          </Button>
-          <Button type="submit" variant="contained" disabled={loading || !itemUuid} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined} sx={{ fontWeight: "bold", px: 3 }}>
-            {loading ? "SAVING..." : (transactionToEdit ? "UPDATE TRANSACTION" : "LOG TRANSACTION")}
-          </Button>
-        </DialogActions>
-
-      </form>
+          </div>
+          <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+              className="rounded-full px-6 font-semibold"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading || !itemUuid}
+              className="rounded-full px-6 font-semibold shadow-md hover:shadow-lg transition-all"
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading ? "Saving..." : (transactionToEdit ? "Save Transaction" : "Log Transaction")}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 };

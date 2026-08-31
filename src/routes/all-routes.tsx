@@ -21,6 +21,7 @@ import Notification from "../pages/notification";
 import Bookings from "../pages/bookings";
 import StaffServiceManagementPage from "../pages/pricing";
 import MyProfile from "../pages/my-profile";
+import Appearance from "../pages/appearance";
 
 function AllRoutes() {
   return (
@@ -51,6 +52,7 @@ function AllRoutes() {
           <Route path="/customers" element={<Customers/>} />
           <Route path="/reports" element={<Reports/>} />
           <Route path="/notifications" element={<Notification/>} />
+          <Route path="/appearance" element={<Appearance/>} />
         </Route>
       </Route>
     </Routes>

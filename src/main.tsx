@@ -7,21 +7,24 @@ import App from "./app.tsx";
 import { Provider } from "react-redux";
 import { persistor, store } from "./store/store.ts";
 import { PersistGate } from "redux-persist/integration/react";
-import ThemeProviderWrapper from "./theme/theme-provider.tsx";
 import SnackbarProviderWrapper from "./components/snackbar/_components/snackbar-provider/index.tsx";
+import { ColorThemeProvider } from "./providers/color-theme-provider.tsx";
+import { ThemeProvider } from "./components/theme-provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <ThemeProviderWrapper>
-        <SnackbarProviderWrapper>
-          <Provider store={store}>
-            <PersistGate loading={null} persistor={persistor}>
-              <App />
-            </PersistGate>
-          </Provider>
-        </SnackbarProviderWrapper>
-      </ThemeProviderWrapper>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ColorThemeProvider>
+          <SnackbarProviderWrapper>
+            <Provider store={store}>
+              <PersistGate loading={null} persistor={persistor}>
+                <App />
+              </PersistGate>
+            </Provider>
+          </SnackbarProviderWrapper>
+        </ColorThemeProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </StrictMode>
 );

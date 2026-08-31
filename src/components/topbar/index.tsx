@@ -1,44 +1,46 @@
-import React, { useState } from "react";
-import { AppBar, Toolbar, Typography, Box, IconButton, useTheme, useMediaQuery, Tooltip } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+import React from "react";
+import { Menu } from "lucide-react";
 import type { RootState } from "../../store/store";
 import { useAppSelector } from "../../store/hooks";
-import { shouldShowTooltip } from "../../common/shouldShowTooltip";
+import { useMediaQuery } from "../../hooks/use-media-query";
+import { ThemeToggle } from "../theme-toggle";
 
 type TopbarProps = {
   onMenuClick?: () => void;
 };
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   const { salon } = useAppSelector((state: RootState) => state.auth);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   return (
-    <AppBar position="static" elevation={0} color="transparent" className="border-b border-gray-200 h-[72px] justify-center">
-      <Toolbar disableGutters className="px-4">
-        {!isDesktop && onMenuClick && (
-          <IconButton edge="start" onClick={onMenuClick} className="mr-2" aria-label="open sidebar">
-            <MenuIcon />
-          </IconButton>
-        )}
+    <header className="border-b border-border h-[72px] flex flex-col justify-center bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-30 sticky top-0">
+      <div className="flex items-center justify-between px-4 w-full">
+        <div className="flex items-center min-w-0 flex-1">
+          {onMenuClick && (
+            <button 
+              onClick={onMenuClick} 
+              className="mr-3 p-2 -ml-2 rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors" 
+              aria-label="toggle sidebar"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          )}
 
-        <Box className="flex-1 min-w-0">
-          <Tooltip title={salon?.name || "Salon Management Service"} open={tooltipOpen} onClose={() => setTooltipOpen(false)} disableHoverListener>
-            <Typography
-              onMouseEnter={(e) => {
-                if (shouldShowTooltip(e.currentTarget)) setTooltipOpen(true);
-              }}
-              onMouseLeave={() => setTooltipOpen(false)}
-              variant="h4" fontWeight={600} className="text-(--primary-900) truncate" sx={{ textTransform: "capitalize" }}
+          <div className="flex-1 min-w-0">
+            <h1 
+              title={salon?.name || "Salon Management Service"}
+              className="text-xl font-bold tracking-tight text-foreground truncate capitalize"
             >
               {salon?.name || "Salon Management Service"}
-            </Typography>
-          </Tooltip>
-        </Box>
-      </Toolbar>
-    </AppBar>
+            </h1>
+          </div>
+        </div>
+        <div className="flex items-center shrink-0 ml-4">
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
   );
 };
 

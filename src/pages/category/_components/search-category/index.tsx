@@ -1,4 +1,3 @@
-import { Box, CircularProgress } from "@mui/material";
 import { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import type { AppDispatch, RootState } from "../../../../store/store";
@@ -7,10 +6,15 @@ import { resetCategories } from "../../../../features/category/category.slice";
 import SearchBar from "../../../../components/searchbar";
 import ListCategories from "../list-categories";
 import { callSnack } from "../../../../components/snackbar";
+import { Loader2 } from "lucide-react";
+import { CategoryListSkeleton } from "../category-skeleton";
 
-const SearchCategories = () => {
+interface SearchCategoriesProps {
+  searchQuery: string;
+}
+
+const SearchCategories = ({ searchQuery }: SearchCategoriesProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const categoryState = useSelector((state: RootState) => state.category);
   const data = categoryState?.data ?? [];
@@ -69,16 +73,21 @@ const SearchCategories = () => {
   const hasMore = data.length < total;
 
   return (
-    <Box className="flex flex-col flex-1 min-h-0 px-4 md:px-8 pb-8 space-y-6">
-      <Box>
-        <SearchBar onSearch={setSearchQuery} placeholder="Search Category" />
-      </Box>
+    <div className="flex flex-col flex-1 min-h-0 px-4 md:px-8 pb-8 space-y-4 pt-4">
+      <div className="flex items-center justify-between pb-4">
+        <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          All Categories
+          <span className="text-primary text-base font-medium bg-primary/10 px-2.5 py-0.5 rounded-full">
+            {total}
+          </span>
+        </h2>
+      </div>
 
-      <Box className="flex-1 min-h-0 overflow-y-auto" id="scrollableDiv">
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1" id="scrollableDiv">
         {isLoading && data.length === 0 ? (
-          <Box className="flex items-center justify-center h-full">
-            <CircularProgress />
-          </Box>
+          <div className="w-full pt-4">
+            <CategoryListSkeleton />
+          </div>
         ) : (
           <ListCategories
             categories={data}
@@ -88,8 +97,8 @@ const SearchCategories = () => {
             searchQuery={searchQuery}
           />
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

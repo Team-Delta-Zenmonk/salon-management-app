@@ -1,15 +1,19 @@
-import { Button, Typography } from "@mui/material";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { useState } from "react";
 import StaffDialog from "../staff-dialog";
+import { Button } from "../../../../components/ui/button";
+import { Plus } from "lucide-react";
 
 export default function CreateStaff() {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <Button variant="contained" startIcon={<AddOutlinedIcon className="text-white!" />} onClick={() => setOpen(true)}>
-        <Typography fontWeight="medium">Add</Typography>
+      <Button 
+        onClick={() => setOpen(true)}
+        className="font-medium gap-2 rounded-full px-5 shadow-md hover:shadow-lg transition-all duration-300"
+      >
+        <Plus className="w-4 h-4" />
+        Add Staff
       </Button>
 
       <StaffDialog open={open} onClose={() => setOpen(false)} mode="create" />

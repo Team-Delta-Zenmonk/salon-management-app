@@ -4,7 +4,10 @@ import { updateStaffAction } from "./update-staff/update-staff.action";
 import type { CloudinaryFile } from "../../common/cloudinary.schema";
 
 export type StaffAddress = Record<string, any>;
-export type StaffEmergencyContact = Record<string, any>;
+export interface StaffEmergencyContact {
+  name: string;
+  phone: string;
+}
 export type StaffActiveHours = Record<string, any>;
 export interface Staff {
   id: number;

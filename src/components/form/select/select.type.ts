@@ -6,7 +6,9 @@ export type CustomSelectProps<T extends FieldValues> = {
   options?: Array<{ value: string; label: string | number }>;
   control: Control<T>;
   identifier: string;
+  label?: string;
   translate?: boolean;
   disabled?: boolean;
   rules?: any;
+  triggerClassName?: string;
 };

@@ -1,12 +1,13 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Avatar, IconButton, CircularProgress } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import { useState } from "react";
-import styles from "./confirm-predefine-dialog.module.scss";
+import { Loader2 } from "lucide-react";
 import type { PredefinedCategory } from "../../predefine-categories.type";
 import { useAppDispatch } from "../../../../../../store/hooks";
 import { createCategoryService } from "../../../../../../features/category/create-category/create-categories.service";
 import { listCategoriesAction } from "../../../../../../features/category/list-categories/list-categories.action";
 import { callSnack } from "../../../../../../components/snackbar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../../../../../components/ui/dialog";
+import { Button } from "../../../../../../components/ui/button";
+import { Avatar, AvatarFallback } from "../../../../../../components/ui/avatar";
 
 interface PredefinedCategoryDetailsDialogProps {
   open: boolean;
@@ -37,62 +38,46 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={(event, reason) => {
-        if (isLoading && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
-      }}
-      className={styles.dialogContainer}
-      classes={{ paper: styles.dialog }}
-      maxWidth="sm"
-      fullWidth
-    >
-      <DialogTitle className={styles.dialogTitle} fontWeight="fontWeightMedium" variant="h5">
-        <Box className="flex justify-between items-center">
-          <Typography variant="h5" fontWeight="fontWeightMedium">
-            Category Details
-          </Typography>
-          <IconButton onClick={onClose} size="small" disabled={isLoading}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
+    <Dialog open={open} onOpenChange={(isOpen) => !isLoading && !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Category Details</DialogTitle>
+        </DialogHeader>
 
-      <DialogContent className={styles.dialogContent}>
-        <Box className="flex flex-col gap-6 py-4">
-          <Box className="flex items-center gap-4">
-            <Avatar alt={category.name} sx={{ width: 80, height: 80, fontSize: 32 }}>
-              {category.name.charAt(0).toUpperCase()}
+        <div className="flex flex-col gap-6 py-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20">
+              <AvatarFallback className="text-3xl">{category.name.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
-            <Box className="flex-1">
-              <Typography variant="h6" fontWeight="bold" className="text-(--primary-900) mb-1">
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-primary mb-1">
                 {category.name}
-              </Typography>
-              <Typography variant="body2" className="text-gray-600">
+              </h3>
+              <p className="text-sm text-muted-foreground">
                 {category.description}
-              </Typography>
-            </Box>
-          </Box>
-          <Box className="border-t border-gray-300" />
+              </p>
+            </div>
+          </div>
+          <div className="border-t border-border" />
 
-          <Box className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <Typography variant="body2" className="text-blue-900">
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+            <p className="text-sm text-primary">
               <strong>Note:</strong> Clicking "Create Category" will add this category to your categories list with the
               predefined name and description.
-            </Typography>
-          </Box>
-        </Box>
-      </DialogContent>
+            </p>
+          </div>
+        </div>
 
-      <DialogActions className={styles.dialogActions}>
-        <Button onClick={onClose} disabled={isLoading} variant="outlined">
-          Cancel
-        </Button>
-        <Button onClick={handleCreate} disabled={isLoading} variant="contained" startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
-          {isLoading ? "Creating..." : "Create Category"}
-        </Button>
-      </DialogActions>
+        <DialogFooter>
+          <Button onClick={onClose} disabled={isLoading} variant="outline">
+            Cancel
+          </Button>
+          <Button onClick={handleCreate} disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isLoading ? "Creating..." : "Create Category"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

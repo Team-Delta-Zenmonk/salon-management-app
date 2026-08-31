@@ -1,36 +1,43 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { Box, useMediaQuery, useTheme, Container } from "@mui/material";
+import { useMediaQuery } from "../hooks/use-media-query";
 import Sidebar from "../components/sidebar";
 import Topbar from "../components/topbar";
 
 const drawerWidth = 260;
 
 const Layout = () => {
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = React.useState(false);
 
-  const handleToggleSidebar = () => setMobileOpen((prev) => !prev);
+  const handleToggleSidebar = () => {
+    if (isDesktop) {
+      setDesktopCollapsed((prev) => !prev);
+    } else {
+      setMobileOpen((prev) => !prev);
+    }
+  };
 
   return (
-    <Box className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
       <Sidebar
         drawerWidth={drawerWidth}
         mobileOpen={mobileOpen}
+        desktopCollapsed={desktopCollapsed}
         onToggleSidebar={handleToggleSidebar}
         isDesktop={isDesktop}
       />
 
-      <Box component="main" className="flex flex-col flex-1 h-screen w-full">
-        <Topbar onMenuClick={isDesktop ? undefined : handleToggleSidebar} />
-        <Box className="flex-1 min-h-0 overflow-y-auto">
-          <Container maxWidth="xl" className="py-6 flex flex-col h-full">
+      <main className="flex flex-col flex-1 h-screen min-w-0">
+        <Topbar onMenuClick={handleToggleSidebar} />
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="w-full mx-auto py-6 flex flex-col h-full px-4 sm:px-6 lg:px-8">
             <Outlet />
-          </Container>
-        </Box>
-      </Box>
-    </Box>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 };
 

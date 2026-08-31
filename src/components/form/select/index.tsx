@@ -1,11 +1,16 @@
-import { Typography } from "@mui/material";
-import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
-import MenuItem from "@mui/material/MenuItem";
-import MuiSelect from "@mui/material/Select";
+import React, { useId } from "react";
+import clsx from "clsx";
+import { X } from "lucide-react";
 import { Controller, type FieldValues } from "react-hook-form";
-import styles from "./select.module.scss";
 import type { CustomSelectProps } from "./select.type";
+import { Label } from "@/components/ui/label";
+import {
+  Select as ShadcnSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Select = <T extends FieldValues>({
   placeholder,
@@ -13,10 +18,14 @@ const Select = <T extends FieldValues>({
   options,
   control,
   identifier,
+  label,
   translate = true,
   disabled = false,
   rules,
+  triggerClassName,
 }: CustomSelectProps<T>) => {
+  const generatedId = useId();
+  const selectId = identifier || generatedId;
 
   return (
     <Controller
@@ -24,63 +33,87 @@ const Select = <T extends FieldValues>({
       control={control}
       rules={rules}
       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error } }) => {
+        const hasError = !!error;
+
         return (
-          <FormControl fullWidth error={!!error?.type}>
-            <MuiSelect
-              displayEmpty
-              disabled={disabled}
-              onChange={onChange}
+          <div className="flex flex-col gap-1.5 w-full" data-test-id={`select-wrapper-${identifier}`}>
+            {label && (
+              <Label 
+                htmlFor={selectId}
+                className={clsx(
+                  "text-sm font-medium",
+                  hasError ? "text-destructive" : "text-foreground",
+                  disabled && "opacity-50"
+                )}
+                data-test-id={`label-${identifier}`}
+              >
+                {label}
+              </Label>
+            )}
+
+            <ShadcnSelect
               value={value ?? ""}
-              inputRef={ref}
-              name={name}
-              error={!!error?.type}
-              onBlur={onBlur}
-              renderValue={(selected) => {
-                if (!selected || selected === "") {
-                  return <Typography color="text.secondary" variant="paragraphMd">{placeholder}</Typography>;
-                }
-                const selectedOption = options?.find(opt => opt.value === selected);
-                return selectedOption ? selectedOption.label : selected;
-              }}
-              MenuProps={{ sx: { maxHeight: "40vh" }, PaperProps: { className: styles.menuPaper } }}
-              inputProps={{
-                className: styles.input,
-                "data-test-id": `input-select-${identifier}`,
-              }}
-              classes={{
-                root: styles.selectRoot,
-                select: styles.selectInput,
-              }}
-              SelectDisplayProps={{
-                ...({ "data-test-id": `select-display-${identifier}` } as any),
-              }}
-              data-test-id={`select-${identifier}`}
+              onValueChange={onChange}
+              disabled={disabled}
             >
-              {options && options?.length > 0 ? (
-                options?.map((option) => {
-                  return (
-                    <MenuItem
-                      sx={{ minHeight: "auto" }}
+              <SelectTrigger
+                id={selectId}
+                ref={ref}
+                onBlur={onBlur}
+                className={clsx(
+                  "w-full shadow-sm",
+                  hasError && "border-destructive focus:ring-destructive aria-invalid:border-destructive aria-invalid:ring-destructive",
+                  triggerClassName
+                )}
+                data-test-id={`select-${identifier}`}
+                aria-invalid={hasError}
+              >
+                <div className="truncate flex-1 text-left flex items-center gap-1.5 line-clamp-1 pr-2">
+                  {value ? options?.find((o) => o.value === value)?.label || value : <span className="text-muted-foreground">{placeholder}</span>}
+                </div>
+                {value && (
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onChange("");
+                    }}
+                    className="mr-1 flex items-center justify-center rounded-full p-0.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </div>
+                )}
+              </SelectTrigger>
+              <SelectContent>
+                {options && options.length > 0 ? (
+                  options.map((option) => (
+                    <SelectItem
+                      key={option.value}
                       value={option.value}
-                      key={option.label}
                       data-test-id={`li-${identifier}-${option.label}`}
                     >
-                      <Typography variant="paragraphMd" color="secondary" className={styles.menuItem}>
-                        {option.label}
-                      </Typography>
-                    </MenuItem>
-                  );
-                })
-              ) : (
-                <MenuItem value={""} data-test-id={`li-${identifier}-no-options`}>
-                  No options
-                </MenuItem>
-              )}
-            </MuiSelect>
-            {error && (
-              <FormHelperText data-test-id={`text-error-${identifier}`}>{error?.message}</FormHelperText>
+                      {option.label}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="" disabled data-test-id={`li-${identifier}-no-options`}>
+                    No options
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </ShadcnSelect>
+
+            {hasError && (
+              <p 
+                className="text-xs font-medium text-destructive mt-0.5" 
+                data-test-id={`text-error-${identifier}`}
+              >
+                {error?.message as string}
+              </p>
             )}
-          </FormControl>
+          </div>
         );
       }}
     />

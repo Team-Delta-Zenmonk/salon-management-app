@@ -1,9 +1,8 @@
 import { useState } from "react";
-import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import { Box, Typography, IconButton, Avatar, CircularProgress } from "@mui/material";
+import { Pencil, Trash2, Loader2, SearchX } from "lucide-react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import dayjs from "dayjs";
+import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../../store/store";
 import { deleteCategoryService } from "../../../../features/category/delete-category/delete-category.service";
@@ -12,6 +11,9 @@ import { callSnack } from "../../../../components/snackbar";
 import CategoryDialog from "../category-dialog";
 import type { Category } from "../../../../features/category/category.slice";
 import DeleteDialog from "../../../../components/delete-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
+import { Button } from "../../../../components/ui/button";
+
 interface ListCategoriesProps {
   categories: Category[];
   total: number;
@@ -73,79 +75,112 @@ export default function ListCategories({
 
   return (
     <>
-      <Box className="text-(--primary-900) mb-4">
-        Categories List ({total})
-      </Box>
-
       <InfiniteScroll
         dataLength={categories.length}
         next={fetchMoreCategories}
         hasMore={hasMore}
         loader={
-          <Box className="flex justify-center py-4">
-            <CircularProgress size={24} />
-          </Box>
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
         }
         scrollableTarget="scrollableDiv"
         endMessage={
           categories.length > 0 ? (
-            <Box className="text-center py-4 text-gray-500">
-              <Typography variant="body2">No more categories to load</Typography>
-            </Box>
+            <div className="text-center py-6 text-muted-foreground">
+              <p className="text-sm font-medium">No more categories to load</p>
+            </div>
           ) : null
         }
       >
-        <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-6"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.1 }
+            }
+          }}
+        >
           {categories.map((category) => (
-            <Box
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, scale: 0.95 },
+                show: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
+              }}
               key={category.uuid}
-              className="bg-white border border-gray-300 rounded-lg p-6 hover:shadow-md transition-shadow"
+              className="group relative overflow-hidden bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between"
             >
-              <Box className="flex items-start justify-between mb-4">
-                <Box className="flex items-center gap-4">
-                  <Box>
-                    <Avatar src={category.logo || undefined} alt={category.name} />
-                  </Box>
-                  <Box>
-                    <Typography className="text-(--primary-900)" fontWeight="bold">
-                      {category.name}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-5">
+                  <div className="flex items-center gap-4 w-full">
+                    <div className="relative shrink-0">
+                      <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <Avatar className="h-14 w-14 ring-4 ring-background/50 border border-border/50 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10">
+                        <AvatarImage src={category.logo || undefined} alt={category.name} className="object-cover" />
+                        <AvatarFallback className="bg-gradient-to-br from-muted to-muted/80 text-foreground text-xl font-bold">{category.name.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-foreground font-bold text-lg leading-tight group-hover:text-primary truncate transition-colors duration-300">
+                        {category.name}
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="text-muted-foreground/90 mb-6 text-sm leading-relaxed line-clamp-2 min-h-[40px]">
+                  {category.description || "No description provided for this category."}
+                </p>
+              </div>
 
-              <Box className="text-gray-600 mb-4">{category.description}</Box>
-
-              <Box className="flex items-center justify-between pt-4 border-t border-blue-100">
-                <Box className="text-gray-500">
-                  Created On: {dayjs(category.created_at).format("MMM DD, YYYY")}
-                </Box>
-                <Box className="flex gap-2">
-                  <IconButton
-                    aria-label="edit"
+              <div className="flex items-center justify-between pt-4 border-t border-border/40 relative z-10">
+                <div className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                  {dayjs(category.created_at).format("MMM DD, YYYY")}
+                </div>
+                <div className="flex gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleUpdateClick(category)}
                     disabled={deleteLoading}
+                    className="h-8 w-8 bg-background/50 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full shadow-sm"
                   >
-                    <ModeEditOutlineOutlinedIcon className="text-(--primary-800)!" />
-                  </IconButton>
-                  <IconButton
-                    aria-label="delete"
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleDeleteClick(category)}
                     disabled={deleteLoading}
+                    className="h-8 w-8 bg-background/50 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full shadow-sm"
                   >
-                    <DeleteOutlinedIcon className="text-(--error-800)!" />
-                  </IconButton>
-                </Box>
-              </Box>
-            </Box>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
           ))}
-        </Box>
+        </motion.div>
       </InfiniteScroll>
 
       {categories.length === 0 && (
-        <Box className="bg-gray-200 border border-gray-400 rounded-lg p-8 text-center mt-4">
-          <Typography>No categories found. Create your first category!</Typography>
-        </Box>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }} 
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-3xl p-10 text-center mt-6 flex flex-col items-center justify-center gap-3"
+        >
+          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+            <SearchX className="h-6 w-6 text-primary opacity-60" />
+          </div>
+          <p className="text-foreground font-medium">No categories found</p>
+          <p className="text-sm text-muted-foreground">Try a different search term or create a new category.</p>
+        </motion.div>
       )}
 
       {updateCategory && (

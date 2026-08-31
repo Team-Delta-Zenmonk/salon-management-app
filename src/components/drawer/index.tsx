@@ -1,12 +1,13 @@
 import { type ReactNode } from "react";
-import Drawer, { type DrawerProps } from "@mui/material/Drawer";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 type CustomDrawerProps = {
   open: boolean;
   onClose: () => void;
-  width?: number;
+  width?: number | string;
   children: ReactNode;
-  variant?: DrawerProps["variant"];
+  variant?: "temporary" | "permanent" | "persistent";
   showOn?: { xs?: boolean; md?: boolean };
 };
 
@@ -18,29 +19,42 @@ const CustomDrawer = ({
   variant = "temporary",
   showOn = { xs: true, md: true },
 }: CustomDrawerProps) => {
+  // If it's a permanent drawer, we typically just render a static aside.
+  // For standard Shadcn, Sheet is inherently an overlay (temporary).
+  // We'll mimic permanent behavior by keeping it open and disabling overlay if needed,
+  // or just rendering a standard div if it's meant to be a permanent side panel.
+  
+  const widthStyle = typeof width === "number" ? `${width}px` : width;
+
+  if (variant === "permanent") {
+    return (
+      <aside
+        style={{ width: widthStyle }}
+        className={cn(
+          "h-full shrink-0 border-r border-border bg-background",
+          !showOn.xs && "hidden md:block",
+          !showOn.md && "md:hidden"
+        )}
+      >
+        {children}
+      </aside>
+    );
+  }
+
   return (
-    <Drawer
-      variant={variant}
-      open={variant === "permanent" ? true : open}
-      onClose={variant === "temporary" ? onClose : undefined}
-      ModalProps={variant === "temporary" ? { keepMounted: true } : undefined}
-      sx={{
-        display: {
-          xs: showOn.xs ? "block" : "none",
-          md: showOn.md ? "block" : "none",
-        },
-        width: variant === "permanent" ? width : undefined,
-        flexShrink: variant === "permanent" ? 0 : undefined,
-        "& .MuiDrawer-paper": {
-          width,
-          boxSizing: "border-box",
-          borderRight: "1px solid",
-          borderColor: "divider",
-        },
-      }}
-    >
-      {children}
-    </Drawer>
+    <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <SheetContent
+        side="left"
+        style={{ maxWidth: widthStyle, width: "100%" }}
+        className={cn(
+          "p-0 border-r-border",
+          !showOn.xs && "hidden md:block",
+          !showOn.md && "md:hidden"
+        )}
+      >
+        {children}
+      </SheetContent>
+    </Sheet>
   );
 };
 

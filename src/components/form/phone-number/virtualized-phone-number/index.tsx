@@ -1,57 +1,16 @@
-import { Stack, styled, Typography } from "@mui/material";
 import React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import clsx from "clsx";
 
 const LISTBOX_PADDING = 8;
 
-const StyledList = styled("ul")({
-  margin: 0,
-  padding: 0,
-});
-
-const renderListOption = (option: any, currentLocale: string) => (
-  <Stack className="country-select flex-row w-100 items-center" gap={1.5}>
-    <Typography variant="titleMd">{option.flagEmoji}</Typography>
-
-    <Typography variant="paragraphMd" color="secondary" flex={1}>
-      {option.translations[currentLocale] ?? option.name}
-    </Typography>
-
-    <Typography variant="paragraphMd" color="secondary.500" textAlign="right">
-      +{option.phoneCode}
-    </Typography>
-  </Stack>
-);
-
-function renderRow(option: any, currentLocale: string, idx: number) {
-  const [, opt] = option;
-  const { name } = opt;
-
-  return (
-    <li
-      key={idx}
-      className="country-select"
-      data-test-id={`li-${name.toLowerCase()}`}
-      style={{
-        height: 36,
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      {renderListOption(opt, currentLocale)}
-    </li>
-  );
+interface VirtualizedListboxProps {
+  options: any[];
+  onSelect: (option: any) => void;
 }
 
-export const VirtualizedListboxComponent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLElement>
->(function ListboxComponent(props, ref) {
-  const { children, ...other } = props;
-
-  const itemData = React.Children.toArray(children) as any[];
-  const itemCount = itemData.length;
-
+export function VirtualizedListboxComponent({ options, onSelect }: VirtualizedListboxProps) {
+  const itemCount = options.length;
   const currentLocale = "es";
   const itemSize = 36;
 
@@ -66,27 +25,26 @@ export const VirtualizedListboxComponent = React.forwardRef<
 
   return (
     <div
-      ref={(node) => {
-        parentRef.current = node;
-        if (typeof ref === "function") ref(node);
-        else if (ref) (ref as any).current = node;
-      }}
-      {...other}
+      ref={parentRef}
       data-test-id="autocomplete-listbox"
       style={{
         height: Math.min(8, itemCount) * itemSize + 2 * LISTBOX_PADDING,
         overflow: "auto",
       }}
+      className="bg-white rounded-md shadow-md border border-gray-200"
     >
-      <StyledList
+      <ul
         style={{
+          margin: 0,
+          padding: 0,
           height: virtualizer.getTotalSize(),
           width: "100%",
           position: "relative",
+          listStyle: "none",
         }}
       >
         {virtualizer.getVirtualItems().map((virtualRow) => {
-          const option = itemData[virtualRow.index];
+          const option = options[virtualRow.index];
 
           return (
             <li
@@ -95,13 +53,27 @@ export const VirtualizedListboxComponent = React.forwardRef<
                 position: "absolute",
                 top: virtualRow.start + LISTBOX_PADDING,
                 width: "100%",
+                height: itemSize,
+                display: "flex",
+                alignItems: "center",
               }}
+              className="country-select px-3 py-1.5 cursor-pointer hover:bg-gray-100"
+              onClick={() => onSelect(option)}
+              data-test-id={`li-${option.name.toLowerCase()}`}
             >
-              {renderRow(option, currentLocale, virtualRow.index)}
+              <div className="flex w-full flex-row items-center gap-3">
+                <span className="text-base">{option.flagEmoji}</span>
+                <span className="flex-1 text-sm text-gray-700 truncate">
+                  {option.translations[currentLocale] ?? option.name}
+                </span>
+                <span className="text-sm text-gray-500 text-right shrink-0">
+                  +{option.phoneCode}
+                </span>
+              </div>
             </li>
           );
         })}
-      </StyledList>
+      </ul>
     </div>
   );
-});
+}

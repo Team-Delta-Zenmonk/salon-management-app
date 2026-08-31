@@ -1,26 +1,28 @@
-import { Box, Typography } from "@mui/material";
-import { DesignServicesOutlined } from "@mui/icons-material";
 import type { ServiceType } from "../../types/staff-service.types";
 import StaffPricingCards from "./_components/staff-pricing-cards";
+import { Scissors } from "lucide-react";
 
 export default function StaffPricingPanel({ selectedService }: Readonly<{ selectedService: ServiceType | null }>) {
   if (!selectedService) {
     return (
-      <Box className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center h-full text-center">
-        <DesignServicesOutlined className="text-gray-300 w-12 h-12 mb-3" />
-        <Typography variant="h6" className="text-gray-700 font-medium">
+      <div className="flex flex-col items-center justify-center min-h-[450px] p-8 text-center bg-transparent">
+        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/40">
+          <Scissors className="text-muted-foreground w-8 h-8" />
+        </div>
+        <h3 className="text-lg font-bold text-foreground">
           No Service Selected
-        </Typography>
-        <Typography className="text-gray-500 text-sm mt-1">
+        </h3>
+        <p className="text-muted-foreground/80 text-sm mt-1 max-w-sm">
           Select a service from the sidebar to view its staff pricing.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     );
   }
 
   return (
-    <Box className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col min-h-full">
+    <div className="p-6 md:p-8 flex flex-col min-h-full bg-transparent">
       <StaffPricingCards selectedService={selectedService} />
-    </Box>
+    </div>
   );
 }
+

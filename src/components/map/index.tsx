@@ -1,7 +1,6 @@
 import { Controller } from "react-hook-form";
 import type { LatLngValue } from "./_components/location-map";
 import MapPicker from "./_components/location-map";
-import { Box } from "@mui/material";
 import { reverseGeocode } from "../../features/maps/mapbox-geocode.service";
 
 type LocationMapProps = {
@@ -32,8 +31,8 @@ export default function LocationMap({ control, latitude, longitude, label, disab
     }
   };
   return (
-    <Box className="space-y-2">
-      {label && <Box className=" text-lg font-semibold mb-2">{label}</Box>}
+    <div className="space-y-2">
+      {label && <div className="text-lg font-semibold mb-2">{label}</div>}
       <Controller
         control={control}
         name={latitude as any}
@@ -58,6 +57,6 @@ export default function LocationMap({ control, latitude, longitude, label, disab
           />
         )}
       />
-    </Box>
+    </div>
   );
 }

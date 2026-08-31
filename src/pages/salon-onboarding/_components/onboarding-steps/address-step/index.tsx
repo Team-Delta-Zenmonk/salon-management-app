@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import type { SalonOnboardingForm } from "../../../schema/salon-onboarding.schema";
 import TextField from "../../../../../components/form/textfield";
@@ -8,30 +7,28 @@ export default function AddressStep() {
   const { control, setValue, clearErrors } = useFormContext<SalonOnboardingForm>();
 
   return (
-    <Box className="space-y-4">
-      <Box>
-        <Box className="text-lg font-semibold mb-2">Address</Box>
-        <Box className="text-sm text-gray-500">Where can customers find your salon?</Box>
-      </Box>
-      <Box>
+    <div className="space-y-4 pt-2">
+      <div>
         <TextField
           type="text"
           label="Full Address"
           name="address.address"
           control={control}
           identifier="salon-address"
+          placeholder="Enter full address"
         />
-      </Box>
-      <Box>
+      </div>
+      <div>
         <TextField
           type="text"
           label="Map Link"
           name="address.map_link"
           control={control}
           identifier="salon-map-link"
+          placeholder="Google Maps link"
         />
-      </Box>
-      <Box>
+      </div>
+      <div>
         <LocationMap
           control={control}
           latitude="address.latitude"
@@ -40,7 +37,7 @@ export default function AddressStep() {
           setValue={setValue}
           clearErrors={clearErrors}
         />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

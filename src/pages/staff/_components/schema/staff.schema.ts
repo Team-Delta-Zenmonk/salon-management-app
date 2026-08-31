@@ -10,13 +10,13 @@ dayjs.extend(customParseFormat);
 
 const DATE_FORMAT = "DD-MM-YYYY";
 
-const parseDateString = (val: any): dayjs.Dayjs => {
+const parseDateString = (val: Dayjs | string | Date | null | undefined | unknown): dayjs.Dayjs => {
   if (typeof val === "string" && val) {
     const parsed = dayjs(val, DATE_FORMAT, true);
     if (parsed.isValid()) return parsed;
     return dayjs(val);
   }
-  return dayjs(val);
+  return dayjs(val as string | Date | Dayjs);
 };
 
 const BusinessDaySchema = z

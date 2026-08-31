@@ -1,13 +1,3 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  CircularProgress,
-} from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
@@ -18,8 +8,21 @@ import { listServicesAction } from "../../../../features/service/list-services/l
 import { listStaffServices } from "../../../../features/staff/list-services/list-services.service";
 import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
 import { unassignStaffFromService } from "../../../../features/staff-service/unassign-staff-service.service";
-import styles from "./assign-services.module.scss";
-import clsx from "clsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../../components/ui/dialog";
+import { Button } from "../../../../components/ui/button";
+import { Loader2 } from "lucide-react";
+import type { Service } from "../../../../features/service/service.slice";
+
+interface AssignedStaffService {
+  uuid: string;
+  service_id: number;
+}
 
 interface AssignServicesDialogProps {
   open: boolean;
@@ -47,7 +50,7 @@ export default function AssignServicesDialog({
 
   const { data: services } = useAppSelector((state: RootState) => state.service);
 
-  const [assignedStaffServices, setAssignedStaffServices] = useState<any[]>([]);
+  const [assignedStaffServices, setAssignedStaffServices] = useState<AssignedStaffService[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -78,7 +81,7 @@ export default function AssignServicesDialog({
           const serviceUuid = serviceIdToUuidMap.get(ss.service_id);
           return serviceUuid ? [serviceUuid, ss] : null;
         })
-        .filter(Boolean) as [string, any][],
+        .filter(Boolean) as [string, AssignedStaffService][],
     );
   }, [assignedStaffServices, serviceIdToUuidMap]);
 
@@ -93,7 +96,7 @@ export default function AssignServicesDialog({
   const serviceOptions = useMemo(() => {
     const rootServices = services.filter((s) => s.parent_id === null);
 
-    const subServicesMap = services.reduce<Record<string, any[]>>((acc, s) => {
+    const subServicesMap = services.reduce<Record<string, Service[]>>((acc, s) => {
       if (s.parent_id) {
         const pId = String(s.parent_id);
         acc[pId] = acc[pId] || [];
@@ -152,8 +155,9 @@ export default function AssignServicesDialog({
       callSnack("Services updated successfully", "success");
       onAssigned?.();
       onClose();
-    } catch (err: any) {
-      callSnack(err?.message || "Failed to update services", "error");
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      callSnack(error?.message || "Failed to update services", "error");
     } finally {
       setSaving(false);
     }
@@ -162,55 +166,67 @@ export default function AssignServicesDialog({
   return (
     <Dialog
       open={open}
-      onClose={(event, reason) => {
-        if (saving && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          if (saving) return;
+          onClose();
+        }
       }}
-      fullWidth
-      maxWidth="sm"
-      classes={{ paper: styles.dialog }}
     >
-      <DialogTitle sx={{ pb: 0 }} className={styles.dialogTitle}>
-        Assign Services
-      </DialogTitle>
+      <DialogContent className="sm:max-w-[480px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+            Assign Services
+          </DialogTitle>
+        </DialogHeader>
 
-      <FormProvider {...methods}>
-        <DialogContent dividers className={clsx(styles.dialogContent)} sx={{ maxHeight: 400, overflowY: "auto" }}>
-          {loading ? (
-            <Box className="flex justify-center py-6">
-              <CircularProgress />
-            </Box>
-          ) : (
-            <form id="assign-services-form" onSubmit={handleSubmit(onSubmit)}>
-              <Typography variant="body2" className="text-(--app-muted) mb-4">
-                Select services to assign to this staff member
-              </Typography>
+        <FormProvider {...methods}>
+          <div className="flex flex-col py-5 px-6 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar min-h-[220px]">
+            {loading ? (
+              <div className="flex justify-center items-center py-12 flex-1">
+                <Loader2 className="h-8 w-8 animate-spin text-primary/60" />
+              </div>
+            ) : (
+              <form id="assign-services-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                <p className="text-sm text-muted-foreground">
+                  Select sub-services to assign to this staff member:
+                </p>
 
-              <CheckboxTree
-                name="service_uuids"
-                control={methods.control}
-                identifier="assign-services"
-                options={serviceOptions}
-              />
-            </form>
-          )}
-        </DialogContent>
+                <div className="mt-2 border border-border/40 rounded-2xl p-4 bg-muted/5 max-h-[300px] overflow-y-auto custom-scrollbar">
+                  <CheckboxTree
+                    name="service_uuids"
+                    control={methods.control}
+                    identifier="assign-services"
+                    options={serviceOptions}
+                  />
+                </div>
+              </form>
+            )}
+          </div>
 
-        <DialogActions className={styles.dialogActions}>
-          <Button onClick={onClose} disabled={saving}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            form="assign-services-form"
-            variant="contained"
-            disabled={saving}
-            startIcon={saving ? <CircularProgress size={18} /> : null}
-          >
-            Save
-          </Button>
-        </DialogActions>
-      </FormProvider>
+          {/* Footer */}
+          <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={saving}
+              className="rounded-full px-6"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="assign-services-form"
+              disabled={saving || loading}
+              className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
+            >
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save
+            </Button>
+          </DialogFooter>
+        </FormProvider>
+      </DialogContent>
     </Dialog>
   );
 }

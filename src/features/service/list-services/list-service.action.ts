@@ -2,7 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { listServicesService } from "./list-service.service";
 import { listServicesType } from "./list-services.type";
 
-interface ListServicesParams {
+export interface ListServicesParams {
   category_uuid?: string;
   page?: number;
   limit?: number;

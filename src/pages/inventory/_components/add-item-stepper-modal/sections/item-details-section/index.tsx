@@ -1,16 +1,8 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-} from "@mui/material";
-import { useForm } from "react-hook-form";
+import { Button } from "../../../../../../components/ui/button";
+import { Loader2 } from "lucide-react";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import clsx from "clsx";
-import styles from "../../../inventory-dialog.module.scss";
 import TextField from "../../../../../../components/form/textfield";
 import Select from "../../../../../../components/form/select";
 import FilePicker from "../../../../../../components/form/file-picker";
@@ -18,16 +10,15 @@ import { uploadImages } from "../../../../../../features/upload-images/upload-im
 import { callSnack } from "../../../../../../components/snackbar";
 import { createInventoryItemService as createInventoryItem } from "../../../../../../features/inventory/create-inventory-item/create-inventory-item.service";
 import type { ItemCategory } from "../../../../../../features/inventory/types/category.type";
-import { inventoryItemSchema } from "../../../schema/inventory-item.schema";
+import { inventoryItemSchema, type InventoryItemForm } from "../../../schema/inventory-item.schema";
+import type { InventoryItem } from "../../../../../../features/inventory/inventory-item.slice";
 import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
 
 interface ItemDetailsSectionProps {
-  selectedCategory: ItemCategory | null;
+  selectedCategory: ItemCategory;
   onBack: () => void;
-  onSuccess: (item: any) => void;
+  onSuccess: (item: InventoryItem) => void;
   onClose: () => void;
-  activeStep: number;
-  steps: string[];
 }
 
 const ITEM_TYPES = [
@@ -45,13 +36,11 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
   onBack,
   onSuccess,
   onClose,
-  activeStep,
-  steps,
 }) => {
   const [loading, setLoading] = useState(false);
 
-  const { control, handleSubmit } = useForm({
-    resolver: zodResolver(inventoryItemSchema),
+  const { control, handleSubmit } = useForm<InventoryItemForm>({
+    resolver: zodResolver(inventoryItemSchema) as unknown as Resolver<InventoryItemForm>,
     defaultValues: {
       name: "",
       brand: "",
@@ -59,12 +48,12 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
       unit: "",
       unit_price: 0,
       item_type: "product",
-      logo: null as any,
+      logo: null as { url: string; filename?: string } | null,
       min_stock_level: 0,
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: InventoryItemForm) => {
     if (!selectedCategory) {
       callSnack("Please select a category first", "error");
       return;
@@ -88,12 +77,13 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
       callSnack("Inventory item created successfully", "success");
       onSuccess(res.data || res);
       onClose();
-    } catch (error: any) {
-      if (error?.response?.status === 409) {
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } } };
+      if (err?.response?.status === 409) {
         callSnack("Item already exists in inventory", "error");
       } else {
         callSnack(
-          error?.response?.data?.message || "Failed to create inventory item",
+          err?.response?.data?.message || "Failed to create inventory item",
           "error"
         );
       }
@@ -104,15 +94,20 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
 
   return (
     <>
-      <DialogContent className={clsx("flex flex-col py-1 px-3", styles.dialogContent)}>
-        <Typography variant="paragraphMd" color="text.secondary" sx={{ mb: 2, mt: 1 }}>
-          Category: <strong>{selectedCategory?.name}</strong>
-        </Typography>
+      <div className="p-6 pb-24">
+        {/* Modern Category Badge */}
+        <div className="flex items-center gap-2 mb-6 px-1">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Organizing in:</span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            {selectedCategory?.name}
+          </span>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} id="add-item-form">
-          <Box display="flex" flexDirection="column" gap={3}>
-            <Box className="flex flex-col gap-2">
-              <Typography variant="titleSm" fontWeight="bold">Item Name</Typography>
+          <div className="flex flex-col gap-5">
+            {/* Row 1: Name & Brand */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <TextField
                 type="text"
                 identifier="add-item-name"
@@ -124,10 +119,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 disabled={loading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
-            </Box>
 
-            <Box className="flex flex-col gap-2">
-              <Typography variant="titleSm" fontWeight="bold">Brand Name</Typography>
               <TextField
                 type="text"
                 identifier="add-item-brand"
@@ -139,99 +131,87 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 disabled={loading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
-            </Box>
+            </div>
 
-            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-              <Box flex={1} className="flex flex-col gap-2">
-                <Typography variant="titleSm" fontWeight="bold">Item Type</Typography>
-                <Select
-                  name="item_type"
-                  control={control}
-                  placeholder="Item Type"
-                  identifier="add-item-type"
-                  options={ITEM_TYPES}
-                  disabled={loading}
-                />
-              </Box>
+            {/* Row 2: Type & Image */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+              <Select
+                name="item_type"
+                control={control}
+                placeholder="Item Type"
+                identifier="add-item-type"
+                label="Item Type"
+                options={ITEM_TYPES}
+                disabled={loading}
+              />
 
-              <Box flex={1} className="flex flex-col gap-2">
-                <Typography variant="titleSm" fontWeight="bold">Item Image (optional)</Typography>
-                <FilePicker
-                  name="logo"
-                  control={control}
-                  identifier="add-item-logo"
-                  label="Item Image"
-                  uploadFn={uploadImages}
-                  disabled={loading}
-                />
-              </Box>
-            </Box>
+              <FilePicker
+                name="logo"
+                control={control}
+                identifier="add-item-logo"
+                label="Item Image (optional)"
+                uploadFn={uploadImages}
+                disabled={loading}
+              />
+            </div>
 
-            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-              <Box flex={1} className="flex flex-col gap-2">
-                <Typography variant="titleSm" fontWeight="bold">Variant / Size</Typography>
-                <TextField
-                  type="text"
-                  identifier="add-item-variant"
-                  name="variant_name"
-                  control={control}
-                  label="Variant / Size"
-                  placeholder="e.g., 500ml / Large"
-                  maxLength={5}
-                  disabled={loading}
-                />
-              </Box>
+            {/* Row 3: Variant & Unit */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <TextField
+                type="text"
+                identifier="add-item-variant"
+                name="variant_name"
+                control={control}
+                label="Variant / Size"
+                placeholder="e.g., 500ml / Large"
+                maxLength={5}
+                disabled={loading}
+              />
 
-              <Box flex={1} className="flex flex-col gap-2">
-                <Typography variant="titleSm" fontWeight="bold">Unit</Typography>
-                <Select
-                  name="unit"
-                  control={control}
-                  placeholder="Select Unit"
-                  identifier="add-item-unit"
-                  options={UNITS}
-                  disabled={loading}
-                />
-              </Box>
-            </Box>
+              <Select
+                name="unit"
+                control={control}
+                placeholder="Select Unit"
+                identifier="add-item-unit"
+                label="Unit"
+                options={UNITS}
+                disabled={loading}
+              />
+            </div>
 
-            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-              <Box flex={1} className="flex flex-col gap-2">
-                <Typography variant="titleSm" fontWeight="bold">Unit Price</Typography>
-                <TextField
-                  type="number"
-                  identifier="add-item-unit-price"
-                  name="unit_price"
-                  control={control}
-                  label="Unit Price"
-                  disabled={loading}
-                />
-              </Box>
+            {/* Row 4: Pricing & Stock Limits */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <TextField
+                type="number"
+                identifier="add-item-unit-price"
+                name="unit_price"
+                control={control}
+                label="Unit Price (₹)"
+                disabled={loading}
+              />
 
-              <Box flex={1} className="flex flex-col gap-2">
-                <Typography variant="titleSm" fontWeight="bold">Minimum Stock Level</Typography>
-                <TextField
-                  type="number"
-                  identifier="add-item-min-stock"
-                  name="min_stock_level"
-                  control={control}
-                  label="Minimum Stock Level"
-                  disabled={loading}
-                />
-              </Box>
-            </Box>
-          </Box>
+              <TextField
+                type="number"
+                identifier="add-item-min-stock"
+                name="min_stock_level"
+                control={control}
+                label="Minimum Stock Level"
+                disabled={loading}
+              />
+            </div>
+          </div>
         </form>
-      </DialogContent>
+      </div>
 
-      <DialogActions className={clsx(styles.dialogActions, "px-2 py-1 pb-2")}>
-        <Button onClick={onBack} disabled={loading}>
+      <div className="absolute bottom-0 left-0 right-0 px-6 py-4 border-t border-border flex justify-end gap-2 bg-muted/20 shrink-0">
+        <Button type="button" variant="ghost" onClick={onBack} disabled={loading} className="font-bold rounded-full">
           Back
         </Button>
-        <Button type="submit" form="add-item-form" disabled={loading} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+        <Button type="submit" form="add-item-form" disabled={loading} className="font-bold px-6 rounded-full">
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {loading ? "Creating..." : "Create"}
         </Button>
-      </DialogActions>
+      </div>
     </>
   );
 };

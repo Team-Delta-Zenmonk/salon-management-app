@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import type { Control } from "react-hook-form";
 import type { StaffForm } from "../../../schema/staff.schema";
 import TextField from "../../../../../../components/form/textfield";
@@ -9,24 +8,21 @@ import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
 
 export default function StaffEmployment({ control, disabled }: Readonly<{ control: Control<StaffForm>; disabled: boolean }>) {
   return (
-    <Box className="flex flex-col gap-4">
-      <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Box className="flex flex-col gap-2">
-          <Typography fontWeight="bold">Title</Typography>
-          <TextField
-            type="text"
-            label="Title"
-            name="title"
-            control={control}
-            identifier="staff-title"
-            disabled={disabled}
-            pattern={VALIDATE_PATTERN.alphabet}
-            maxLength={50}
-          />
-        </Box>
+    <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <TextField
+          type="text"
+          label="Title"
+          name="title"
+          control={control}
+          identifier="staff-title"
+          disabled={disabled}
+          pattern={VALIDATE_PATTERN.alphabet}
+          maxLength={50}
+          placeholder="Stylist, Barber, Receptionist, etc."
+        />
 
-        <Box className="flex flex-col gap-2">
-          <Typography fontWeight="bold">Joining Date</Typography>
+        <div className="flex flex-col gap-1.5 w-full">
           <DatePicker
             name="joining_date"
             control={control}
@@ -34,13 +30,13 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             identifier="staff-join"
             format="DD-MM-YYYY"
             disabled={disabled}
+            label="Joining Date"
           />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Box className="flex flex-col gap-2">
-          <Typography fontWeight="bold">End Date</Typography>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="flex flex-col gap-1.5 w-full">
           <DatePicker
             name="end_date"
             control={control}
@@ -48,65 +44,59 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             identifier="staff-end"
             format="DD-MM-YYYY"
             disabled={disabled}
+            label="End Date"
           />
-        </Box>
+        </div>
 
-        <Box className="flex flex-col gap-2">
-          <Typography fontWeight="bold">Photo</Typography>
+        <div className="flex flex-col gap-1.5 w-full">
           <FilePicker
             name="photos"
             control={control}
             identifier="staff-photo"
-            label="Photo (optional)"
+            label="Photo"
             uploadFn={uploadImages}
             disabled={disabled}
           />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Box className="flex flex-col gap-2">
-        <Typography fontWeight="bold">Address</Typography>
+      <TextField
+        type="text"
+        label="Address"
+        name="address"
+        control={control}
+        identifier="staff-address"
+        disabled={disabled}
+        pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
+        maxLength={100}
+        placeholder="Staff residential address"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <TextField
           type="text"
-          label="Address"
-          name="address"
+          label="Emergency Contact Name"
+          name="emergency_contact.name"
           control={control}
-          identifier="staff-address"
+          identifier="staff-ec-name"
           disabled={disabled}
-          pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
-          maxLength={100}
+          pattern={VALIDATE_PATTERN.alphabet}
+          maxLength={50}
+          placeholder="Contact relative name"
         />
-      </Box>
 
-      <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Box className="flex flex-col gap-2">
-          <Typography fontWeight="bold">Emergency Contact Name</Typography>
-          <TextField
-            type="text"
-            label="Name"
-            name="emergency_contact.name"
-            control={control}
-            identifier="staff-ec-name"
-            disabled={disabled}
-            pattern={VALIDATE_PATTERN.alphabet}
-            maxLength={50}
-          />
-        </Box>
-
-        <Box className="flex flex-col gap-2">
-          <Typography fontWeight="bold">Emergency Contact Phone</Typography>
-          <TextField
-            type="text"
-            label="Phone"
-            name="emergency_contact.phone"
-            control={control}
-            identifier="staff-ec-phone"
-            disabled={disabled}
-            pattern={VALIDATE_PATTERN.number}
-            maxLength={10}
-          />
-        </Box>
-      </Box>
-    </Box>
+        <TextField
+          type="text"
+          label="Emergency Contact Phone"
+          name="emergency_contact.phone"
+          control={control}
+          identifier="staff-ec-phone"
+          disabled={disabled}
+          pattern={VALIDATE_PATTERN.number}
+          maxLength={10}
+          placeholder="Emergency phone number"
+        />
+      </div>
+    </div>
   );
 }

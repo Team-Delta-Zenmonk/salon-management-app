@@ -1,10 +1,13 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { StaffPricingType } from "../../types/staff-service.types";
 import Select from "../../../../components/form/select";
 import { PriceTypeOptions } from "../../../../common/enums/price-type.enum";
 import TextField from "../../../../components/form/textfield";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+
 
 type DialogContext = {
   staff_name: string;
@@ -82,55 +85,74 @@ export default function StaffServicePricingDialog({
   });
 
   return (
-    <Dialog open={open} onClose={loading ? undefined : onClose} fullWidth maxWidth="xs">
-      <DialogTitle>
-        Edit Pricing
-        <Typography className="text-gray-500 text-sm mt-1">
-          {staff_name} · {service_name}
-        </Typography>
-      </DialogTitle>
+    <Dialog open={open} onOpenChange={(val: boolean) => !val && !loading && onClose()}>
+      <DialogContent className="sm:max-w-[440px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex flex-col items-start gap-1">
+            Edit Pricing
+            <span className="text-xs text-muted-foreground font-normal mt-1.5">
+              {staff_name} &bull; {service_name}
+            </span>
+          </DialogTitle>
+        </DialogHeader>
 
-      <FormProvider {...methods}>
-        <DialogContent>
-          <Box className="flex flex-col gap-4 py-2">
-            <Select
-              name="price_type"
-              control={control}
-              placeholder="Price Type"
-              identifier="edit-price-type"
-              options={PriceTypeOptions}
-              disabled={loading}
-            />
+        <FormProvider {...methods}>
+          <form onSubmit={submit}>
+            <div className="flex flex-col py-5 px-6 gap-4">
+              <Select
+                name="price_type"
+                control={control}
+                label="Price Type"
+                placeholder="Price Type"
+                identifier="edit-price-type"
+                options={PriceTypeOptions}
+                disabled={loading}
+              />
 
-            <TextField
-              type="number"
-              label="Price"
-              name="price"
-              control={control}
-              identifier="edit-price"
-              disabled={loading || isFree}
-            />
+              <TextField
+                type="number"
+                label="Price"
+                name="price"
+                control={control}
+                identifier="edit-price"
+                placeholder="Enter price"
+                disabled={loading || isFree}
+              />
 
-            <TextField
-              type="number"
-              label="Duration (minutes)"
-              name="duration"
-              control={control}
-              identifier="edit-duration"
-              disabled={loading}
-            />
-          </Box>
-        </DialogContent>
+              <TextField
+                type="number"
+                label="Duration (in minutes)"
+                name="duration"
+                control={control}
+                identifier="edit-duration"
+                placeholder="Enter duration"
+                disabled={loading}
+              />
+            </div>
 
-        <DialogActions>
-          <Button onClick={onClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button variant="contained" onClick={submit} disabled={loading || !isDirty}>
-            Save
-          </Button>
-        </DialogActions>
-      </FormProvider>
+            <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
+                className="rounded-full px-6"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading || !isDirty}
+                className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading ? "Saving..." : "Save"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </FormProvider>
+      </DialogContent>
     </Dialog>
   );
 }
+

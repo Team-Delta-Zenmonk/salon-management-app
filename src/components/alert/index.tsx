@@ -1,5 +1,4 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
 
 type AlertVariant = "success" | "error" | "warning" | "info";
 
@@ -41,17 +40,17 @@ export function Alert({ variant, icon, title, children, action }: AlertProps) {
   };
 
   return (
-    <Box
+    <div
       className={`flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-xl border shadow-sm ${getStyles()}`}
     >
-      <Box className="flex items-start md:items-center gap-3 w-full">
-        {icon && <Box className={`flex-shrink-0 mt-1 md:mt-0 ${getIconStyles()}`}>{icon}</Box>}
-        <Box className="flex flex-col w-full">
-          {title && <Typography className="font-semibold text-base mb-0.5">{title}</Typography>}
-          <Typography className="text-sm opacity-90 leading-relaxed">{children}</Typography>
-        </Box>
-      </Box>
-      {action && <Box className="flex-shrink-0 self-end md:self-auto w-full md:w-auto mt-2 md:mt-0">{action}</Box>}
-    </Box>
+      <div className="flex items-start md:items-center gap-3 w-full">
+        {icon && <div className={`flex-shrink-0 mt-1 md:mt-0 ${getIconStyles()}`}>{icon}</div>}
+        <div className="flex flex-col w-full">
+          {title && <span className="font-semibold text-base mb-0.5">{title}</span>}
+          <p className="text-sm opacity-90 leading-relaxed m-0">{children}</p>
+        </div>
+      </div>
+      {action && <div className="flex-shrink-0 self-end md:self-auto w-full md:w-auto mt-2 md:mt-0">{action}</div>}
+    </div>
   );
 }

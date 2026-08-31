@@ -1,30 +1,16 @@
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import { Box, Tooltip } from "@mui/material";
-import Autocomplete, { type AutocompleteCloseReason } from "@mui/material/Autocomplete";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
-import InputBase from "@mui/material/InputBase";
-import Popper from "@mui/material/Popper";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import clsx from "clsx";
-import { Fragment, useState } from "react";
+import { useState, useMemo } from "react";
 import { type FieldValues, useController } from "react-hook-form";
-import { RemoveScroll } from "react-remove-scroll";
-import { VirtualizedListboxComponent } from "./virtualized-phone-number"
-import styles from "./phone-number-select.module.scss";
+import clsx from "clsx";
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../ui/popover";
+import { Input } from "../../ui/input";
+import { VirtualizedListboxComponent } from "./virtualized-phone-number";
 import type { PhoneNumberSelectProps } from "./phone-number-select.type";
-
-interface PopperComponentProps {
-  anchorEl?: any;
-  disablePortal?: boolean;
-  open: boolean;
-}
-
-function PopperComponent(props: Readonly<PopperComponentProps>) {
-  const { disablePortal, anchorEl, open, ...other } = props;
-  return <Box component="div" {...other} />;
-}
 
 const PhoneNumberSelect = <T extends FieldValues>({
   name,
@@ -36,157 +22,77 @@ const PhoneNumberSelect = <T extends FieldValues>({
 }: PhoneNumberSelectProps<T>) => {
   const {
     field: { onChange, value },
-  } = useController({
-    name,
-    control,
-  });
+  } = useController({ name, control });
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [textValue, setTextValue] = useState<string>("");
-;
+  const [open, setOpen] = useState(false);
+  const [textValue, setTextValue] = useState("");
+
   const currentLocale = "es";
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const filteredOptions = useMemo(() => {
+    if (!textValue) return options;
+    const lowerText = textValue.toLowerCase();
+    return options.filter((opt: any) => {
+      const label = (opt?.translations?.[currentLocale] ?? opt?.name).toLowerCase();
+      return label.includes(lowerText) || String(opt.phoneCode).includes(lowerText);
+    });
+  }, [options, textValue, currentLocale]);
 
-  const handleClose = () => {
-    setTextValue("");
-    setAnchorEl(null);
-  };
+  const sortedOptions = useMemo(() => {
+    return [...filteredOptions].sort((a, b) => {
+      const isASelected = a.name === value?.name;
+      const isBSelected = b.name === value?.name;
+      if (isASelected && !isBSelected) return -1;
+      if (!isASelected && isBSelected) return 1;
+      return options.indexOf(a) - options.indexOf(b);
+    });
+  }, [filteredOptions, value, options]);
 
-  const open = Boolean(anchorEl);
+  const handleSelect = (newValue: any) => {
+    onChange(newValue);
+    setOpen(false);
+  };
 
   return (
-    <Fragment>
-      <Stack
-        className={clsx("flex-row justify-center items-center", styles.selectComponent)}
-        onClick={disabled ? undefined : handleClick}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        disabled={disabled}
+        className="flex items-center justify-center gap-1 rounded-md px-2 py-1.5 hover:bg-accent disabled:opacity-50 transition-colors cursor-pointer outline-none"
         data-test-id={`open-country-code-menu-${identifier}`}
       >
-        <Typography
-          variant="titleMd"
-          className="flex items-center justify-center gap-2"
-          data-test-id="country-flag-emoji"
-        >
+        <span className="flex items-center justify-center gap-1.5 text-lg" data-test-id="country-flag-emoji">
           {value?.flagEmoji}
-          <Tooltip
+          <span
+            className={clsx("text-sm font-medium", disabled ? "text-muted-foreground" : "text-foreground")}
             title={`+${value?.phoneCode}`}
-            slotProps={{
-              popper: { modifiers: [{ name: "offset", options: { offset: [0, 0] } }] },
-            }}
+            data-test-id={`text-country-phone-code-${index}`}
           >
-            <Typography
-              component="span"
-              variant="paragraphSm"
-              color="secondary.800"
-              className={disabled ? styles.selectedCountryTextDisabled : styles.selectedCountryText}
-              data-test-id={`text-country-phone-code-${index}`}
-            >
-              +{value?.phoneCode}
-            </Typography>
-          </Tooltip>
-        </Typography>
-        {open ? <ArrowDropUpIcon className="iconSizeStyles" /> : <ArrowDropDownIcon className="iconSizeStyles" />}
-      </Stack>
-      {open && (
-        <RemoveScroll>
-          <Popper open={open} anchorEl={anchorEl} placement="bottom-start" className={styles.popper}>
-            <ClickAwayListener
-              onClickAway={(event) => {
-                const target = event.target as HTMLElement;
-                if (!target.classList.contains("country-select")) {
-                  event.preventDefault();
-                  handleClose();
-                }
-              }}
-            >
-              <Autocomplete
-                disabled={disabled}
-                open={open}
-                onClose={(event, reason: AutocompleteCloseReason) => {
-                  if (reason === "escape") {
-                    event.preventDefault();
-                    handleClose();
-                  }
-                }}
-                value={value}
-                onChange={(event, newValue, reason) => {
-                  if (
-                    reason === "clear" ||
-                    (event.type === "keydown" &&
-                      ((event as React.KeyboardEvent).key === "Backspace" ||
-                        (event as React.KeyboardEvent).key === "Delete") &&
-                      reason === "removeOption")
-                  ) {
-                    return;
-                  }
-                  onChange(newValue);
-                  handleClose();
-                }}
-                renderValue={() => null}
-                noOptionsText={
-                  <Typography variant="paragraphMd" data-test-id={`text-${identifier}-no-options`}>
-                    {"No Options"}
-                  </Typography>
-                }
-                openText={"Open"}
-                closeText={"Close"}
-                renderOption={(props, option, state) => [props, option, state.index] as React.ReactNode}
-                options={[...options].sort((a, b) => {
-                  const isASelected = a.name === value?.name;
-                  const isBSelected = b.name === value?.name;
-                  if (isASelected && !isBSelected) return -1;
-                  if (!isASelected && isBSelected) return 1;
-                  return options.indexOf(a) - options.indexOf(b);
-                })}
-                getOptionLabel={(option: any) => {
-                  return option?.translations?.[currentLocale] ?? option?.name;
-                }}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                inputValue={textValue}
-                renderInput={(params) => (
-                  <InputBase
-                    ref={params.InputProps.ref}
-                    inputProps={{
-                      ...params.inputProps,
-                      "data-test-id": "input-filter-flag",
-                    }}
-                    autoFocus
-                    placeholder={"Flag"}
-                    onBeforeInput={(e) => {
-                      e.stopPropagation();
-                    }}
-                    onChange={(e) => setTextValue(e.target.value)}
-                    className={styles.textField}
-                  />
-                )}
-                slots={{
-                  popper: PopperComponent,
-                }}
-                slotProps={{
-                  paper: {
-                    className: styles.listBox,
-                  },
-                  listbox: { component: VirtualizedListboxComponent },
-                  clearIndicator: {
-                    ...({
-                      "data-test-id": `btn-autocomplete-clear-${identifier}`,
-                    } as any),
-                  },
-                  popupIndicator: {
-                    ...({
-                      "data-test-id": `btn-autocomplete-arrow-${identifier}`,
-                    } as any),
-                  },
-                }}
-                data-test-id={`autocomplete-${identifier}`}
-              />
-            </ClickAwayListener>
-          </Popper>
-        </RemoveScroll>
-      )}
-    </Fragment>
+            +{value?.phoneCode}
+          </span>
+        </span>
+        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+      </PopoverTrigger>
+
+      <PopoverContent className="w-64 p-0 shadow-lg" align="start">
+        <div className="p-2 border-b border-border">
+          <Input
+            placeholder="Search flag..."
+            value={textValue}
+            onChange={(e) => setTextValue(e.target.value)}
+            className="h-8 shadow-none focus-visible:ring-1"
+            data-test-id="input-filter-flag"
+            autoFocus
+          />
+        </div>
+        {sortedOptions.length === 0 ? (
+          <div className="p-4 text-center text-sm text-muted-foreground" data-test-id={`text-${identifier}-no-options`}>
+            No Options
+          </div>
+        ) : (
+          <VirtualizedListboxComponent options={sortedOptions} onSelect={handleSelect} />
+        )}
+      </PopoverContent>
+    </Popover>
   );
 };
 

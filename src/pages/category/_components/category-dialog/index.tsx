@@ -1,6 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, CircularProgress } from "@mui/material";
-import clsx from "clsx";
 import { FormProvider, useForm } from "react-hook-form";
 import { categorySchema, type categoryForm } from "../schema/create-category.schema";
 import TextField from "../../../../components/form/textfield";
@@ -10,10 +8,12 @@ import { uploadImages } from "../../../../features/upload-images/upload-images.s
 import { useAppDispatch } from "../../../../store/hooks";
 import { updateCategoryAction } from "../../../../features/category/update-category/update-category.action";
 import { callSnack } from "../../../../components/snackbar";
-import styles from "./category-dialog.module.scss";
 import { useEffect, useState } from "react";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { createCategoryService } from "../../../../features/category/create-category/create-categories.service";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../../../components/ui/dialog";
+import { Button } from "../../../../components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface CategoryDialogProps {
   open: boolean;
@@ -86,32 +86,18 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
   });
 
   return (
-    <Dialog
-      open={open}
-      onClose={(event, reason) => {
-        if (isLoading && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
-      }}
-      className={styles.dialogContainer}
-      classes={{ paper: styles.dialog }}
-    >
-      <DialogTitle
-        className={clsx(styles.dialogTitle)}
-        id="alert-dialog-title"
-        fontWeight="fontWeightMedium"
-        variant="h5"
-      >
-        {mode === "create" ? "Create Category" : "Update Category"}
-      </DialogTitle>
+    <Dialog open={open} onOpenChange={(isOpen) => !isLoading && !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+            {mode === "create" ? "Create Category" : "Update Category"}
+          </DialogTitle>
+        </DialogHeader>
 
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent
-            className={clsx("flex flex-col py-1 px-3", styles.dialogContent)}
-            id="alert-dialog-description"
-          >
-            <Box className="flex flex-col gap-2">
-              <Typography fontWeight="bold">Category Name</Typography>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            {/* Scrollable body */}
+            <div className="flex flex-col py-5 px-6 gap-5 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
               <TextField
                 type="text"
                 label="Category Name"
@@ -122,10 +108,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 disabled={isLoading}
                 maxLength={50}
               />
-            </Box>
 
-            <Box className="flex flex-col gap-2">
-              <Typography fontWeight="bold">Description</Typography>
               <TextField
                 type="text"
                 label="Description"
@@ -135,38 +118,51 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 disabled={isLoading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
                 maxLength={100}
+                multiline
+                rows={3}
               />
-            </Box>
 
-            <Box className="flex flex-col gap-2">
-              <Typography fontWeight="bold">Logo</Typography>
-              <FilePicker
-                name="logo"
-                control={control}
-                identifier="category-logo"
-                label="Logo (Optional)"
-                uploadFn={uploadImages}
+              <div className="flex flex-col gap-1.5">
+                <FilePicker
+                  name="logo"
+                  control={control}
+                  identifier="category-logo"
+                  label="Logo (Optional)"
+                  uploadFn={uploadImages}
+                  disabled={isLoading}
+                />
+
+                {mode === "update" && category?.logo && (
+                  <span className="text-xs text-muted-foreground mt-1">
+                    Current logo already uploaded. Upload a new one to replace.
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+              <Button
+                type="button"
+                onClick={onClose}
                 disabled={isLoading}
-              />
-
-              {mode === "update" && category.logo && (
-                <Typography variant="caption" className="text-gray-500">
-                  Current logo already uploaded. Upload a new one to replace.
-                </Typography>
-              )}
-            </Box>
-          </DialogContent>
-
-          <DialogActions className={clsx(styles.dialogActions, "px-2 py-1 pb-2")}>
-            <Button onClick={onClose} disabled={isLoading}>
-              Back
-            </Button>
-            <Button type="submit" disabled={isLoading} startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}>
-              {mode === "create" ? (isLoading ? "Creating..." : "Create") : (isLoading ? "Saving..." : "Save")}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+                variant="outline"
+                className="rounded-full px-6"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {mode === "create" ? (isLoading ? "Creating..." : "Create Category") : (isLoading ? "Saving..." : "Save Category")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </FormProvider>
+      </DialogContent>
     </Dialog>
   );
 }

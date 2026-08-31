@@ -1,25 +1,20 @@
 import React, { useState } from "react";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-  CircularProgress,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import clsx from "clsx";
-import styles from "../inventory-dialog.module.scss";
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../../components/ui/dialog";
+import { Button } from "../../../../components/ui/button";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextField from "../../../../components/form/textfield";
 import { callSnack } from "../../../../components/snackbar";
 import { createItemCategoryService as createItemCategory } from "../../../../features/inventory/create-inventory-item-category/create-inventory-item-category.service";
 import type { ItemCategory } from "../../../../features/inventory/types/category.type";
-import { createCategorySchema } from "../schema/create-category.schema";
+import { createCategorySchema, type CreateCategoryForm } from "../schema/create-category.schema";
 import type { UseFormSetValue } from "react-hook-form";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 
@@ -39,7 +34,7 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   setValue,
 }) => {
   const [loading, setLoading] = useState(false);
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset } = useForm<CreateCategoryForm>({
     resolver: zodResolver(createCategorySchema),
     defaultValues: {
       name: "",
@@ -52,7 +47,7 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
     }
   }, [open, reset]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: CreateCategoryForm) => {
     setLoading(true);
     try {
       const res = await createItemCategory({ name: data.name.trim().toLowerCase() });
@@ -61,9 +56,10 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
       onSuccess(res.data || res);
       onClose();
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
       callSnack(
-        error?.response?.data?.message || "Failed to create category",
+        err?.response?.data?.message || "Failed to create category",
         "error"
       );
     } finally {
@@ -72,36 +68,16 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={(event, reason) => {
-        if (loading && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
-      }}
-      className={styles.dialogContainer}
-      classes={{ paper: styles.dialogMd }}
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          py: 2,
-          px: 3,
-        }}
-      >
-        <Typography variant="titleMd" fontWeight="bold" color="primary.900">
-          Create New Category
-        </Typography>
-        <IconButton onClick={onClose} edge="end" size="small" disabled={loading}>
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
+    <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
+      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+            Create New Category
+          </DialogTitle>
+        </DialogHeader>
 
-      <form onSubmit={handleSubmit(onSubmit)} id="create-category-form">
-        <DialogContent className={clsx("flex flex-col py-1 px-3", styles.dialogContent)}>
-          <Box className="flex flex-col gap-2 mt-2">
-            <Typography variant="titleSm" fontWeight="bold">Category Name</Typography>
+        <form onSubmit={handleSubmit(onSubmit)} id="create-category-form">
+          <div className="p-6">
             <TextField
               type="text"
               identifier="create-category-name"
@@ -113,18 +89,30 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
               disabled={loading}
               pattern={VALIDATE_PATTERN.alphabetWithSpecial}
             />
-          </Box>
-        </DialogContent>
+          </div>
 
-        <DialogActions className={clsx(styles.dialogActions, "px-2 py-1 pb-2")}>
-          <Button onClick={onClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button type="submit" form="create-category-form" disabled={loading} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined}>
-            {loading ? "Creating..." : "Create"}
-          </Button>
-        </DialogActions>
-      </form>
+          <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+              className="rounded-full px-6 font-semibold"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="create-category-form"
+              disabled={loading}
+              className="rounded-full px-6 font-semibold shadow-md hover:shadow-lg transition-all"
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading ? "Creating..." : "Create Category"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 };

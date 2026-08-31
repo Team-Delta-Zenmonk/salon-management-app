@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import type { SalonOnboardingForm } from "../../../schema/salon-onboarding.schema";
 import Select from "../../../../../components/form/select";
@@ -10,13 +9,8 @@ import { uploadImages } from "../../../../../features/upload-images/upload-image
 export default function SalonStep() {
   const { control } = useFormContext<SalonOnboardingForm>();
   return (
-    <Box className="space-y-6">
-      <Box>
-        <Box className="text-lg font-semibold mb-2">Salon Details</Box>
-        <Box className="text-sm text-gray-500">Add details to help customers recognize your salon.</Box>
-      </Box>
-      <Box className="space-y-6">
-        <Box>
+    <div className="space-y-6 pt-2">
+        <div>
           <Select
             name="salon.type"
             control={control}
@@ -24,8 +18,8 @@ export default function SalonStep() {
             identifier="salon-type"
             options={TypeOfSalon}
           />
-        </Box>
-        <Box>
+        </div>
+        <div>
           <FilePicker
             name="salon.logo"
             control={control}
@@ -33,8 +27,8 @@ export default function SalonStep() {
             label="Salon Logo"
             uploadFn={uploadImages}
           />
-        </Box>
-        <Box>
+        </div>
+        <div>
           <FileMultiPicker
             name="salon.photos"
             control={control}
@@ -42,8 +36,7 @@ export default function SalonStep() {
             label="Salon Photos"
             uploadFn={uploadImages}
           />
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
   );
 }

@@ -1,22 +1,18 @@
-import { Box, Typography, IconButton, Collapse, Chip, Avatar, CircularProgress } from "@mui/material";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
-import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import Person2OutlinedIcon from "@mui/icons-material/Person2Outlined";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import dayjs from "dayjs";
+import { Loader2, SearchX } from "lucide-react";
 import { deleteServiceService } from "../../../../features/service/delete-service/delete-service.service";
 import { callSnack } from "../../../../components/snackbar";
 import ServiceDialog from "../service-dailog";
 import { listServicesAction } from "../../../../features/service/list-services/list-service.action";
-import { listSubServicesService } from "../../../../features/service/list-sub-services/list-sub-services.service";
 import AssignStaffDialog from "../assign-staff-dialog";
 import DeleteDialog from "../../../../components/delete-dialog";
+import { ServiceCard } from "./service-card";
+import { SubServicesDrawer } from "./sub-services-drawer";
+import { motion } from "framer-motion";
+import type { Service } from "../../../../features/service/service.slice";
 
 interface ListServicesProps {
   searchQuery: string;
@@ -33,26 +29,30 @@ export default function ListServices({
   refreshServices: refreshServicesProp,
   hasMore,
   fetchMoreServices,
-  total,
 }: Readonly<ListServicesProps>) {
   const dispatch = useAppDispatch();
-  const services = useAppSelector((state: RootState) => state.service.data) ?? [];
+  const servicesState = useAppSelector((state: RootState) => state.service);
+  const services = useMemo(() => servicesState?.data ?? [], [servicesState?.data]);
 
-  const [expandedService, setExpandedService] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<any>(null);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [subServiceOpen, setSubServiceOpen] = useState(false);
-  const [subServiceParent, setSubServiceParent] = useState<any>(null);
+  const [subServiceParent, setSubServiceParent] = useState<Service | null>(null);
   const [editingSubServiceParent, setEditingSubServiceParent] = useState<string | null>(null);
-  const [subServicesMap, setSubServicesMap] = useState<Record<string, any[]>>({});
-  const [subLoadingMap, setSubLoadingMap] = useState<Record<string, boolean>>({});
   const [staffDialogOpen, setStaffDialogOpen] = useState(false);
-  const [selectedServiceForStaff, setSelectedServiceForStaff] = useState<any>(null);
+  const [selectedServiceForStaff, setSelectedServiceForStaff] = useState<Service | null>(null);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deletingService, setDeletingService] = useState<any>(null);
+  const [deletingService, setDeletingService] = useState<Service | null>(null);
   const [deletingSubServiceParent, setDeletingSubServiceParent] = useState<string | null>(null);
+
+  // Sub-services drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activeParentService, setActiveParentService] = useState<Service | null>(null);
+
+  // Used to trigger refetching of sub-services in a specific ServiceCard or drawer
+  const [refreshTriggers, setRefreshTriggers] = useState<Record<string, number>>({});
 
   const filteredServices = useMemo(() => {
     const q = searchQuery.toLowerCase();
@@ -71,36 +71,20 @@ export default function ListServices({
     }
   };
 
-  const fetchSubServices = async (parentUuid: string) => {
-    if (subServicesMap[parentUuid]) return;
-    try {
-      setSubLoadingMap((p) => ({ ...p, [parentUuid]: true }));
-      const res = await listSubServicesService(parentUuid);
-      setSubServicesMap((p) => ({ ...p, [parentUuid]: res?.rows ?? [] }));
-    } catch {
-      callSnack("Failed to fetch sub-services", "error");
-      setSubServicesMap((p) => ({ ...p, [parentUuid]: [] }));
-    } finally {
-      setSubLoadingMap((p) => ({ ...p, [parentUuid]: false }));
-    }
+  const triggerSubServiceRefresh = (parentUuid: string) => {
+    setRefreshTriggers((prev) => ({
+      ...prev,
+      [parentUuid]: (prev[parentUuid] || 0) + 1,
+    }));
   };
 
-  const handleToggleExpand = async (uuid: string) => {
-    const next = expandedService === uuid ? null : uuid;
-    setExpandedService(next);
-    if (next) {
-      await fetchSubServices(uuid);
-    }
-  };
-
-  const handleServiceDeleteClick = (service: any) => {
+  const handleServiceDeleteClick = (service: Service, parentUuid?: string) => {
     setDeletingService(service);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleSubServiceDeleteClick = (service: any, parentUuid: string) => {
-    setDeletingService(service);
-    setDeletingSubServiceParent(parentUuid);
+    if (parentUuid) {
+      setDeletingSubServiceParent(parentUuid);
+    } else {
+      setDeletingSubServiceParent(null);
+    }
     setDeleteDialogOpen(true);
   };
 
@@ -112,8 +96,7 @@ export default function ListServices({
       await deleteServiceService(deletingService.uuid);
 
       if (deletingSubServiceParent) {
-        const res = await listSubServicesService(deletingSubServiceParent);
-        setSubServicesMap((p) => ({ ...p, [deletingSubServiceParent!]: res?.rows ?? [] }));
+        triggerSubServiceRefresh(deletingSubServiceParent);
         callSnack("Sub-service deleted successfully", "success");
       } else {
         await refreshServices();
@@ -135,7 +118,7 @@ export default function ListServices({
     setDeletingSubServiceParent(null);
   };
 
-  const handleEdit = (service: any, parentUuid?: string) => {
+  const handleEdit = (service: Service, parentUuid?: string) => {
     setSelectedService(service);
     setEditingSubServiceParent(parentUuid || null);
     setEditOpen(true);
@@ -147,7 +130,7 @@ export default function ListServices({
     setEditingSubServiceParent(null);
   };
 
-  const handleOpenSubService = (parentService: any) => {
+  const handleOpenSubService = (parentService: Service) => {
     setSubServiceParent(parentService);
     setSubServiceOpen(true);
   };
@@ -157,145 +140,102 @@ export default function ListServices({
     setSubServiceParent(null);
   };
 
-  const handleAssignStaff = (service: any) => {
+  const handleAssignStaff = (service: Service) => {
     setSelectedServiceForStaff(service);
     setStaffDialogOpen(true);
   };
 
-  const afterSubServiceCreation = async (parentUuid: string) => {
-    const res = await listSubServicesService(parentUuid);
-    setSubServicesMap((p) => ({ ...p, [parentUuid]: res?.rows ?? [] }));
+  const handleManageOptions = (service: Service) => {
+    setActiveParentService(service);
+    setDrawerOpen(true);
   };
 
   return (
     <>
-      <Box className="text-(--primary-900) mb-4">Services List ({total})</Box>
+      <div className="flex items-center justify-between pb-6">
+        <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          All Services
+          <span className="text-primary text-base font-medium bg-primary/10 px-2.5 py-0.5 rounded-full">
+            {filteredServices.length}
+          </span>
+        </h2>
+      </div>
 
       <InfiniteScroll
         dataLength={filteredServices.length}
         next={fetchMoreServices}
         hasMore={hasMore}
         loader={
-          <Box className="flex justify-center py-4">
-            <CircularProgress size={24} />
-          </Box>
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin text-primary/60" />
+          </div>
         }
         scrollableTarget="servicesScrollableDiv"
         endMessage={
           filteredServices.length > 0 ? (
-            <Box className="text-center py-4 text-gray-500">
-              <Typography variant="body2">No more services to load</Typography>
-            </Box>
+            <div className="text-center py-8 text-muted-foreground text-sm flex items-center justify-center gap-2">
+              <div className="w-12 h-px bg-border/50"></div>
+              End of services
+              <div className="w-12 h-px bg-border/50"></div>
+            </div>
           ) : null
         }
       >
-        <Box className="space-y-4">
-          {filteredServices.map((service: any) => {
-            const isExpanded = expandedService === service.uuid;
-            const subServices = subServicesMap[service.uuid] ?? [];
-            const subLoading = subLoadingMap[service.uuid] ?? false;
-
-            return (
-              <Box key={service.uuid} className="bg-white border border-gray-300 rounded-lg p-6">
-                <Box className="flex justify-between items-start">
-                  <Box className="flex gap-4">
-                    <Avatar src={service.logo || undefined} alt={service.name}>
-                      {!service.logo && service.name ? service.name.charAt(0).toUpperCase() : null}
-                    </Avatar>
-                    <Box>
-                      <Typography className="text-(--primary-900)" fontWeight="bold">
-                        {service.name}
-                      </Typography>
-                      {service.description && (
-                        <Typography className="text-gray-600 text-sm">{service.description}</Typography>
-                      )}
-                      <Box className="flex gap-2 mt-2">
-                        <Chip size="small" label={service.gender} />
-                        <Chip size="small" label={`${service.price_type} ₹${service.price}`} />
-                        {service.is_popular && <Chip size="small" color="warning" label="Popular" />}
-                        {!service.is_active && <Chip size="small" color="error" label="Inactive" />}
-                      </Box>
-                    </Box>
-                  </Box>
-
-                  <Box className="flex gap-1">
-                    <IconButton onClick={() => handleToggleExpand(service.uuid)}>
-                      {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
-                    <IconButton onClick={() => handleAssignStaff(service)} disabled={deleteLoading}>
-                      <Person2OutlinedIcon className="text-green-600!" />
-                    </IconButton>
-                    <IconButton onClick={() => handleOpenSubService(service)} disabled={deleteLoading}>
-                      <AddOutlinedIcon className="text-(--primary-800)!" />
-                    </IconButton>
-                    <IconButton onClick={() => handleEdit(service)} disabled={deleteLoading}>
-                      <ModeEditOutlineOutlinedIcon className="text-purple-800!" />
-                    </IconButton>
-                    <IconButton disabled={deleteLoading} onClick={() => handleServiceDeleteClick(service)}>
-                      <DeleteOutlinedIcon className="text-(--error-800)!" />
-                    </IconButton>
-                  </Box>
-                </Box>
-
-                <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                  <Box className="mt-4 pl-6 border-l border-gray-200 space-y-3">
-                    {subLoading && <Typography className="text-gray-500">Loading sub-services...</Typography>}
-                    {!subLoading && subServices.length === 0 && (
-                      <Typography className="text-gray-500">No sub-services yet</Typography>
-                    )}
-                    {!subLoading &&
-                      subServices.map((sub) => (
-                        <Box
-                          key={sub.uuid}
-                          className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex justify-between items-start"
-                        >
-                          <Box className="flex gap-3">
-                            <Avatar src={sub.logo || undefined} alt={sub.name}>
-                              {!sub.logo && sub.name ? sub.name.charAt(0).toUpperCase() : null}
-                            </Avatar>
-                            <Box>
-                              <Typography fontWeight="bold">{sub.name}</Typography>
-                              {sub.description && (
-                                <Typography className="text-gray-600 text-sm">{sub.description}</Typography>
-                              )}
-                              <Box className="flex gap-2 mt-2">
-                                <Chip size="small" label={sub.gender} />
-                                <Chip size="small" label={`${sub.price_type} ₹${sub.price}`} />
-                                {sub.is_popular && <Chip size="small" color="warning" label="Popular" />}
-                                {!sub.is_active && <Chip size="small" color="error" label="Inactive" />}
-                              </Box>
-                            </Box>
-                          </Box>
-
-                          <Box className="flex gap-1">
-                            <IconButton onClick={() => handleEdit(sub, service.uuid)} disabled={deleteLoading}>
-                              <ModeEditOutlineOutlinedIcon className="text-purple-800!" />
-                            </IconButton>
-                            <IconButton
-                              onClick={() => handleSubServiceDeleteClick(sub, service.uuid)}
-                              disabled={deleteLoading}
-                            >
-                              <DeleteOutlinedIcon className="text-(--error-800)!" />
-                            </IconButton>
-                          </Box>
-                        </Box>
-                      ))}
-                  </Box>
-                </Collapse>
-
-                <Box className="text-gray-400 text-xs mt-4">
-                  Created on: {dayjs(service.created_at).format("MMM DD, YYYY")}
-                </Box>
-              </Box>
-            );
-          })}
-        </Box>
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.1 },
+            },
+          }}
+        >
+          {filteredServices.map((service: Service) => (
+            <ServiceCard
+              key={service.uuid}
+              service={service}
+              onEdit={handleEdit}
+              onDelete={handleServiceDeleteClick}
+              onAddSubService={handleOpenSubService}
+              onAssignStaff={handleAssignStaff}
+              onManageOptions={handleManageOptions}
+              deleteLoading={deleteLoading}
+              refreshTrigger={refreshTriggers[service.uuid] || 0}
+            />
+          ))}
+        </motion.div>
       </InfiniteScroll>
 
       {filteredServices.length === 0 && (
-        <Box className="bg-gray-200 border border-gray-400 rounded-lg p-8 text-center mt-4">
-          <Typography>No services found</Typography>
-        </Box>
+        <div className="bg-card/40 border border-dashed border-border/50 rounded-3xl p-12 flex flex-col items-center justify-center mt-4">
+          <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
+            <SearchX className="w-8 h-8 text-primary/40" />
+          </div>
+          <h3 className="text-lg font-medium text-foreground mb-1">No services found</h3>
+          <p className="text-muted-foreground text-sm text-center max-w-sm">
+            We couldn't find any services matching your criteria. Try adjusting your search or category filters.
+          </p>
+        </div>
+      )}
+
+      {activeParentService && (
+        <SubServicesDrawer
+          open={drawerOpen}
+          onClose={() => {
+            setDrawerOpen(false);
+            setActiveParentService(null);
+          }}
+          parentService={activeParentService}
+          onEdit={handleEdit}
+          onDelete={handleServiceDeleteClick}
+          onAddSubService={handleOpenSubService}
+          onAssignStaff={handleAssignStaff}
+          deleteLoading={deleteLoading}
+          refreshTrigger={refreshTriggers[activeParentService.uuid] || 0}
+        />
       )}
 
       {selectedService && (
@@ -306,7 +246,7 @@ export default function ListServices({
           service={selectedService}
           onCreated={async () => {
             if (editingSubServiceParent) {
-              await afterSubServiceCreation(editingSubServiceParent);
+              triggerSubServiceRefresh(editingSubServiceParent);
             }
             await refreshServices();
           }}
@@ -320,7 +260,7 @@ export default function ListServices({
           parentService={subServiceParent}
           onCreated={async () => {
             if (subServiceParent?.uuid) {
-              await afterSubServiceCreation(subServiceParent.uuid);
+              triggerSubServiceRefresh(subServiceParent.uuid);
             }
             await refreshServices();
           }}
@@ -343,7 +283,7 @@ export default function ListServices({
         <DeleteDialog
           open={deleteDialogOpen}
           onClose={handleCloseDelete}
-          title={deletingSubServiceParent ? "Delete Sub-service?" : "Delete Service?"}
+          title={deletingSubServiceParent ? "Delete Sub-service" : "Delete Service"}
           itemName={deletingService.name}
           isLoading={deleteLoading}
           onDelete={handleDeleteConfirm}

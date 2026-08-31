@@ -1,6 +1,6 @@
-import { Button, Typography } from "@mui/material";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { useState } from "react";
+import { PlusIcon } from "lucide-react";
+import { Button } from "../../../../components/ui/button";
 import ServiceDialog from "../service-dailog";
 
 interface CreateServiceProps {
@@ -12,8 +12,9 @@ export default function CreateService({ onCreatedOrUpdated }: Readonly<CreateSer
 
   return (
     <>
-      <Button variant="contained" startIcon={<AddOutlinedIcon className="text-white!" />} onClick={() => setOpen(true)}>
-        <Typography fontWeight="medium">Add</Typography>
+      <Button onClick={() => setOpen(true)} className="font-medium gap-2 rounded-full px-5 shadow-md hover:shadow-lg transition-all duration-300">
+        <PlusIcon className="w-4 h-4" />
+        Add Service
       </Button>
 
       <ServiceDialog open={open} onClose={() => setOpen(false)} mode="create" onCreated={onCreatedOrUpdated} />

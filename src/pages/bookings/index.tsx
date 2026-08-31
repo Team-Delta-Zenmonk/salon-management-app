@@ -1,9 +1,10 @@
-import { Box, Typography } from "@mui/material";
 import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import BookingCalendar from "./_components/booking-calender";
+import { motion } from "framer-motion";
+import CustomScheduler from "./_components/custom-scheduler";
 import CreateBooking from "./_components/create-booking";
-import type { BookingStatus } from "./types/booking.type";
+import BookingDetailsDialog from "./_components/booking-calender/_components/booking-detail-drawer";
+import type { Booking, BookingStatus } from "./types/booking.type";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { listBookingsAction } from "../../features/booking/get-bookings/get-bookings.action";
 import { updateBookingAction } from "../../features/booking/update-booking/update-booking.action";
@@ -25,7 +26,9 @@ export default function BookingPage() {
   const { data: staff } = useAppSelector((state) => state.staff);
   const { data: services } = useAppSelector((state) => state.service);
   const { data: bookings } = useAppSelector((state) => state.booking);
-  const [selectedRange, setSelectedRange] = useState<[Date, Date] | null>(null);
+
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const { control, watch } = useForm<FilterForm>({
     defaultValues: {
@@ -40,19 +43,16 @@ export default function BookingPage() {
   useEffect(() => {
     dispatch(listStaffAction({ page: 1, limit: 100 }));
     dispatch(listServicesAction({ page: 1, limit: 100 }));
-    dispatch(listBookingsAction({ filter: BOOKING_FILTER.MONTH })); // Load all for the month by default
+    dispatch(listBookingsAction({ filter: BOOKING_FILTER.MONTH }));
   }, [dispatch]);
 
   const staffOptions = useMemo(
     () => [
       { label: "All Staff", value: ALL_STAFF_VALUE },
-      ...staff.map((s) => {
-        const lastName = s.last_name ? ` ${s.last_name}` : "";
-        return {
-          label: `${s.first_name}${lastName}`,
-          value: s.uuid,
-        };
-      }),
+      ...staff.map((s) => ({
+        label: `${s.first_name}${s.last_name ? ` ${s.last_name}` : ""}`,
+        value: s.uuid,
+      })),
     ],
     [staff],
   );
@@ -80,19 +80,14 @@ export default function BookingPage() {
         : booking.admin_booking?.name || "Walk-in Customer";
 
       const customerEmail = isCustomerBooking ? booking.customer?.email || "" : "";
-
       const customerPhone = isCustomerBooking ? "" : booking.admin_booking?.phone || "";
 
       const serviceNames = bookingServices.map((bs: any) => bs.service?.name).filter(Boolean);
       const staffNames = [
         ...new Set(
           bookingServices
-            .map((bs: any) => {
-              const first = bs.staff?.first_name || "";
-              const last = bs.staff?.last_name || "";
-              return `${first} ${last}`.trim();
-            })
-            .filter(Boolean),
+            .map((bs: any) => `${bs.staff?.first_name || ""} ${bs.staff?.last_name || ""}`.trim())
+            .filter(Boolean)
         ),
       ];
 
@@ -103,8 +98,8 @@ export default function BookingPage() {
         customer_phone: customerPhone,
         service_name: serviceNames.length > 0 ? serviceNames.join(", ") : "Unknown Service",
         staff_name: staffNames.length > 0 ? staffNames.join(", ") : "Unknown",
-        start_time: booking.booking_start_time,
-        end_time: booking.booking_end_time,
+        start_time: booking.booking_start_time?.endsWith('Z') ? booking.booking_start_time.slice(0, -1) : booking.booking_start_time,
+        end_time: booking.booking_end_time?.endsWith('Z') ? booking.booking_end_time.slice(0, -1) : booking.booking_end_time,
         created_by: booking.created_by,
       };
     });
@@ -125,78 +120,120 @@ export default function BookingPage() {
     return BOOKING_STATUS_COLORS[status] ?? "#6b7280";
   };
 
-  const handleDateRangeChange = (range: [Date, Date]) => {
-    setSelectedRange(range);
-  };
-
   const todayBookingsCount = filteredBookings.filter(
-    (b) => b.status === BOOKING_STATUS.CONFIRMED && new Date(b.start_time).toDateString() === new Date().toDateString(),
+    (b) =>
+      (b.status === BOOKING_STATUS.CONFIRMED || b.status === BOOKING_STATUS.PENDING) &&
+      new Date(b.start_time).toDateString() === new Date().toDateString(),
   ).length;
 
-  const updateBookingStatus = (bookingUuid: string, newStatus: BookingStatus) => {
-    dispatch(updateBookingAction({ uuid: bookingUuid, body: { status: newStatus } }));
+  const handleEventClick = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsDrawerOpen(true);
   };
 
-  return (
-    <Box className="flex flex-col flex-1 min-h-0 w-full space-y-6 bg-gray-50 px-8 pb-6">
-      <Box className="flex justify-between items-start shrink-0">
-        <Box>
-          <Typography variant="h5" fontWeight="fontWeightBold" className="text-(--primary-900) mb-2">
-            Booking Calendar
-          </Typography>
-          <Typography className="text-gray-600">
-            Manage appointments • Today: <span className="font-semibold text-gray-900">{todayBookingsCount}</span>{" "}
-            confirmed bookings
-          </Typography>
-        </Box>
-        <CreateBooking />
-      </Box>
+  const handleCancel = (bookingUuid: string, reason?: string) => {
+    dispatch(updateBookingAction({ uuid: bookingUuid, body: { status: BOOKING_STATUS.CANCELLED, notes: reason } }));
+    setIsDrawerOpen(false);
+    setSelectedBooking(null);
+  };
 
-      <Box className="flex items-center gap-4 flex-wrap">
-        <Box className="w-[200px]">
+  const statusLegend = [
+    { status: BOOKING_STATUS.CONFIRMED, label: "Confirmed" },
+    { status: BOOKING_STATUS.COMPLETED, label: "Completed" },
+    { status: BOOKING_STATUS.CANCELLED, label: "Cancelled" },
+  ];
+
+  return (
+    <div className="flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 pb-6 shrink-0 gap-4"
+      >
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Bookings</h1>
+          <p className="text-sm text-muted-foreground max-w-xl">
+            Manage your salon's appointments and schedulets.
+          </p>
+        </div>
+        <div className="shrink-0">
+          <CreateBooking />
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="px-4 md:px-8 pb-5 shrink-0 flex items-center gap-3 flex-wrap"
+      >
+        <div className="w-[175px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
           <Select
             name="staff"
             control={control}
-            placeholder="Select Staff"
+            placeholder="All Staff"
             options={staffOptions}
             identifier="booking-staff-filter"
             translate={false}
             disabled={staffOptions.length === 1}
           />
-        </Box>
-
-        <Box className="w-[200px]">
+        </div>
+        <div className="w-[175px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
           <Select
             name="service"
             control={control}
-            placeholder="Select Service"
+            placeholder="All Services"
             options={serviceOptions}
             identifier="booking-service-filter"
             translate={false}
             disabled={serviceOptions.length === 1}
           />
-        </Box>
+        </div>
 
-        <Box className="bg-white p-3 shadow-sm flex gap-6 border border-gray-300 rounded-lg">
-          <Box className="flex items-center gap-2">
-            <Box className="w-3 h-3 rounded-full bg-[#10b981]"></Box>
-            <Box className="text-xs font-medium">Confirmed</Box>
-          </Box>
-          <Box className="flex items-center gap-2">
-            <Box className="w-3 h-3 rounded-full bg-[#ef4444]"></Box>
-            <Box className="text-xs font-medium">Cancelled</Box>
-          </Box>
-        </Box>
-      </Box>
+        <div className="ml-auto flex items-center gap-2 flex-wrap">
+          {statusLegend.map(({ status, label }) => {
+            const color = getStatusColor(status);
+            return (
+              <span
+                key={status}
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-border bg-card/65 text-muted-foreground"
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ backgroundColor: color }}
+                />
+                {label}
+              </span>
+            );
+          })}
+        </div>
+      </motion.div>
 
-      <Box className="flex-1 bg-white shadow-sm p-2 border border-gray-300">
-        <BookingCalendar
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="flex-1 px-4 md:px-8 pb-8 overflow-hidden"
+      >
+        <CustomScheduler
           bookings={filteredBookings}
-          onDateRangeChange={handleDateRangeChange}
-          updateBookingStatus={updateBookingStatus}
+          updateBookingStatus={(uuid, status) => dispatch(updateBookingAction({ uuid, body: { status } }))}
           getStatusColor={getStatusColor}
+          onEventClick={handleEventClick}
         />
-      </Box>
-    </Box>
+      </motion.div>
+
+      <BookingDetailsDialog
+        open={isDrawerOpen}
+        booking={selectedBooking}
+        onClose={() => {
+          setIsDrawerOpen(false);
+          setSelectedBooking(null);
+        }}
+        getStatusColor={getStatusColor}
+        onCancel={handleCancel}
+      />
+    </div>
   );
 }

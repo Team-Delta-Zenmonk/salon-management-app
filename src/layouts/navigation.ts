@@ -1,15 +1,18 @@
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import DesignServicesIcon from "@mui/icons-material/DesignServices";
-import EventNoteIcon from "@mui/icons-material/EventNote";
-import PeopleIcon from "@mui/icons-material/People";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
-import CurrencyRupeeOutlinedIcon from '@mui/icons-material/CurrencyRupeeOutlined';
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import {
+  LayoutDashboard,
+  Scissors,
+  CalendarDays,
+  Users,
+  Tag,
+  User,
+  Package,
+  BarChart,
+  Bell,
+  LayoutList,
+  IndianRupee,
+  CircleUser,
+  Palette
+} from "lucide-react";
 
 export type NavItem = {
   name: string;
@@ -18,16 +21,17 @@ export type NavItem = {
 };
 
 export const navigationItems: NavItem[] = [
-  { name: "My Profile", path: "/my-profile", icon: AccountCircleIcon },
-  { name: "Dashboard", path: "/dashboard", icon: DashboardIcon },
-  { name: "Categories", path: "/categories", icon: CategoryOutlinedIcon },
-  { name: "Services", path: "/services", icon: DesignServicesIcon },
-  { name: "Bookings", path: "/bookings", icon: EventNoteIcon },
-  { name: "Staff", path: "/staff", icon: PeopleIcon },
-  { name: "Pricing", path: "/staff-service-pricing", icon: CurrencyRupeeOutlinedIcon },
-  { name: "Offers", path: "/offers", icon: LocalOfferIcon },
-  { name: "Customers", path: "/customers", icon: PersonOutlineIcon },
-  { name: "Inventory", path: "/inventory", icon: Inventory2Icon },
-  { name: "Reports", path: "/reports", icon: BarChartIcon },
-  { name: "Notifications", path: "/notifications", icon: NotificationsNoneIcon },
+  { name: "My Profile", path: "/my-profile", icon: CircleUser },
+  { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { name: "Categories", path: "/categories", icon: LayoutList },
+  { name: "Services", path: "/services", icon: Scissors },
+  { name: "Bookings", path: "/bookings", icon: CalendarDays },
+  { name: "Staff", path: "/staff", icon: Users },
+  { name: "Pricing", path: "/staff-service-pricing", icon: IndianRupee },
+  { name: "Offers", path: "/offers", icon: Tag },
+  { name: "Customers", path: "/customers", icon: User },
+  { name: "Inventory", path: "/inventory", icon: Package },
+  { name: "Reports", path: "/reports", icon: BarChart },
+  { name: "Notifications", path: "/notifications", icon: Bell },
+  { name: "Appearance", path: "/appearance", icon: Palette },
 ];

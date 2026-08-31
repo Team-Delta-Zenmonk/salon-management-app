@@ -1,13 +1,15 @@
-import { DaysList } from "../../../../../../common/enums/days.enum";
+import { DaysList, type DayKey } from "../../../../../../common/enums/days.enum";
+import type { Gender } from "../../../../../../common/enums/gender.enum";
+import type { Staff } from "../../../../../../features/staff/staff.slice";
+import type { StaffForm } from "../../../schema/staff.schema";
 
-
-export const getDefaultActiveHours = () => {
-  const obj: any = {};
+export const getDefaultActiveHours = (): Record<DayKey, null> => {
+  const obj = {} as Record<DayKey, null>;
   for (const d of DaysList) obj[d] = null;
   return obj;
 };
 
-export const createStaffDefaultPayload = () => ({
+export const createStaffDefaultPayload = (): StaffForm => ({
   first_name: "",
   last_name: "",
   email: "",
@@ -19,12 +21,12 @@ export const createStaffDefaultPayload = () => ({
   end_date: "",
   address: "",
   emergency_contact: { name: "", phone: "" },
-  gender: undefined as any,
+  gender: undefined as unknown as Gender,
   photos: null,
   active_hours: getDefaultActiveHours(),
 });
 
-export const updateStaffDefaultPayload = (staff: any) => ({
+export const updateStaffDefaultPayload = (staff: Staff): StaffForm => ({
   first_name: staff?.first_name ?? "",
   last_name: staff?.last_name ?? "",
   email: staff?.email ?? "",
@@ -36,7 +38,7 @@ export const updateStaffDefaultPayload = (staff: any) => ({
   end_date: staff?.end_date ?? "",
   address: staff?.address ?? "",
   emergency_contact: staff?.emergency_contact ?? { name: "", phone: "" },
-  gender: staff?.gender ?? undefined,
+  gender: (staff?.gender as Gender) ?? undefined,
   photos: null,
   active_hours: staff?.active_hours ?? getDefaultActiveHours(),
 });

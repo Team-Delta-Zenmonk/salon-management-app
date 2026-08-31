@@ -1,10 +1,5 @@
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import Stack from "@mui/material/Stack";
-import styles from "./arrow-buttons.module.scss";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import clsx from "clsx";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 
 import type { FieldError, FieldValues, Path, PathValue } from "react-hook-form";
 
@@ -40,29 +35,26 @@ function ArrowButtons<T extends FieldValues>({
   };
 
   return (
-    <InputAdornment
-      className={endAdornmentClassName && clsx(error ? styles.endAdornmentError : styles[endAdornmentClassName])}
-      position="end"
-    >
-      <Stack>
-        <IconButton
-          className={clsx("p-0", styles.arrowBtn)}
-          onClick={handleUp}
-          disabled={Number(value) >= max}
-          data-test-id={`btn-number-input-arrow-up-${identifier}`}
-        >
-          <ArrowDropUpIcon className="iconSizeStyles" />
-        </IconButton>
-        <IconButton
-          className={clsx("p-0", styles.arrowBtn)}
-          onClick={handleDown}
-          disabled={Number(value) <= min}
-          data-test-id={`btn-number-input-arrow-down-${identifier}`}
-        >
-          <ArrowDropDownIcon className="iconSizeStyles" />
-        </IconButton>
-      </Stack>
-    </InputAdornment>
+    <div className={clsx("flex flex-col justify-center pl-2", endAdornmentClassName, error && "text-destructive")}>
+      <button
+        type="button"
+        className={clsx("p-0 text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors")}
+        onClick={handleUp}
+        disabled={Number(value) >= max}
+        data-test-id={`btn-number-input-arrow-up-${identifier}`}
+      >
+        <ChevronUp className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className={clsx("p-0 text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors")}
+        onClick={handleDown}
+        disabled={Number(value) <= min}
+        data-test-id={`btn-number-input-arrow-down-${identifier}`}
+      >
+        <ChevronDown className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 

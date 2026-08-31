@@ -1,7 +1,6 @@
 import { useState } from "react";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import TextField from "../textfield/index"
+import { Eye, EyeOff } from "lucide-react";
+import TextField from "../textfield/index";
 
 type PasswordFieldProps = {
   label: string;
@@ -9,9 +8,10 @@ type PasswordFieldProps = {
   control: any;
   identifier: string;
   disabled?: boolean;
+  placeholder?: string;
 };
 
-const PasswordField = ({ label, name, control, identifier, disabled }: PasswordFieldProps) => {
+const PasswordField = ({ label, name, control, identifier, disabled, placeholder }: PasswordFieldProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleShowPassword = () => {
@@ -26,7 +26,8 @@ const PasswordField = ({ label, name, control, identifier, disabled }: PasswordF
       control={control}
       identifier={identifier}
       disabled={disabled}
-      endAdornment={showPassword ? <VisibilityOff /> : <Visibility />}
+      placeholder={placeholder}
+      endAdornment={showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
       onEndAdornmentClick={toggleShowPassword}
       highlightPrimaryIconButton
     />

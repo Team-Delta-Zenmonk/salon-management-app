@@ -1,18 +1,17 @@
 import React from "react";
-import { Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import SearchBar from "../../../../components/searchbar";
 import Select from "../../../../components/form/select";
 import type { ItemCategory } from "../../../../features/inventory/types/category.type";
 
-export const STOCK_SORT_OPTIONS = [
+const STOCK_SORT_OPTIONS = [
   { value: "name_asc", label: "Name: A to Z" },
   { value: "name_desc", label: "Name: Z to A" },
   { value: "stock_high_low", label: "Stock: High to Low" },
   { value: "stock_low_high", label: "Stock: Low to High" },
 ];
 
-export const LOG_SORT_OPTIONS = [
+const LOG_SORT_OPTIONS = [
   { value: "received_date_desc", label: "Received: Newest" },
   { value: "received_date_asc", label: "Received: Oldest" },
   { value: "ordered_date_desc", label: "Ordered: Newest" },
@@ -21,7 +20,7 @@ export const LOG_SORT_OPTIONS = [
   { value: "amount_low_high", label: "Amount: Low to High" },
 ];
 
-export const ITEM_TYPE_OPTIONS = [
+const ITEM_TYPE_OPTIONS = [
   { value: "", label: "All Types" },
   { value: "product", label: "Product" },
   { value: "equipment", label: "Equipment" },
@@ -29,7 +28,6 @@ export const ITEM_TYPE_OPTIONS = [
 
 interface InventoryFiltersProps {
   activeTab: number;
-  searchTerm: string;
   onSearch: (query: string) => void;
   sortBy: string;
   onSortChange: (value: string) => void;
@@ -42,7 +40,6 @@ interface InventoryFiltersProps {
 
 export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
   activeTab,
-  searchTerm,
   onSearch,
   sortBy,
   onSortChange,
@@ -80,7 +77,7 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
 
   const categoryOptions = [
     { value: "", label: "All Categories" },
-    ...categories.map((cat) => ({ value: cat.uuid, label: cat.name })),
+    ...categories.map((cat) => ({ value: cat.uuid, label: cat.name.charAt(0).toUpperCase() + cat.name.slice(1) })),
   ];
 
   const sortOptionsWithDefault = [
@@ -89,40 +86,46 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
   ];
 
   return (
-    <Box mb={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">
-      <Box sx={{ width: { xs: "100%", sm: "300px" } }}>
+    <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-4">
+      <div className="w-full sm:w-[280px]">
         <SearchBar onSearch={onSearch} placeholder="Search products..." />
-      </Box>
+      </div>
 
-      <Box sx={{ display: activeTab === 1 ? 'block' : 'none', minWidth: 160, width: 160 }}>
-        <Select
-          name="categoryUuid"
-          control={control}
-          placeholder="Category"
-          identifier="filter-category"
-          options={categoryOptions}
-        />
-      </Box>
+      <div className="flex flex-wrap items-center gap-3">
+        {activeTab === 1 && (
+          <div className="w-[160px] bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-xs [&_button]:h-10 [&_button]:border-none [&_button]:bg-transparent hover:border-primary/35 transition-colors">
+            <Select
+              name="categoryUuid"
+              control={control}
+              placeholder="Category"
+              identifier="filter-category"
+              options={categoryOptions}
+            />
+          </div>
+        )}
 
-      <Box sx={{ display: activeTab === 1 ? 'block' : 'none', minWidth: 160, width: 160 }}>
-        <Select
-          name="itemType"
-          control={control}
-          placeholder="Type"
-          identifier="filter-type"
-          options={ITEM_TYPE_OPTIONS}
-        />
-      </Box>
+        {activeTab === 1 && (
+          <div className="w-[140px] bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-xs [&_button]:h-10 [&_button]:border-none [&_button]:bg-transparent hover:border-primary/35 transition-colors">
+            <Select
+              name="itemType"
+              control={control}
+              placeholder="Type"
+              identifier="filter-type"
+              options={ITEM_TYPE_OPTIONS}
+            />
+          </div>
+        )}
 
-      <Box sx={{ minWidth: 180, width: 180 }}>
-        <Select
-          name="sortBy"
-          control={control}
-          placeholder="Sort By"
-          identifier="filter-sort"
-          options={sortOptionsWithDefault}
-        />
-      </Box>
-    </Box>
+        <div className="w-[180px] bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-xs [&_button]:h-10 [&_button]:border-none [&_button]:bg-transparent hover:border-primary/35 transition-colors">
+          <Select
+            name="sortBy"
+            control={control}
+            placeholder="Sort By"
+            identifier="filter-sort"
+            options={sortOptionsWithDefault}
+          />
+        </div>
+      </div>
+    </div>
   );
 };

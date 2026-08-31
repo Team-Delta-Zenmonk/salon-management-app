@@ -1,6 +1,7 @@
 import { axiosInstance } from "../../../config/axios";
 import type { Gender } from "../../../common/enums/gender.enum";
 import type { StaffActiveHours, StaffEmergencyContact } from "../staff.slice";
+import type { CloudinaryFile } from "../../../common/cloudinary.schema";
 
 export interface CreateStaffPayload {
   first_name: string;
@@ -13,7 +14,7 @@ export interface CreateStaffPayload {
   joining_date: string;
   end_date?: string | null;
   address: string;
-  photos?: string;
+  photos?: CloudinaryFile | string | null;
   emergency_contact: StaffEmergencyContact;
   gender: Gender;
   active_hours?: StaffActiveHours | null;

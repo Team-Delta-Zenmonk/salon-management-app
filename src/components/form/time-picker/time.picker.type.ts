@@ -11,4 +11,6 @@ export type CustomDateTimePickerProps<T extends FieldValues> = {
   maxDateTime?: Dayjs | null;
   valueFormat?: "iso";
   handleChange?: () => void;
+  label?: string;
+  triggerClassName?: string;
 };

@@ -1,13 +1,3 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  CircularProgress,
-} from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
@@ -18,8 +8,16 @@ import { listStaffAction } from "../../../../features/staff/list-staff/list-staf
 import { listServiceStaff } from "../../../../features/service/list-staff/list-staff.service";
 import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
 import { unassignStaffFromService } from "../../../../features/staff-service/unassign-staff-service.service";
-import styles from "./list-staff.module.scss";
-import clsx from "clsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../../components/ui/dialog";
+import { Button } from "../../../../components/ui/button";
+import { Loader2 } from "lucide-react";
+import type { Staff } from "../../../../features/staff/staff.slice";
 
 interface AssignStaffDialogProps {
   open: boolean;
@@ -28,12 +26,23 @@ interface AssignStaffDialogProps {
   service: {
     price_type: string;
     price: number;
-    duration: number;
+    duration: number | string;
   };
   onStaffAssigned?: () => void;
 }
 interface FormValues {
   staff_ids: string[];
+}
+
+interface AssignedStaffService {
+  uuid?: string;
+  service_uuid?: string;
+  staff_uuid?: string;
+  price_type?: string;
+  price?: number;
+  duration?: number;
+  staff_id?: number;
+  service_id?: number;
 }
 
 export default function AssignStaffDialog({
@@ -54,7 +63,7 @@ export default function AssignStaffDialog({
   const { data: allStaff } = useAppSelector((state: RootState) => state.staff);
   const { data: allServices } = useAppSelector((state: RootState) => state.service);
   const salonUUID = useAppSelector((state) => state.auth.salon.uuid);
-  const [assignedStaffServices, setAssignedStaffServices] = useState<any[]>([]);
+  const [assignedStaffServices, setAssignedStaffServices] = useState<AssignedStaffService[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -73,7 +82,7 @@ export default function AssignStaffDialog({
 
     Promise.allSettled(serviceUuidsToQuery.map((uuid) => listServiceStaff(uuid, salonUUID)))
       .then((results) => {
-        const allRows: any[] = [];
+        const allRows: AssignedStaffService[] = [];
         results.forEach((result) => {
           if (result.status === "fulfilled") {
             const res = result.value;
@@ -93,9 +102,9 @@ export default function AssignStaffDialog({
   }, [allStaff]);
 
   const assignedStaffMap = useMemo(() => {
-    const map = new Map<string, any[]>();
+    const map = new Map<string, AssignedStaffService[]>();
     assignedStaffServices.forEach((ss) => {
-      const staffUuid = ss.staff_uuid || staffIdToUuidMap.get(ss.staff_id);
+      const staffUuid = ss.staff_uuid || (ss.staff_id ? staffIdToUuidMap.get(ss.staff_id) : undefined);
       if (!staffUuid) return;
       const existing = map.get(staffUuid) || [];
       existing.push(ss);
@@ -113,7 +122,7 @@ export default function AssignStaffDialog({
   }, [assignedStaffMap, allStaff, reset]);
 
   const staffOptions = useMemo(() => {
-    return allStaff.map((staff: any) => ({
+    return allStaff.map((staff: Staff) => ({
       label: `${staff.first_name} ${staff.last_name ?? ""}`,
       value: staff.uuid,
     }));
@@ -130,7 +139,7 @@ export default function AssignStaffDialog({
         ? allServices.filter((s) => s.parent_id && String(s.parent_id) === String(parentServiceObj.id))
         : [];
       const allServicesToAssign = [
-        { uuid: serviceUuid, price_type: service.price_type, price: service.price, duration: service.duration },
+        { uuid: serviceUuid, price_type: service.price_type, price: service.price, duration: Number(service.duration) },
         ...childrenServices.map((s) => ({
           uuid: s.uuid,
           price_type: s.price_type,
@@ -139,7 +148,13 @@ export default function AssignStaffDialog({
         })),
       ];
 
-      const toAssign: any[] = [];
+      const toAssign: {
+        service_uuid: string;
+        staff_uuid: string;
+        price_type: string;
+        price?: number;
+        duration?: number;
+      }[] = [];
       selectedStaffUuids
         .filter((staffUuid) => !assignedStaffMap.has(staffUuid))
         .forEach((staffUuid) => {
@@ -158,7 +173,7 @@ export default function AssignStaffDialog({
       Array.from(assignedStaffMap.entries())
         .filter(([staffUuid]) => !selectedStaffUuids.includes(staffUuid))
         .forEach(([, records]) => {
-          records.forEach((record: any) => {
+          records.forEach((record) => {
             if (record.uuid) toUnassign.push(record.uuid);
           });
         });
@@ -174,8 +189,9 @@ export default function AssignStaffDialog({
       callSnack("Staff assignment updated successfully", "success");
       onStaffAssigned?.();
       onClose();
-    } catch (err: any) {
-      callSnack(err?.message || "Failed to update staff assignment", "error");
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      callSnack(error?.message || "Failed to update staff assignment", "error");
     } finally {
       setSaving(false);
     }
@@ -184,56 +200,67 @@ export default function AssignStaffDialog({
   return (
     <Dialog
       open={open}
-      onClose={(event, reason) => {
-        if (saving && (reason === "backdropClick" || reason === "escapeKeyDown")) return;
-        onClose();
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          if (saving) return;
+          onClose();
+        }
       }}
-      fullWidth
-      maxWidth="sm"
-      classes={{ paper: styles.dialog }}
     >
-      <DialogTitle sx={{ pb: 0 }} className={styles.dialogTitle}>
-        Assign Staff
-      </DialogTitle>
+      <DialogContent className="sm:max-w-[450px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+            Assign Staff
+          </DialogTitle>
+        </DialogHeader>
 
-      <FormProvider {...methods}>
-        <DialogContent dividers className={clsx(styles.dialogContent)} sx={{ maxHeight: 400, overflowY: "auto" }}>
-          {loading ? (
-            <Box className="flex justify-center py-6">
-              <CircularProgress />
-            </Box>
-          ) : (
-            <form id="assign-staff-form" onSubmit={handleSubmit(onSubmit)}>
-              <Typography variant="body2" className="text-(--app-muted) mb-4">
-                Select staff members to assign to this service
-              </Typography>
+        <FormProvider {...methods}>
+          <div className="flex flex-col py-5 px-6 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar min-h-[200px]">
+            {loading ? (
+              <div className="flex justify-center items-center py-12 flex-1">
+                <Loader2 className="h-8 w-8 animate-spin text-primary/60" />
+              </div>
+            ) : (
+              <form id="assign-staff-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                <p className="text-sm text-muted-foreground">
+                  Select staff members to assign to this service:
+                </p>
 
-              <CheckboxGroup
-                name="staff_ids"
-                control={methods.control}
-                identifier="assign-staff"
-                options={staffOptions}
-                optionGap={2}
-              />
-            </form>
-          )}
-        </DialogContent>
+                <div className="mt-2 border border-border/40 rounded-2xl p-4 bg-muted/5 max-h-[300px] overflow-y-auto custom-scrollbar">
+                  <CheckboxGroup
+                    name="staff_ids"
+                    control={methods.control}
+                    identifier="assign-staff"
+                    options={staffOptions}
+                    optionGap={2}
+                  />
+                </div>
+              </form>
+            )}
+          </div>
 
-        <DialogActions className={styles.dialogActions}>
-          <Button onClick={onClose} disabled={saving}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            form="assign-staff-form"
-            variant="contained"
-            disabled={saving}
-            startIcon={saving ? <CircularProgress size={18} /> : null}
-          >
-            Save
-          </Button>
-        </DialogActions>
-      </FormProvider>
+          <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={saving}
+              className="rounded-full px-6"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="assign-staff-form"
+              disabled={saving || loading}
+              className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
+            >
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save
+            </Button>
+          </DialogFooter>
+        </FormProvider>
+      </DialogContent>
     </Dialog>
   );
 }
