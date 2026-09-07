@@ -36,6 +36,9 @@ export type Booking = {
   total_price?: number;
   total_duration?: number;
   booking_services?: BookingServiceItem[];
+  payment_policy?: 'pay_at_venue' | 'partial_deposit' | 'full_upfront';
+  deposit_amount?: number;
+  amount_paid_online?: number;
   admin_booking?: {
     name?: string;
     phone?: string;

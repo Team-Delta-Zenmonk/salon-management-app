@@ -101,7 +101,7 @@ export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  
+
   const { data, loading } = useDashboardData();
 
   useEffect(() => {
@@ -144,13 +144,13 @@ export default function Dashboard() {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       className="flex flex-col w-full max-w-[1600px] mx-auto pb-10 px-4 md:px-8"
     >
       {/* Dashboard Header & Stripe Live Status */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
@@ -271,7 +271,7 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-              
+
               <div className="w-full h-10 mt-4 bg-foreground/5 rounded-full animate-pulse" />
             </div>
           </div>
@@ -330,19 +330,19 @@ export default function Dashboard() {
       ) : (
         /* --- LOADED DASHBOARD --- */
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-8">
-          
+
           {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {data?.stats.map((stat: any) => {
               const Icon = stat.icon;
               return (
-                <motion.div 
-                  key={stat.title} 
+                <motion.div
+                  key={stat.title}
                   variants={itemVariants}
                   className="group relative overflow-hidden p-4 sm:p-5 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col gap-3 rounded-3xl border border-border/50 shadow-sm transition-all hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30"
                 >
                   <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors pointer-events-none" />
-                  
+
                   <div className="flex items-start justify-between relative z-10">
                     <div className="w-10 h-10 bg-background/50 rounded-xl flex items-center justify-center border border-border/50 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
                       <Icon className="w-5 h-5 text-primary" />
@@ -373,46 +373,46 @@ export default function Dashboard() {
               </div>
               <div className="w-full flex-1 min-h-[240px] relative">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart 
-                    data={data?.chartData} 
+                  <AreaChart
+                    data={data?.chartData}
                     margin={{ top: 15, right: 15, left: -10, bottom: 0 }}
                   >
                     <defs>
                       <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25}/>
-                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0}/>
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
                       </linearGradient>
                       <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="0" dy="6" stdDeviation="4" floodColor="var(--primary)" floodOpacity="0.25"/>
+                        <feDropShadow dx="0" dy="6" stdDeviation="4" floodColor="var(--primary)" floodOpacity="0.25" />
                       </filter>
                     </defs>
                     <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--border))" opacity={0.35} />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11, fontWeight: 500 }} 
-                      dy={10} 
-                    />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
                       tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11, fontWeight: 500 }}
-                      tickFormatter={(value) => `₹${value}`} 
+                      dy={10}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11, fontWeight: 500 }}
+                      tickFormatter={(value) => `₹${value}`}
                       width={50}
                     />
-                    <Tooltip 
+                    <Tooltip
                       content={<CustomTooltip />}
                       cursor={{ stroke: 'var(--primary)', strokeWidth: 1.5, strokeDasharray: '4 4' }}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke="var(--primary)" 
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="var(--primary)"
                       strokeWidth={3}
                       filter="url(#glow)"
-                      fillOpacity={1} 
-                      fill="url(#revenueGradient)" 
+                      fillOpacity={1}
+                      fill="url(#revenueGradient)"
                       activeDot={{ r: 6, stroke: 'hsl(var(--background))', strokeWidth: 2, fill: 'var(--primary)' }}
                       dot={(props: any) => {
                         const { cx, cy, payload } = props;
@@ -483,11 +483,10 @@ export default function Dashboard() {
                     <div className="flex flex-col items-end gap-1.5 shrink-0 ml-4">
                       <p className="font-bold text-sm text-foreground">{booking.time}</p>
                       <span
-                        className={`inline-flex px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded-full border ${
-                          booking.status === "Confirmed" 
+                        className={`inline-flex px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded-full border ${booking.status === "Confirmed"
                             ? "bg-green-500/10 text-green-600 border-green-500/20"
                             : "bg-orange-500/10 text-orange-600 border-orange-500/20"
-                        }`}
+                          }`}
                       >
                         {booking.status}
                       </span>
@@ -495,7 +494,7 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-              
+
               <Button variant="outline" className="w-full mt-4 rounded-full border-border/60 hover:bg-background/80">
                 View All Bookings
               </Button>
@@ -510,7 +509,7 @@ export default function Dashboard() {
                 <h3 className="text-lg font-bold text-foreground">Popular Services</h3>
                 <p className="text-sm text-muted-foreground">Most popular services by booking share.</p>
               </div>
-              
+
               <div className="flex-1 flex flex-col items-center justify-center min-h-[220px] py-4">
                 <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
@@ -527,14 +526,14 @@ export default function Dashboard() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: '1px solid hsl(var(--border))' }}
                       itemStyle={{ color: 'hsl(var(--foreground))', fontWeight: 600 }}
                       formatter={(value: any) => [`${value}%`, 'Share']}
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                
+
                 {/* Custom Legend */}
                 <div className="w-full grid grid-cols-2 gap-3 mt-4 text-xs font-semibold text-muted-foreground">
                   {data?.serviceDistribution.map((entry: any, index: number) => (
@@ -554,7 +553,7 @@ export default function Dashboard() {
                 <h3 className="text-lg font-bold text-foreground">Top Performing Staff</h3>
                 <p className="text-sm text-muted-foreground">Highest rated and most booked staff this week.</p>
               </div>
-              
+
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
                 {data?.staffPerformance.map((staff: any) => (
                   <div key={staff.name} className="flex items-center justify-between p-4 bg-background/40 border border-border/40 rounded-2xl hover:border-primary/30 transition-all group">
@@ -569,7 +568,7 @@ export default function Dashboard() {
                         <p className="text-xs text-muted-foreground font-medium truncate">{staff.role}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
                       <span className="text-xs font-bold text-foreground">{staff.bookings} Bookings</span>
                       <div className="flex items-center gap-1 text-[11px] font-bold text-yellow-600">
@@ -580,7 +579,7 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-              
+
               <div className="mt-6 flex flex-col sm:flex-row gap-3 items-center justify-between text-xs text-muted-foreground font-medium border-t border-border/20 pt-4">
                 <p>Overall customer satisfaction: <span className="text-green-600 font-bold">98.4%</span></p>
                 <Button variant="ghost" className="h-auto p-0 text-xs font-bold text-primary hover:bg-transparent">

@@ -11,9 +11,10 @@ type LocationMapProps = {
   disabled?: boolean;
   setValue: any;
   clearErrors: any;
+  height?: number | string;
 };
 
-export default function LocationMap({ control, latitude, longitude, label, disabled, setValue, clearErrors }: Readonly<LocationMapProps>) {
+export default function LocationMap({ control, latitude, longitude, label, disabled, setValue, clearErrors, height = "100%" }: Readonly<LocationMapProps>) {
   const handleLocationChange = async (
     coords: LatLngValue,
     latFieldOnChange: (v: any) => void,
@@ -31,7 +32,7 @@ export default function LocationMap({ control, latitude, longitude, label, disab
     }
   };
   return (
-    <div className="space-y-2">
+    <div className="h-full w-full">
       {label && <div className="text-lg font-semibold mb-2">{label}</div>}
       <Controller
         control={control}
@@ -48,6 +49,7 @@ export default function LocationMap({ control, latitude, longitude, label, disab
                 <MapPicker
                   value={value}
                   disabled={disabled}
+                  height={height}
                   onChange={(coords) => {
                     handleLocationChange(coords, latField.onChange, lngField.onChange);
                   }}

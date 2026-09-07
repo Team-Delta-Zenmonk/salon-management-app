@@ -44,7 +44,7 @@ function MapResizer() {
   return null;
 }
 
-export default function MapPicker({ value, onChange, height = 300, disabled }: Readonly<MapPickerProps>) {
+export default function MapPicker({ value, onChange, height = "100%", disabled }: Readonly<MapPickerProps>) {
   const [prevValue, setPrevValue] = useState(value);
   const [position, setPosition] = useState<LatLngExpression | null>(
     value ? [value.lat, value.lng] : null
@@ -68,7 +68,7 @@ export default function MapPicker({ value, onChange, height = 300, disabled }: R
     <MapContainer
       center={center}
       zoom={position ? 15 : 11}
-      style={{ height, width: "100%", borderRadius: 8, overflow: "hidden" }}
+      style={{ height, width: "100%", overflow: "hidden" }}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

@@ -1,6 +1,7 @@
 import React from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
+import { motion, AnimatePresence } from "framer-motion";
 import type { SalonProfileForm } from "../../schema/my-profile.schema";
 import TextField from "../../../../components/form/textfield";
 import Select from "../../../../components/form/select";
@@ -9,6 +10,11 @@ import { uploadImages } from "../../../../features/upload-images/upload-images.s
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { Store, Sparkles, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../../components/ui/dialog";
+import { callSnack } from "../../../../components/snackbar";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 interface PhotoType {
   url: string;
@@ -31,14 +37,60 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
 
   const [logoUploading, setLogoUploading] = React.useState(false);
   const [photosUploading, setPhotosUploading] = React.useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = React.useState(false);
+  const [isLogoPreviewOpen, setIsLogoPreviewOpen] = React.useState(false);
   const logoInputRef = React.useRef<HTMLInputElement | null>(null);
   const photoInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const handleAddPhotoClick = () => {
+    if (photos.length >= 4) {
+      callSnack("Maximum 4 photos can be uploaded", "warning");
+      return;
+    }
+    photoInputRef.current?.click();
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
+
+    const currentCount = photos.length;
+    if (currentCount >= 4) {
+      callSnack("Maximum 4 photos can be uploaded", "warning");
+      e.target.value = "";
+      return;
+    }
+
+    const allowedCount = 4 - currentCount;
+    const filesToUpload = Array.from(files).slice(0, allowedCount);
+
+    if (files.length > allowedCount) {
+      callSnack(
+        `Maximum 4 photos allowed. Only ${allowedCount} photo(s) will be uploaded.`,
+        "warning"
+      );
+    }
+
+    setPhotosUploading(true);
+    try {
+      const uploadedData: Array<{ url: string; filename: string }> = [];
+      for (const file of filesToUpload) {
+        const result = await uploadImages(file);
+        uploadedData.push(result);
+      }
+      setValue("photos", [...photos, ...uploadedData], { shouldDirty: true });
+    } catch {
+      callSnack("Photos upload failed", "error");
+    } finally {
+      setPhotosUploading(false);
+      e.target.value = "";
+    }
+  };
 
   return (
     <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
-      {/* Section Header */}
       <div className="flex items-center gap-2 mb-5 relative z-10">
         <Sparkles className="w-4 h-4 text-primary" />
         <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Salon Branding & Media</span>
@@ -46,9 +98,11 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
       </div>
 
       <div className="space-y-6 relative z-10">
-        {/* Logo Section */}
         <div className="flex items-center gap-6">
-          <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-border/50 bg-background/40 flex items-center justify-center shadow-md hover:border-primary/20 transition-all duration-300 group shrink-0">
+          <div 
+            onClick={() => logo?.url && setIsLogoPreviewOpen(true)}
+            className="relative w-20 h-20 rounded-2xl overflow-hidden border border-border/50 bg-background/40 flex items-center justify-center shadow-md hover:border-primary/20 transition-all duration-300 group shrink-0 cursor-pointer"
+          >
             {logo?.url ? (
               <img src={logo.url} className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" alt="Logo Preview" />
             ) : (
@@ -98,67 +152,164 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
           </div>
         </div>
 
-        {/* Cover Photos Section */}
         <div className="space-y-2.5">
-          <div className="space-y-0.5">
-            <p className="text-xs font-bold text-foreground">Gallery & Cover Photos</p>
-            <p className="text-[10px] text-muted-foreground/80 leading-relaxed">
-              These images will be displayed on client-facing booking pages.
-            </p>
-          </div>
-
-          {/* Scrollable grid if there are multiple images */}
-          <div className="max-h-[260px] overflow-y-auto pr-1.5 space-y-3 custom-scrollbar">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {/* Add Cover Image Button - Placed at the Start */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <p className="text-xs font-bold text-foreground">Gallery & Cover Photos</p>
+              <p className="text-[10px] text-muted-foreground/80 leading-relaxed">
+                These images will be displayed on client-facing booking pages.
+              </p>
+            </div>
+            {photos.length > 0 && (
               <button
                 type="button"
-                onClick={() => photoInputRef.current?.click()}
-                disabled={photosUploading || isSaving}
-                className="aspect-[4/3] rounded-xl border-2 border-dashed border-border/60 hover:border-primary/50 bg-background/30 hover:bg-background/60 flex flex-col items-center justify-center text-muted-foreground hover:text-primary gap-1 transition-all duration-250 cursor-pointer p-2"
+                onClick={() => setIsGalleryOpen(true)}
+                className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
               >
-                {photosUploading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                View all ({photos.length})
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <button
+              type="button"
+              onClick={handleAddPhotoClick}
+              disabled={photosUploading || isSaving}
+              className="aspect-[4/3] rounded-2xl border-2 border-dashed border-border/60 hover:border-primary/50 bg-background/30 hover:bg-background/60 flex flex-col items-center justify-center text-muted-foreground hover:text-primary gap-1 transition-all duration-250 cursor-pointer p-2"
+            >
+              {photosUploading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <ImageIcon className="w-5 h-5" />
+                  <span className="text-[10px] font-bold">Add Photo</span>
+                </>
+              )}
+            </button>
+
+            {photos.length > 0 ? (
+              <div 
+                className="group relative rounded-2xl overflow-hidden border border-border/50 bg-background/40 shadow-sm hover:border-primary/30 transition-all duration-300 flex flex-col aspect-[4/3] cursor-pointer"
+                onClick={() => setIsGalleryOpen(true)}
+              >
+                <img 
+                  src={photos[0].url} 
+                  alt={photos[0].filename || "Cover 1"} 
+                  className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const updated = photos.filter((_, i) => i !== 0);
+                    setValue("photos", updated, { shouldDirty: true });
+                  }}
+                  className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 hover:bg-destructive hover:scale-110 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer z-10"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-xs px-2 py-1 flex items-center justify-between">
+                  <p className="text-[9px] font-medium text-white truncate max-w-[85%]" title={photos[0].filename}>
+                    {photos[0].filename || "Photo 1"}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
+            {photos.length > 1 ? (
+              <div 
+                className="group relative rounded-2xl overflow-hidden border border-border/50 bg-background/40 shadow-sm hover:border-primary/30 transition-all duration-300 flex flex-col aspect-[4/3] cursor-pointer"
+                onClick={() => setIsGalleryOpen(true)}
+              >
+                <img 
+                  src={photos[1].url} 
+                  alt={photos[1].filename || "Cover 2"} 
+                  className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                />
+                
+                {photos.length > 2 ? (
+                  <div className="absolute inset-0 bg-black/65 backdrop-blur-xs flex flex-col items-center justify-center text-white transition-all group-hover:bg-black/75">
+                    <span className="text-base font-black">+{photos.length - 2}</span>
+                    <span className="text-[9px] font-bold text-white/80">View All</span>
+                  </div>
                 ) : (
                   <>
-                    <ImageIcon className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Add Photo</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const updated = photos.filter((_, i) => i !== 1);
+                        setValue("photos", updated, { shouldDirty: true });
+                      }}
+                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 hover:bg-destructive hover:scale-110 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer z-10"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-xs px-2 py-1 flex items-center justify-between">
+                      <p className="text-[9px] font-medium text-white truncate max-w-[85%]" title={photos[1].filename}>
+                        {photos[1].filename || "Photo 2"}
+                      </p>
+                    </div>
                   </>
                 )}
-              </button>
+              </div>
+            ) : null}
+          </div>
 
-              {photos.map((photo: PhotoType, index: number) => (
-                <div 
-                  key={photo.url || index}
-                  className="group relative rounded-xl overflow-hidden border border-border/50 bg-background/40 shadow-sm hover:border-primary/30 transition-all duration-300 flex flex-col aspect-[4/3]"
-                >
-                  <div className="relative w-full h-full overflow-hidden bg-muted">
-                    <img 
-                      src={photo.url} 
-                      alt={photo.filename || "Cover Thumbnail"} 
-                      className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+          <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
+            <DialogContent className="sm:max-w-2xl rounded-3xl border-border/60 bg-card p-6 shadow-xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/40">
+                <DialogTitle className="text-base font-bold text-foreground">
+                  All Gallery & Cover Photos ({photos.length})
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4">
+                {photos.map((photo: PhotoType, index: number) => (
+                  <div
+                    key={photo.url || index}
+                    className="group relative rounded-2xl overflow-hidden border border-border/50 bg-background/40 shadow-sm aspect-[4/3]"
+                  >
+                    <img
+                      src={photo.url}
+                      alt={photo.filename || `Photo ${index + 1}`}
+                      className="object-cover w-full h-full"
                     />
                     <button
                       type="button"
                       onClick={() => {
-                        const updated = photos.filter((p: PhotoType) => p.url !== photo.url);
+                        const updated = photos.filter((_, i) => i !== index);
                         setValue("photos", updated, { shouldDirty: true });
+                        if (updated.length === 0) setIsGalleryOpen(false);
                       }}
-                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 hover:bg-destructive hover:scale-110 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 hover:bg-destructive text-white opacity-90 group-hover:opacity-100 transition-all cursor-pointer"
+                      title="Delete photo"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                    {/* Filename display overlay at the bottom */}
-                    <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-xs px-2 py-1 flex items-center justify-between">
-                      <p className="text-[9px] font-medium text-white truncate max-w-[85%]" title={photo.filename}>
+                    <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-xs px-2.5 py-1.5">
+                      <p className="text-[10px] font-medium text-white truncate" title={photo.filename}>
                         {photo.filename || `Photo ${index + 1}`}
                       </p>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {logo?.url && (
+            <Lightbox
+              open={isLogoPreviewOpen}
+              close={() => setIsLogoPreviewOpen(false)}
+              slides={[{ src: logo.url }]}
+              render={{
+                buttonPrev: () => null,
+                buttonNext: () => null,
+              }}
+            />
+          )}
 
           <input
             ref={photoInputRef}
@@ -166,23 +317,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
             accept="image/*"
             multiple
             className="hidden"
-            onChange={async (e) => {
-              const files = e.target.files;
-              if (!files?.length) return;
-              setPhotosUploading(true);
-              try {
-                const uploadedData: Array<{ url: string; filename: string }> = [];
-                for (const file of Array.from(files)) {
-                  const result = await uploadImages(file);
-                  uploadedData.push(result);
-                }
-                setValue("photos", [...photos, ...uploadedData], { shouldDirty: true });
-              } catch {
-                console.error("Photos upload failed");
-              } finally {
-                setPhotosUploading(false);
-              }
-            }}
+            onChange={handlePhotoUpload}
           />
         </div>
       </div>
@@ -202,7 +337,6 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
-      {/* Section Header */}
       <div className="flex items-center gap-2 mb-5 relative z-10">
         <Store className="w-4 h-4 text-primary" />
         <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">General Information</span>
@@ -210,9 +344,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       </div>
 
       <div className="space-y-6 relative z-10">
-        {/* Row 1: Name, Owner Name, Salon Type in 3 columns - No prefix icons */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Salon Name */}
           <div className="w-full">
             <TextField
               name="name"
@@ -228,7 +360,6 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             />
           </div>
 
-          {/* Owner Name */}
           <div className="w-full">
             <TextField
               name="owner_name"
@@ -244,7 +375,6 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             />
           </div>
 
-          {/* Salon Type */}
           <div className="w-full">
             <Select
               name="type"
@@ -259,7 +389,6 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           </div>
         </div>
 
-        {/* About Description */}
         <div className="w-full">
           <TextField
             name="about"

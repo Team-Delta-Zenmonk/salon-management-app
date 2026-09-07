@@ -12,13 +12,14 @@ import { MyProfileSchema, type SalonProfileForm } from "./schema/my-profile.sche
 import { DAYS_MAP } from "./_components/constants/business-hours.constants";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
+import Autoplay from "embla-carousel-autoplay";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "../../components/ui/carousel";
 
-// Sub-components
 import { GeneralInfoSection, BrandingSection } from "./_components/general-tab/index";
 import { LocationSection } from "./_components/location-tab/index";
 import { HoursSection } from "./_components/hours-tab/index";
+import PaymentPolicyCard from "./_components/payment-policy-card/index";
 
-// Icons
 import {
   AlertCircle,
   RotateCcw,
@@ -47,6 +48,7 @@ interface PhotoType {
 const MyProfile = () => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state: RootState) => state.auth);
 
@@ -86,7 +88,9 @@ const MyProfile = () => {
       },
       logo: salon?.logo ? { url: salon.logo, filename: "Logo" } : null,
       photos: salon?.photos || [],
-      business_hours: getMappedInitialHours()
+      business_hours: getMappedInitialHours(),
+      payment_policy: (salon as any)?.payment_policy || "pay_at_venue",
+      deposit_percentage: (salon as any)?.deposit_percentage ?? null,
     }
   });
 
@@ -110,13 +114,15 @@ const MyProfile = () => {
         latitude: address.latitude?.toString().trim() || null,
         longitude: address.longitude?.toString().trim() || null,
         logo: logo?.url || null,
+        payment_policy: data.payment_policy,
+        deposit_percentage: data.payment_policy === "partial_deposit" ? Number(data.deposit_percentage) : null,
       };
 
       const resultAction = await dispatch(updateSalonProfileAction(payload));
       if (updateSalonProfileAction.fulfilled.match(resultAction)) {
         callSnack("Profile updated successfully", "success");
         if (salon?.uuid) dispatch(getSalonProfileAction(salon.uuid));
-        reset(data); // reset form dirty state with new values
+        reset(data); 
         return true;
       } else {
         callSnack("Failed to update profile", "error");
@@ -132,7 +138,7 @@ const MyProfile = () => {
 
   const handleSave = () => {
     handleSubmit(
-      async (data) => {
+      async (data: SalonProfileForm) => {
         await onSubmit(data);
       },
       (formErrors) => {
@@ -152,9 +158,8 @@ const MyProfile = () => {
   return (
     <FormProvider {...methods}>
       <div className="flex flex-col flex-1 h-full min-h-0 w-full overflow-hidden bg-background">
-        
-        {/* Top Header Section */}
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
@@ -175,12 +180,10 @@ const MyProfile = () => {
           </div>
         </motion.div>
 
-        {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-24">
           <div className="w-full max-w-[1600px] mx-auto space-y-8">
-            
+
             {loading && !salon ? (
-              /* --- SKELETON LOADERS --- */
               <div className="space-y-6">
                 <div className="w-full h-48 bg-foreground/5 animate-pulse rounded-2xl border border-border/50" />
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -189,36 +192,59 @@ const MyProfile = () => {
                 </div>
               </div>
             ) : (
-              <motion.div 
-                variants={containerVariants} 
-                initial="hidden" 
-                animate="show" 
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
                 className="space-y-8"
               >
-                {/* Visual Banner Header Card - Height increased to 260px */}
-                <motion.div 
-                   variants={itemVariants} 
+                <motion.div
+                  variants={itemVariants}
                   className="relative group rounded-3xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg h-[260px] hover:shadow-xl hover:border-primary/30 transition-all duration-300"
                 >
-                  {/* Banner cover background mosaic - 100% opacity, no low opacity tint */}
+                  {/* Pure Zero-useEffect Automatic Carousel */}
                   {activePhotos.length > 0 ? (
-                    <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 gap-1 opacity-100">
-                      {activePhotos.slice(0, 6).map((photo: PhotoType, index: number) => (
-                        <img 
-                          key={index}
-                          src={photo.url} 
-                          alt="Cover Mosaic" 
-                          className="object-cover w-full h-full" 
-                        />
-                      ))}
-                    </div>
+                    <Carousel
+                      setApi={setCarouselApi}
+                      plugins={[Autoplay({ delay: 4000 })]}
+                      opts={{ loop: true }}
+                      className="absolute inset-0 w-full h-full"
+                    >
+                      <CarouselContent className="h-full -ml-0">
+                        {activePhotos.map((photo: PhotoType, index: number) => (
+                          <CarouselItem key={photo.url || index} className="pl-0 h-[260px] w-full">
+                            <img
+                              src={photo.url}
+                              alt={`Salon Banner ${index + 1}`}
+                              className="object-cover w-full h-full"
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+
+                      {/* Interactive indicator dots */}
+                      {activePhotos.length > 1 && (
+                        <div className="absolute top-4 right-6 z-20 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                          {activePhotos.slice(0, 3).map((_, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                carouselApi?.scrollTo(idx);
+                              }}
+                              className="w-2.5 h-2.5 rounded-full bg-white/60 hover:bg-white transition-all cursor-pointer"
+                              aria-label={`Go to slide ${idx + 1}`}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </Carousel>
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-tr from-neutral-900 to-neutral-950" />
                   )}
-                  {/* Bottom-up dark gradient overlay to ensure text contrast while keeping images clearly visible */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
 
-                  {/* Overlapping Quick Profile Stats */}
                   <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-8 z-10">
                     <div className="flex items-center gap-5 text-left">
                       <div className="w-24 h-24 rounded-2xl border border-white/20 shrink-0 bg-background overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
@@ -249,7 +275,6 @@ const MyProfile = () => {
                       </div>
                     </div>
 
-                    {/* Operational Summary */}
                     <div className="hidden md:flex flex-col items-end gap-1 text-right text-white/95 drop-shadow-md mb-2">
                       <span className="text-[10px] uppercase font-bold tracking-wider text-white/60">Operational Schedule</span>
                       <span className="text-sm font-bold">
@@ -259,34 +284,34 @@ const MyProfile = () => {
                   </div>
                 </motion.div>
 
-                {/* Single-Page 2-Column Dashboard Layout */}
                 <motion.div variants={itemVariants} className="w-full">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    
-                    {/* Left Column (col-span-7) - Info & Geolocation */}
+
                     <div className="lg:col-span-7 space-y-8">
                       <GeneralInfoSection control={control} isSaving={isSaving} />
-                      
-                      <LocationSection 
-                        control={control} 
-                        setValue={setValue} 
-                        clearErrors={clearErrors} 
+
+                      <LocationSection
+                        control={control}
+                        setValue={setValue}
+                        clearErrors={clearErrors}
                       />
                     </div>
 
                     {/* Right Column (col-span-5) - Branding & Schedule */}
                     <div className="lg:col-span-5 space-y-8">
-                      <BrandingSection 
-                        control={control} 
-                        setValue={setValue} 
-                        isSaving={isSaving} 
+                      <BrandingSection
+                        control={control}
+                        setValue={setValue}
+                        isSaving={isSaving}
                       />
 
-                      <HoursSection 
-                        control={control} 
-                        setValue={setValue} 
-                        isSaving={isSaving} 
+                      <HoursSection
+                        control={control}
+                        setValue={setValue}
+                        isSaving={isSaving}
                       />
+
+                      <PaymentPolicyCard isSaving={isSaving} />
                     </div>
 
                   </div>
@@ -296,7 +321,6 @@ const MyProfile = () => {
           </div>
         </div>
 
-        {/* Floating Action Banner for Unsaved Changes */}
         <AnimatePresence>
           {isDirty && (
             <motion.div
@@ -318,7 +342,7 @@ const MyProfile = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2 shrink-0">
                   <Button
                     variant="ghost"
