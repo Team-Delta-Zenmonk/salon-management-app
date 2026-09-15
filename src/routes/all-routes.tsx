@@ -22,10 +22,12 @@ import Bookings from "../pages/bookings";
 import StaffServiceManagementPage from "../pages/pricing";
 import MyProfile from "../pages/my-profile";
 import Appearance from "../pages/appearance";
+import UnProtectedRoute from "./unprotected-route";
 
 function AllRoutes() {
   return (
     <Routes>
+      <Route element={<UnProtectedRoute />}>
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
@@ -33,6 +35,7 @@ function AllRoutes() {
       <Route path="/verify-salon" element={<VerifyEmail />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
+      </Route>
 
       <Route element={<OnboardingRoute />}>
         <Route path="/salon-onboarding" element={<SalonOnboarding />} />

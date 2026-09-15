@@ -176,7 +176,7 @@ export default function BookingPage() {
   }, [mappedBookings, receiptBooking]);
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-background">
+    <div className="flex flex-col flex-1 min-h-0 w-full bg-background">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -289,9 +289,9 @@ export default function BookingPage() {
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="flex-1 px-4 md:px-8 pb-8 overflow-y-auto"
+        className="w-full px-4 md:px-8 pb-8 flex-1 flex flex-col min-h-[550px]"
       >
         {viewMode === "calendar" ? (
           <CustomScheduler

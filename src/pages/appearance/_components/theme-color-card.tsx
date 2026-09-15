@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../..
 import { Label } from "../../../components/ui/label";
 import type { ColorTheme } from "../../../hooks/use-color-theme";
 import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
 
 const themePresets = [
   { id: "zinc", name: "Zinc Minimal", color: "#18181b", darkColor: "#fafafa", description: "Sleek and clean monochrome" },
@@ -27,6 +28,8 @@ export default function ThemeColorCard({
   setColorTheme,
   themeMode,
 }: ThemeColorCardProps) {
+  const { resolvedTheme } = useTheme();
+  const activeTheme = themeMode === "system" ? resolvedTheme : themeMode;
   return (
     <Card className="border-border/50 bg-card/60 backdrop-blur-md shadow-sm rounded-2xl overflow-hidden">
       <CardHeader className="pb-4">
@@ -49,7 +52,7 @@ export default function ThemeColorCard({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {themePresets.map((preset) => {
               const active = colorTheme === preset.id;
-              const displayBg = themeMode === "dark" ? preset.darkColor : preset.color;
+              const displayBg = activeTheme === "dark" ? preset.darkColor : preset.color;
 
               return (
                 <button

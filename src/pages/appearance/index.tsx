@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useColorTheme, type ColorTheme } from "../../hooks/use-color-theme";
 import { Button } from "../../components/ui/button";
 import { callSnack } from "../../components/snackbar";
-import { Save, RotateCcw, AlertCircle, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 // Config Components
 import ThemeColorCard from "./_components/theme-color-card";
 import PreferencesCard from "./_components/preferences-card";
 import LivePreviewPanel from "./_components/live-preview-panel";
+import { UnsavedChangesBanner } from "../../components/unsaved-changes-banner";
 
 // Container Framer Motion animation presets
 const containerVariants: Variants = {
@@ -167,51 +168,12 @@ export default function Appearance() {
       </div>
 
       {/* Floating Action Banner for Unsaved Changes */}
-      <AnimatePresence>
-        {isDirty && (
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 60 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-xl"
-          >
-            <div className="bg-card/90 backdrop-blur-md border border-border/80 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <AlertCircle className="h-4 w-4 animate-pulse" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-foreground">You have unsaved changes</p>
-                  <p className="text-[10px] text-muted-foreground truncate">
-                    Save to apply branding updates to the workspace
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  onClick={handleCancelChanges}
-                  className="text-[11px] font-bold text-muted-foreground hover:text-foreground h-8 px-2.5 rounded-full"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 mr-1" />
-                  Discard
-                </Button>
-                <Button
-                  size="xs"
-                  onClick={handleSave}
-                  className="text-[11px] font-bold rounded-full h-8 px-4 shadow-md shadow-primary/20 hover:opacity-95"
-                >
-                  <Save className="h-3.5 w-3.5 mr-1" />
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <UnsavedChangesBanner
+        isDirty={isDirty}
+        message="Save to apply branding updates to the workspace"
+        onSave={handleSave}
+        onDiscard={handleCancelChanges}
+      />
 
       {/* Default/Reset footer panel if not dirty */}
       {!isDirty && (

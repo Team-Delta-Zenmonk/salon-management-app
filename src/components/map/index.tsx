@@ -43,7 +43,9 @@ export default function LocationMap({ control, latitude, longitude, label, disab
             name={longitude as any}
             render={({ field: lngField }) => {
               const value: LatLngValue | null =
-                latField.value != null && lngField.value != null ? { lat: latField.value, lng: lngField.value } : null;
+                latField.value != null && lngField.value != null && latField.value !== "" && lngField.value !== ""
+                  ? { lat: Number(latField.value), lng: Number(lngField.value) }
+                  : null;
 
               return (
                 <MapPicker

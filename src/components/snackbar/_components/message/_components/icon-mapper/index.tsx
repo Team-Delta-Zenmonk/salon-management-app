@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle, AlertTriangle, Info } from "lucide-react";
+import { CheckCircle2, AlertOctagon, AlertTriangle, Info } from "lucide-react";
 import { type VariantType } from "notistack";
 
 interface IconMapperProps {
@@ -8,13 +8,13 @@ interface IconMapperProps {
 export const IconMapper = ({ variant }: IconMapperProps) => {
   switch (variant) {
     case "success":
-      return <CheckCircle className="text-(--success-700)!" />;
+      return <CheckCircle2 className="h-5 w-5 shrink-0 text-current" />;
     case "error":
-      return <XCircle className="text-(--error-600)!" />;
+      return <AlertOctagon className="h-5 w-5 shrink-0 text-current" />;
     case "warning":
-      return <AlertTriangle className="text-(--warning-700)!" />;
+      return <AlertTriangle className="h-5 w-5 shrink-0 text-current" />;
     case "info":
-      return <Info className="text-(--info-700)!" />;
+      return <Info className="h-5 w-5 shrink-0 text-current" />;
     default:
       return null;
   }

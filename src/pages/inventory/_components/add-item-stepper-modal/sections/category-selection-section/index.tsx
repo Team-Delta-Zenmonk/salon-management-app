@@ -88,7 +88,8 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
 
   return (
     <>
-      <div className="p-6 pb-24 flex flex-col gap-6 h-full">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden">
+      <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6 flex-1 overflow-y-auto custom-scrollbar">
         <div className="flex flex-col gap-1.5">
           <h3 className="font-bold text-base text-foreground">Select Product Category</h3>
           <p className="text-xs text-muted-foreground">
@@ -96,14 +97,14 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {/* Create New Category Card */}
           <button
             type="button"
             onClick={() => setCreateCategoryOpen(true)}
-            className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-border/85 hover:border-primary/50 hover:bg-primary/[0.02] rounded-2xl transition-all duration-300 group text-center cursor-pointer min-h-[130px] gap-3"
+            className="flex flex-col items-center justify-center p-4 sm:p-5 border-2 border-dashed border-border/85 hover:border-primary/50 hover:bg-primary/[0.02] rounded-2xl transition-all duration-300 group text-center cursor-pointer min-h-[110px] sm:min-h-[130px] gap-2 sm:gap-3"
           >
-            <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
               <Plus className="w-5 h-5" />
             </div>
             <div className="font-bold text-xs text-foreground/80 group-hover:text-primary transition-colors">
@@ -119,7 +120,7 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
                 key={category.uuid}
                 type="button"
                 onClick={() => handleCategorySelect(category)}
-                className={`flex flex-col items-center justify-center p-5 border rounded-2xl transition-all duration-300 text-center cursor-pointer min-h-[130px] gap-3 group relative overflow-hidden ${
+                className={`flex flex-col items-center justify-center p-4 sm:p-5 border rounded-2xl transition-all duration-300 text-center cursor-pointer min-h-[110px] sm:min-h-[130px] gap-2 sm:gap-3 group relative overflow-hidden ${
                   isSelected
                     ? "border-primary bg-primary/[0.03] text-primary shadow-sm"
                     : "border-border bg-card/45 hover:bg-muted/40 hover:border-border/100"
@@ -128,7 +129,7 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
                 {isSelected && (
                   <div className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-primary" />
                 )}
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 ${
                   isSelected 
                     ? "bg-primary/10 text-primary" 
                     : "bg-muted/50 text-muted-foreground group-hover:text-foreground group-hover:bg-muted/75"
@@ -162,21 +163,22 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 px-6 py-4 border-t border-border bg-muted/20 flex justify-end gap-2 shrink-0">
-        <Button type="button" variant="ghost" onClick={onClose} disabled={loading} className="font-bold rounded-full">
+      <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-border bg-muted/20 flex flex-row items-center justify-end gap-2.5 shrink-0">
+        <Button type="button" variant="ghost" onClick={onClose} disabled={loading} className="w-1/2 sm:w-auto flex-1 sm:flex-none font-bold rounded-full">
           Cancel
         </Button>
-        <Button type="button" onClick={onNext} disabled={!selectedCategory || loading} className="font-bold px-6 rounded-full">
+        <Button type="button" onClick={onNext} disabled={!selectedCategory || loading} className="w-1/2 sm:w-auto flex-1 sm:flex-none font-bold px-6 rounded-full">
           Next
         </Button>
       </div>
+    </div>
 
-      <CreateCategoryModal
-        open={createCategoryOpen}
-        onClose={() => setCreateCategoryOpen(false)}
-        onSuccess={handleCreateCategorySuccess}
-        setValue={setValue}
-      />
-    </>
+    <CreateCategoryModal
+      open={createCategoryOpen}
+      onClose={() => setCreateCategoryOpen(false)}
+      onSuccess={handleCreateCategorySuccess}
+      setValue={setValue}
+    />
+  </>
   );
 };

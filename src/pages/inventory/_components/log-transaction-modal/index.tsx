@@ -136,15 +136,15 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
-        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
-          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+      <DialogContent className="w-[95vw] sm:max-w-lg p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="px-5 sm:px-6 py-4 sm:py-5 border-b bg-muted/20 shrink-0">
+          <DialogTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
             {transactionToEdit ? "Edit Stock Entry" : "Add Stock Entry"}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col py-5 px-6 gap-5 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
-            <div className="flex flex-col sm:flex-row gap-4 items-end">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden min-h-0">
+          <div className="flex flex-col py-4 sm:py-5 px-4 sm:px-6 gap-4 sm:gap-5 overflow-y-auto custom-scrollbar flex-1">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end">
               <div className="flex-1 w-full">
                 <Select
                   name="item_uuid"
@@ -157,14 +157,14 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                 />
               </div>
               {!transactionToEdit && (
-                <Button type="button" variant="outline" onClick={onAddNewItem} className="font-bold shrink-0 h-10 px-4">
+                <Button type="button" variant="outline" onClick={onAddNewItem} className="font-bold shrink-0 h-10 px-4 w-full sm:w-auto">
                   + Add New Item
                 </Button>
               )}
             </div>
 
             {itemUuid && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1">
                     <DatePicker
@@ -215,7 +215,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                     />
                   </div>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1">
                     <TextField
                       identifier="damaged_quantity"
@@ -247,20 +247,20 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
               </div>
             )}
           </div>
-          <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+          <DialogFooter className="m-0 px-4 sm:px-6 py-3.5 sm:py-4 border-t bg-muted/10 gap-2.5 sm:gap-3 flex flex-row items-center justify-end shrink-0">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
               disabled={loading}
-              className="rounded-full px-6 font-semibold"
+              className="w-1/2 sm:w-auto flex-1 sm:flex-none rounded-full px-4 sm:px-6 font-semibold"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading || !itemUuid}
-              className="rounded-full px-6 font-semibold shadow-md hover:shadow-lg transition-all"
+              className="w-1/2 sm:w-auto flex-1 sm:flex-none rounded-full px-4 sm:px-6 font-semibold shadow-md hover:shadow-lg transition-all"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {loading ? "Saving..." : (transactionToEdit ? "Save Transaction" : "Log Transaction")}

@@ -3,34 +3,37 @@ export const getSnackBarStyles = (state: string) => {
     switch (state) {
       case "error":
         return {
-          backgroundColor: "var(--error-50)",
-          color: "var(--error-600)",
+          backgroundColor: "var(--destructive)",
+          color: "var(--destructive-foreground)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
         };
       case "success":
         return {
-          backgroundColor: "var(--success-50)",
-          color: "var(--success-700)",
+          backgroundColor: "var(--primary)",
+          color: "var(--primary-foreground)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
         };
       case "warning":
         return {
-          backgroundColor: "var(--warning-50)",
-          color: "var(--warning-700)",
+          backgroundColor: "#f59e0b",
+          color: "#ffffff",
+          border: "1px solid #d97706",
         };
       case "info":
-        return {
-          backgroundColor: "var(--info-50)",
-          color: "var(--success-700)",
-        };
       default:
         return {
-          backgroundColor: "#F7F9FC",
-          color: "var(--secondary-800)",
+          backgroundColor: "var(--primary)",
+          color: "var(--primary-foreground)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
         };
     }
   };
   return {
-    boxShadow: "0px 2px 8px 3px rgba(51, 51, 51, 0.15)",
-    borderRadius: "8px",
+    boxShadow: "0 20px 30px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08)",
+    borderRadius: "14px",
+    padding: "10px 18px",
+    fontWeight: "600",
+    letterSpacing: "-0.01em",
     ...getVariantStyle(),
   };
 };

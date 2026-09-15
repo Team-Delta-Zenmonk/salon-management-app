@@ -257,7 +257,7 @@ export default function Inventory() {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-background">
+    <div className="flex flex-col flex-1 min-h-0 w-full bg-background">
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -283,7 +283,7 @@ export default function Inventory() {
         </div>
       </motion.div>
 
-      <div className="flex-1 flex flex-col min-h-0 px-4 md:px-8 pb-8 space-y-6">
+      <div className="w-full px-4 md:px-8 pb-8 space-y-6">
         {/* Metrics Grid */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -372,7 +372,7 @@ export default function Inventory() {
           </div>
         </motion.div>
 
-        <div className="shrink-0">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-4 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-border/40 shadow-xs mb-2">
           <InventoryFilters
             activeTab={activeTab}
             onSearch={setSearchTerm}
@@ -386,10 +386,10 @@ export default function Inventory() {
           />
 
           <div className="mt-4">
-            <div className="relative inline-flex h-11 items-center justify-start rounded-xl bg-muted/40 p-1 text-muted-foreground border border-border/40 backdrop-blur-sm w-full max-w-[360px]">
+            <div className="relative inline-flex h-11 items-center justify-start rounded-xl bg-muted/40 p-1 text-muted-foreground border border-border/40 backdrop-blur-sm w-full sm:w-auto sm:max-w-[360px]">
               <button
                 onClick={() => handleTabChange("logs")}
-                className={`flex-1 relative z-10 inline-flex h-full items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
+                className={`flex-1 min-w-0 relative z-10 inline-flex h-full items-center justify-center rounded-lg px-2.5 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
                   activeTab === 0 ? "text-primary-foreground font-bold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -400,12 +400,12 @@ export default function Inventory() {
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
-                <ClipboardList className="w-4 h-4 mr-2 relative z-20" />
-                <span className="relative z-20">Inventory Logs</span>
+                <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 relative z-20 shrink-0" />
+                <span className="relative z-20 truncate">Inventory Logs</span>
               </button>
               <button
                 onClick={() => handleTabChange("stock")}
-                className={`flex-1 relative z-10 inline-flex h-full items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
+                className={`flex-1 min-w-0 relative z-10 inline-flex h-full items-center justify-center rounded-lg px-2.5 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
                   activeTab === 1 ? "text-primary-foreground font-bold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -416,14 +416,14 @@ export default function Inventory() {
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
-                <Package className="w-4 h-4 mr-2 relative z-20" />
-                <span className="relative z-20">Current Stocks</span>
+                <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 relative z-20 shrink-0" />
+                <span className="relative z-20 truncate">Current Stocks</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto" id="inventoryScrollableDiv">
+        <div className="w-full pt-2">
           {activeTab === 1 && (
             <div className="pr-1">
               <div className="text-muted-foreground font-semibold mb-4 text-xs tracking-wider uppercase">

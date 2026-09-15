@@ -42,22 +42,22 @@ export default function PaymentPolicyCard({ isSaving }: PaymentPolicyCardProps) 
   const { control } = useFormContext();
 
   return (
-    <Card className="rounded-3xl border border-border/50 bg-card/60 backdrop-blur-md shadow-sm">
-      <CardHeader className="p-6 pb-4">
+    <Card className="rounded-3xl border border-border/50 bg-card/60 backdrop-blur-md shadow-sm overflow-hidden w-full max-w-full">
+      <CardHeader className="p-4 sm:p-6 pb-4">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
-              <Store className="w-5 h-5 text-primary" />
-              Booking Payment Policy
+          <div className="space-y-1 min-w-0">
+            <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2 text-foreground">
+              <Store className="w-5 h-5 text-primary shrink-0" />
+              <span className="truncate">Booking Payment Policy</span>
             </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
+            <CardDescription className="text-xs text-muted-foreground leading-relaxed">
               Choose how you want to charge customers when they book online through the app.
             </CardDescription>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="p-6 pt-2">
+      <CardContent className="p-4 sm:p-6 pt-0 sm:pt-2">
         <Controller
           name="payment_policy"
           control={control}
@@ -65,7 +65,7 @@ export default function PaymentPolicyCard({ isSaving }: PaymentPolicyCardProps) 
             <RadioGroup
               value={field.value}
               onValueChange={field.onChange}
-              className="grid gap-3"
+              className="grid gap-3 w-full"
             >
               {POLICY_OPTIONS.map((option) => {
                 const isSelected = field.value === option.value;
@@ -76,7 +76,7 @@ export default function PaymentPolicyCard({ isSaving }: PaymentPolicyCardProps) 
                     key={option.value}
                     onClick={() => !isSaving && field.onChange(option.value)}
                     className={cn(
-                      "relative flex items-start gap-4 p-4 rounded-2xl border transition-all duration-200 cursor-pointer select-none",
+                      "relative flex items-start gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer select-none min-w-0 w-full overflow-hidden",
                       isSelected
                         ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20"
                         : "border-border/60 bg-background/50 hover:border-border hover:bg-accent/40"
@@ -86,31 +86,31 @@ export default function PaymentPolicyCard({ isSaving }: PaymentPolicyCardProps) 
                       value={option.value}
                       id={`policy-${option.value}`}
                       disabled={isSaving}
-                      className="mt-1"
+                      className="mt-1 shrink-0"
                     />
 
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 space-y-1.5 min-w-0">
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 min-w-0">
                         <Label
                           htmlFor={`policy-${option.value}`}
-                          className="font-bold text-sm text-foreground cursor-pointer flex items-center gap-2"
+                          className="font-bold text-xs sm:text-sm text-foreground cursor-pointer flex items-center gap-1.5 sm:gap-2 min-w-0 flex-wrap"
                         >
-                          <Icon className={cn("w-4 h-4", isSelected ? "text-primary" : "text-muted-foreground")} />
-                          {option.title}
+                          <Icon className={cn("w-4 h-4 shrink-0", isSelected ? "text-primary" : "text-muted-foreground")} />
+                          <span>{option.title}</span>
                         </Label>
-                        <Badge variant={option.badgeVariant} className="text-[10px] py-0 px-2 rounded-full">
+                        <Badge variant={option.badgeVariant} className="shrink-0 text-[10px] py-0.5 px-2 rounded-full font-bold">
                           {option.badgeText}
                         </Badge>
                       </div>
 
-                      <p className="text-xs text-muted-foreground leading-relaxed">
+                      <p className="text-xs text-muted-foreground leading-relaxed break-words">
                         {option.description}
                       </p>
 
                       {option.value === "partial_deposit" && isSelected && (
                         <div
                           onClick={(e) => e.stopPropagation()}
-                          className="mt-3 pt-3 border-t border-border/40 flex items-center gap-3"
+                          className="mt-3 pt-3 border-t border-border/40 flex flex-wrap items-center gap-3 min-w-0"
                         >
                           <Label className="text-xs font-semibold text-foreground whitespace-nowrap">
                             Deposit Percentage:

@@ -58,15 +58,15 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
-        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
-          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+      <DialogContent className="w-[95vw] sm:max-w-md p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="px-5 sm:px-6 py-4 sm:py-5 border-b bg-muted/20 shrink-0">
+          <DialogTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
             Decrease Stock
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="p-6 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden min-h-0">
+          <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
             <div className="text-sm text-muted-foreground font-medium">
               Enter the quantity you want to subtract from <strong className="font-semibold text-foreground">{inventoryItem?.name}</strong>.
             </div>
@@ -90,20 +90,20 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
               max={inventoryItem?.current_stock || 1000}
             />
           </div>
-          <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+          <DialogFooter className="m-0 px-4 sm:px-6 py-3.5 sm:py-4 border-t bg-muted/10 gap-2.5 sm:gap-3 flex flex-row items-center justify-end shrink-0">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
               disabled={loading}
-              className="rounded-full px-6 font-semibold"
+              className="w-1/2 sm:w-auto flex-1 sm:flex-none rounded-full px-4 sm:px-6 font-semibold"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="rounded-full px-6 font-semibold shadow-md hover:shadow-lg transition-all"
+              className="w-1/2 sm:w-auto flex-1 sm:flex-none rounded-full px-4 sm:px-6 font-semibold shadow-md hover:shadow-lg transition-all"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {loading ? "Decreasing..." : "Decrease Stock"}

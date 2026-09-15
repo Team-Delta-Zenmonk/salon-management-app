@@ -139,6 +139,7 @@ const TextField = <T extends FieldValues>({
                 type={type}
                 ref={ref}
                 value={value ?? ""}
+                title={(others as any).title ?? (value ? String(value) : undefined)}
                 onChange={handleChangeInternal}
                 onBlur={handleBlur ?? onBlur}
                 placeholder={placeholder}
@@ -151,7 +152,7 @@ const TextField = <T extends FieldValues>({
                 onBeforeInput={handleBeforeInput}
                 data-test-id={`input-${identifier}`}
                 className={clsx(
-                  "w-full shadow-sm",
+                  "w-full shadow-sm truncate",
                   startAdornment && "pl-10",
                   (endAdornment || type === "number") && "pr-10",
                   hasError && "border-destructive focus-visible:ring-destructive aria-invalid:border-destructive aria-invalid:ring-destructive",
@@ -172,7 +173,7 @@ const TextField = <T extends FieldValues>({
                       min={min}
                       max={max}
                     />
-                  ) : (
+                  ) : onEndAdornmentClick ? (
                     <button
                       type="button"
                       disabled={disabled}
@@ -189,6 +190,10 @@ const TextField = <T extends FieldValues>({
                     >
                       {endAdornment}
                     </button>
+                  ) : (
+                    <div className={clsx("flex items-center justify-center pointer-events-none select-none", endAdornmentClassName)}>
+                      {endAdornment}
+                    </div>
                   )}
                 </div>
               )}

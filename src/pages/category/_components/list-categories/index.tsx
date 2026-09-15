@@ -13,6 +13,7 @@ import type { Category } from "../../../../features/category/category.slice";
 import DeleteDialog from "../../../../components/delete-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
 import { Button } from "../../../../components/ui/button";
+import { EllipsisCell } from "../../../../components/ellipse-cell";
 
 interface ListCategoriesProps {
   categories: Category[];
@@ -84,7 +85,6 @@ export default function ListCategories({
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         }
-        scrollableTarget="scrollableDiv"
         endMessage={
           categories.length > 0 ? (
             <div className="text-center py-6 text-muted-foreground">
@@ -127,16 +127,21 @@ export default function ListCategories({
                       </Avatar>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-foreground font-bold text-lg leading-tight group-hover:text-primary truncate transition-colors duration-300">
-                        {category.name}
-                      </h3>
+                      <EllipsisCell
+                        value={category.name}
+                        className="text-foreground font-bold text-lg leading-tight group-hover:text-primary transition-colors duration-300"
+                      />
                     </div>
                   </div>
                 </div>
                 
-                <p className="text-muted-foreground/90 mb-6 text-sm leading-relaxed line-clamp-2 min-h-[40px]">
-                  {category.description || "No description provided for this category."}
-                </p>
+                <div className="mb-6 min-h-[40px]">
+                  <EllipsisCell
+                    value={category.description || "No description provided for this category."}
+                    maxLines={2}
+                    className="text-muted-foreground/90 text-sm leading-relaxed"
+                  />
+                </div>
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-border/40 relative z-10">

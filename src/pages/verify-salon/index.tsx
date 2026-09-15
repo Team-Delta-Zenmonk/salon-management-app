@@ -66,8 +66,8 @@ export default function VerifyEmail() {
   const handleResend = async () => {
     try {
       setResendLoading(true);
-      await resendOTP(email);
-      callSnack("OTP resent successfully", "success");
+      const otpResonponse = await resendOTP(email);
+      callSnack(otpResonponse?.message ?? "OTP resent successfully", "success");
       reset({ otp: "" });
       setTimer(60);
       setCanResend(false);

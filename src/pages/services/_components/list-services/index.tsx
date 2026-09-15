@@ -152,14 +152,6 @@ export default function ListServices({
 
   return (
     <>
-      <div className="flex items-center justify-between pb-6">
-        <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          All Services
-          <span className="text-primary text-base font-medium bg-primary/10 px-2.5 py-0.5 rounded-full">
-            {filteredServices.length}
-          </span>
-        </h2>
-      </div>
 
       <InfiniteScroll
         dataLength={filteredServices.length}

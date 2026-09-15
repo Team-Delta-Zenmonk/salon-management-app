@@ -93,10 +93,10 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
   };
 
   return (
-    <>
-      <div className="p-6 pb-24">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden">
+      <div className="p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar">
         {/* Modern Category Badge */}
-        <div className="flex items-center gap-2 mb-6 px-1">
+        <div className="flex items-center gap-2 mb-4 sm:mb-6 px-1">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Organizing in:</span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
@@ -105,7 +105,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} id="add-item-form">
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4 sm:gap-5">
             {/* Row 1: Name & Brand */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <TextField
@@ -203,15 +203,15 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
         </form>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 px-6 py-4 border-t border-border flex justify-end gap-2 bg-muted/20 shrink-0">
-        <Button type="button" variant="ghost" onClick={onBack} disabled={loading} className="font-bold rounded-full">
+      <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-border flex flex-row items-center justify-end gap-2.5 bg-muted/20 shrink-0">
+        <Button type="button" variant="ghost" onClick={onBack} disabled={loading} className="w-1/2 sm:w-auto flex-1 sm:flex-none font-bold rounded-full">
           Back
         </Button>
-        <Button type="submit" form="add-item-form" disabled={loading} className="font-bold px-6 rounded-full">
+        <Button type="submit" form="add-item-form" disabled={loading} className="w-1/2 sm:w-auto flex-1 sm:flex-none font-bold px-6 rounded-full">
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {loading ? "Creating..." : "Create"}
         </Button>
       </div>
-    </>
+    </div>
   );
 };

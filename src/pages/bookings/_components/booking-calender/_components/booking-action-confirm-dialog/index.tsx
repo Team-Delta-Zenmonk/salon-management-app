@@ -38,19 +38,19 @@ export default function BookingActionConfirmDialog({
         <div className="text-sm text-muted-foreground leading-relaxed pb-6">
           {description}
         </div>
-        <DialogFooter className="pt-4 border-t bg-muted/10 gap-3 flex-row justify-end -mx-6 -mb-6 px-6">
+        <DialogFooter className="pt-4 border-t bg-muted/10 gap-3 flex flex-row items-center justify-end -mx-6 -mb-6 px-6">
           <Button
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
-            className="rounded-full h-10 px-5"
+            className="w-1/2 sm:w-auto flex-1 sm:flex-none rounded-full h-10 px-5"
           >
             {cancelText}
           </Button>
           <Button
             onClick={onConfirm}
             disabled={isLoading}
-            className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold gap-2 h-10 px-5 transition-colors shadow-sm"
+            className="w-1/2 sm:w-auto flex-1 sm:flex-none rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold gap-2 h-10 px-5 transition-colors shadow-sm"
           >
             {isLoading ? (
               <>

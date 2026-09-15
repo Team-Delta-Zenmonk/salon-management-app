@@ -5,6 +5,7 @@ import {
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { useAppSelector } from "../../../store/hooks";
+import { useTheme } from "next-themes";
 import { type RootState } from "../../../store/store";
 import type { ColorTheme } from "../../../hooks/use-color-theme";
 
@@ -71,8 +72,10 @@ export default function LivePreviewPanel({
   colorTheme,
   themeMode,
 }: LivePreviewPanelProps) {
+  const { systemTheme } = useTheme();
   const palette = themePaletteMap[colorTheme] || themePaletteMap.sunset;
-  const currentPalette = themeMode === "dark" ? palette.dark : palette.light;
+  const activeTheme = themeMode === "system" ? systemTheme : themeMode;
+  const currentPalette = activeTheme === "dark" ? palette.dark : palette.light;
 
   const styleVariables = {
     "--background": currentPalette.background,

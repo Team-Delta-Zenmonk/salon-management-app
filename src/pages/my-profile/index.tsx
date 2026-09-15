@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import type { RootState } from "../../store/store";
 import { getSalonProfileAction } from "../../features/auth/profile/get-salon-profile/getSalonProfile.action";
@@ -11,21 +11,15 @@ import LogoutButton from "../../components/logout";
 import { MyProfileSchema, type SalonProfileForm } from "./schema/my-profile.schema";
 import { DAYS_MAP } from "./_components/constants/business-hours.constants";
 import { Badge } from "../../components/ui/badge";
-import { Button } from "../../components/ui/button";
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "../../components/ui/carousel";
+import { cn } from "../../lib/utils";
 
 import { GeneralInfoSection, BrandingSection } from "./_components/general-tab/index";
 import { LocationSection } from "./_components/location-tab/index";
 import { HoursSection } from "./_components/hours-tab/index";
 import PaymentPolicyCard from "./_components/payment-policy-card/index";
-
-import {
-  AlertCircle,
-  RotateCcw,
-  Save,
-  Loader2,
-} from "lucide-react";
+import { UnsavedChangesBanner } from "../../components/unsaved-changes-banner";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -49,8 +43,24 @@ const MyProfile = () => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const onSelect = () => {
+      setCurrentSlideIndex(carouselApi.selectedScrollSnap());
+    };
+
+    onSelect();
+    carouselApi.on("select", onSelect);
+
+    return () => {
+      carouselApi.off("select", onSelect);
+    };
+  }, [carouselApi]);
 
   useEffect(() => {
     if (salon?.uuid) {
@@ -122,7 +132,7 @@ const MyProfile = () => {
       if (updateSalonProfileAction.fulfilled.match(resultAction)) {
         callSnack("Profile updated successfully", "success");
         if (salon?.uuid) dispatch(getSalonProfileAction(salon.uuid));
-        reset(data); 
+        reset(data);
         return true;
       } else {
         callSnack("Failed to update profile", "error");
@@ -200,7 +210,7 @@ const MyProfile = () => {
               >
                 <motion.div
                   variants={itemVariants}
-                  className="relative group rounded-3xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg h-[260px] hover:shadow-xl hover:border-primary/30 transition-all duration-300"
+                  className="relative group rounded-3xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg min-h-[210px] sm:min-h-[240px] md:h-[260px] hover:shadow-xl hover:border-primary/30 transition-all duration-300 w-full"
                 >
                   {/* Pure Zero-useEffect Automatic Carousel */}
                   {activePhotos.length > 0 ? (
@@ -212,7 +222,7 @@ const MyProfile = () => {
                     >
                       <CarouselContent className="h-full -ml-0">
                         {activePhotos.map((photo: PhotoType, index: number) => (
-                          <CarouselItem key={photo.url || index} className="pl-0 h-[260px] w-full">
+                          <CarouselItem key={photo.url || index} className="pl-0 min-h-[210px] sm:min-h-[240px] md:h-[260px] w-full">
                             <img
                               src={photo.url}
                               alt={`Salon Banner ${index + 1}`}
@@ -222,52 +232,63 @@ const MyProfile = () => {
                         ))}
                       </CarouselContent>
 
-                      {/* Interactive indicator dots */}
+                      {/* Interactive indicator dots & slide counter */}
                       {activePhotos.length > 1 && (
-                        <div className="absolute top-4 right-6 z-20 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                          {activePhotos.slice(0, 3).map((_, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                carouselApi?.scrollTo(idx);
-                              }}
-                              className="w-2.5 h-2.5 rounded-full bg-white/60 hover:bg-white transition-all cursor-pointer"
-                              aria-label={`Go to slide ${idx + 1}`}
-                            />
-                          ))}
+                        <div className="absolute top-3 right-3 sm:top-4 sm:right-6 z-20 flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15 shadow-lg">
+                          <div className="flex items-center gap-1.5">
+                            {activePhotos.map((_, idx) => {
+                              const isActive = currentSlideIndex === idx;
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    carouselApi?.scrollTo(idx);
+                                  }}
+                                  className={cn(
+                                    "h-2 rounded-full transition-all duration-300 cursor-pointer",
+                                    isActive
+                                      ? "w-5 bg-white shadow-sm ring-1 ring-white/50"
+                                      : "w-2 bg-white/40 hover:bg-white/80"
+                                  )}
+                                  aria-label={`Go to slide ${idx + 1}`}
+                                  title={`Slide ${idx + 1}`}
+                                />
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
                     </Carousel>
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-tr from-neutral-900 to-neutral-950" />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
 
-                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-8 z-10">
-                    <div className="flex items-center gap-5 text-left">
-                      <div className="w-24 h-24 rounded-2xl border border-white/20 shrink-0 bg-background overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
+                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 sm:p-6 md:p-8 z-10 gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4 md:gap-5 text-left min-w-0 flex-1">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl border border-white/20 shrink-0 bg-background overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
                         {activeLogo?.url ? (
                           <img src={activeLogo.url} className="object-cover w-full h-full" alt="Logo" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-2xl font-black">
+                          <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-xl sm:text-2xl font-black">
                             {activeName?.substring(0, 1).toUpperCase() || "S"}
                           </div>
                         )}
                       </div>
 
-                      <div className="space-y-1.5">
-                        <h2 className="text-2xl font-black tracking-tight text-white drop-shadow-md">
+                      <div className="space-y-1 sm:space-y-1.5 min-w-0 flex-1">
+                        <h2 className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white drop-shadow-md truncate">
                           {activeName || "Your Salon"}
                         </h2>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                           {activeType && (
-                            <Badge variant="secondary" className="bg-white/15 text-white border-white/10 backdrop-blur-sm text-[10px] font-bold py-0.5 px-2.5 rounded-full capitalize">
+                            <Badge variant="secondary" className="bg-white/15 text-white border-white/10 backdrop-blur-sm text-[9px] sm:text-[10px] font-bold py-0.5 px-2 sm:px-2.5 rounded-full capitalize">
                               {activeType}
                             </Badge>
                           )}
-                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 py-0.5 px-2.5 rounded-full text-[10px] font-bold gap-1.5 backdrop-blur-sm">
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 py-0.5 px-2 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold gap-1.5 backdrop-blur-sm">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Operational
                           </Badge>
@@ -275,7 +296,7 @@ const MyProfile = () => {
                       </div>
                     </div>
 
-                    <div className="hidden md:flex flex-col items-end gap-1 text-right text-white/95 drop-shadow-md mb-2">
+                    <div className="hidden md:flex flex-col items-end gap-1 text-right text-white/95 drop-shadow-md shrink-0 mb-1">
                       <span className="text-[10px] uppercase font-bold tracking-wider text-white/60">Operational Schedule</span>
                       <span className="text-sm font-bold">
                         Open {openDaysCount} days a week
@@ -298,7 +319,7 @@ const MyProfile = () => {
                     </div>
 
                     {/* Right Column (col-span-5) - Branding & Schedule */}
-                    <div className="lg:col-span-5 space-y-8">
+                    <div className="lg:col-span-5 space-y-8 min-w-0 w-full">
                       <BrandingSection
                         control={control}
                         setValue={setValue}
@@ -321,56 +342,13 @@ const MyProfile = () => {
           </div>
         </div>
 
-        <AnimatePresence>
-          {isDirty && (
-            <motion.div
-              initial={{ opacity: 0, y: 60 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 60 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-xl"
-            >
-              <div className="bg-card/95 backdrop-blur-md border border-border/80 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <AlertCircle className="h-4 w-4 animate-pulse" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-foreground">You have unsaved changes</p>
-                    <p className="text-[10px] text-muted-foreground truncate">
-                      Save to apply operational updates to your salon profile
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    onClick={() => reset()}
-                    className="text-[11px] font-bold text-muted-foreground hover:text-foreground h-8 px-2.5 rounded-full cursor-pointer"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5 mr-1" />
-                    Discard
-                  </Button>
-                  <Button
-                    size="xs"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="text-[11px] font-bold rounded-full h-8 px-4 shadow-md shadow-primary/20 hover:opacity-95 cursor-pointer bg-primary text-primary-foreground"
-                  >
-                    {isSaving ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
-                    ) : (
-                      <Save className="h-3.5 w-3.5 mr-1" />
-                    )}
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <UnsavedChangesBanner
+          isDirty={isDirty}
+          message="Save to apply operational updates to your salon profile"
+          isSaving={isSaving}
+          onSave={handleSave}
+          onDiscard={() => reset()}
+        />
 
       </div>
     </FormProvider>

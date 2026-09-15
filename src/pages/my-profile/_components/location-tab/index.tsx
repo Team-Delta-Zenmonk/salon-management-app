@@ -204,13 +204,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
           {/* Email (Readonly) */}
-          <div className="relative min-w-0">
-            <div className="absolute right-3 top-[34px] flex items-center gap-1.5 z-10">
-              <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 py-0.5 px-2 rounded-full text-[9px] font-bold gap-1 backdrop-blur-xs">
-                <CheckCircle2 className="w-2.5 h-2.5" />
-                Verified
-              </Badge>
-            </div>
+          <div className="min-w-0">
             <TextField
               name="email"
               type="text"
@@ -219,7 +213,13 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="salon@example.com"
               identifier="salon-email-field"
               disabled
-              inputPropsClassName="bg-white dark:bg-neutral-900"
+              endAdornment={
+                <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 py-0.5 px-2 rounded-full text-[9px] font-bold gap-1 backdrop-blur-xs shrink-0 select-none">
+                  <CheckCircle2 className="w-2.5 h-2.5" />
+                  Verified
+                </Badge>
+              }
+              inputPropsClassName="bg-white dark:bg-neutral-900 pr-22 text-ellipsis overflow-hidden whitespace-nowrap"
             />
           </div>
 
@@ -301,7 +301,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
         </div>
 
         {/* Leaflet Map - Height increased to h-[380px] */}
-        <div className="relative rounded-3xl border border-border/50 overflow-hidden shadow-inner h-[380px] bg-background/20 mb-6 z-0 hover:border-primary/20 transition-all duration-300">
+        <div className="relative rounded-xl border border-border/50 overflow-hidden shadow-inner h-[380px] bg-background/20 mb-6 z-0 hover:border-primary/20 transition-all duration-300">
           <LocationMap
             control={control}
             latitude="address.latitude"

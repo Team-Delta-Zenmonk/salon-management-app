@@ -195,7 +195,6 @@ const FilePicker = <T extends FieldValues>({
               data-test-id={`input-${identifier}`}
               onChange={(e) => {
                 handleFileChange(e, onChange);
-                onBlur();
               }}
               accept={accept}
               hidden

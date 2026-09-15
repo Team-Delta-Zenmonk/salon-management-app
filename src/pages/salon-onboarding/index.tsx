@@ -314,7 +314,7 @@ export default function SalonOnboarding() {
               </div>
 
               {/* Step content — animated */}
-              <div className="px-6 py-5 min-h-[220px] overflow-hidden">
+              <div className="px-6 py-5 min-h-[220px]">
                 <AnimatePresence mode="wait" custom={direction}>
                   <motion.div
                     key={activeStep}

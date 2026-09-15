@@ -252,14 +252,6 @@ export default function ListStaff({
 
   return (
     <>
-      <div className="flex items-center justify-between pb-6">
-        <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          Staff Directory
-          <span className="text-primary text-base font-medium bg-primary/10 px-2.5 py-0.5 rounded-full">
-            {staffs.length}
-          </span>
-        </h2>
-      </div>
 
       <InfiniteScroll
         dataLength={staffs.length}
@@ -270,7 +262,6 @@ export default function ListStaff({
             <Loader2 className="w-8 h-8 animate-spin text-primary/60" />
           </div>
         }
-        scrollableTarget="scrollableDiv"
         endMessage={
           staffs.length > 0 ? (
             <div className="text-center py-8 text-muted-foreground text-sm flex items-center justify-center gap-2">

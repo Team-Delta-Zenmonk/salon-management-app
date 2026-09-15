@@ -317,7 +317,6 @@ export const StockTable: React.FC<StockTableProps> = ({
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         }
-        scrollableTarget="inventoryScrollableDiv"
         endMessage={
           !hasMore && data.length > 0 ? (
             <div className="text-center py-6">

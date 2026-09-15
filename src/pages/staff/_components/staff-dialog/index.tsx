@@ -85,7 +85,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
         last_name: data.last_name ? data.last_name.trim().toLowerCase() : undefined,
         email: data.email,
         phone_number: data.phone_number,
-        additional_phone_number: data.additional_phone_number ?? null,
+        additional_phone_number: data.additional_phone_number || undefined,
         dob: data.dob,
         title: data.title,
         joining_date: data.joining_date,

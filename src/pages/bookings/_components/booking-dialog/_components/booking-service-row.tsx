@@ -30,8 +30,8 @@ export default function BookingServiceRow({
   watchedServiceId,
 }: Readonly<BookingServiceRowProps>) {
   return (
-    <div className="rounded-xl border border-border/50 p-4 relative bg-muted/5 transition-colors hover:bg-muted/10">
-      <div className="flex items-start gap-4">
+    <div className="rounded-xl border border-border/50 p-3.5 sm:p-4 relative bg-muted/5 transition-colors hover:bg-muted/10">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
           <Select
             name={`services.${index}.service_id`}
@@ -61,7 +61,7 @@ export default function BookingServiceRow({
             size="icon"
             variant="ghost"
             onClick={onRemove}
-            className="mt-1 h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            className="self-end sm:self-auto mt-0 sm:mt-1 h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
           >
             <X className="h-4 w-4" />
           </Button>

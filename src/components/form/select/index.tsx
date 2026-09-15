@@ -86,7 +86,7 @@ const Select = <T extends FieldValues>({
                   </div>
                 )}
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="start" >
                 {options && options.length > 0 ? (
                   options.map((option) => (
                     <SelectItem

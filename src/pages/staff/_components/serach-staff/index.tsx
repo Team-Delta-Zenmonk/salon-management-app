@@ -84,14 +84,20 @@ const SearchStaff = () => {
   const hasMore = data.length < total;
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 px-4 md:px-8 pb-8 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center gap-4 pb-6 border-b border-border/10 mb-2">
+    <div className="w-full px-4 md:px-8 pb-8 space-y-6">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-border/40 shadow-xs mb-2">
+        <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          Staff Directory
+          <span className="text-primary text-base font-medium bg-primary/10 px-2.5 py-0.5 rounded-full">
+            {total}
+          </span>
+        </h2>
         <div className="w-full md:w-[320px]">
           <SearchBar onSearch={setSearchQuery} placeholder="Search staff members..." />
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden" id="scrollableDiv">
+      <div className="flex-1 min-h-0 pt-2" id="scrollableDiv">
         {isLoading && data.length === 0 ? (
           <div className="w-full">
             <StaffListSkeleton />

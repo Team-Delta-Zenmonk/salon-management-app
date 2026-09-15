@@ -1,7 +1,6 @@
 import React from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
-import { motion, AnimatePresence } from "framer-motion";
 import type { SalonProfileForm } from "../../schema/my-profile.schema";
 import TextField from "../../../../components/form/textfield";
 import Select from "../../../../components/form/select";
@@ -39,6 +38,9 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
   const [photosUploading, setPhotosUploading] = React.useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = React.useState(false);
   const [isLogoPreviewOpen, setIsLogoPreviewOpen] = React.useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
+  const [lightboxIndex, setLightboxIndex] = React.useState(0);
+
   const logoInputRef = React.useRef<HTMLInputElement | null>(null);
   const photoInputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -85,6 +87,11 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
       setPhotosUploading(false);
       e.target.value = "";
     }
+  };
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setIsLightboxOpen(true);
   };
 
   return (
@@ -160,15 +167,6 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                 These images will be displayed on client-facing booking pages.
               </p>
             </div>
-            {photos.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setIsGalleryOpen(true)}
-                className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
-              >
-                View all ({photos.length})
-              </button>
-            )}
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -191,7 +189,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
             {photos.length > 0 ? (
               <div 
                 className="group relative rounded-2xl overflow-hidden border border-border/50 bg-background/40 shadow-sm hover:border-primary/30 transition-all duration-300 flex flex-col aspect-[4/3] cursor-pointer"
-                onClick={() => setIsGalleryOpen(true)}
+                onClick={() => openLightbox(0)}
               >
                 <img 
                   src={photos[0].url} 
@@ -205,11 +203,12 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                     const updated = photos.filter((_, i) => i !== 0);
                     setValue("photos", updated, { shouldDirty: true });
                   }}
-                  className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 hover:bg-destructive hover:scale-110 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer z-10"
+                  className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-4 h-4 sm:w-7 sm:h-7 p-0 flex items-center justify-center rounded-full bg-black/75 hover:bg-destructive hover:scale-110 text-white opacity-100 sm:opacity-0 sm:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 cursor-pointer z-20 shadow-md"
+                  title="Delete photo"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </button>
-                <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-xs px-2 py-1 flex items-center justify-between">
+                <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-xs px-2 py-1 flex items-center justify-between pointer-events-none">
                   <p className="text-[9px] font-medium text-white truncate max-w-[85%]" title={photos[0].filename}>
                     {photos[0].filename || "Photo 1"}
                   </p>
@@ -220,7 +219,13 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
             {photos.length > 1 ? (
               <div 
                 className="group relative rounded-2xl overflow-hidden border border-border/50 bg-background/40 shadow-sm hover:border-primary/30 transition-all duration-300 flex flex-col aspect-[4/3] cursor-pointer"
-                onClick={() => setIsGalleryOpen(true)}
+                onClick={() => {
+                  if (photos.length > 2) {
+                    setIsGalleryOpen(true);
+                  } else {
+                    openLightbox(1);
+                  }
+                }}
               >
                 <img 
                   src={photos[1].url} 
@@ -242,11 +247,12 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                         const updated = photos.filter((_, i) => i !== 1);
                         setValue("photos", updated, { shouldDirty: true });
                       }}
-                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 hover:bg-destructive hover:scale-110 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer z-10"
+                      className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 p-0 flex items-center justify-center rounded-full bg-black/75 hover:bg-destructive hover:scale-110 text-white opacity-100 sm:opacity-0 sm:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 cursor-pointer z-20 shadow-md"
+                      title="Delete photo"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
-                    <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-xs px-2 py-1 flex items-center justify-between">
+                    <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-xs px-2 py-1 flex items-center justify-between pointer-events-none">
                       <p className="text-[9px] font-medium text-white truncate max-w-[85%]" title={photos[1].filename}>
                         {photos[1].filename || "Photo 2"}
                       </p>
@@ -269,7 +275,8 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                 {photos.map((photo: PhotoType, index: number) => (
                   <div
                     key={photo.url || index}
-                    className="group relative rounded-2xl overflow-hidden border border-border/50 bg-background/40 shadow-sm aspect-[4/3]"
+                    className="group relative rounded-2xl overflow-hidden border border-border/50 bg-background/40 shadow-sm aspect-[4/3] cursor-pointer"
+                    onClick={() => openLightbox(index)}
                   >
                     <img
                       src={photo.url}
@@ -278,17 +285,18 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                     />
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         const updated = photos.filter((_, i) => i !== index);
                         setValue("photos", updated, { shouldDirty: true });
                         if (updated.length === 0) setIsGalleryOpen(false);
                       }}
-                      className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 hover:bg-destructive text-white opacity-90 group-hover:opacity-100 transition-all cursor-pointer"
+                      className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 p-0 flex items-center justify-center rounded-full bg-black/75 hover:bg-destructive hover:scale-110 text-white opacity-100 sm:opacity-0 sm:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all cursor-pointer z-20 shadow-md"
                       title="Delete photo"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
-                    <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-xs px-2.5 py-1.5">
+                    <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-xs px-2.5 py-1.5 pointer-events-none">
                       <p className="text-[10px] font-medium text-white truncate" title={photo.filename}>
                         {photo.filename || `Photo ${index + 1}`}
                       </p>
@@ -308,6 +316,15 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                 buttonPrev: () => null,
                 buttonNext: () => null,
               }}
+            />
+          )}
+
+          {photos.length > 0 && (
+            <Lightbox
+              open={isLightboxOpen}
+              close={() => setIsLightboxOpen(false)}
+              index={lightboxIndex}
+              slides={photos.map((p) => ({ src: p.url }))}
             />
           )}
 

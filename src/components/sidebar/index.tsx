@@ -8,6 +8,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 import { useAppSelector } from "../../store/hooks";
 import type { RootState } from "../../store/store";
+import { EllipsisCell } from "../ellipse-cell";
 
 type SidebarProps = {
   drawerWidth: number;
@@ -29,12 +30,10 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
           </div>
           {!desktopCollapsed && (
             <div className="min-w-0 flex-1">
-              <div 
-                title={salon?.owner_name || "Salon Manager"}
-                className="truncate text-base font-semibold text-foreground capitalize"
-              >
-                {salon?.owner_name || "Salon Manager"}
-              </div>
+              <EllipsisCell
+                value={salon?.owner_name || "Salon Manager"}
+                className="text-base font-semibold text-foreground capitalize"
+              />
               <div className="text-xs text-muted-foreground whitespace-nowrap">
                 Admin Panel
               </div>

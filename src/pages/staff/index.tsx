@@ -4,7 +4,7 @@ import SearchStaff from "./_components/serach-staff";
 
 export default function Staff() {
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-background">
+    <div className="flex flex-col flex-1 min-h-0 w-full bg-background">
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

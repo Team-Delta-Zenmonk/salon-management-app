@@ -100,8 +100,8 @@ export default function BookingTable({
 
   return (
     <div className="w-full space-y-4">
-      <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md overflow-hidden shadow-sm">
-        <Table>
+      <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md overflow-x-auto shadow-sm">
+        <Table className="min-w-[700px] md:min-w-full">
           <TableHeader className="bg-muted/40">
             <TableRow className="border-border/60 hover:bg-transparent">
               <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Client</TableHead>
@@ -215,7 +215,7 @@ export default function BookingTable({
 
       {/* Pagination Bar */}
       {total > 0 && onPageChange && (
-        <div className="flex items-center justify-between px-2 pt-2 text-xs text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 pt-2 text-xs text-muted-foreground text-center sm:text-left">
           <span>
             Showing <strong className="text-foreground">{bookings.length}</strong> of{" "}
             <strong className="text-foreground">{total}</strong> bookings

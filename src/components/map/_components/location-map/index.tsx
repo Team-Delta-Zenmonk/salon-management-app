@@ -35,11 +35,33 @@ function ChangeMapView({ coords }: { coords: LatLngExpression }) {
 function MapResizer() {
   const map = useMap();
   useEffect(() => {
-    map.invalidateSize();
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 400);
-    return () => clearTimeout(timer);
+    const container = map.getContainer();
+    if (!container) return;
+
+    const initRafId = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
+    });
+
+    let resizeRafId: number | null = null;
+    let observer: ResizeObserver | null = null;
+
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => {
+        if (resizeRafId !== null) cancelAnimationFrame(resizeRafId);
+        resizeRafId = requestAnimationFrame(() => {
+          map.invalidateSize();
+        });
+      });
+      observer.observe(container);
+    }
+
+    return () => {
+      cancelAnimationFrame(initRafId);
+      if (resizeRafId !== null) cancelAnimationFrame(resizeRafId);
+      observer?.disconnect();
+    };
   }, [map]);
   return null;
 }
