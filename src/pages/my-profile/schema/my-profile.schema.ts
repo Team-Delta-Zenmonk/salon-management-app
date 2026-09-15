@@ -47,10 +47,10 @@ export const MyProfileSchema = z.object({
     saturday: BusinessDaySchema,
     sunday: BusinessDaySchema,
   }),
-  payment_policy: z.enum(["pay_at_venue", "partial_deposit", "full_upfront"]),
+  allowed_payment_policies: z.array(z.enum(["pay_at_venue", "partial_deposit", "full_upfront"])).min(1, "Select at least one payment policy"),
   deposit_percentage: z.number().optional().nullable(),
 }).superRefine((data, ctx) => {
-  if (data.payment_policy === "partial_deposit") {
+  if (data.allowed_payment_policies?.includes("partial_deposit")) {
     if (data.deposit_percentage == null || isNaN(Number(data.deposit_percentage))) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

@@ -38,7 +38,7 @@ export default function BookingReceiptDialog({
     booking.booking_services?.reduce((sum, s) => sum + (Number(s.price) || 0), 0) ||
     0;
   const onlinePaid = booking.amount_paid_online || 0;
-  const policy = booking.payment_policy;
+  const policy = booking.payment_preference || booking.payment_policy;
 
   let paid = 0;
   let label = "Pay at Venue";

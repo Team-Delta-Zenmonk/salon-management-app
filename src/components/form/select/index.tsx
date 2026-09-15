@@ -19,7 +19,6 @@ const Select = <T extends FieldValues>({
   control,
   identifier,
   label,
-  translate = true,
   disabled = false,
   rules,
   triggerClassName,
@@ -52,7 +51,7 @@ const Select = <T extends FieldValues>({
             )}
 
             <ShadcnSelect
-              value={value ?? ""}
+              value={value != null && value !== "" ? String(value) : ""}
               onValueChange={onChange}
               disabled={disabled}
             >
@@ -69,7 +68,7 @@ const Select = <T extends FieldValues>({
                 aria-invalid={hasError}
               >
                 <div className="truncate flex-1 text-left flex items-center gap-1.5 line-clamp-1 pr-2">
-                  {value ? options?.find((o) => o.value === value)?.label || value : <span className="text-muted-foreground">{placeholder}</span>}
+                  {value ? options?.find((o) => String(o.value) === String(value))?.label || value : <span className="text-muted-foreground">{placeholder}</span>}
                 </div>
                 {value && (
                   <div

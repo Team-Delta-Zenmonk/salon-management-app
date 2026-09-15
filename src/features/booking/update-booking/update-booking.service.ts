@@ -9,6 +9,7 @@ export interface UpdateBookingPayload {
       phone?: string;
       email?: string;
     };
+    is_walk_in?: boolean;
     [key: string]: any;
   };
 }

@@ -19,7 +19,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import type { Booking, BookingStatus, BookingServiceItem } from "../../../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../../../common/enums/booking-status.enum";
-import { BOOKING_SOURCE } from "../../../../../../common/enums/booking-source.enum";
 import { formatTimeRange } from "../../../../utils/format-time-range";
 import { deleteBookingAction } from "../../../../../../features/booking/delete-booking/delete-booking.action";
 import { updateBookingAction } from "../../../../../../features/booking/update-booking/update-booking.action";
@@ -83,7 +82,6 @@ export default function BookingDetailsDialog({
   const statusColor = booking ? getStatusColor(booking.status) : "#6b7280";
   const isCancelled = booking?.status === BOOKING_STATUS.CANCELLED;
   const isCompleted = booking?.status === BOOKING_STATUS.COMPLETED;
-  const isAdminBooking = booking?.created_by === BOOKING_SOURCE.ADMIN;
 
   const timeInfo = useMemo(() => {
     if (!booking) return null;
@@ -144,7 +142,7 @@ export default function BookingDetailsDialog({
                 <div className="shrink-0 relative overflow-hidden bg-muted/20 border-b border-border/50">
                   <div className="relative flex items-start justify-between px-5 sm:px-6 pt-5 pb-2">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span
                           className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full"
                           style={{
@@ -159,6 +157,18 @@ export default function BookingDetailsDialog({
                           />
                           {STATUS_LABELS[booking.status] ?? booking.status}
                         </span>
+
+                        {booking.is_walk_in ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                            Walk-in
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            Online
+                          </span>
+                        )}
                       </div>
                       <DialogTitle className="text-lg font-bold text-foreground leading-tight">Booking Details</DialogTitle>
                       <p className="text-xs text-muted-foreground font-mono mt-0.5">
@@ -301,18 +311,16 @@ export default function BookingDetailsDialog({
                     transition={{ delay: 0.15, duration: 0.2 }}
                     className="shrink-0 px-4 sm:px-5 py-4 border-t bg-muted/10 space-y-2"
                   >
-                    <div className={`grid gap-2 ${isAdminBooking ? "grid-cols-2" : "grid-cols-1"}`}>
-                      {isAdminBooking && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditOpen(true)}
-                          className="w-full rounded-xl gap-2 h-10 font-medium"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                          Edit
-                        </Button>
-                      )}
+                    <div className="grid gap-2 grid-cols-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditOpen(true)}
+                        className=" rounded-xl gap-2 h-10 font-medium"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Edit
+                      </Button>
                       <Button
                         size="sm"
                         onClick={handleComplete}
@@ -329,7 +337,7 @@ export default function BookingDetailsDialog({
                       <div className="flex-1 h-px bg-border/40" />
                     </div>
 
-                    <div className={`grid gap-2 ${isAdminBooking ? "grid-cols-2" : "grid-cols-1"}`}>
+                    <div className="grid gap-2 grid-cols-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -339,17 +347,17 @@ export default function BookingDetailsDialog({
                         <X className="h-3.5 w-3.5" />
                         Cancel
                       </Button>
-                      {isAdminBooking && (
+                       
                         <Button
                           size="sm"
                           onClick={() => setDeleteConfirmOpen(true)}
                           disabled={isDeleting}
-                          className="w-full rounded-xl h-10 font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-all gap-2 border-none"
+                          className="rounded-xl h-10 font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-all gap-2 border-none"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           Delete
                         </Button>
-                      )}
+                      
                     </div>
                   </motion.div>
                 )}
@@ -388,7 +396,7 @@ export default function BookingDetailsDialog({
         isLoading={isDeleting}
       />
       {booking && (
-        <BookingDialog open={editOpen} onClose={() => setEditOpen(false)} mode="update" booking={booking} />
+        <BookingDialog open={editOpen} onClose={() => { setEditOpen(false); onClose(); }} mode="update" booking={booking} />
       )}
     </>
   );

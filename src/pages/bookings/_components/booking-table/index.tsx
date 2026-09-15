@@ -29,7 +29,7 @@ const getPaymentDetails = (booking: Booking) => {
     booking.total_price ||
     booking.booking_services?.reduce((sum, s) => sum + (Number(s.price) || 0), 0) ||
     0;
-  const policy = booking.payment_policy;
+  const policy = booking.payment_preference || booking.payment_policy;
   const onlinePaid = booking.amount_paid_online || 0;
   let paid = 0;
   let label = "Pay at Venue";
@@ -140,6 +140,20 @@ export default function BookingTable({
                   >
                     <TableCell className="font-semibold text-foreground text-sm">
                       {booking.customer_name}
+                      <div className="flex flex-col gap-1 items-start">
+                        <span>{booking.customer_name}</span>
+                        {booking.is_walk_in ? (
+                          <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0 px-2 font-bold gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            Walk-in
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0 px-2 font-bold gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            Online
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
 
                     <TableCell className="text-muted-foreground text-sm">

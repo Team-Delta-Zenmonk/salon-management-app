@@ -152,6 +152,9 @@ export default function MonthView({
                             <span className={`truncate flex-1 opacity-90 ${isCancelled ? "line-through opacity-60" : ""}`}>
                               {booking.customer_name}
                             </span>
+                            {booking.is_walk_in && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 shadow-sm" title="Walk-in Booking" />
+                            )}
                           </button>
                         );
                       })}
@@ -174,10 +177,8 @@ export default function MonthView({
         </div>
       </div>
 
-      {/* ── "More events" Dialog — separate from calendar DOM ── */}
       <Dialog open={!!moreDayDate} onOpenChange={(o) => !o && setMoreDayDate(null)}>
         <DialogContent className="w-[92vw] sm:max-w-md p-0 gap-0 rounded-2xl overflow-hidden border-border/60 shadow-2xl [&>button]:hidden">
-          {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 bg-muted/30 border-b border-border/50">
             <div className="flex flex-col gap-0.5">
               <DialogTitle className="text-base font-bold flex items-center gap-2 text-foreground">
@@ -196,7 +197,6 @@ export default function MonthView({
             </button>
           </div>
 
-          {/* Scrollable booking list */}
           <ScrollArea className="max-h-[60vh]">
             <div className="flex flex-col gap-2 p-4">
               {moreDayBookings.map((booking) => {
@@ -210,13 +210,11 @@ export default function MonthView({
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all hover:brightness-110 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 text-white"
                     style={{ backgroundColor: color }}
                   >
-                    {/* Time */}
                     <div className={`text-xs font-bold tabular-nums shrink-0 ${isCancelled ? "line-through opacity-70" : ""}`}>
                       <Clock className="w-3 h-3 inline mr-1 opacity-80" />
                       {format(new Date(booking.start_time), "h:mm a")}
                     </div>
 
-                    {/* Customer + service */}
                     <div className="flex-1 min-w-0">
                       <div className={`font-semibold text-sm truncate flex items-center gap-1.5 ${isCancelled ? "line-through opacity-70" : ""}`}>
                         <User className="w-3.5 h-3.5 shrink-0 opacity-80" />
@@ -229,7 +227,6 @@ export default function MonthView({
                       )}
                     </div>
 
-                    {/* Status badge */}
                     <div className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 bg-white/20 border border-white/10">
                       {booking.status}
                     </div>

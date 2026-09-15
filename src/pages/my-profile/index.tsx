@@ -99,7 +99,9 @@ const MyProfile = () => {
       logo: salon?.logo ? { url: salon.logo, filename: "Logo" } : null,
       photos: salon?.photos || [],
       business_hours: getMappedInitialHours(),
-      payment_policy: (salon as any)?.payment_policy || "pay_at_venue",
+      allowed_payment_policies: (salon as any)?.allowed_payment_policies?.length
+        ? (salon as any).allowed_payment_policies
+        : ["pay_at_venue"],
       deposit_percentage: (salon as any)?.deposit_percentage ?? null,
     }
   });
@@ -124,8 +126,8 @@ const MyProfile = () => {
         latitude: address.latitude?.toString().trim() || null,
         longitude: address.longitude?.toString().trim() || null,
         logo: logo?.url || null,
-        payment_policy: data.payment_policy,
-        deposit_percentage: data.payment_policy === "partial_deposit" ? Number(data.deposit_percentage) : null,
+        allowed_payment_policies: data.allowed_payment_policies,
+        deposit_percentage: data.allowed_payment_policies.includes("partial_deposit") ? Number(data.deposit_percentage) : null,
       };
 
       const resultAction = await dispatch(updateSalonProfileAction(payload));

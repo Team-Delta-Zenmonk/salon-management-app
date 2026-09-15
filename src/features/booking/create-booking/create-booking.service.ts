@@ -15,6 +15,8 @@ export interface CreateBookingPayload {
     sequence?: number;
   }>;
   status?: string;
+  payment_preference?: string;
+  is_walk_in?: boolean;
 }
 
 export const createBookingService = async (payload: CreateBookingPayload) => {

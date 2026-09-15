@@ -185,6 +185,11 @@ export default function WeekView({
                           {booking.service_name}
                         </span>
                       )}
+                      {booking.is_walk_in && (
+                        <span className="text-[9px] font-extrabold uppercase px-1 py-0.2 rounded bg-amber-400 text-amber-950 self-start shrink-0 shadow-sm mt-auto">
+                          Walk-in
+                        </span>
+                      )}
                     </button>
                   );
                 })}

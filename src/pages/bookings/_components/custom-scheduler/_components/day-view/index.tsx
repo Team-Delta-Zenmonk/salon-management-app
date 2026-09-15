@@ -173,9 +173,15 @@ export default function DayView({
                       )}
                     </div>
 
-                    {/* Status badge */}
-                    <div className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 bg-white/20 border border-white/10">
-                      {booking.status}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {booking.is_walk_in && (
+                        <div className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-amber-400 text-amber-950 font-extrabold shadow-sm">
+                          Walk-in
+                        </div>
+                      )}
+                      <div className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-white/20 border border-white/10">
+                        {booking.status}
+                      </div>
                     </div>
                   </div>
                 );

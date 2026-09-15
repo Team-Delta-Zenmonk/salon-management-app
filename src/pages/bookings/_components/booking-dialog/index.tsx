@@ -9,7 +9,8 @@ import {
 import { Button } from "../../../../components/ui/button";
 import { Separator } from "../../../../components/ui/separator";
 import { Plus, X, Loader2 } from "lucide-react";
-import { FormProvider, useForm, useFieldArray, useWatch, type SubmitHandler } from "react-hook-form";
+import { FormProvider, useForm, useFieldArray, useWatch, Controller, type SubmitHandler } from "react-hook-form";
+import { cn } from "../../../../lib/utils";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -60,6 +61,17 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   const [isLoading, setIsLoading] = useState(false);
   const [staffMap, setStaffMap] = useState<StaffMap>({});
 
+  const depositPercentage = (salon as any)?.deposit_percentage ?? 20;
+
+  const paymentPolicyOptions = useMemo(
+    () => [
+      { label: "Pay at venue", value: "pay_at_venue" },
+      { label: "Already paid", value: "full_upfront" },
+      { label: `Paid ${depositPercentage}%`, value: "partial_deposit" },
+    ],
+    [depositPercentage]
+  );
+
   const methods = useForm<BookingFormValues>({
     resolver: zodResolver(bookingSchema) as any,
     defaultValues: {
@@ -69,6 +81,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       booking_date: new Date(),
       booking_start_time: "",
       status: BOOKING_STATUS.CONFIRMED,
+      payment_preference: "pay_at_venue",
+      is_walk_in: false,
     },
   });
 
@@ -144,8 +158,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
     if (mode === "update" && booking) {
       const bookingServices = booking.booking_services?.map((bs: any) => ({
-        service_id: bs.service_id,
-        staff_id: bs.staff_id,
+        service_id: String(bs.service_id),
+        staff_id: String(bs.staff_id),
       })) ?? [{ ...EMPTY_SERVICE }];
 
       const d = new Date(booking.booking_start_time);
@@ -153,12 +167,14 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       const mm = String(d.getUTCMinutes()).padStart(2, "0");
 
       reset({
-        customer_name: booking.admin_booking?.name || "",
-        customer_phone: booking.admin_booking?.phone || "",
+        customer_name: booking.customer_name || booking.customer?.name || booking.admin_booking?.name || "",
+        customer_phone: booking.customer_phone || booking.customer?.phone || booking.admin_booking?.phone || "",
         services: bookingServices,
         booking_date: new Date(booking.booking_date),
         booking_start_time: `${hh}:${mm}`,
         status: booking.status,
+        payment_preference: booking.payment_preference || booking.payment_policy || "pay_at_venue",
+        is_walk_in: booking.is_walk_in ?? false,
       });
 
       bookingServices.forEach((svc: any, idx: number) => {
@@ -172,6 +188,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         booking_date: new Date(),
         booking_start_time: "",
         status: BOOKING_STATUS.CONFIRMED,
+        payment_preference: "pay_at_venue",
+        is_walk_in: false,
       });
     }
   }, [mode, booking, reset, open]);
@@ -228,6 +246,16 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     });
   };
 
+  const getErrorMessage = (error: any): string => {
+    if (Array.isArray(error?.errors) && error.errors.length > 0) {
+      return error.errors.map((e: any) => e.message).filter(Boolean).join(". ");
+    }
+    if (typeof error?.message === "string") return error.message;
+    if (typeof error?.error === "string") return error.error;
+    if (typeof error === "string") return error;
+    return "Failed to save booking";
+  };
+
   const onSubmit: SubmitHandler<BookingFormValues> = async (values) => {
     setIsLoading(true);
     try {
@@ -248,6 +276,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
           sequence: i + 1,
         })),
         status: values.status,
+        payment_preference: values.payment_preference || "pay_at_venue",
+        is_walk_in: Boolean(values.is_walk_in),
       };
 
       if (mode === "create") {
@@ -264,7 +294,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       }
       onClose();
     } catch (error: any) {
-      const errorMessage = error || "Failed to save booking";
+      const errorMessage = getErrorMessage(error);
       callSnack(errorMessage, "error");
     } finally {
       setIsLoading(false);
@@ -293,6 +323,45 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit as any)}>
             <div className="flex flex-col py-5 px-6 gap-5 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
+              <Controller
+                name="is_walk_in"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Booking Type</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => field.onChange(false)}
+                        className={cn(
+                          "flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer",
+                          !field.value
+                            ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-500 shadow-sm ring-1 ring-emerald-500/30"
+                            : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40"
+                        )}
+                      >
+                        <span className={cn("w-2 h-2 rounded-full shrink-0", !field.value ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/40")} />
+                        <span>Online Booking</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => field.onChange(true)}
+                        className={cn(
+                          "flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer",
+                          field.value
+                            ? "border-amber-500/60 bg-amber-500/10 text-amber-500 shadow-sm ring-1 ring-amber-500/30"
+                            : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40"
+                        )}
+                      >
+                        <span className={cn("w-2 h-2 rounded-full shrink-0", field.value ? "bg-amber-500 animate-pulse" : "bg-muted-foreground/40")} />
+                        <span>Walk-in Booking</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              />
+
               <div className="grid grid-cols-2 gap-5">
                 <TextField
                   type="text"
@@ -373,6 +442,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Select Date"
                   control={control as any}
                   identifier="booking-date"
+                  disablePast={true}
                 />
                 <TimePicker
                   name="booking_start_time"
@@ -380,6 +450,20 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Select Time"
                   control={control as any}
                   identifier="booking-start-time"
+                />
+              </div>
+
+              <Separator className="my-1 border-border/50" />
+
+              <div className="flex flex-col gap-1.5">
+                <Select
+                  name="payment_preference"
+                  label="Payment Preference"
+                  placeholder="Select Payment Preference"
+                  identifier="booking-payment-preference"
+                  options={paymentPolicyOptions}
+                  translate={false}
+                  control={control as any}
                 />
               </div>
 
