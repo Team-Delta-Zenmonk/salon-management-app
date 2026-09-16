@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import { CalendarDays, Clock, User, X } from "lucide-react";
 import {
   format,
   startOfMonth,
@@ -12,8 +11,7 @@ import {
 } from "date-fns";
 import type { Booking, BookingStatus } from "../../../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../../../common/enums/booking-status.enum";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import BookingListModal from "../booking-list-modal";
 
 interface MonthViewProps {
   currentDate: Date;
@@ -63,10 +61,6 @@ export default function MonthView({
     [moreDayDate, getBookingsForDay],
   );
 
-  const handleMoreEventClick = (booking: Booking) => {
-    onEventClick(booking);
-  };
-
   return (
     <>
       <div className="flex flex-col h-full bg-card border-t border-border">
@@ -108,14 +102,15 @@ export default function MonthView({
                 return (
                   <div
                     key={day.toString()}
-                    className={`flex flex-col min-h-0 overflow-hidden p-1.5 gap-1 transition-colors ${
+                    onClick={() => dayBookings.length > 0 && setMoreDayDate(day)}
+                    className={`flex flex-col min-h-0 overflow-hidden p-2 justify-between transition-colors cursor-pointer group ${
                       dayIdx < 6 ? "border-r border-border/60" : ""
                     } ${
                       !isCurrentMonth
                         ? "bg-muted/20"
                         : isWeekend
                         ? "bg-muted/10"
-                        : "bg-card hover:bg-muted/20"
+                        : "bg-card hover:bg-muted/30"
                     }`}
                   >
                     {/* Day number */}
@@ -123,7 +118,7 @@ export default function MonthView({
                       <span
                         className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold transition-colors ${
                           isToday
-                            ? "bg-primary text-primary-foreground shadow-sm"
+                            ? "bg-primary text-primary-foreground shadow-sm font-bold"
                             : isCurrentMonth
                             ? "text-foreground"
                             : "text-muted-foreground/40"
@@ -163,9 +158,9 @@ export default function MonthView({
                         <button
                           type="button"
                           onClick={() => setMoreDayDate(day)}
-                          className="w-full shrink-0 flex items-center justify-center px-2 py-1 rounded-md text-[11px] font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors focus:outline-none"
+                          className="w-full shrink-0 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm focus:outline-none"
                         >
-                          +{overflowCount} more
+                          See all (+{overflowCount})
                         </button>
                       )}
                     </div>
@@ -177,66 +172,14 @@ export default function MonthView({
         </div>
       </div>
 
-      <Dialog open={!!moreDayDate} onOpenChange={(o) => !o && setMoreDayDate(null)}>
-        <DialogContent className="w-[92vw] sm:max-w-md p-0 gap-0 rounded-2xl overflow-hidden border-border/60 shadow-2xl [&>button]:hidden">
-          <div className="flex items-center justify-between px-5 py-4 bg-muted/30 border-b border-border/50">
-            <div className="flex flex-col gap-0.5">
-              <DialogTitle className="text-base font-bold flex items-center gap-2 text-foreground">
-                <CalendarDays className="w-4 h-4 text-primary" />
-                {moreDayDate && format(moreDayDate, "EEEE, MMMM d")}
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground ml-6">
-                {moreDayBookings.length} {moreDayBookings.length === 1 ? "booking" : "bookings"}
-              </p>
-            </div>
-            <button
-              onClick={() => setMoreDayDate(null)}
-              className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          <ScrollArea className="max-h-[60vh]">
-            <div className="flex flex-col gap-2 p-4">
-              {moreDayBookings.map((booking) => {
-                const color = getStatusColor(booking.status);
-                const isCancelled = booking.status === BOOKING_STATUS.CANCELLED;
-                return (
-                  <button
-                    key={booking.uuid}
-                    type="button"
-                    onClick={() => handleMoreEventClick(booking)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all hover:brightness-110 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 text-white"
-                    style={{ backgroundColor: color }}
-                  >
-                    <div className={`text-xs font-bold tabular-nums shrink-0 ${isCancelled ? "line-through opacity-70" : ""}`}>
-                      <Clock className="w-3 h-3 inline mr-1 opacity-80" />
-                      {format(new Date(booking.start_time), "h:mm a")}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className={`font-semibold text-sm truncate flex items-center gap-1.5 ${isCancelled ? "line-through opacity-70" : ""}`}>
-                        <User className="w-3.5 h-3.5 shrink-0 opacity-80" />
-                        {booking.customer_name}
-                      </div>
-                      {booking.service_name && (
-                        <div className="text-[11px] opacity-75 truncate mt-0.5">
-                          {booking.service_name}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 bg-white/20 border border-white/10">
-                      {booking.status}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
+      <BookingListModal
+        isOpen={!!moreDayDate}
+        onClose={() => setMoreDayDate(null)}
+        title={moreDayDate ? format(moreDayDate, "EEEE, MMMM d") : ""}
+        bookings={moreDayBookings}
+        getStatusColor={getStatusColor}
+        onEventClick={onEventClick}
+      />
     </>
   );
 }
