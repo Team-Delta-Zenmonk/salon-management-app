@@ -9,7 +9,7 @@ export const CloudinaryFileSchema = z.object({
   type: z.string().min(1, "Required"),
   secure_url: z.string().min(1, "Required"),
   asset_folder: z.string().min(1, "Required"),
-  filename: z.string().min(1, "Required"),
+filename: z.string().min(1, "Required"),
 });
 
 export type CloudinaryFile = z.infer<typeof CloudinaryFileSchema>;

@@ -3,6 +3,7 @@ import type { StaffForm } from "../../../schema/staff.schema";
 import TextField from "../../../../../../components/form/textfield";
 import DatePicker from "../../../../../../components/form/date-picker";
 import FilePicker from "../../../../../../components/form/file-picker";
+import FileMultiPicker from "../../../../../../components/form/multi-file-picker";
 import { uploadImages } from "../../../../../../features/upload-images/upload-images.service";
 import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
 
@@ -58,6 +59,19 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             disabled={disabled}
           />
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1.5 w-full">
+        <FileMultiPicker
+          name="staff_docs"
+          control={control}
+          identifier="staff-docs"
+          label="Staff Documents (Images & PDFs)"
+          accept="image/*,application/pdf"
+          maxFiles={Number(import.meta.env.VITE_MAX_STAFF_DOCS_LIMIT) || 10}
+          uploadFn={uploadImages}
+          disabled={disabled}
+        />
       </div>
 
       <TextField

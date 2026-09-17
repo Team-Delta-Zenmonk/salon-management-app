@@ -6,11 +6,10 @@ import { X, UploadCloud, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 import { callSnack } from "../../snackbar";
 import type { FileMultiPickerProps } from "./multi-file-picke.type";
-import { ALLOWED_IMAGE_TYPES } from "../../../common/allowed-images.type";
+import { uploadMultipleFiles } from "../../../features/upload-images/upload-images.service";
 
 const FileMultiPicker = <T extends FieldValues>({
   label,
@@ -20,7 +19,8 @@ const FileMultiPicker = <T extends FieldValues>({
   name,
   accept = "image/*",
   maxSizeBytes = 5 * 1024 * 1024,
-  uploadFn,
+  maxFiles = 10,
+  uploadMultipleFn,
 }: FileMultiPickerProps<T>) => {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -38,10 +38,17 @@ const FileMultiPicker = <T extends FieldValues>({
     const files = event.target.files;
     if (!files?.length) return;
 
-    const invalidFile = Array.from(files).find((file) => !ALLOWED_IMAGE_TYPES.includes(file.type as any));
+    if (current.length + files.length > maxFiles) {
+      callSnack(`Maximum ${maxFiles} files allowed. You already have ${current.length} file(s).`, "error");
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
+    const isPdfOrImage = (type: string) => type === "application/pdf" || type.startsWith("image/");
+    const invalidFile = Array.from(files).find((file) => !isPdfOrImage(file.type));
 
     if (invalidFile) {
-      callSnack("Invalid file type. Only images are allowed.", "error");
+      callSnack("Invalid file type. Only images and PDF are allowed.", "error");
       if (inputRef.current) inputRef.current.value = "";
       return;
     }
@@ -57,11 +64,11 @@ const FileMultiPicker = <T extends FieldValues>({
     }
 
     try {
-      const uploadedData: Array<{ url: string; filename: string }> = [];
-      for (const file of Array.from(files)) {
-        const result = await uploadFn(file);
-        uploadedData.push(result);
-      }
+      const fileList = Array.from(files);
+      const uploadedData = uploadMultipleFn 
+        ? await uploadMultipleFn(fileList)
+        : await uploadMultipleFiles(fileList);
+
       onChange([...current, ...uploadedData]);
     } catch {
       callSnack("Failed to upload files", "error");
@@ -189,33 +196,42 @@ const FileMultiPicker = <T extends FieldValues>({
 
             {arr.length > 0 && (
               <div className="flex flex-wrap gap-3 mt-2">
-                {arr.map((item: any, index: number) => (
-                  <div
-                    key={`${item.url}-${index}`}
-                    className="relative group w-12 h-12 rounded-xl overflow-hidden border border-border/60 bg-muted/20 shadow-sm animate-in fade-in zoom-in-95 duration-200 shrink-0"
-                  >
-                    <img
-                      src={item.url}
-                      alt={item.filename || "Uploaded photo"}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    {!isDisabled && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeOne(item.url, arr, onChange);
-                          onBlur();
-                        }}
-                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200"
-                      >
-                        <div className="p-1.5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow transition-colors">
-                          <X size={12} />
+                {arr.map((item: any, index: number) => {
+                  const isPdf = item.format === "pdf" || item.url?.toLowerCase().endsWith(".pdf") || item.filename?.toLowerCase().endsWith(".pdf");
+                  return (
+                    <div
+                      key={`${item.url}-${index}`}
+                      className="relative group w-12 h-12 rounded-xl overflow-hidden border border-border/60 bg-muted/20 shadow-sm animate-in fade-in zoom-in-95 duration-200 shrink-0 flex items-center justify-center"
+                    >
+                      {isPdf ? (
+                        <div className="flex flex-col items-center justify-center text-primary p-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-destructive">PDF</span>
                         </div>
-                      </button>
-                    )}
-                  </div>
-                ))}
+                      ) : (
+                        <img
+                          src={item.url}
+                          alt={item.filename || "Uploaded file"}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      )}
+                      {!isDisabled && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeOne(item.url, arr, onChange);
+                            onBlur();
+                          }}
+                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200"
+                        >
+                          <div className="p-1.5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow transition-colors">
+                            <X size={12} />
+                          </div>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
 

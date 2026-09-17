@@ -127,6 +127,7 @@ export const StaffSchema = z.object({
     message: "Required",
   }),
   photos: CloudinaryFileSchema.nullable().optional(),
+  staff_docs: z.array(CloudinaryFileSchema).nullable().optional(),
   active_hours: ActiveHoursSchema.optional(),
 });
 

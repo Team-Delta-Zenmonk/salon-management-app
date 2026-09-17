@@ -38,7 +38,7 @@ const STEPS = [
 
 const STEP_FIELDS: Record<number, FieldPath<StaffForm>[]> = {
   0: ["first_name", "last_name", "email", "dob", "phone_number", "additional_phone_number", "gender"],
-  1: ["title", "joining_date", "end_date", "address", "photos", "emergency_contact.name" as FieldPath<StaffForm>, "emergency_contact.phone" as FieldPath<StaffForm>],
+  1: ["title", "joining_date", "end_date", "address", "photos", "staff_docs", "emergency_contact.name" as FieldPath<StaffForm>, "emergency_contact.phone" as FieldPath<StaffForm>],
   2: ["active_hours"],
 };
 
@@ -79,6 +79,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
     try {
       setIsLoading(true);
       const photos = data.photos || (mode === "update" ? staff?.photos : undefined);
+      const staff_docs = data.staff_docs || (mode === "update" ? staff?.staff_docs : undefined);
 
       const payload = {
         first_name: data.first_name?.trim().toLowerCase(),
@@ -94,6 +95,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
         emergency_contact: data.emergency_contact,
         gender: data.gender,
         photos,
+        staff_docs,
         active_hours: data.active_hours ?? null,
       };
 

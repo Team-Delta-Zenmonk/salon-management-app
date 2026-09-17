@@ -94,11 +94,6 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
       setIsLoading(true);
       const logoUrl = data.logo?.url || (mode === "update" ? service?.logo : undefined);
 
-      if (mode === "create" && !isCreatingSubService && !data.category_id) {
-        callSnack("Category is required", "error");
-        return;
-      }
-
       const payload = buildPayload(data, logoUrl);
 
       if (mode === "create") {

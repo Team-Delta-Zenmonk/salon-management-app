@@ -23,6 +23,7 @@ export const createStaffDefaultPayload = (): StaffForm => ({
   emergency_contact: { name: "", phone: "" },
   gender: undefined as unknown as Gender,
   photos: null,
+  staff_docs: [],
   active_hours: getDefaultActiveHours(),
 });
 
@@ -39,6 +40,7 @@ export const updateStaffDefaultPayload = (staff: Staff): StaffForm => ({
   address: staff?.address ?? "",
   emergency_contact: staff?.emergency_contact ?? { name: "", phone: "" },
   gender: (staff?.gender as Gender) ?? undefined,
-  photos: null,
+  photos: staff?.photos ?? null,
+  staff_docs: staff?.staff_docs ?? [],
   active_hours: staff?.active_hours ?? getDefaultActiveHours(),
 });

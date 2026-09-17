@@ -15,7 +15,8 @@ export interface Staff {
   first_name: string;
   last_name?: string | null;
   email: string;
-  photos: CloudinaryFile;
+  photos?: CloudinaryFile | null;
+  staff_docs?: CloudinaryFile[] | null;
   phone_number: string;
   additional_phone_number?: string | null;
   dob: string;

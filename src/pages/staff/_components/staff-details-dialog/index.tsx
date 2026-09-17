@@ -8,7 +8,7 @@ import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import {
   Phone, Mail, MapPin, Cake,
-  Calendar, Shield, UserCircle, Clock
+  Calendar, Shield, UserCircle, Clock, FileText, ExternalLink
 } from "lucide-react";
 import type { Staff } from "../../../../features/staff/staff.slice";
 import dayjs from "dayjs";
@@ -88,6 +88,7 @@ function InfoRow({
 const TABS = [
   { value: "contact", label: "Contact" },
   { value: "employment", label: "Employment" },
+  { value: "documents", label: "Documents" },
   { value: "schedule", label: "Schedule" },
 ];
 
@@ -281,6 +282,49 @@ export default function StaffDetailsDialog({
                     </div>
                   )}
                 </>
+              )}
+
+              {/* ── Documents ── */}
+              {tab === "documents" && (
+                <div className="flex flex-col gap-3">
+                  {!staff.staff_docs || staff.staff_docs.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 border border-dashed border-border/60 rounded-2xl">
+                      <FileText className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                      <p className="text-xs font-semibold text-muted-foreground">No documents uploaded</p>
+                      <p className="text-[11px] text-muted-foreground/60 mt-0.5">Documents can be added when editing staff details.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2.5">
+                      {staff.staff_docs.map((doc, i) => {
+                        const isPdf = doc.format === "pdf" || doc.url?.toLowerCase().endsWith(".pdf") || doc.filename?.toLowerCase().endsWith(".pdf");
+                        return (
+                          <div
+                            key={doc.url || i}
+                            className="flex items-center justify-between p-3 bg-muted/30 border border-border/40 rounded-2xl hover:border-primary/30 transition-all duration-200"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+                                {isPdf ? <FileText className="h-4 w-4 text-destructive" /> : <UserCircle className="h-4 w-4 text-primary" />}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-semibold text-foreground truncate">{doc.filename || `Document ${i + 1}`}</p>
+                                <p className="text-[10px] text-muted-foreground uppercase font-bold">{isPdf ? "PDF Document" : "Image File"}</p>
+                              </div>
+                            </div>
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="w-8 h-8 flex items-center justify-center rounded-xl bg-background border border-border/60 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors shrink-0"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* ── Schedule ── */}
