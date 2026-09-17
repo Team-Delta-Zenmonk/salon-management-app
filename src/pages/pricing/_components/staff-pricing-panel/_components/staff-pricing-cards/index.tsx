@@ -25,7 +25,7 @@ interface DialogContext {
 export default function StaffPricingCards({ selectedService }: Readonly<{ selectedService: ServiceType }>) {
   const staffState = useAppSelector((state: RootState) => state.staff);
   const staffs = staffState?.data ?? [];
-  const salonUUID = useAppSelector((state: RootState) => state.auth.salon.uuid);
+  const salonUUID = useAppSelector((state: RootState) => state.auth.salon?.uuid ?? "");
 
   const servicesToShow = useMemo(() => {
     const children = selectedService.children ?? [];
@@ -143,7 +143,6 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
 
   return (
     <>
-      {/* Panel Header */}
       <div className="flex flex-wrap items-start sm:items-center justify-between gap-4 pb-6 border-b border-border/60 mb-6">
         <div className="space-y-1">
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
@@ -221,7 +220,6 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                         key={staff.uuid}
                         className="group relative border border-border/50 rounded-2xl p-4.5 flex items-center justify-between bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 overflow-hidden"
                       >
-                        {/* Hover Gradient Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
                         <div className="flex items-center gap-3.5 min-w-0 pr-4 relative z-10">

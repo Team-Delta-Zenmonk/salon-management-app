@@ -96,13 +96,11 @@ export default function BookingReceiptDialog({
         </DialogHeader>
 
         <div className="space-y-6 pt-4">
-          {/* Customer & Service Info */}
           <div>
             <h3 className="text-xl font-bold text-foreground">{booking.customer_name}</h3>
             <p className="text-xs text-muted-foreground mt-0.5">{booking.service_name}</p>
           </div>
 
-          {/* Details Grid */}
           <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-muted/40 border border-border/40">
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
@@ -125,7 +123,6 @@ export default function BookingReceiptDialog({
             </div>
           </div>
 
-          {/* Payment Progress */}
           <div className="space-y-3 p-4 rounded-2xl bg-muted/30 border border-border/40">
             <div className="flex justify-between items-center text-xs font-bold text-foreground">
               <span>Payment Progress</span>
@@ -156,7 +153,6 @@ export default function BookingReceiptDialog({
             </div>
           </div>
 
-          {/* Price Breakdown */}
           <div className="space-y-2 text-xs">
             <div className="flex justify-between items-center py-2 border-b border-border/40">
               <span className="text-muted-foreground font-medium">Service Total</span>

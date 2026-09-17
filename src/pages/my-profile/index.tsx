@@ -214,7 +214,6 @@ const MyProfile = () => {
                   variants={itemVariants}
                   className="relative group rounded-3xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg min-h-[210px] sm:min-h-[240px] md:h-[260px] hover:shadow-xl hover:border-primary/30 transition-all duration-300 w-full"
                 >
-                  {/* Pure Zero-useEffect Automatic Carousel */}
                   {activePhotos.length > 0 ? (
                     <Carousel
                       setApi={setCarouselApi}
@@ -234,7 +233,6 @@ const MyProfile = () => {
                         ))}
                       </CarouselContent>
 
-                      {/* Interactive indicator dots & slide counter */}
                       {activePhotos.length > 1 && (
                         <div className="absolute top-3 right-3 sm:top-4 sm:right-6 z-20 flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15 shadow-lg">
                           <div className="flex items-center gap-1.5">
@@ -320,7 +318,6 @@ const MyProfile = () => {
                       />
                     </div>
 
-                    {/* Right Column (col-span-5) - Branding & Schedule */}
                     <div className="lg:col-span-5 space-y-8 min-w-0 w-full">
                       <BrandingSection
                         control={control}

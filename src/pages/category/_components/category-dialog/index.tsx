@@ -96,7 +96,6 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
 
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
-            {/* Scrollable body */}
             <div className="flex flex-col py-5 px-6 gap-5 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
               <TextField
                 type="text"
@@ -140,7 +139,6 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
               </div>
             </div>
 
-            {/* Footer */}
             <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
               <Button
                 type="button"

@@ -95,7 +95,6 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
   return (
     <div className="flex flex-col h-full min-h-0 overflow-hidden">
       <div className="p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar">
-        {/* Modern Category Badge */}
         <div className="flex items-center gap-2 mb-4 sm:mb-6 px-1">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Organizing in:</span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
@@ -106,7 +105,6 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
 
         <form onSubmit={handleSubmit(onSubmit)} id="add-item-form">
           <div className="flex flex-col gap-4 sm:gap-5">
-            {/* Row 1: Name & Brand */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <TextField
                 type="text"
@@ -133,7 +131,6 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
               />
             </div>
 
-            {/* Row 2: Type & Image */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
               <Select
                 name="item_type"
@@ -155,7 +152,6 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
               />
             </div>
 
-            {/* Row 3: Variant & Unit */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <TextField
                 type="text"
@@ -179,7 +175,6 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
               />
             </div>
 
-            {/* Row 4: Pricing & Stock Limits */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <TextField
                 type="number"

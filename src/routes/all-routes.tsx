@@ -22,6 +22,7 @@ import Bookings from "../pages/bookings";
 import StaffServiceManagementPage from "../pages/pricing";
 import MyProfile from "../pages/my-profile";
 import Appearance from "../pages/appearance";
+import PlanAndBillingPage from "../pages/billing";
 import UnProtectedRoute from "./unprotected-route";
 
 function AllRoutes() {
@@ -56,6 +57,7 @@ function AllRoutes() {
           <Route path="/reports" element={<Reports/>} />
           <Route path="/notifications" element={<Notification/>} />
           <Route path="/appearance" element={<Appearance/>} />
+          <Route path="/billing" element={<PlanAndBillingPage />} />
         </Route>
       </Route>
     </Routes>

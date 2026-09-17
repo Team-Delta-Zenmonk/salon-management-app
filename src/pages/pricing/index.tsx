@@ -42,7 +42,6 @@ export default function StaffServiceManagementPage() {
       variants={containerVariants}
       className="flex flex-col w-full max-w-[1600px] mx-auto pb-10 px-4 md:px-8 pt-4"
     >
-      {/* Page Header */}
       <motion.div
         variants={itemVariants}
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 shrink-0 gap-4"
@@ -56,7 +55,6 @@ export default function StaffServiceManagementPage() {
           </p>
         </div>
 
-        {/* Premium Sliding View Mode Toggle */}
         <div className="relative inline-flex h-11 items-center justify-center rounded-xl bg-muted/60 p-1 text-muted-foreground border border-border/50 backdrop-blur-sm">
           <button
             onClick={() => handleViewChange("staff")}
@@ -93,7 +91,6 @@ export default function StaffServiceManagementPage() {
         </div>
       </motion.div>
 
-      {/* Main View Container */}
       <motion.div variants={itemVariants} className="w-full flex-1 min-h-[600px] flex flex-col">
         {viewMode === "service" ? <ServiceView /> : <StaffView />}
       </motion.div>

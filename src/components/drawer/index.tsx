@@ -19,10 +19,6 @@ const CustomDrawer = ({
   variant = "temporary",
   showOn = { xs: true, md: true },
 }: CustomDrawerProps) => {
-  // If it's a permanent drawer, we typically just render a static aside.
-  // For standard Shadcn, Sheet is inherently an overlay (temporary).
-  // We'll mimic permanent behavior by keeping it open and disabling overlay if needed,
-  // or just rendering a standard div if it's meant to be a permanent side panel.
   
   const widthStyle = typeof width === "number" ? `${width}px` : width;
 

@@ -86,11 +86,9 @@ export default function LivePreviewPanel({
     "--muted": currentPalette.muted,
   } as React.CSSProperties;
 
-  // Retrieve salon details from the auth store
   const { salon } = useAppSelector((state: RootState) => state.auth);
   const brandName = salon?.name || "Velvet & Co";
 
-  // Render mock data
   const mockAppointments = [
     { client: "Sophia Loren", service: "Balayage", time: "10:30 AM", status: "Completed" },
     { client: "Marcus Aurelius", service: "Classic Fade", time: "11:15 AM", status: "In Progress" },
@@ -102,7 +100,6 @@ export default function LivePreviewPanel({
       style={styleVariables}
       className="relative w-full rounded-3xl border border-border bg-background text-foreground shadow-xl overflow-hidden transition-all duration-300"
     >
-      {/* Dynamic Glow decoration matching primary color */}
       <div 
         className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none transition-all duration-500" 
         style={{ backgroundColor: currentPalette.primary }}
@@ -112,7 +109,6 @@ export default function LivePreviewPanel({
         style={{ backgroundColor: currentPalette.secondary }}
       />
 
-      {/* Header bar */}
       <div className="px-4 py-3.5 border-b border-border/50 bg-card/60 backdrop-blur-md flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2">
           <div 
@@ -126,17 +122,14 @@ export default function LivePreviewPanel({
           </span>
         </div>
 
-        {/* Mock Search Input */}
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-muted/60 text-[10px] text-muted-foreground w-28">
           <Search className="h-3 w-3 shrink-0" />
           <span>Search...</span>
         </div>
       </div>
 
-      {/* Main Workspace Body */}
       <div className="p-4 space-y-4 relative z-10 transition-all duration-300">
         
-        {/* Top Header Mockup */}
         <div className="flex items-center justify-between">
           <div>
             <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Salon Dashboard</h4>
@@ -150,9 +143,7 @@ export default function LivePreviewPanel({
           </Badge>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
-          {/* Card 1 */}
           <div className="p-3 rounded-2xl border border-border bg-card/70">
             <div className="flex items-center gap-2 mb-1">
               <div 
@@ -166,7 +157,6 @@ export default function LivePreviewPanel({
             <p className="text-base font-extrabold text-foreground tracking-tight">$1,450</p>
           </div>
 
-          {/* Card 2 */}
           <div className="p-3 rounded-2xl border border-border bg-card/70">
             <div className="flex items-center gap-2 mb-1">
               <div 
@@ -181,7 +171,6 @@ export default function LivePreviewPanel({
           </div>
         </div>
 
-        {/* Form controls mockup */}
         <div className="p-3.5 rounded-2xl border border-border bg-card/70 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-foreground">Interactive Elements</span>
@@ -214,7 +203,6 @@ export default function LivePreviewPanel({
           </div>
         </div>
 
-        {/* Table Mockup */}
         <div className="border border-border rounded-2xl overflow-hidden bg-card/50">
           <div className="px-3 py-2 border-b border-border/50 flex items-center justify-between bg-muted/40">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Queue Schedule</span>

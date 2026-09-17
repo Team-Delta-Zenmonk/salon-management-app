@@ -10,7 +10,9 @@ export interface UpdateSalonPayload {
   map_link?: string;
   latitude?: string;
   longitude?: string;
+  slug?: string;
   is_onboarded?: boolean;
+  subscription_plan?: "trial" | "monthly" | "yearly";
 }
 
 export const updateSalon = async (payload: UpdateSalonPayload) => {

@@ -47,11 +47,9 @@ export default function ListServices({
   const [deletingService, setDeletingService] = useState<Service | null>(null);
   const [deletingSubServiceParent, setDeletingSubServiceParent] = useState<string | null>(null);
 
-  // Sub-services drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeParentService, setActiveParentService] = useState<Service | null>(null);
 
-  // Used to trigger refetching of sub-services in a specific ServiceCard or drawer
   const [refreshTriggers, setRefreshTriggers] = useState<Record<string, number>>({});
 
   const filteredServices = useMemo(() => {

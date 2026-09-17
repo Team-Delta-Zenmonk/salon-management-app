@@ -24,7 +24,6 @@ export default function DayView({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
-  // Track container width dynamically on resize
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
@@ -58,7 +57,6 @@ export default function DayView({
     return Array.from({ length: maxHour - minHour + 1 }, (_, i) => i + minHour);
   }, [dayBookings]);
 
-  // Group bookings by starting hour row
   const bookingsByHour = useMemo(() => {
     const map = new Map<number, Booking[]>();
     for (const b of dayBookings) {
@@ -84,10 +82,9 @@ export default function DayView({
   const currentMinute = new Date().getMinutes();
   const minHour = hours[0] ?? 8;
 
-  // Calculate dynamically how many cards fit in a row before needing "See all" button
-  const CARD_MIN_WIDTH = 180; // px
-  const SEE_ALL_BTN_WIDTH = 110; // px
-  const GAP = 8; // px
+  const CARD_MIN_WIDTH = 180;
+  const SEE_ALL_BTN_WIDTH = 110;
+  const GAP = 8;
 
   const getVisibleCount = (totalItems: number) => {
     if (containerWidth <= 0 || totalItems === 0) return totalItems;
@@ -120,7 +117,6 @@ export default function DayView({
           ) : (
             <div className="flex pr-2" style={{ minHeight: `${hours.length * HOUR_HEIGHT_PX}px` }}>
 
-              {/* ── Time labels ── */}
               <div className="w-16 shrink-0 relative">
                 {hours.map((hour) => (
                   <div
@@ -141,9 +137,7 @@ export default function DayView({
                 ))}
               </div>
 
-              {/* ── Grid + events ── */}
               <div ref={containerRef} className="flex-1 relative border-l border-border/40">
-                {/* Hour grid lines & row slots */}
                 {hours.map((hour) => {
                   const hourBookings = bookingsByHour.get(hour) ?? [];
                   const maxVisible = getVisibleCount(hourBookings.length);
@@ -164,7 +158,6 @@ export default function DayView({
                         height: `${HOUR_HEIGHT_PX}px`,
                       }}
                     >
-                      {/* Bookings starting in this hour stacked horizontally */}
                       {visibleBookings.map((booking, idx) => {
                         const color = getStatusColor(booking.status);
                         const isCancelled = booking.status === BOOKING_STATUS.CANCELLED;
@@ -181,11 +174,8 @@ export default function DayView({
                               padding: "6px 10px",
                             }}
                           >
-                            {/* Left accent bar */}
-                            {/* <div className="absolute left-0 top-1 bottom-1 w-1 rounded-full bg-white/40 " /> */}
 
                             <div className="flex-1 min-w-0 pl-1.5 flex flex-col justify-center gap-0.5">
-                              {/* Time */}
                               <div className={`text-[11px] font-bold tabular-nums leading-tight ${isCancelled ? "line-through opacity-70" : ""}`}>
                                 {format(startDate, "HH:mm")}
                                 {endDate && (
@@ -195,13 +185,11 @@ export default function DayView({
                                 )}
                               </div>
 
-                              {/* Customer */}
                               <div className={`font-semibold text-xs truncate flex items-center gap-1 leading-tight ${isCancelled ? "line-through opacity-70" : ""}`}>
                                 <User className="w-3 h-3 shrink-0 opacity-80" />
                                 <span className="truncate">{booking.customer_name}</span>
                               </div>
 
-                              {/* Service + staff */}
                               <div className="text-[10px] opacity-80 truncate leading-tight">
                                 {booking.service_name}
                                 {booking.staff_name && (
@@ -224,7 +212,6 @@ export default function DayView({
                         );
                       })}
 
-                      {/* "See all" button when row has more bookings */}
                       {overflowCount > 0 && (
                         <button
                           type="button"
@@ -238,7 +225,6 @@ export default function DayView({
                   );
                 })}
 
-                {/* Current time indicator */}
                 {isToday && (
                   <div
                     className="absolute w-full z-20 flex items-center pointer-events-none"

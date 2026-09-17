@@ -156,7 +156,6 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
       }}
     >
       <DialogContent className="sm:max-w-[680px] w-full max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-3xl">
-        {/* ── Header ── */}
         <DialogHeader className="px-6 py-5 border-b border-border/40 bg-muted/20 shrink-0">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
             {mode === "create" ? "Add Staff Member" : "Update Staff Profile"}
@@ -171,13 +170,9 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
         <FormProvider {...methods}>
           <form onSubmit={onSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
 
-            {/* ── Stepper ── */}
             <div className="shrink-0 px-6 pt-5 pb-6 border-b border-border/30 select-none">
-              {/* Step bubbles */}
               <div className="relative flex items-start justify-between">
-                {/* Track line */}
                 <div className="absolute left-0 right-0 top-[18px] h-[2px] bg-border/40 mx-9 z-0" />
-                {/* Progress fill */}
                 <motion.div
                   className="absolute top-[18px] h-[2px] bg-primary z-0 ml-9"
                   initial={false}
@@ -193,7 +188,6 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
 
                   return (
                     <div key={s.label} className="relative z-10 flex flex-col items-center gap-2 w-28">
-                      {/* Bubble */}
                       <div
                         className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                           isCompleted
@@ -210,7 +204,6 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
                         )}
                       </div>
 
-                      {/* Labels */}
                       <div className="flex flex-col items-center text-center">
                         <span
                           className={`text-[11px] font-bold tracking-wide transition-colors duration-200 ${
@@ -229,7 +222,6 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
               </div>
             </div>
 
-            {/* ── Step Content ── */}
             <div className="flex-1 overflow-y-auto px-6 py-6 min-h-0 custom-scrollbar">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -247,9 +239,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
               </AnimatePresence>
             </div>
 
-            {/* ── Footer ── */}
             <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 shrink-0 gap-3 sm:gap-3 flex-row justify-between items-center">
-              {/* Step counter */}
               <span className="text-xs text-muted-foreground font-medium select-none">
                 Step {step + 1} of {totalSteps}
               </span>

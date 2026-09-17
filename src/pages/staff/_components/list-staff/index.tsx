@@ -71,11 +71,9 @@ function StaffCard({
       className="group relative bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between cursor-pointer h-full min-h-[290px] overflow-hidden"
       onClick={onClick}
     >
-      {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
       <div>
-        {/* Header section with photo, name & role */}
         <div className="flex gap-4 items-start relative z-10">
           <div className="relative shrink-0">
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -92,7 +90,6 @@ function StaffCard({
               <h3 className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors truncate capitalize">
                 {getFullName(staff)}
               </h3>
-              {/* Pulsing Active/Inactive Status badge */}
               {isActive ? (
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Active" />
               ) : (
@@ -105,7 +102,6 @@ function StaffCard({
           </div>
         </div>
 
-        {/* Detailed Grid Info */}
         <div className="grid grid-cols-1 gap-2 mt-4 text-[11px] text-muted-foreground bg-muted/5 border border-border/30 rounded-2xl p-3" onClick={(e) => e.stopPropagation()}>
           {staff.email ? (
             <a
@@ -144,7 +140,6 @@ function StaffCard({
           </div>
         </div>
 
-        {/* Today shift badge */}
         <div className="mt-3 relative z-10">
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-primary/5 border border-primary/10 rounded-2xl p-2.5">
             <span className="font-semibold text-foreground/80 select-none">Today's Shift:</span>
@@ -153,7 +148,6 @@ function StaffCard({
         </div>
       </div>
 
-      {/* Footer Area with quick actions */}
       <div className="mt-5 pt-3.5 border-t border-border/40 flex items-center gap-2 relative z-10" onClick={(e) => e.stopPropagation()}>
         {isActive && <Button
           variant="outline"

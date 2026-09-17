@@ -62,7 +62,7 @@ export default function AssignStaffDialog({
 
   const { data: allStaff } = useAppSelector((state: RootState) => state.staff);
   const { data: allServices } = useAppSelector((state: RootState) => state.service);
-  const salonUUID = useAppSelector((state) => state.auth.salon.uuid);
+  const salonUUID = useAppSelector((state: RootState) => state.auth.salon?.uuid ?? "");
   const [assignedStaffServices, setAssignedStaffServices] = useState<AssignedStaffService[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);

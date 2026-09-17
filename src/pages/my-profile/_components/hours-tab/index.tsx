@@ -32,7 +32,6 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
     <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-5 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
-      {/* Section Header */}
       <div className="flex items-center gap-2 mb-3 relative z-10">
         <CalendarDays className="w-4 h-4 text-primary" />
         <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
@@ -49,7 +48,6 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
 
           return (
             <div key={dayKey} className="border-b border-border/40 last:border-0 py-2">
-              {/* Row 1: Day name + Closed badge + Toggle */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <div
@@ -76,7 +74,6 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
                 />
               </div>
 
-              {/* Stacked time pickers — full width, shown only when open */}
               {isOpen && (
                 <div className="mt-2 pl-3.5 grid grid-cols-2 gap-2">
                   <div className="space-y-1">

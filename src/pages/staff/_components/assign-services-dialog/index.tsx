@@ -204,7 +204,6 @@ export default function AssignServicesDialog({
             )}
           </div>
 
-          {/* Footer */}
           <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
             <Button
               type="button"

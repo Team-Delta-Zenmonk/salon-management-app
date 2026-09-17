@@ -11,7 +11,8 @@ import {
   LayoutList,
   IndianRupee,
   CircleUser,
-  Palette
+  Palette,
+  CreditCard
 } from "lucide-react";
 
 export type NavItem = {
@@ -34,4 +35,5 @@ export const navigationItems: NavItem[] = [
   { name: "Reports", path: "/reports", icon: BarChart },
   { name: "Notifications", path: "/notifications", icon: Bell },
   { name: "Appearance", path: "/appearance", icon: Palette },
+  { name: "Plan & Billing", path: "/billing", icon: CreditCard },
 ];

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FormProvider, useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Scissors, Loader2, Check, User, Store, MapPin, KeyRound, Sparkles, Navigation } from "lucide-react";
@@ -13,6 +13,7 @@ import { useAppDispatch } from "../../store/hooks";
 import { completeOnboarding } from "../../features/auth/auth.slice";
 import { Button } from "../../components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import OnboardingSuccessDialog from "./_components/onboarding-success-dialog";
 
 const STEPS = [
   { label: "Owner", desc: "Your details", icon: User },
@@ -36,10 +37,10 @@ const STEP_INFO = [
     badge: "Owner Identification",
   },
   {
-    title: "Upload Your Branding",
-    desc: "Your logo and photos are displayed on client booking pages. Salons with photos receive up to 40% more booking interest.",
+    title: "Claim Your URL & Branding",
+    desc: "Choose your custom storefront address (e.g. glow.salon.com) and upload your visual branding for your client booking portal.",
     icon: Sparkles,
-    badge: "Salon Portfolio",
+    badge: "Salon Brand & URL",
   },
   {
     title: "Pin Your Location",
@@ -53,8 +54,16 @@ export default function SalonOnboarding() {
   const [activeStep, setActiveStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [successModalOpen, setSuccessModalOpen] = useState<boolean>(false);
+  const [confirmedSlug, setConfirmedSlug] = useState<string>("");
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useAppDispatch();
+
+  const intendedPlan: "monthly" | "yearly" | undefined =
+    location.state?.plan === "yearly" || location.state?.plan === "monthly"
+      ? location.state.plan
+      : undefined;
 
   const methods = useForm<SalonOnboardingForm>({
     resolver: zodResolver(SalonOnboardingSchema),
@@ -63,6 +72,7 @@ export default function SalonOnboarding() {
     defaultValues: {
       owner: { owner_name: "" },
       salon: {
+        slug: "",
         type: "",
         logo: null,
         photos: [],
@@ -82,7 +92,7 @@ export default function SalonOnboarding() {
     let fieldsToValidate: (FieldPath<SalonOnboardingForm>)[] = [];
 
     if (activeStep === 0) fieldsToValidate = ["owner.owner_name" as FieldPath<SalonOnboardingForm>];
-    if (activeStep === 1) fieldsToValidate = ["salon.type" as FieldPath<SalonOnboardingForm>, "salon.logo" as FieldPath<SalonOnboardingForm>, "salon.photos" as FieldPath<SalonOnboardingForm>];
+    if (activeStep === 1) fieldsToValidate = ["salon.slug" as FieldPath<SalonOnboardingForm>, "salon.type" as FieldPath<SalonOnboardingForm>, "salon.logo" as FieldPath<SalonOnboardingForm>, "salon.photos" as FieldPath<SalonOnboardingForm>];
     if (activeStep === 2) fieldsToValidate = ["address.address" as FieldPath<SalonOnboardingForm>, "address.map_link" as FieldPath<SalonOnboardingForm>];
 
     const isValid = await trigger(fieldsToValidate);
@@ -99,6 +109,7 @@ export default function SalonOnboarding() {
       await updateSalon({
         owner_name: data.owner?.owner_name,
         type: data.salon?.type,
+        slug: data.salon?.slug,
         logo: data.salon?.logo?.url,
         photos: data.salon.photos,
         latitude: String(data?.address?.latitude),
@@ -106,10 +117,12 @@ export default function SalonOnboarding() {
         address: data?.address?.address,
         map_link: data?.address?.map_link,
         is_onboarded: true,
+        subscription_plan: intendedPlan,
       });
-      dispatch(completeOnboarding({}));
+      dispatch(completeOnboarding({ slug: data.salon?.slug, subscription_plan: intendedPlan }));
       callSnack("Onboarding completed", "success");
-      navigate("/dashboard");
+      setConfirmedSlug(data.salon?.slug || "");
+      setSuccessModalOpen(true);
     } catch {
       callSnack("Failed to save salon details", "error");
     } finally {
@@ -130,19 +143,16 @@ export default function SalonOnboarding() {
   return (
     <FormProvider {...methods}>
       <div className="min-h-screen flex bg-background">
-        {/* Left — Branding Panel */}
         <motion.div
           initial={{ x: -40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="hidden lg:flex lg:w-[45%] flex-col relative overflow-hidden bg-[#211922] dark:bg-black border-r border-border/30 dark:border-border/20 shrink-0"
         >
-          {/* Gradient blobs */}
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary/25 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-primary/15 rounded-full blur-3xl translate-x-1/4 translate-y-1/4 pointer-events-none" />
           <div className="absolute top-1/2 left-1/3 w-[300px] h-[300px] bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Logo */}
           <div className="relative z-10 p-10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
@@ -152,7 +162,6 @@ export default function SalonOnboarding() {
             </div>
           </div>
 
-          {/* Hero content — dynamically changes with step */}
           <div className="relative z-10 flex-1 flex flex-col justify-center px-10 pb-16">
             <AnimatePresence mode="wait">
               <motion.div
@@ -188,7 +197,6 @@ export default function SalonOnboarding() {
             </AnimatePresence>
           </div>
 
-          {/* Bottom message */}
           <div className="relative z-10 px-10 pb-10">
             <div className="border-t border-white/10 pt-6">
               <p className="text-white/50 text-xs font-medium">
@@ -198,17 +206,14 @@ export default function SalonOnboarding() {
           </div>
         </motion.div>
 
-        {/* Right — Form Panel */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
           className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 relative overflow-hidden"
         >
-          {/* Subtle grid pattern & glow */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-70 pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-          {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2 mb-10">
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
               <Scissors className="w-4.5 h-4.5 text-primary-foreground" />
@@ -217,10 +222,8 @@ export default function SalonOnboarding() {
           </div>
 
           <div className="w-full max-w-3xl">
-            {/* Stepper card */}
             <div className="bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 overflow-hidden flex flex-col md:flex-row min-h-[500px]">
               
-              {/* Progress stepper (HORIZONTAL - Mobile) */}
               <div className="flex md:hidden items-start justify-between px-6 pt-6 pb-4 border-b border-border/40 bg-muted/10">
                 {STEPS.map((step, i) => {
                   const Icon = step.icon;
@@ -229,7 +232,6 @@ export default function SalonOnboarding() {
 
                   return (
                     <div key={step.label} className={i < STEPS.length - 1 ? "flex-1 flex items-start" : "flex items-start"}>
-                      {/* Step bubble */}
                       <div className="flex flex-col items-center shrink-0 w-12">
                         <motion.div
                           animate={{
@@ -248,7 +250,6 @@ export default function SalonOnboarding() {
                           {step.label}
                         </span>
                       </div>
-                      {/* Connector */}
                       {i < STEPS.length - 1 && (
                         <div className="flex-1 mt-4 mx-2 h-1 bg-border/40 rounded-full overflow-hidden">
                           <motion.div className="h-full bg-primary" animate={{ width: i < activeStep ? "100%" : "0%" }} transition={{ duration: 0.4 }} />
@@ -259,7 +260,6 @@ export default function SalonOnboarding() {
                 })}
               </div>
 
-              {/* Progress stepper (VERTICAL - Desktop) */}
               <div className="hidden md:flex w-[140px] flex-col justify-between py-10 border-r border-border/40 bg-muted/10 shrink-0">
                 {STEPS.map((step, i) => {
                   const Icon = step.icon;
@@ -268,7 +268,6 @@ export default function SalonOnboarding() {
 
                   return (
                     <div key={step.label} className={i < STEPS.length - 1 ? "flex-1 flex flex-col items-center" : "flex flex-col items-center"}>
-                      {/* Step bubble & Label */}
                       <div className="flex flex-col items-center gap-2 relative z-10 px-2">
                         <motion.div
                           animate={{
@@ -287,7 +286,6 @@ export default function SalonOnboarding() {
                           {step.label}
                         </span>
                       </div>
-                      {/* Connector */}
                       {i < STEPS.length - 1 && (
                         <div className="w-1 mx-auto my-3 flex-1 bg-border/40 rounded-full overflow-hidden">
                           <motion.div className="w-full bg-primary" animate={{ height: i < activeStep ? "100%" : "0%" }} transition={{ duration: 0.4 }} />
@@ -298,10 +296,8 @@ export default function SalonOnboarding() {
                 })}
               </div>
 
-              {/* Form Content Area */}
               <div className="flex-1 flex flex-col justify-between relative bg-card dark:bg-neutral-900">
 
-              {/* Card header */}
               <div className="px-6 pt-6 pb-1">
                 <motion.div key={activeStep} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
                   <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-wider mb-2">
@@ -313,7 +309,6 @@ export default function SalonOnboarding() {
                 </motion.div>
               </div>
 
-              {/* Step content — animated */}
               <div className="px-6 py-5 min-h-[220px]">
                 <AnimatePresence mode="wait" custom={direction}>
                   <motion.div
@@ -332,7 +327,6 @@ export default function SalonOnboarding() {
                 </AnimatePresence>
               </div>
 
-              {/* Footer nav */}
               <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-muted/20">
                 <Button
                   variant="ghost"
@@ -372,6 +366,12 @@ export default function SalonOnboarding() {
         </div>
         </motion.div>
       </div>
+
+      <OnboardingSuccessDialog
+        open={successModalOpen}
+        slug={confirmedSlug}
+        onClose={() => setSuccessModalOpen(false)}
+      />
     </FormProvider>
   );
 }

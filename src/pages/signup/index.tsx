@@ -1,12 +1,12 @@
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignUpSchema, type SignUpForm } from "./schema/signup.schema";
-import { Scissors, Loader2, CheckCircle2 } from "lucide-react";
+import { Scissors, Loader2, CheckCircle2, Sparkles } from "lucide-react";
 import TextField from "../../components/form/textfield";
 import { useState } from "react";
 import PasswordField from "../../components/form/password-field";
 import { registerSalon } from "../../features/salon-onboarding/register-salon/register-salon.service";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { callSnack } from "../../components/snackbar";
 import { VALIDATE_PATTERN } from "../../common/validate-pattern";
 import { Button } from "../../components/ui/button";
@@ -29,6 +29,8 @@ export default function SignUp() {
   const { handleSubmit, control } = methods;
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const intendedPlan = searchParams.get("plan");
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -45,7 +47,12 @@ export default function SignUp() {
       } else if (result?.message?.includes("OTP sent to your email")) {
         callSnack("OTP sent to your email", "success");
       }
-      navigate("/verify-salon", { state: { email: data.email } });
+      navigate("/verify-salon", {
+        state: {
+          email: data.email,
+          plan: intendedPlan === "yearly" || intendedPlan === "monthly" ? intendedPlan : undefined,
+        },
+      });
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } | string } };
       const backendMessage = (typeof error?.response?.data === 'string' ? error.response.data : error?.response?.data?.message) || "";
@@ -63,18 +70,15 @@ export default function SignUp() {
   return (
     <FormProvider {...methods}>
       <div className="min-h-screen flex bg-background">
-        {/* Left — Form Panel */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
           className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 relative overflow-hidden"
         >
-          {/* Subtle grid pattern & glow */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-70 pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2 mb-8">
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
               <Scissors className="w-4.5 h-4.5 text-primary-foreground" />
@@ -89,11 +93,29 @@ export default function SignUp() {
               transition={{ delay: 0.1, duration: 0.5 }}
               className="bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 p-6 sm:p-10"
             >
-              <div className="mb-8">
+              <div className="mb-6">
                 <h2 className="text-2xl font-black text-foreground tracking-tight mb-1.5">
                   Register your salon
                 </h2>
                 <p className="text-muted-foreground text-sm">Join thousands of salons managing smarter</p>
+                {intendedPlan && (intendedPlan === "yearly" || intendedPlan === "monthly") ? (
+                  <div className="mt-4 p-3 rounded-2xl bg-primary/10 border border-primary/25 flex items-center gap-2.5">
+                    <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                    <p className="text-xs text-foreground font-medium">
+                      Selected Plan:{" "}
+                      <strong className="text-primary capitalize">{intendedPlan}</strong> (
+                      {intendedPlan === "yearly" ? "₹24,990/yr • Save ~20%" : "₹2,499/mo"}
+                      ) • <span className="font-semibold text-emerald-600 dark:text-emerald-400">14-Day Free Trial</span> included
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-4 p-2.5 rounded-xl bg-muted/60 border border-border/70 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                    <p className="text-xs text-muted-foreground">
+                      Includes <strong>14-day full free trial</strong> • No card required upfront
+                    </p>
+                  </div>
+                )}
               </div>
 
               <form onSubmit={onSubmit} className="space-y-4">
@@ -200,18 +222,15 @@ export default function SignUp() {
           </div>
         </motion.div>
 
-        {/* Right — Benefits Panel */}
         <motion.div
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="hidden lg:flex lg:w-[42%] flex-col relative overflow-hidden bg-[#211922] dark:bg-black border-l border-border/30 dark:border-border/20"
         >
-          {/* Gradient blobs */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 pointer-events-none" />
 
-          {/* Logo */}
           <div className="relative z-10 p-10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
@@ -221,7 +240,6 @@ export default function SignUp() {
             </div>
           </div>
 
-          {/* Content */}
           <div className="relative z-10 flex-1 flex flex-col justify-center px-10 pb-16">
             <motion.div
               initial={{ y: 20, opacity: 0 }}
@@ -251,7 +269,6 @@ export default function SignUp() {
                 ))}
               </div>
 
-              {/* Stats */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}

@@ -5,11 +5,15 @@ import { TypeOfSalon } from "../../constants/salon.type";
 import FilePicker from "../../../../../components/form/file-picker";
 import FileMultiPicker from "../../../../../components/form/multi-file-picker";
 import { uploadImages } from "../../../../../features/upload-images/upload-images.service";
+import SlugInput from "./_components/slug-input";
 
 export default function SalonStep() {
   const { control } = useFormContext<SalonOnboardingForm>();
   return (
     <div className="space-y-6 pt-2">
+        <div>
+          <SlugInput />
+        </div>
         <div>
           <Select
             name="salon.type"

@@ -15,13 +15,12 @@ const CheckboxTree = <T extends FieldValues>({
   showError = true,
   options,
 }: CustomCheckboxTreeProps<T>) => {
-  // Store expanded/collapsed state for parent nodes
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     const traverse = (nodes: CheckboxTreeNode[]) => {
       nodes.forEach((n) => {
         if (n.children && n.children.length > 0) {
-          initial[n.value] = true; // All nodes expanded by default
+          initial[n.value] = true;
           traverse(n.children);
         }
       });

@@ -49,7 +49,6 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
 
   return (
     <>
-      {/* Mobile Drawer */}
       {!isDesktop && (
         <Sheet open={mobileOpen} onOpenChange={onToggleSidebar}>
           <SheetContent side="left" className="p-0 border-r-border w-[280px]">
@@ -58,7 +57,6 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
         </Sheet>
       )}
 
-      {/* Desktop Sidebar */}
       {isDesktop && (
         <motion.aside 
           initial={false}

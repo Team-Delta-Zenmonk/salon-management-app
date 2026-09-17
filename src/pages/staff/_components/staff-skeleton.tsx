@@ -4,7 +4,6 @@ export function StaffCardSkeleton() {
       <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
       
       <div className="relative z-10 space-y-4">
-        {/* Header section skeleton */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 flex-1">
             <div className="w-14 h-14 rounded-full bg-foreground/10 shrink-0" />
@@ -16,14 +15,12 @@ export function StaffCardSkeleton() {
           <div className="w-16 h-6 bg-foreground/5 rounded-full" />
         </div>
 
-        {/* Info summary skeletons */}
         <div className="space-y-2 pt-2 border-t border-border/10">
           <div className="h-4 bg-foreground/5 rounded w-3/4" />
           <div className="h-4 bg-foreground/5 rounded w-1/2" />
         </div>
       </div>
 
-      {/* Footer buttons skeleton */}
       <div className="flex justify-between items-center pt-4 border-t border-border/10 relative z-10">
         <div className="h-4 bg-foreground/5 rounded w-24" />
         <div className="flex gap-2">

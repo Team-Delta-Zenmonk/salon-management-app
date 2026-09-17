@@ -53,7 +53,6 @@ export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Reado
                 )}
                 onClick={() => onSelectStaff(staff.uuid)}
               >
-                {/* Active side indicator */}
                 {isSelected && (
                   <motion.div
                     layoutId="activeStaffIndicator"

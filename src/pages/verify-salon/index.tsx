@@ -33,7 +33,10 @@ export default function VerifyEmail() {
       setIsLoading(true);
       await dispatch(verifySalonAction({ otp: data.otp, email: email! })).unwrap();
       callSnack("Email verified successfully", "success");
-      navigate("/salon-onboarding", { replace: true });
+      navigate("/salon-onboarding", {
+        replace: true,
+        state: { plan: location.state?.plan },
+      });
     } catch (err: unknown) {
       const error = err as { response?: { data?: string } };
       if (error.response?.data?.includes("OTP expired")) {
@@ -82,23 +85,19 @@ export default function VerifyEmail() {
     return null;
   }
 
-  // Timer progress: 0–30s maps to 100–0%
   const timerProgress = (timer / 30) * 100;
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Left — Branding Panel */}
       <motion.div
         initial={{ x: -40, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="hidden lg:flex lg:w-[45%] flex-col relative overflow-hidden bg-[#211922] dark:bg-black border-r border-border/30 dark:border-border/20"
       >
-        {/* Gradient blobs */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
-        {/* Logo */}
         <div className="relative z-10 p-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
@@ -108,7 +107,6 @@ export default function VerifyEmail() {
           </div>
         </div>
 
-        {/* Hero content */}
         <div className="relative z-10 flex-1 flex flex-col justify-center px-10 pb-16">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -151,7 +149,6 @@ export default function VerifyEmail() {
           </motion.div>
         </div>
 
-        {/* Bottom message */}
         <div className="relative z-10 px-10 pb-10">
           <div className="border-t border-white/10 pt-6">
             <p className="text-white/50 text-xs font-medium">
@@ -161,18 +158,15 @@ export default function VerifyEmail() {
         </div>
       </motion.div>
 
-      {/* Right — Form Panel */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
         className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 relative overflow-hidden"
       >
-        {/* Subtle grid pattern & glow */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-70 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2 mb-10">
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
             <Scissors className="w-4.5 h-4.5 text-primary-foreground" />
@@ -199,7 +193,6 @@ export default function VerifyEmail() {
 
             <FormProvider {...methods}>
               <form onSubmit={onSubmit} className="space-y-6">
-                {/* OTP input */}
                 <div className="flex justify-center">
                   <OTPInput
                     name="otp"
@@ -210,7 +203,6 @@ export default function VerifyEmail() {
                   />
                 </div>
 
-                {/* Timer / Resend */}
                 <div className="flex flex-col items-center gap-3">
                   {!canResend ? (
                     <div className="w-full space-y-2">

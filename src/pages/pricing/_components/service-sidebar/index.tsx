@@ -54,7 +54,6 @@ export default function ServiceSidebar({
                 )}
                 onClick={() => onSelectService(s.uuid)}
               >
-                {/* Active side indicator */}
                 {isSelected && (
                   <motion.div
                     layoutId="activeServiceIndicator"

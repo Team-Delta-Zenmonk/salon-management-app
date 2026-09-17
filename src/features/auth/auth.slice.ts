@@ -2,6 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { loginSalonAction } from "./login/login.action";
 import { verifySalonAction } from "./verify-salon/verify-salon.action";
 import { getSalonProfileAction } from "./profile/get-salon-profile/getSalonProfile.action";
+import type { SalonType } from "@/common/enums/salon-type.enum";
+import type { SubscriptionPlan } from "@/common/enums/subscription-plan.enum";
+import type { SubscriptionStatus } from "@/common/enums/subscription-status.enum";
 
 export interface Salon {
   id: number;
@@ -16,15 +19,25 @@ export interface Salon {
   map_link?: string;
   about?: string;
   logo?: string;
-  type?: string;
+  type?: SalonType;
+  slug?: string;
+  is_active?: boolean;
+  trial_ends_at?: string;
+  subscription_plan?: SubscriptionPlan;
+  subscription_status?: SubscriptionStatus;
+  subscription_expires_at?: string;
   is_onboarded: boolean;
   stripe_account_id?: string;
+  photos?: any[];
+  business_hours?: Record<string, any>;
+  allowed_payment_policies?: string[];
+  deposit_percentage?: number | null;
   created_at: string;
   updated_at: string;
 }
 
 export type AuthState = {
-  salon: any;
+  salon: Salon | null;
   isAuthenticated: boolean;
   isOnboardingComplete: boolean;
 };

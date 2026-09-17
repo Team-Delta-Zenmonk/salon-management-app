@@ -167,7 +167,7 @@ export default function Inventory() {
     setTransactionLoading(true);
     try {
       await dispatch(listInventoryLogsAction({
-        page: newPage + 1, // TablePagination is 0-based, API is 1-based
+        page: newPage + 1,
         limit: PAGE_LIMIT,
         search: debouncedSearch,
         ...getSortParams(sortBy),
@@ -223,7 +223,6 @@ export default function Inventory() {
   const stockHasMore = Number(stockTotal) > 0 && stockData.length < Number(stockTotal);
   const transactionHasMore = Number(transactionTotal) > 0 && transactionData.length < Number(transactionTotal);
 
-  // Compute Stats
   const totalProducts = allStockItems.length;
   const lowStockCount = allStockItems.filter(
     (item) => item.current_stock > 0 && item.min_stock_level && item.current_stock <= item.min_stock_level
@@ -284,14 +283,12 @@ export default function Inventory() {
       </motion.div>
 
       <div className="w-full px-4 md:px-8 pb-8 space-y-6">
-        {/* Metrics Grid */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 shrink-0"
         >
-          {/* Total Products */}
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
@@ -307,7 +304,6 @@ export default function Inventory() {
             </div>
           </div>
 
-          {/* Low Stock Items */}
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-amber-500/20 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-amber-500/5 rounded-full blur-xl group-hover:bg-amber-500/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
@@ -323,7 +319,6 @@ export default function Inventory() {
             </div>
           </div>
 
-          {/* Out of Stock Items */}
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-destructive/20 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-destructive/5 rounded-full blur-xl group-hover:bg-destructive/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
@@ -339,7 +334,6 @@ export default function Inventory() {
             </div>
           </div>
 
-          {/* Inventory Value */}
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-emerald-500/20 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
@@ -355,7 +349,6 @@ export default function Inventory() {
             </div>
           </div>
 
-          {/* Recent Activity */}
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-primary/20 col-span-2 sm:col-span-1 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">

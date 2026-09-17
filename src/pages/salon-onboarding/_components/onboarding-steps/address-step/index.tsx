@@ -72,7 +72,6 @@ export default function AddressStep() {
 
   return (
     <div className="space-y-4 pt-2">
-      {/* Full Address Search Input with Autocomplete */}
       <div 
         className="relative z-20"
         onBlur={(e) => {
@@ -98,7 +97,6 @@ export default function AddressStep() {
           )}
         </div>
 
-        {/* Suggestions Dropdown */}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute top-[68px] left-0 right-0 bg-card/95 backdrop-blur-md border border-border/50 rounded-2xl shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-border/50">
             {suggestions.map((place) => {
@@ -125,7 +123,6 @@ export default function AddressStep() {
         )}
       </div>
 
-      {/* Map Link Input (Disabled) */}
       <div>
         <TextField
           type="text"
@@ -138,7 +135,6 @@ export default function AddressStep() {
         />
       </div>
 
-      {/* Map Container */}
       <div className="space-y-3">
         <label className="text-sm font-semibold text-foreground block mb-2">Select location on map</label>
         <div 

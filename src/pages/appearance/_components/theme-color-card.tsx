@@ -43,7 +43,6 @@ export default function ThemeColorCard({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Preset list */}
         <div className="space-y-3">
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5" />

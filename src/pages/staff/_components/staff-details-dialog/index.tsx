@@ -8,7 +8,7 @@ import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import {
   Phone, Mail, MapPin, Cake,
-  Calendar, Shield, UserCircle, Clock, FileText, ExternalLink
+  Calendar, Shield, UserCircle, Clock
 } from "lucide-react";
 import type { Staff } from "../../../../features/staff/staff.slice";
 import dayjs from "dayjs";
@@ -39,7 +39,6 @@ interface StaffDetailsDialogProps {
 
 }
 
-// ─── Reusable info row ────────────────────────────────────────────────────────
 function InfoRow({
   icon: Icon,
   label,
@@ -88,7 +87,6 @@ function InfoRow({
 const TABS = [
   { value: "contact", label: "Contact" },
   { value: "employment", label: "Employment" },
-  { value: "documents", label: "Documents" },
   { value: "schedule", label: "Schedule" },
 ];
 
@@ -118,10 +116,8 @@ export default function StaffDetailsDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-[520px] w-full max-h-[90vh] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-3xl flex flex-col">
 
-        {/* ── Header ── */}
         <div className="shrink-0 px-6 py-5 border-b border-border/40 bg-muted/20">
           <div className="flex items-start gap-4">
-            {/* Avatar */}
             <Avatar className="w-14 h-14 rounded-2xl ring-2 ring-primary/10 shadow-md overflow-hidden shrink-0">
               <AvatarImage src={staff.photos?.url} alt={fullName} className="object-cover" />
               <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg rounded-2xl">
@@ -129,7 +125,6 @@ export default function StaffDetailsDialog({
               </AvatarFallback>
             </Avatar>
 
-            {/* Identity */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg font-bold text-foreground capitalize leading-tight tracking-tight truncate">
@@ -159,7 +154,6 @@ export default function StaffDetailsDialog({
           </div>
         </div>
 
-        {/* ── Custom Tab Bar ── */}
         <div className="shrink-0 flex items-stretch border-b border-border/40 bg-muted/10 px-2">
           {TABS.map((t) => {
             const isActive = tab === t.value;
@@ -174,7 +168,6 @@ export default function StaffDetailsDialog({
                 }`}
               >
                 {t.label}
-                {/* Active underline */}
                 <span
                   className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full bg-primary transition-all duration-300 ${
                     isActive ? "w-4/5 opacity-100" : "w-0 opacity-0"
@@ -185,7 +178,6 @@ export default function StaffDetailsDialog({
           })}
         </div>
 
-        {/* ── Tab Content ── */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
@@ -196,7 +188,6 @@ export default function StaffDetailsDialog({
               transition={{ duration: 0.16, ease: "easeOut" }}
               className="p-6 flex flex-col gap-3"
             >
-              {/* ── Contact ── */}
               {tab === "contact" && (
                 <>
                   <InfoRow
@@ -233,7 +224,6 @@ export default function StaffDetailsDialog({
                 </>
               )}
 
-              {/* ── Employment ── */}
               {tab === "employment" && (
                 <>
                   <div className="grid grid-cols-2 gap-3">
@@ -284,7 +274,6 @@ export default function StaffDetailsDialog({
                 </>
               )}
 
-              {/* ── Documents ── */}
               {tab === "documents" && (
                 <div className="flex flex-col gap-3">
                   {!staff.staff_docs || staff.staff_docs.length === 0 ? (
@@ -327,10 +316,8 @@ export default function StaffDetailsDialog({
                 </div>
               )}
 
-              {/* ── Schedule ── */}
               {tab === "schedule" && (
                 <>
-                  {/* Today's summary card */}
                   {(() => {
                     const todayHours = staff.active_hours?.[todayKey];
                     const hasHours = todayHours?.start_time && todayHours?.end_time;
@@ -355,7 +342,6 @@ export default function StaffDetailsDialog({
                     );
                   })()}
 
-                  {/* Weekly grid — 7 day cards */}
                   <div className="grid grid-cols-7 gap-1.5">
                     {DAYS_OF_WEEK.map((day) => {
                       const hours = staff.active_hours?.[day];
@@ -373,14 +359,12 @@ export default function StaffDetailsDialog({
                               : "bg-muted/30 border-border/30"
                           }`}
                         >
-                          {/* Day abbreviation */}
                           <span className={`text-[10px] font-bold uppercase tracking-wider ${
                             isToday ? "text-primary-foreground" : isClosed ? "text-muted-foreground" : "text-foreground/80"
                           }`}>
                             {DAY_ABBR[day]}
                           </span>
 
-                          {/* Hours or off */}
                           {isClosed ? (
                             <span className={`text-[9px] font-semibold ${isToday ? "text-primary-foreground/80" : "text-destructive"}`}>
                               Off
@@ -406,7 +390,6 @@ export default function StaffDetailsDialog({
           </AnimatePresence>
         </div>
 
-        {/* ── Footer ── */}
         <div className="shrink-0 px-6 py-4 border-t border-border/40 bg-muted/10 flex items-center justify-end">
           <Button
             size="sm"

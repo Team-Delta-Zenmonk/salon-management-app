@@ -6,13 +6,11 @@ import { Button } from "../../components/ui/button";
 import { callSnack } from "../../components/snackbar";
 import { Sparkles } from "lucide-react";
 
-// Config Components
 import ThemeColorCard from "./_components/theme-color-card";
 import PreferencesCard from "./_components/preferences-card";
 import LivePreviewPanel from "./_components/live-preview-panel";
 import { UnsavedChangesBanner } from "../../components/unsaved-changes-banner";
 
-// Container Framer Motion animation presets
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -30,11 +28,9 @@ export default function Appearance() {
   const { theme, setTheme } = useTheme();
   const { colorTheme, setColorTheme } = useColorTheme();
 
-  // Primary branding states
   const [activeColorTheme, setActiveColorTheme] = useState<ColorTheme>(colorTheme);
   const [themeMode, setThemeMode] = useState(() => theme || "light");
 
-  // Keep track of originally saved states to check if form is dirty
   const [originalSettings, setOriginalSettings] = useState<string>(() => 
     JSON.stringify({
       colorTheme,
@@ -69,7 +65,6 @@ export default function Appearance() {
   };
 
 
-  // Check if anything has been modified since last save
   const currentSnapshot = JSON.stringify({
     colorTheme: activeColorTheme,
     themeMode,
@@ -78,11 +73,9 @@ export default function Appearance() {
   const isDirty = originalSettings !== "" && originalSettings !== currentSnapshot;
 
   const handleSave = () => {
-    // Update global app state variables
     setColorTheme(activeColorTheme);
     setTheme(themeMode);
 
-    // Save new snapshot
     setOriginalSettings(currentSnapshot);
     callSnack("Appearance settings saved successfully", "success");
   };
@@ -101,7 +94,6 @@ export default function Appearance() {
   return (
     <div className="flex flex-col flex-1 h-full min-h-0 w-full overflow-hidden">
       
-      {/* Top Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -119,12 +111,10 @@ export default function Appearance() {
         </div>
       </motion.div>
 
-      {/* Main Body Configuration Panel */}
       <div className="flex-1 overflow-y-auto px-4 md:px-8 pt-4 pb-0">
         <div className="max-w-[1600px] mx-auto w-full pb-24">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
             
-            {/* Left Side: Configurator */}
             <motion.div 
               variants={containerVariants} 
               initial="hidden" 
@@ -147,7 +137,6 @@ export default function Appearance() {
               </motion.div>
             </motion.div>
 
-            {/* Right Side: Sticky Live Preview */}
             <div className="lg:col-span-2 lg:sticky lg:top-0 space-y-4">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -167,7 +156,6 @@ export default function Appearance() {
         </div>
       </div>
 
-      {/* Floating Action Banner for Unsaved Changes */}
       <UnsavedChangesBanner
         isDirty={isDirty}
         message="Save to apply branding updates to the workspace"
@@ -175,7 +163,6 @@ export default function Appearance() {
         onDiscard={handleCancelChanges}
       />
 
-      {/* Default/Reset footer panel if not dirty */}
       {!isDirty && (
         <div className="shrink-0 px-8 py-4 border-t border-border/20 bg-muted/10 flex items-center justify-end">
           <Button

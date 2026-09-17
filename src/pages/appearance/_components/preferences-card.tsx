@@ -25,7 +25,6 @@ export default function PreferencesCard({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Mode Selector */}
         <div className="space-y-3">
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Display Theme Mode

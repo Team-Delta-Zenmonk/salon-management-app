@@ -70,7 +70,6 @@ const SearchStaff = () => {
     }
   }, [dispatch, page, limit, searchQuery]);
 
-  // Default sorting alphabetically by first name
   const sortedStaff = useMemo(() => {
     const result = [...(data ?? [])];
     result.sort((a, b) => {

@@ -28,7 +28,6 @@ export default function MonthView({
   getStatusColor,
   onEventClick,
 }: Readonly<MonthViewProps>) {
-  // Track which day's "more" dialog is open — null = none
   const [moreDayDate, setMoreDayDate] = useState<Date | null>(null);
 
   const days = useMemo(() => {
@@ -55,7 +54,6 @@ export default function MonthView({
     [bookings]
   );
 
-  // Bookings for the currently open "more" dialog
   const moreDayBookings = useMemo(
     () => (moreDayDate ? getBookingsForDay(moreDayDate) : []),
     [moreDayDate, getBookingsForDay],
@@ -64,7 +62,6 @@ export default function MonthView({
   return (
     <>
       <div className="flex flex-col h-full bg-card border-t border-border">
-        {/* ── Weekday header ── */}
         <div className="grid grid-cols-7 shrink-0 border-b border-border bg-muted/40">
           {weekDays.map((day, i) => (
             <div
@@ -78,7 +75,6 @@ export default function MonthView({
           ))}
         </div>
 
-        {/* ── Calendar grid ── */}
         <div
           className="flex-1 grid overflow-hidden"
           style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}
@@ -113,7 +109,6 @@ export default function MonthView({
                         : "bg-card hover:bg-muted/30"
                     }`}
                   >
-                    {/* Day number */}
                     <div className="flex justify-between items-center shrink-0">
                       <span
                         className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold transition-colors ${
@@ -128,7 +123,6 @@ export default function MonthView({
                       </span>
                     </div>
 
-                    {/* Event pills */}
                     <div className="flex flex-col gap-1 min-h-0 overflow-hidden">
                       {visibleBookings.map((booking) => {
                         const color = getStatusColor(booking.status);

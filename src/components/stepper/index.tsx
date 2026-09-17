@@ -12,7 +12,6 @@ export default function StepperHeader({ steps, activeStep, className }: Readonly
   return (
     <div className={cn("w-full py-4", className)}>
       <div className="flex items-center justify-between w-full relative">
-        {/* Connecting lines background */}
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-border z-0" />
         
         {steps.map((step, index) => {

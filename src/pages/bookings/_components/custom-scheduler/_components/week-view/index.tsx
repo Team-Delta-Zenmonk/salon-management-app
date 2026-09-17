@@ -29,7 +29,6 @@ export default function WeekView({
     return eachDayOfInterval({ start: startDate, end: endDate });
   }, [currentDate]);
 
-  // Dynamic hour range: covers 8–22 or extends to cover early/late bookings
   const hours = useMemo(() => {
     const defaultStart = 8;
     const defaultEnd = 22;
@@ -45,7 +44,6 @@ export default function WeekView({
     return Array.from({ length: maxHour - minHour + 1 }, (_, i) => i + minHour);
   }, [bookings, days]);
 
-  // Group bookings by Day -> Hour
   const bookingsByDayAndHour = useMemo(() => {
     const map = new Map<string, Map<number, Booking[]>>();
     days.forEach((day) => {
@@ -80,7 +78,6 @@ export default function WeekView({
         <div className="flex-1 overflow-y-auto custom-scrollbar bg-card">
           <div className="grid grid-cols-[56px_repeat(7,minmax(120px,1fr))] min-w-full">
 
-            {/* ── Sticky Days Header ── */}
             <div className="sticky top-0 z-20 bg-muted/40 border-r border-b border-border/60 backdrop-blur-sm" />
             {days.map((day) => {
               const isToday = isSameDay(day, new Date());
@@ -104,7 +101,6 @@ export default function WeekView({
               );
             })}
 
-            {/* ── Time Labels column ── */}
             <div className="bg-muted/10 border-r border-border/60">
               {hours.map((hour) => (
                 <div key={hour} style={{ height: `${HOUR_HEIGHT_PX}px` }} className="border-b border-border/60 relative">
@@ -115,7 +111,6 @@ export default function WeekView({
               ))}
             </div>
 
-            {/* ── Day columns ── */}
             {days.map((day) => {
               const isToday = isSameDay(day, new Date());
               const hourMap = bookingsByDayAndHour.get(day.toDateString());
@@ -128,7 +123,6 @@ export default function WeekView({
                     }`}
                   style={{ height: `${hours.length * HOUR_HEIGHT_PX}px` }}
                 >
-                  {/* Hour slots */}
                   {hours.map((hour) => {
                     const hourBookings = hourMap?.get(hour) ?? [];
                     const hasOverflow = hourBookings.length > MAX_VISIBLE_BOOKINGS;
@@ -194,7 +188,6 @@ export default function WeekView({
                           );
                         })}
 
-                        {/* "See all" button when multiple bookings exist in cell */}
                         {overflowCount > 0 && (
                           <button
                             type="button"

@@ -227,7 +227,6 @@ export default function BookingTable({
         </Table>
       </div>
 
-      {/* Pagination Bar */}
       {total > 0 && onPageChange && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 pt-2 text-xs text-muted-foreground text-center sm:text-left">
           <span>

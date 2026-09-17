@@ -43,7 +43,7 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
         await dispatch(
           fetchItemCategoriesAction({
             page: pageNum,
-            limit: 12, // slightly larger limit to fit grid nicely
+            limit: 12,
           })
         ).unwrap();
       } catch (error) {
@@ -98,7 +98,6 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          {/* Create New Category Card */}
           <button
             type="button"
             onClick={() => setCreateCategoryOpen(true)}
@@ -112,7 +111,6 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
             </div>
           </button>
 
-          {/* List existing Categories */}
           {categories.map((category) => {
             const isSelected = selectedCategory?.uuid === category.uuid;
             return (

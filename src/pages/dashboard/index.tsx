@@ -35,9 +35,7 @@ export default function Dashboard() {
   const [chartLoading, setChartLoading] = useState<boolean>(true);
   const [revenueChartData, setRevenueChartData] = useState<RevenueChartPoint[]>([]);
 
-  // --- FUNCTION CALLING LOGIC ---
 
-  // 1. Fetch Revenue Chart Data
   const loadChartData = useCallback(async (range: "7d" | "30d") => {
     setChartLoading(true);
     try {
@@ -51,7 +49,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  // 2. Fetch Today's Bookings
   const loadTodayBookings = useCallback(() => {
     const todayStr = getTodayFormattedDate();
     dispatch(
@@ -66,7 +63,6 @@ export default function Dashboard() {
     );
   }, [dispatch]);
 
-  // 3. Verify Stripe Onboarding status if URL param present
   const checkStripeOnboarding = useCallback(() => {
     if (searchParams.get("stripe_onboarded") === "true" && salon?.uuid) {
       setIsVerifying(true);
@@ -79,13 +75,11 @@ export default function Dashboard() {
     }
   }, [searchParams, salon?.uuid, dispatch, setSearchParams]);
 
-  // Handle Range Toggle via direct function call
   const handleTimeRangeChange = (range: "7d" | "30d") => {
     setTimeRange(range);
     loadChartData(range);
   };
 
-  // Connect Stripe action handler
   const handleStripeConnect = async () => {
     try {
       setIsConnecting(true);
@@ -100,7 +94,6 @@ export default function Dashboard() {
     }
   };
 
-  // View Stripe Dashboard action handler
   const handleViewDashboard = async () => {
     try {
       const res = await dispatch(getStripeDashboardLinkAction()).unwrap();
@@ -112,14 +105,12 @@ export default function Dashboard() {
     }
   };
 
-  // Initial mount data loader (runs once on page mount)
   useEffect(() => {
     loadChartData("7d");
     loadTodayBookings();
     checkStripeOnboarding();
   }, [loadChartData, loadTodayBookings, checkStripeOnboarding]);
 
-  // Map raw Redux bookings to display model
   const todayBookings: TodayBookingItem[] = useMemo(() => {
     return reduxBookings.map((booking) => {
       const bookingServices = booking.booking_services ?? [];
@@ -159,7 +150,6 @@ export default function Dashboard() {
       animate={{ opacity: 1 }}
       className="flex flex-col w-full max-w-[1600px] mx-auto pb-10 px-4 md:px-8"
     >
-      {/* Header & Stripe Status */}
       <DashboardHeader
         salonName={salon?.name}
         isVerifying={isVerifying}
@@ -169,12 +159,9 @@ export default function Dashboard() {
         onViewDashboard={handleViewDashboard}
       />
 
-      {/* Main Dashboard Layout */}
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-8">
-        {/* Row 1: KPI Stats Cards */}
         <StatsGrid />
 
-        {/* Row 2: Revenue Chart & Today's Bookings */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <RevenueChart
             timeRange={timeRange}
@@ -185,7 +172,6 @@ export default function Dashboard() {
           <TodayBookingsSection todayBookings={todayBookings} bookingsLoading={bookingsLoading} />
         </div>
 
-        {/* Row 3: Popular Services Chart & Top Staff Leaderboard */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <ServiceDistribution />
           <StaffLeaderboard />

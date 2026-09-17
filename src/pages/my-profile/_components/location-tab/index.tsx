@@ -52,7 +52,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
   const latVal = useWatch({ control, name: "address.latitude" });
   const lngVal = useWatch({ control, name: "address.longitude" });
 
-  // Sync local inputs when coordinates change (e.g. from drag or initial load)
   useEffect(() => {
     if (!latVal || !lngVal) return;
 
@@ -92,7 +91,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
     fetchStructuredAddress();
   }, [latVal, lngVal]);
 
-  // Click outside listener for suggestions
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -103,7 +101,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch address search suggestions from Nominatim API (debounced)
   useEffect(() => {
     if (searchQuery.trim().length < 3) {
       setSuggestions([]);
@@ -191,11 +188,9 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Contact Information */}
       <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
-        {/* Section Header */}
         <div className="flex items-center gap-2 mb-5 relative z-10">
           <Phone className="w-4 h-4 text-primary" />
           <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Contact & Authentication</span>
@@ -203,7 +198,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-          {/* Email (Readonly) */}
           <div className="min-w-0">
             <TextField
               name="email"
@@ -223,7 +217,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
             />
           </div>
 
-          {/* Contact Number */}
           <div className="min-w-0">
             <TextField
               name="phone"
@@ -240,18 +233,15 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
         </div>
       </div>
 
-      {/* Address & Interactive Map */}
       <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
-        {/* Section Header */}
         <div className="flex items-center gap-2 mb-5 relative z-10">
           <MapPin className="w-4 h-4 text-primary" />
           <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Salon Geolocation</span>
           <div className="flex-1 h-px bg-border/50" />
         </div>
 
-        {/* Address Autocomplete Search */}
         <div ref={searchRef} className="relative mb-6 z-10">
           <label className="text-sm font-semibold text-foreground block mb-1.5">Search Address</label>
           <div className="flex items-center border border-border/50 rounded-xl h-10 overflow-hidden bg-white dark:bg-neutral-900 shadow-xs focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all duration-200">
@@ -274,7 +264,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
             )}
           </div>
 
-          {/* Suggestions Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute top-[72px] left-0 right-0 bg-card/95 backdrop-blur-md border border-border/50 rounded-2xl shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-border/50">
               {suggestions.map((place) => {
@@ -300,7 +289,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
           )}
         </div>
 
-        {/* Leaflet Map - Height increased to h-[380px] */}
         <div className="relative rounded-xl border border-border/50 overflow-hidden shadow-inner h-[380px] bg-background/20 mb-6 z-0 hover:border-primary/20 transition-all duration-300">
           <LocationMap
             control={control}
@@ -311,9 +299,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
           />
         </div>
 
-        {/* Address Fields — clean 3-column layout */}
         <div className="grid grid-cols-3 gap-4 relative z-10">
-          {/* Street (full-width col-span-3) */}
           <div className="flex flex-col gap-1.5 w-full col-span-3">
             <label className="text-sm font-semibold text-foreground">Street Address</label>
             <input 
@@ -325,7 +311,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
             />
           </div>
 
-          {/* City */}
           <div className="flex flex-col gap-1.5 w-full col-span-1">
             <label className="text-sm font-semibold text-foreground">City</label>
             <input 
@@ -337,7 +322,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
             />
           </div>
 
-          {/* State */}
           <div className="flex flex-col gap-1.5 w-full col-span-1">
             <label className="text-sm font-semibold text-foreground">State</label>
             <input 
@@ -349,7 +333,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
             />
           </div>
 
-          {/* Pincode */}
           <div className="flex flex-col gap-1.5 w-full col-span-1">
             <label className="text-sm font-semibold text-foreground">Pincode</label>
             <input 
@@ -361,7 +344,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
             />
           </div>
 
-          {/* Google Maps Link (full-width col-span-3) */}
           <div className="flex flex-col gap-1.5 w-full col-span-3 mt-2">
             <TextField
               name="address.map_link"

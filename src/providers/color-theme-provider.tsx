@@ -14,7 +14,6 @@ export function ColorThemeProvider({ children, defaultColor = "sunset" }: { chil
 
   useEffect(() => {
     const root = document.documentElement;
-    // Remove existing color classes
     root.classList.remove(
       "theme-rose", 
       "theme-zinc", 
@@ -25,7 +24,6 @@ export function ColorThemeProvider({ children, defaultColor = "sunset" }: { chil
       "theme-ocean",
       "theme-cyber"
     );
-    // Add the selected color class
     root.classList.add(`theme-${colorTheme}`);
   }, [colorTheme]);
 

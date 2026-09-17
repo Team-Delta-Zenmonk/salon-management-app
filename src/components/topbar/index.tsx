@@ -4,6 +4,7 @@ import type { RootState } from "../../store/store";
 import { useAppSelector } from "../../store/hooks";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { ThemeToggle } from "../theme-toggle";
+import SubscriptionWidget from "./_components/subscription-widget";
 
 type TopbarProps = {
   onMenuClick?: () => void;
@@ -36,7 +37,8 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
             </h1>
           </div>
         </div>
-        <div className="flex items-center shrink-0 ml-4">
+        <div className="flex items-center gap-3 shrink-0 ml-4">
+          <SubscriptionWidget />
           <ThemeToggle />
         </div>
       </div>

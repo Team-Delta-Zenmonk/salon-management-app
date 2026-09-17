@@ -12,7 +12,6 @@ import { Clock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
-/** Generate time options at 30-minute intervals in "HH:mm" (24h) format with 12h display labels */
 const TIME_OPTIONS = (() => {
   const options: { value: string; label: string }[] = [];
   for (let h = 0; h < 24; h++) {
@@ -27,11 +26,9 @@ const TIME_OPTIONS = (() => {
   return options;
 })();
 
-/** Convert "HH:mm" to display label like "9:00 AM" */
 const formatTimeLabel = (val: string): string => {
   const match = TIME_OPTIONS.find((o) => o.value === val);
   if (match) return match.label;
-  // Fallback for non-standard times
   if (!val) return "";
   const [hours, minutes] = val.split(":");
   const h = Number.parseInt(hours, 10);
