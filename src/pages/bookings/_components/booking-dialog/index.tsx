@@ -8,7 +8,7 @@ import {
 } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
 import { Separator } from "../../../../components/ui/separator";
-import { Plus, X, Loader2 } from "lucide-react";
+import { Plus, Loader2, FileText } from "lucide-react";
 import { FormProvider, useForm, useFieldArray, useWatch, Controller, type SubmitHandler } from "react-hook-form";
 import { cn } from "../../../../lib/utils";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
@@ -23,6 +23,7 @@ import TimePicker from "../../../../components/form/time-picker";
 import { listServiceStaff } from "../../../../features/service/list-staff/list-staff.service";
 import { createBookingAction } from "../../../../features/booking/create-booking/create-booking.action";
 import { updateBookingAction } from "../../../../features/booking/update-booking/update-booking.action";
+import { downloadInvoiceService } from "../../../../features/invoice/download-invoice/download-invoice.service";
 import dayjs from "dayjs";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import BookingServiceRow from "./_components/booking-service-row";
@@ -60,7 +61,33 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   const { salon } = useAppSelector((state) => state.auth);
   const { data: services } = useAppSelector((state) => state.service);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
   const [staffMap, setStaffMap] = useState<StaffMap>({});
+
+  const handleDownloadInvoice = async () => {
+    const bookingIdentifier = booking?.id || booking?.uuid;
+    if (!bookingIdentifier) {
+      callSnack("Booking identifier not found", "error");
+      return;
+    }
+
+    setIsDownloadingInvoice(true);
+    try {
+      const res = await downloadInvoiceService(bookingIdentifier);
+      if (res?.url) {
+        window.open(res.url, "_blank");
+        callSnack("Opening invoice...", "success");
+      } else {
+        callSnack("Invoice URL not available", "error");
+      }
+    } catch (err: any) {
+      console.error("Failed to download invoice:", err);
+      const msg = err?.response?.data?.message || err?.message || "Failed to download invoice";
+      callSnack(msg, "error");
+    } finally {
+      setIsDownloadingInvoice(false);
+    }
+  };
 
   const depositPercentage = (salon as any)?.deposit_percentage ?? 20;
 
@@ -496,11 +523,27 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
               )}
             </div>
 
-            <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+            <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end items-center">
+              {mode === "update" && (booking?.id || booking?.uuid) && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isDownloadingInvoice || isLoading}
+                  onClick={handleDownloadInvoice}
+                  className="rounded-full px-4 gap-2 text-xs font-semibold mr-auto border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                >
+                  {isDownloadingInvoice ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <FileText className="h-3.5 w-3.5 text-primary" />
+                  )}
+                  Invoice
+                </Button>
+              )}
               <Button
                 type="button"
                 onClick={onClose}
-                disabled={isLoading}
+                disabled={isLoading || isDownloadingInvoice}
                 variant="outline"
                 className="rounded-full px-6"
               >
@@ -508,7 +551,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isDownloadingInvoice}
                 className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
               >
                 {isLoading ? (

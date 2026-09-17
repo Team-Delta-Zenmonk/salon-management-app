@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { CalendarDays, LayoutList } from "lucide-react";
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
 import CustomScheduler from "./_components/custom-scheduler";
 import CreateBooking from "./_components/create-booking";
 import BookingDetailsDialog from "./_components/booking-calender/_components/booking-detail-drawer";
@@ -33,10 +34,20 @@ export default function BookingPage() {
   const { data: bookings, total, page, limit, loading } = useAppSelector((state) => state.booking);
 
   const [viewMode, setViewMode] = useState<"calendar" | "table">("calendar");
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [receiptBooking, setReceiptBooking] = useState<Booking | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [statePage, setStatePage] = useState(1);
+
+  const startDateStr = useMemo(
+    () => format(startOfWeek(startOfMonth(currentDate)), "yyyy-MM-dd"),
+    [currentDate]
+  );
+  const endDateStr = useMemo(
+    () => format(endOfWeek(endOfMonth(currentDate)), "yyyy-MM-dd"),
+    [currentDate]
+  );
 
   const { control, watch } = useForm<FilterForm>({
     defaultValues: {
@@ -59,6 +70,8 @@ export default function BookingPage() {
     dispatch(
       listBookingsAction({
         filter: BOOKING_FILTER.MONTH,
+        start_date: startDateStr,
+        end_date: endDateStr,
         page: statePage,
         limit: 12,
         view: viewMode,
@@ -67,7 +80,7 @@ export default function BookingPage() {
         service_uuid: selectedService !== ALL_SERVICES_VALUE ? selectedService : undefined,
       })
     );
-  }, [dispatch, statePage, viewMode, selectedPayment, selectedStaff, selectedService]);
+  }, [dispatch, startDateStr, endDateStr, statePage, viewMode, selectedPayment, selectedStaff, selectedService]);
 
   const staffOptions = useMemo(
     () => [
@@ -296,6 +309,8 @@ export default function BookingPage() {
         {viewMode === "calendar" ? (
           <CustomScheduler
             bookings={filteredBookings}
+            currentDate={currentDate}
+            onDateChange={setCurrentDate}
             updateBookingStatus={(uuid, status) => dispatch(updateBookingAction({ uuid, body: { status } }))}
             getStatusColor={getStatusColor}
             onEventClick={handleEventClick}

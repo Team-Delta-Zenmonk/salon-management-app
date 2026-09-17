@@ -1,10 +1,11 @@
 import { useState } from "react";
 import dayjs from "dayjs";
-import { Clock, User, CheckCircle2, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
+import { Clock, User, ShieldCheck, Loader2, FileText } from "lucide-react";
 import type { Booking } from "../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
 import { useAppDispatch } from "../../../../store/hooks";
 import { collectRemainingPaymentAction } from "../../../../features/booking/collect-remaning-payment/collect-remaining-payment.action";
+import { downloadInvoiceService } from "../../../../features/invoice/download-invoice/download-invoice.service";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,32 @@ export default function BookingReceiptDialog({
 }: Readonly<BookingReceiptDialogProps>) {
   const dispatch = useAppDispatch();
   const [isCollecting, setIsCollecting] = useState(false);
+  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+
+  const handleDownloadInvoice = async () => {
+    if (!booking) return;
+    const identifier = booking.id || booking.uuid;
+    if (!identifier) {
+      callSnack("Booking identifier not found", "error");
+      return;
+    }
+
+    setIsDownloadingInvoice(true);
+    try {
+      const res = await downloadInvoiceService(identifier);
+      if (res?.url) {
+        window.open(res.url, "_blank");
+      } else {
+        callSnack("Invoice URL not available", "error");
+      }
+    } catch (err: any) {
+      console.error("Failed to download invoice:", err);
+      const msg = err?.response?.data?.message || err?.message || "Failed to download invoice";
+      callSnack(msg, "error");
+    } finally {
+      setIsDownloadingInvoice(false);
+    }
+  };
 
   if (!booking) return null;
 
@@ -168,9 +195,23 @@ export default function BookingReceiptDialog({
           </div>
         </div>
 
-        <DialogFooter className="pt-4 border-t border-border/40 gap-2">
+        <DialogFooter className="pt-4 border-t border-border/40 gap-2 flex-row justify-between items-center">
+          <Button
+            variant="outline"
+            onClick={handleDownloadInvoice}
+            disabled={isDownloadingInvoice}
+            className="rounded-xl text-xs font-semibold gap-2 border-primary/30 text-primary hover:bg-primary/10"
+          >
+            {isDownloadingInvoice ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <FileText className="w-3.5 h-3.5" />
+            )}
+            Download Invoice
+          </Button>
+
           {remaining > 0 && booking.status !== BOOKING_STATUS.CANCELLED ? (
-            <>
+            <div className="flex items-center gap-2">
               <Button variant="outline" onClick={onClose} className="rounded-xl text-xs font-semibold">
                 Dismiss
               </Button>
@@ -186,9 +227,9 @@ export default function BookingReceiptDialog({
                 )}
                 Collect Remaining ₹{remaining.toFixed(0)}
               </Button>
-            </>
+            </div>
           ) : (
-            <Button variant="secondary" onClick={onClose} className="w-full rounded-xl text-xs font-semibold">
+            <Button variant="secondary" onClick={onClose} className="rounded-xl text-xs font-semibold">
               Close Receipt
             </Button>
           )}

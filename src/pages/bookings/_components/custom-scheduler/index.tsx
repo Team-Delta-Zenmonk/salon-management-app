@@ -14,6 +14,8 @@ interface CustomSchedulerProps {
   updateBookingStatus: (bookingUuid: string, newStatus: BookingStatus) => void;
   getStatusColor: (status: BookingStatus) => string;
   onEventClick: (booking: Booking) => void;
+  currentDate?: Date;
+  onDateChange?: (date: Date) => void;
 }
 
 type ViewType = "month" | "week" | "day";
@@ -22,28 +24,41 @@ export default function CustomScheduler({
   bookings,
   getStatusColor,
   onEventClick,
+  currentDate: controlledDate,
+  onDateChange,
 }: Readonly<CustomSchedulerProps>) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [internalDate, setInternalDate] = useState(new Date());
+  const currentDate = controlledDate ?? internalDate;
+
+  const setDate = (newDate: Date | ((prev: Date) => Date)) => {
+    const updated = typeof newDate === "function" ? newDate(currentDate) : newDate;
+    if (onDateChange) {
+      onDateChange(updated);
+    } else {
+      setInternalDate(updated);
+    }
+  };
+
   const [view, setView] = useState<ViewType>("month");
   const [direction, setDirection] = useState(0);
 
   const handlePrevious = () => {
     setDirection(-1);
-    if (view === "month") setCurrentDate((d) => subMonths(d, 1));
-    else if (view === "week") setCurrentDate((d) => subWeeks(d, 1));
-    else setCurrentDate((d) => subDays(d, 1));
+    if (view === "month") setDate((d) => subMonths(d, 1));
+    else if (view === "week") setDate((d) => subWeeks(d, 1));
+    else setDate((d) => subDays(d, 1));
   };
 
   const handleNext = () => {
     setDirection(1);
-    if (view === "month") setCurrentDate((d) => addMonths(d, 1));
-    else if (view === "week") setCurrentDate((d) => addWeeks(d, 1));
-    else setCurrentDate((d) => addDays(d, 1));
+    if (view === "month") setDate((d) => addMonths(d, 1));
+    else if (view === "week") setDate((d) => addWeeks(d, 1));
+    else setDate((d) => addDays(d, 1));
   };
 
   const handleToday = () => {
     setDirection(0);
-    setCurrentDate(new Date());
+    setDate(new Date());
   };
 
   const slideVariants = {

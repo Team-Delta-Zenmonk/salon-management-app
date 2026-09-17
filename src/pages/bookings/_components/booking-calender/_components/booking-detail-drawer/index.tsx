@@ -15,6 +15,8 @@ import {
   IndianRupee,
   Timer,
   UserCheck,
+  FileText,
+  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Booking, BookingStatus, BookingServiceItem } from "../../../../types/booking.type";
@@ -26,6 +28,8 @@ import { useAppDispatch } from "../../../../../../store/hooks";
 import { callSnack } from "../../../../../../components/snackbar";
 import BookingDialog from "../../../booking-dialog";
 import BookingActionConfirmDialog from "../booking-action-confirm-dialog";
+import BookingReceiptDialog from "../../../booking-receipt-dialog";
+import { downloadInvoiceService } from "../../../../../../features/invoice/download-invoice/download-invoice.service";
 
 type BookingDetailsDrawerProps = {
   open: boolean;
@@ -77,7 +81,34 @@ export default function BookingDetailsDialog({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [editOpen, setEditOpen] = useState(false);
+  const [receiptOpen, setReceiptOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+
+  const handleDownloadInvoice = async () => {
+    if (!booking) return;
+    const identifier = booking.id || booking.uuid;
+    if (!identifier) {
+      callSnack("Booking identifier not found", "error");
+      return;
+    }
+
+    setIsDownloadingInvoice(true);
+    try {
+      const res = await downloadInvoiceService(identifier);
+      if (res?.url) {
+        window.open(res.url, "_blank");
+      } else {
+        callSnack("Invoice URL not available", "error");
+      }
+    } catch (err: any) {
+      console.error("Failed to download invoice:", err);
+      const msg = err?.response?.data?.message || err?.message || "Failed to download invoice";
+      callSnack(msg, "error");
+    } finally {
+      setIsDownloadingInvoice(false);
+    }
+  };
 
   const statusColor = booking ? getStatusColor(booking.status) : "#6b7280";
   const isCancelled = booking?.status === BOOKING_STATUS.CANCELLED;
@@ -140,59 +171,53 @@ export default function BookingDetailsDialog({
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
                 <div className="shrink-0 relative overflow-hidden bg-muted/20 border-b border-border/50">
-                  <div className="relative flex items-start justify-between px-5 sm:px-6 pt-5 pb-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span
-                          className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full"
-                          style={{
-                            color: statusColor,
-                            backgroundColor: `color-mix(in srgb, ${statusColor} 20%, transparent)`,
-                            border: `1px solid color-mix(in srgb, ${statusColor} 40%, transparent)`,
-                          }}
-                        >
-                          <span
-                            className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
-                            style={{ backgroundColor: statusColor }}
-                          />
-                          {STATUS_LABELS[booking.status] ?? booking.status}
-                        </span>
+                  <div className="relative flex items-center justify-between px-5 sm:px-6 pt-5 pb-2">
+                    <div className="flex items-center gap-3 flex-wrap min-w-0">
+                      <DialogTitle className="text-lg font-bold text-foreground leading-tight">
+                        Booking Details
+                      </DialogTitle>
 
-                        {booking.is_walk_in ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                            Walk-in
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                            Online
-                          </span>
-                        )}
-                      </div>
-                      <DialogTitle className="text-lg font-bold text-foreground leading-tight">Booking Details</DialogTitle>
-                      <p className="text-xs text-muted-foreground font-mono mt-0.5">
-                        #{booking.uuid.slice(0, 8).toUpperCase()}
-                      </p>
+                      {booking.is_walk_in ? (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                          Walk-in
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                          Online
+                        </span>
+                      )}
                     </div>
+
                     <button
                       onClick={onClose}
-                      className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors ml-2 shrink-0 mt-0.5"
+                      className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors shrink-0"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
 
                   {timeInfo && (
-                    <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-2 px-5 sm:px-6 pb-4">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-background border border-border/60 shadow-sm text-foreground">
-                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span>{timeInfo.date}</span>
+                    <div className="relative flex flex-wrap items-center justify-between gap-3 px-5 sm:px-6 pb-4 pt-1">
+                      <div className="flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full bg-background border border-border/60 shadow-sm text-foreground">
+                        <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span>{timeInfo.date} • {timeInfo.startTime} – {timeInfo.endTime}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-background border border-border/60 shadow-sm text-foreground">
-                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span>{timeInfo.startTime} – {timeInfo.endTime}</span>
-                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleDownloadInvoice}
+                        disabled={isDownloadingInvoice}
+                        className="flex items-center gap-2 text-xs font-semibold px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-500 hover:bg-amber-500/20 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+                      >
+                        {isDownloadingInvoice ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                        ) : (
+                          <FileText className="h-3.5 w-3.5 shrink-0" />
+                        )}
+                        <span>Download Receipt</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -309,60 +334,58 @@ export default function BookingDetailsDialog({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15, duration: 0.2 }}
-                    className="shrink-0 px-4 sm:px-5 py-4 border-t bg-muted/10 space-y-2"
+                    className="shrink-0 px-4 sm:px-5 py-4 border-t bg-muted/10 space-y-2.5"
                   >
                     <div className="grid gap-2 grid-cols-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditOpen(true)}
-                        className=" rounded-xl gap-2 h-10 font-medium"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleComplete}
-                        className="w-full rounded-xl gap-2 h-10 font-semibold"
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        Mark Complete
-                      </Button>
-                    </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditOpen(true)}
+                          className="rounded-xl gap-2 h-10 font-medium"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleComplete}
+                          className="w-full rounded-xl gap-2 h-10 font-semibold"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Mark Complete
+                        </Button>
+                      </div>
 
-                    <div className="flex items-center gap-3 py-1">
-                      <div className="flex-1 h-px bg-border/40" />
-                      <span className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-wider">Danger Zone</span>
-                      <div className="flex-1 h-px bg-border/40" />
-                    </div>
+                      <div className="flex items-center gap-3 py-0.5">
+                        <div className="flex-1 h-px bg-border/40" />
+                        <span className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-wider">Danger Zone</span>
+                        <div className="flex-1 h-px bg-border/40" />
+                      </div>
 
-                    <div className="grid gap-2 grid-cols-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setConfirmOpen(true)}
-                        className="w-full rounded-xl h-10 font-medium border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all gap-2"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                        Cancel
-                      </Button>
-                       
+                      <div className="grid gap-2 grid-cols-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setConfirmOpen(true)}
+                          className="w-full rounded-xl h-10 font-medium border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all gap-2"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                          Cancel
+                        </Button>
                         <Button
                           size="sm"
                           onClick={() => setDeleteConfirmOpen(true)}
                           disabled={isDeleting}
-                          className="rounded-xl h-10 font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-all gap-2 border-none"
+                          className="w-full rounded-xl h-10 font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-all gap-2 border-none"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           Delete
                         </Button>
-                      
-                    </div>
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
           </AnimatePresence>
         </DialogContent>
       </Dialog>
@@ -396,7 +419,10 @@ export default function BookingDetailsDialog({
         isLoading={isDeleting}
       />
       {booking && (
-        <BookingDialog open={editOpen} onClose={() => { setEditOpen(false); onClose(); }} mode="update" booking={booking} />
+        <>
+          <BookingDialog open={editOpen} onClose={() => { setEditOpen(false); onClose(); }} mode="update" booking={booking} />
+          <BookingReceiptDialog open={receiptOpen} onClose={() => setReceiptOpen(false)} booking={booking} />
+        </>
       )}
     </>
   );

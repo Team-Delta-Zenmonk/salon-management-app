@@ -105,6 +105,7 @@ export default function BookingTable({
           <TableHeader className="bg-muted/40">
             <TableRow className="border-border/60 hover:bg-transparent">
               <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Client</TableHead>
+              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Booking Type</TableHead>
               <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Service</TableHead>
               <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Staff Assigned</TableHead>
               <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Status</TableHead>
@@ -118,14 +119,14 @@ export default function BookingTable({
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i} className="border-border/40">
-                  <TableCell colSpan={8} className="py-4">
+                  <TableCell colSpan={9} className="py-4">
                     <div className="h-6 w-full bg-muted/30 animate-pulse rounded-md" />
                   </TableCell>
                 </TableRow>
               ))
             ) : bookings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-12 text-muted-foreground text-sm">
+                <TableCell colSpan={9} className="text-center py-12 text-muted-foreground text-sm">
                   No bookings found matching your criteria.
                 </TableCell>
               </TableRow>
@@ -140,20 +141,20 @@ export default function BookingTable({
                   >
                     <TableCell className="font-semibold text-foreground text-sm">
                       {booking.customer_name}
-                      <div className="flex flex-col gap-1 items-start">
-                        <span>{booking.customer_name}</span>
-                        {booking.is_walk_in ? (
-                          <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0 px-2 font-bold gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                            Walk-in
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0 px-2 font-bold gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            Online
-                          </Badge>
-                        )}
-                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      {booking.is_walk_in ? (
+                        <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0 px-2 font-bold gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                          Walk-in
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0 px-2 font-bold gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          Online
+                        </Badge>
+                      )}
                     </TableCell>
 
                     <TableCell className="text-muted-foreground text-sm">
