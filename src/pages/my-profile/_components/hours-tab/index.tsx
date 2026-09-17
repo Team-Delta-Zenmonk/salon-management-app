@@ -22,7 +22,7 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
   const handleToggleDay = (dayKey: string, checked: boolean) => {
     const path = `business_hours.${dayKey}` as FieldPath<SalonProfileForm>;
     if (checked) {
-      setValue(path, { start_time: "09:00", end_time: "18:00" }, { shouldDirty: true });
+      setValue(path, { start_time: "09:00", end_time: "21:00" }, { shouldDirty: true });
     } else {
       setValue(path, null, { shouldDirty: true });
     }
@@ -94,7 +94,7 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
                     <TimePicker
                       name={`business_hours.${dayKey}.end_time`}
                       control={control}
-                      placeholder="06:00 PM"
+                      placeholder="09:00 PM"
                       identifier={`end-time-${dayKey}`}
                       triggerClassName="bg-white dark:bg-neutral-900 !h-8 text-xs"
                     />

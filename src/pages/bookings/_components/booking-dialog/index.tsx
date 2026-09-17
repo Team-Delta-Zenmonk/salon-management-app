@@ -45,6 +45,7 @@ interface ServiceStaff {
     uuid: string;
     first_name: string;
     last_name?: string;
+    end_date?: string | null;
   };
 }
 
@@ -197,13 +198,19 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   const getStaffOptions = (rowIndex: number) => {
     const rowData = staffMap[rowIndex];
     if (!rowData?.data) return [];
-    return rowData.data.map((ss) => {
-      const lastName = ss.staff.last_name ? ` ${ss.staff.last_name}` : "";
-      return {
-        label: `${ss.staff.first_name}${lastName}`,
-        value: String(ss.staff_id),
-      };
-    });
+    return rowData.data
+      .filter((ss) => {
+        if (!ss.staff || !ss.staff.end_date) return true;
+        // Check if end_date is in future
+        return dayjs(ss.staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
+      })
+      .map((ss) => {
+        const lastName = ss.staff.last_name ? ` ${ss.staff.last_name}` : "";
+        return {
+          label: `${ss.staff.first_name}${lastName}`,
+          value: String(ss.staff_id),
+        };
+      });
   };
 
   const getStaffService = (rowIndex: number, staffId: any): ServiceStaff | undefined => {

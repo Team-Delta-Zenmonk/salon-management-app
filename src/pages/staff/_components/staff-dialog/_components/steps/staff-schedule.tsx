@@ -26,7 +26,7 @@ export default function StaffSchedule({
     }
     setValue(
       path,
-      { start_time: "", end_time: "" },
+      { start_time: "09:00", end_time: "21:00" },
       { shouldDirty: true }
     );
   };

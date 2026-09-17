@@ -3,9 +3,9 @@ import type { Gender } from "../../../../../../common/enums/gender.enum";
 import type { Staff } from "../../../../../../features/staff/staff.slice";
 import type { StaffForm } from "../../../schema/staff.schema";
 
-export const getDefaultActiveHours = (): Record<DayKey, null> => {
-  const obj = {} as Record<DayKey, null>;
-  for (const d of DaysList) obj[d] = null;
+export const getDefaultActiveHours = (): Record<DayKey, { start_time: string; end_time: string } | null> => {
+  const obj = {} as Record<DayKey, { start_time: string; end_time: string } | null>;
+  for (const d of DaysList) obj[d] = { start_time: "09:00", end_time: "21:00" };
   return obj;
 };
 

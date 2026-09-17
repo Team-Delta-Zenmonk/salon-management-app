@@ -155,17 +155,17 @@ function StaffCard({
 
       {/* Footer Area with quick actions */}
       <div className="mt-5 pt-3.5 border-t border-border/40 flex items-center gap-2 relative z-10" onClick={(e) => e.stopPropagation()}>
-        <Button
+        {isActive && <Button
           variant="outline"
           size="sm"
-          className="flex-1 h-9 rounded-full hover:bg-green-500/10 hover:text-green-600 border-border/50 text-muted-foreground transition-all gap-1 px-2 shadow-xs"
+          className="flex-1 h-9 rounded-full hover:bg-green-500/10 hover:text-green-600 border-border/50 text-muted-foreground transition-all gap-1 px-2 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => onAssign(staff)}
-          disabled={deleteLoading}
-          title="Assign Services"
+          disabled={deleteLoading || !isActive}
+          title={isActive ? "Assign Services" : "Cannot assign services to inactive staff"}
         >
           <ClipboardCheck className="w-3.5 h-3.5 text-green-600" />
           <span className="text-[11px] font-semibold">Assign</span>
-        </Button>
+        </Button>}
         <Button
           variant="outline"
           size="sm"
@@ -358,12 +358,12 @@ export default function ListStaff({
       )}
 
       {detailsDialogOpen && selectedStaff && (
-        <StaffDetailsDialog 
-          open={detailsDialogOpen} 
+        <StaffDetailsDialog
+          open={detailsDialogOpen}
           onClose={() => {
             setDetailsDialogOpen(false);
             setSelectedStaff(null);
-          }} 
+          }}
           staff={selectedStaff}
         />
       )}
