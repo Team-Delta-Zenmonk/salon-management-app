@@ -33,6 +33,7 @@ const FileMultiPicker = <T extends FieldValues>({
   const handleFileChange = async (
     event: ChangeEvent<HTMLInputElement>,
     onChange: (value: Array<{ url: string; filename: string }>) => void,
+    onBlur: () => void,
     current: Array<{ url: string; filename: string }>
   ) => {
     const files = event.target.files;
@@ -70,6 +71,7 @@ const FileMultiPicker = <T extends FieldValues>({
         : await uploadMultipleFiles(fileList);
 
       onChange([...current, ...uploadedData]);
+      onBlur();
     } catch {
       callSnack("Failed to upload files", "error");
     } finally {
@@ -239,7 +241,7 @@ const FileMultiPicker = <T extends FieldValues>({
               ref={inputRef}
               data-test-id={`input-${identifier}`}
               onChange={(e) => {
-                handleFileChange(e, onChange, arr);
+                handleFileChange(e, onChange, onBlur, arr);
               }}
               accept={accept}
               hidden

@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { callSnack } from "../../../../components/snackbar";
+import EllipsisCell from "@/components/ellipse-cell";
 
 interface BookingReceiptDialogProps {
   open: boolean;
@@ -124,28 +125,28 @@ export default function BookingReceiptDialog({
 
         <div className="space-y-6 pt-4">
           <div>
-            <h3 className="text-xl font-bold text-foreground">{booking.customer_name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{booking.service_name}</p>
+            <EllipsisCell value={booking.customer_name} className="text-xl font-bold text-foreground" />
+            <EllipsisCell value={booking.service_name || "-"} className="text-xs text-muted-foreground mt-0.5" />
           </div>
 
           <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-muted/40 border border-border/40">
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Appointment Time
               </span>
               <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                <span>{formattedDate} • {formattedTime}</span>
+                <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span className="truncate">{formattedDate} • {formattedTime}</span>
               </div>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Assigned Staff
               </span>
-              <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                <User className="w-3.5 h-3.5 text-muted-foreground" />
-                <span>{booking.staff_name}</span>
+              <div className="flex items-center gap-2 text-xs font-semibold text-foreground min-w-0">
+                <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <EllipsisCell value={booking.staff_name || "-"} className="text-xs font-semibold text-foreground" />
               </div>
             </div>
           </div>

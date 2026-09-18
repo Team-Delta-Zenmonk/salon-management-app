@@ -3,6 +3,7 @@ import { User } from "lucide-react";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
 import type { Booking, BookingStatus } from "../../../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../../../common/enums/booking-status.enum";
+import EllipsisCell from "@/components/ellipse-cell";
 import BookingListModal from "../booking-list-modal";
 
 interface WeekViewProps {
@@ -169,14 +170,13 @@ export default function WeekView({
                                 )}
                               </span>
                               <div className="flex items-center gap-1 opacity-90 min-w-0 justify-between">
-                                <div className="flex items-center gap-1 min-w-0">
+                                <div className="flex items-center gap-1 min-w-0 flex-1">
                                   <User className="w-3 h-3 shrink-0" />
-                                  <span
-                                    className={`truncate font-semibold text-[11px] leading-tight ${isCancelled ? "line-through opacity-70" : ""
-                                      }`}
-                                  >
-                                    {booking.customer_name}
-                                  </span>
+                                  <EllipsisCell
+                                    value={booking.customer_name}
+                                    maxChars={14}
+                                    className={`text-[11px] font-semibold text-white leading-tight min-w-0 flex-1 ${isCancelled ? "line-through opacity-70" : ""}`}
+                                  />
                                 </div>
                                 {booking.is_walk_in && (
                                   <span className="text-[9px] font-extrabold uppercase px-1 py-0.2 rounded bg-amber-400 text-amber-950 shrink-0 shadow-sm">

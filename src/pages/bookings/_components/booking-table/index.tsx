@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import EllipsisCell from "@/components/ellipse-cell";
 
 interface BookingTableProps {
   bookings: Booking[];
@@ -139,8 +140,8 @@ export default function BookingTable({
                     key={booking.uuid}
                     className="border-border/40 hover:bg-muted/30 transition-colors"
                   >
-                    <TableCell className="font-semibold text-foreground text-sm">
-                      {booking.customer_name}
+                    <TableCell className="font-semibold text-foreground text-sm max-w-[160px]">
+                      <EllipsisCell value={booking.customer_name} className="font-semibold text-foreground text-sm" />
                     </TableCell>
 
                     <TableCell>
@@ -157,12 +158,12 @@ export default function BookingTable({
                       )}
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground text-sm">
-                      {booking.service_name}
+                    <TableCell className="text-muted-foreground text-sm max-w-[180px]">
+                      <EllipsisCell value={booking.service_name || "-"} className="text-muted-foreground text-sm" />
                     </TableCell>
 
-                    <TableCell className="text-foreground text-sm font-medium">
-                      {booking.staff_name}
+                    <TableCell className="text-foreground text-sm font-medium max-w-[140px]">
+                      <EllipsisCell value={booking.staff_name || "-"} className="text-foreground text-sm font-medium" />
                     </TableCell>
 
                     <TableCell>

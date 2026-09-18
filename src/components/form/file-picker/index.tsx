@@ -29,7 +29,11 @@ const FilePicker = <T extends FieldValues>({
     if (!disabled && !loading && !hasValue) inputRef.current?.click();
   };
 
-  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>, onChange: (value: any) => void) => {
+  const handleFileChange = async (
+    event: ChangeEvent<HTMLInputElement>,
+    onChange: (value: any) => void,
+    onBlur: () => void
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setLoading(true);
@@ -51,6 +55,7 @@ const FilePicker = <T extends FieldValues>({
     try {
       const result = await uploadFn(file);
       onChange(result);
+      onBlur();
     } catch {
       callSnack("Failed to upload file", "error");
     } finally {
@@ -194,7 +199,7 @@ const FilePicker = <T extends FieldValues>({
               ref={inputRef}
               data-test-id={`input-${identifier}`}
               onChange={(e) => {
-                handleFileChange(e, onChange);
+                handleFileChange(e, onChange, onBlur);
               }}
               accept={accept}
               hidden

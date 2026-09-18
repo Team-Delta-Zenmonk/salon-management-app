@@ -11,6 +11,7 @@ import {
 } from "date-fns";
 import type { Booking, BookingStatus } from "../../../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../../../common/enums/booking-status.enum";
+import EllipsisCell from "@/components/ellipse-cell";
 import BookingListModal from "../booking-list-modal";
 
 interface MonthViewProps {
@@ -138,9 +139,11 @@ export default function MonthView({
                             <span className={`font-bold tabular-nums shrink-0 ${isCancelled ? "line-through opacity-70" : ""}`}>
                               {format(new Date(booking.start_time), "HH:mm")}
                             </span>
-                            <span className={`truncate flex-1 opacity-90 ${isCancelled ? "line-through opacity-60" : ""}`}>
-                              {booking.customer_name}
-                            </span>
+                            <EllipsisCell
+                              value={booking.customer_name}
+                              maxChars={12}
+                              className={`flex-1 min-w-0 text-[11px] font-medium text-white opacity-90 ${isCancelled ? "line-through opacity-60" : ""}`}
+                            />
                             {booking.is_walk_in && (
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 shadow-sm" title="Walk-in Booking" />
                             )}

@@ -7,7 +7,6 @@ import { getSalonProfileAction } from "../../features/auth/profile/get-salon-pro
 import { updateSalonProfileAction } from "../../features/auth/profile/update-salon-profile/update-salon-profile.action";
 import { callSnack } from "../../components/snackbar";
 import { zodResolver } from "@hookform/resolvers/zod";
-import LogoutButton from "../../components/logout";
 import { MyProfileSchema, type SalonProfileForm } from "./schema/my-profile.schema";
 import { DAYS_MAP } from "./_components/constants/business-hours.constants";
 import { Badge } from "../../components/ui/badge";
@@ -185,11 +184,6 @@ const MyProfile = () => {
               Configure branding, business hours, and operational details
             </p>
           </div>
-          <div className="shrink-0 flex gap-2 w-full sm:w-auto">
-            <div className="w-full sm:w-40">
-              <LogoutButton />
-            </div>
-          </div>
         </motion.div>
 
         <div className="flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-24">
@@ -269,13 +263,11 @@ const MyProfile = () => {
                   <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 sm:p-6 md:p-8 z-10 gap-4">
                     <div className="flex items-center gap-3 sm:gap-4 md:gap-5 text-left min-w-0 flex-1">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl border border-white/20 shrink-0 bg-background overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
-                        {activeLogo?.url ? (
-                          <img src={activeLogo.url} className="object-cover w-full h-full" alt="Logo" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-xl sm:text-2xl font-black">
-                            {activeName?.substring(0, 1).toUpperCase() || "S"}
-                          </div>
-                        )}
+                        <img
+                          src={activeLogo?.url || "/management-icon.png"}
+                          className="object-cover w-full h-full"
+                          alt="Salon Logo"
+                        />
                       </div>
 
                       <div className="space-y-1 sm:space-y-1.5 min-w-0 flex-1">

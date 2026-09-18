@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Scissors } from "lucide-react";
 import { navigationItems } from "../../layouts/navigation";
 import SidebarNavList from "./_components/sidebar-nav-list";
 import { cn } from "@/lib/utils";
@@ -25,18 +24,19 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
     <div className="flex flex-col h-full bg-card">
       <div className={cn("border-b border-border h-[72px] flex items-center shrink-0", desktopCollapsed ? "justify-center px-0" : "px-4")}>
         <div className={cn("flex items-center", desktopCollapsed ? "justify-center" : "space-x-3 w-full")}>
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary shrink-0 shadow-sm">
-            <Scissors className="text-primary-foreground w-5 h-5" />
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 overflow-hidden shrink-0 shadow-xs border border-border/40">
+            <img
+              src={salon?.logo || "/management-icon.png"}
+              alt={salon?.name || "Salon Logo"}
+              className="w-full h-full object-cover"
+            />
           </div>
           {!desktopCollapsed && (
             <div className="min-w-0 flex-1">
               <EllipsisCell
-                value={salon?.owner_name || "Salon Manager"}
+                value={import.meta.env.VITE_APP_NAME ?? "Veloura"}
                 className="text-base font-semibold text-foreground capitalize"
               />
-              <div className="text-xs text-muted-foreground whitespace-nowrap">
-                Admin Panel
-              </div>
             </div>
           )}
         </div>

@@ -1,49 +1,55 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import React, { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface EllipsisCellProps extends React.HTMLAttributes<HTMLSpanElement> {
   value: string;
   maxLines?: number;
+  maxChars?: number;
   className?: string;
 }
 
 export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   value,
   maxLines = 1,
+  maxChars,
   className,
   ...props
 }) => {
-  const [isOverflowing, setIsOverflowing] = useState(false);
   const textRef = useRef<HTMLSpanElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showHoldTooltip, setShowHoldTooltip] = useState(false);
 
-  useEffect(() => {
-    const element = textRef.current;
-    if (!element) return;
+  const isCharTruncated = Boolean(maxChars && value && value.length > maxChars);
+  const displayValue = isCharTruncated ? `${value.slice(0, maxChars)}...` : (value || "");
 
-    const checkOverflow = () => {
-      setIsOverflowing(
-        element.scrollWidth > element.clientWidth ||
-          element.scrollHeight > element.clientHeight
-      );
-    };
+  const startHold = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setShowHoldTooltip(true);
+    }, 350);
+  };
 
-    checkOverflow();
+  const clearHold = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setShowHoldTooltip(false);
+  };
 
-    const observer = new ResizeObserver(checkOverflow);
-    observer.observe(element);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [value]);
-
-  const textElement = (
+  return (
     <span
       ref={textRef}
+      title={value || ""}
+      onTouchStart={startHold}
+      onTouchEnd={clearHold}
+      onTouchCancel={clearHold}
+      onMouseDown={startHold}
+      onMouseUp={clearHold}
+      onMouseLeave={clearHold}
       className={cn(
-        "overflow-hidden text-ellipsis text-sm",
-        maxLines === 1 ? "block whitespace-nowrap" : "line-clamp-none",
+        "overflow-hidden text-ellipsis min-w-0 pointer-events-auto relative select-none",
+        maxLines === 1 ? "inline-block whitespace-nowrap truncate" : "line-clamp-none",
         className
       )}
       style={
@@ -58,21 +64,13 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
       }
       {...props}
     >
-      {value}
+      {displayValue}
+      {showHoldTooltip && (
+        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1 bg-neutral-900 text-white text-xs font-normal rounded-md shadow-xl border border-neutral-700 z-[9999] whitespace-normal max-w-xs break-words pointer-events-none">
+          {value}
+        </span>
+      )}
     </span>
-  );
-
-  if (!isOverflowing) {
-    return textElement;
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger>{textElement}</TooltipTrigger>
-      <TooltipContent>
-        <p className="max-w-xs break-words">{value}</p>
-      </TooltipContent>
-    </Tooltip>
   );
 };
 

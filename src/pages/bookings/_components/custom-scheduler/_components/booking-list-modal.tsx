@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BOOKING_STATUS, type BookingStatus } from "@/common/enums/booking-status.enum";
 import type { Booking } from "@/pages/bookings/types/booking.type";
+import EllipsisCell from "@/components/ellipse-cell";
 
 interface BookingListModalProps {
   isOpen: boolean;
@@ -26,10 +27,10 @@ export default function BookingListModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-[92vw] sm:max-w-md p-0 gap-0 rounded-2xl overflow-hidden border-border/60 shadow-2xl [&>button]:hidden">
         <div className="flex items-center justify-between px-5 py-4 bg-muted/30 border-b border-border/50">
-          <div className="flex flex-col gap-0.5">
-            <DialogTitle className="text-base font-bold flex items-center gap-2 text-foreground">
-              <CalendarDays className="w-4 h-4 text-primary" />
-              {title}
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1 pr-3">
+            <DialogTitle className="text-base font-bold flex items-center gap-2 text-foreground min-w-0">
+              <CalendarDays className="w-4 h-4 text-primary shrink-0" />
+              <EllipsisCell value={title} className="text-base font-bold text-foreground" />
             </DialogTitle>
             <p className="text-xs text-muted-foreground ml-6">
               {bookings.length} {bookings.length === 1 ? "booking" : "bookings"}
@@ -66,15 +67,15 @@ export default function BookingListModal({
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className={`font-semibold text-sm truncate flex items-center gap-1.5 ${isCancelled ? "line-through opacity-70" : ""}`}>
+                    <div className={`font-semibold text-sm flex items-center gap-1.5 min-w-0 ${isCancelled ? "line-through opacity-70" : ""}`}>
                       <User className="w-3.5 h-3.5 shrink-0 opacity-80" />
-                      {booking.customer_name}
+                      <EllipsisCell value={booking.customer_name} className="text-sm font-semibold text-white" />
                     </div>
                     {booking.service_name && (
-                      <div className="text-[11px] opacity-75 truncate mt-0.5">
-                        {booking.service_name}
-                        {booking.staff_name && <span> · {booking.staff_name}</span>}
-                      </div>
+                      <EllipsisCell
+                        value={`${booking.service_name}${booking.staff_name ? ` · ${booking.staff_name}` : ""}`}
+                        className="text-[11px] opacity-75 mt-0.5 text-white/90"
+                      />
                     )}
                   </div>
 

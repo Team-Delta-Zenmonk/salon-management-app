@@ -3,6 +3,7 @@ import { User, CalendarX2 } from "lucide-react";
 import { format, isSameDay } from "date-fns";
 import type { Booking, BookingStatus } from "../../../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../../../common/enums/booking-status.enum";
+import EllipsisCell from "@/components/ellipse-cell";
 import BookingListModal from "../booking-list-modal";
 
 interface DayViewProps {
@@ -174,7 +175,6 @@ export default function DayView({
                               padding: "6px 10px",
                             }}
                           >
-
                             <div className="flex-1 min-w-0 pl-1.5 flex flex-col justify-center gap-0.5">
                               <div className={`text-[11px] font-bold tabular-nums leading-tight ${isCancelled ? "line-through opacity-70" : ""}`}>
                                 {format(startDate, "HH:mm")}
@@ -185,17 +185,22 @@ export default function DayView({
                                 )}
                               </div>
 
-                              <div className={`font-semibold text-xs truncate flex items-center gap-1 leading-tight ${isCancelled ? "line-through opacity-70" : ""}`}>
+                              <div className={`font-semibold text-xs flex items-center gap-1 leading-tight min-w-0 ${isCancelled ? "line-through opacity-70" : ""}`}>
                                 <User className="w-3 h-3 shrink-0 opacity-80" />
-                                <span className="truncate">{booking.customer_name}</span>
+                                <EllipsisCell
+                                  value={booking.customer_name}
+                                  maxChars={18}
+                                  className="text-xs font-semibold text-white min-w-0 flex-1"
+                                />
                               </div>
 
-                              <div className="text-[10px] opacity-80 truncate leading-tight">
-                                {booking.service_name}
-                                {booking.staff_name && (
-                                  <span className="opacity-70"> · {booking.staff_name}</span>
-                                )}
-                              </div>
+                              {booking.service_name && (
+                                <EllipsisCell
+                                  value={`${booking.service_name}${booking.staff_name ? ` · ${booking.staff_name}` : ""}`}
+                                  maxChars={22}
+                                  className="text-[10px] opacity-80 leading-tight text-white/90 min-w-0 block"
+                                />
+                              )}
                             </div>
 
                             <div className="flex items-center gap-1 shrink-0 ml-1.5">

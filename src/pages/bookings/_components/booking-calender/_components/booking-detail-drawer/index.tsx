@@ -26,6 +26,7 @@ import { deleteBookingAction } from "../../../../../../features/booking/delete-b
 import { updateBookingAction } from "../../../../../../features/booking/update-booking/update-booking.action";
 import { useAppDispatch } from "../../../../../../store/hooks";
 import { callSnack } from "../../../../../../components/snackbar";
+import EllipsisCell from "@/components/ellipse-cell";
 import BookingDialog from "../../../booking-dialog";
 import BookingActionConfirmDialog from "../booking-action-confirm-dialog";
 import BookingReceiptDialog from "../../../booking-receipt-dialog";
@@ -63,7 +64,7 @@ function InfoCard({
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest mb-0.5">{label}</p>
-        <p className="text-sm font-semibold text-foreground truncate">{value}</p>
+        <EllipsisCell value={value} className="text-sm font-semibold text-foreground" />
       </div>
     </div>
   );
@@ -262,9 +263,10 @@ export default function BookingDetailsDialog({
                               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                                 <Scissors className="h-3.5 w-3.5 text-primary" />
                               </div>
-                              <span className="font-semibold text-sm text-foreground leading-tight">
-                                {bs.service?.name || "Unknown Service"}
-                              </span>
+                              <EllipsisCell
+                                value={bs.service?.name || "Unknown Service"}
+                                className="font-semibold text-sm text-foreground leading-tight"
+                              />
                             </div>
                             <span className="text-sm font-bold shrink-0 px-2 py-0.5 rounded-lg bg-muted/60 text-foreground border border-border/40">
                               ₹{Math.round(Number(bs.price) || 0).toLocaleString("en-IN")}

@@ -14,9 +14,6 @@ import Inventory from "../pages/inventory";
 import Category from "../pages/category";
 import Services from "../pages/services";
 import Staff from "../pages/staff";
-import Offers from "../pages/offers";
-import Customers from "../pages/customers";
-import Reports from "../pages/reports";
 import Notification from "../pages/notification";
 import Bookings from "../pages/bookings";
 import StaffServiceManagementPage from "../pages/pricing";
@@ -52,9 +49,6 @@ function AllRoutes() {
           <Route path="/bookings" element={<Bookings/>} />
           <Route path="/staff" element={<Staff/>} />
           <Route path="/staff-service-pricing" element={<StaffServiceManagementPage/>} />
-          <Route path="/offers" element={<Offers/>} />
-          <Route path="/customers" element={<Customers/>} />
-          <Route path="/reports" element={<Reports/>} />
           <Route path="/notifications" element={<Notification/>} />
           <Route path="/appearance" element={<Appearance/>} />
           <Route path="/billing" element={<PlanAndBillingPage />} />
