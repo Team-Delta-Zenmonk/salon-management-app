@@ -6,9 +6,7 @@ import {
   Package,
   LayoutList,
   IndianRupee,
-  CircleUser,
   Palette,
-  CreditCard
 } from "lucide-react";
 
 export type NavItem = {
@@ -26,5 +24,4 @@ export const navigationItems: NavItem[] = [
   { name: "Bookings", path: "/bookings", icon: CalendarDays },
   { name: "Inventory", path: "/inventory", icon: Package },
   { name: "Appearance", path: "/appearance", icon: Palette },
-  { name: "Plan & Billing", path: "/billing", icon: CreditCard },
 ];

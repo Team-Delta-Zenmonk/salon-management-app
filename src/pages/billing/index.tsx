@@ -32,6 +32,7 @@ import type { RootState } from "@/store/store";
 import { getSalonProfileAction } from "@/features/auth/profile/get-salon-profile/getSalonProfile.action";
 import {
   createSubscriptionIntent,
+  upgradeSalonSubscription,
   getSubscriptionInvoices,
   type SubscriptionInvoice,
 } from "@/features/subscription/subscription.service";
@@ -120,7 +121,7 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
     setIsPaying(true);
     setErrorMsg(null);
 
-    const { error } = await stripe.confirmPayment({
+    const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/billing?payment=success`,
@@ -137,6 +138,22 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
       setErrorMsg(error.message || "Payment failed. Please try again.");
       setIsPaying(false);
       return;
+    }
+
+    if (paymentIntent && paymentIntent.status === "succeeded") {
+      try {
+        await upgradeSalonSubscription({
+          plan,
+          billing_cycle: plan,
+          payment_method: "card",
+          transaction_id: paymentIntent.id,
+          payment_details: {
+            stripe_payment_intent_id: paymentIntent.id,
+          },
+        });
+      } catch (err) {
+        console.warn("Direct activation fallback error:", err);
+      }
     }
 
     callSnack("Payment successful! Activating your subscription...", "success");
@@ -320,6 +337,8 @@ export default function PlanAndBillingPage() {
     }
   };
 
+  const appName = import.meta.env.VITE_APP_NAME || "Veloura";
+
   const handlePaymentSuccess = async () => {
     setIsActivating(true);
     let attempts = 0;
@@ -327,7 +346,7 @@ export default function PlanAndBillingPage() {
       try {
         const updatedSalon = await dispatch(getSalonProfileAction(salon!.uuid)).unwrap();
         if (updatedSalon?.subscription_status === "active") {
-          callSnack("Subscription activated! Welcome to ZenMonk Pro 🎉", "success");
+          callSnack(`Subscription activated! Welcome to ${appName} Pro 🎉`, "success");
           setIsActivating(false);
           setClientSecret(null);
           setCheckoutPlan(null);
@@ -361,7 +380,7 @@ export default function PlanAndBillingPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto pb-16">
+    <div className="w-full max-w-full overflow-x-hidden space-y-6 sm:space-y-8 pb-16 min-w-0">
       <div>
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary mb-1">
           <CreditCard className="w-4 h-4" />
@@ -371,17 +390,17 @@ export default function PlanAndBillingPage() {
           Plan & Billing Management
         </h1>
         <p className="text-muted-foreground text-sm mt-1 max-w-2xl">
-          Manage your ZenMonk subscription, monitor your 14-day trial, and upgrade anytime.
+          Manage your {appName} subscription, monitor your 14-day trial, and upgrade anytime.
         </p>
       </div>
 
-      <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/40 p-6 sm:p-8 shadow-xs">
+      <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/40 p-4 sm:p-6 md:p-8 shadow-xs">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="text-xs font-medium text-muted-foreground">Current Plan:</span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold capitalize bg-primary/15 text-primary border border-primary/20">
+          <div className="space-y-3 min-w-0 max-w-full">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground shrink-0">Current Plan:</span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold capitalize bg-primary/15 text-primary border border-primary/20 shrink-0">
                 <Sparkles className="w-3.5 h-3.5" />
                 {currentPlan === "yearly"
                   ? "Yearly Plan (Best Value)"
@@ -390,7 +409,7 @@ export default function PlanAndBillingPage() {
                   : "14-Day Free Trial"}
               </span>
               <span
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider shrink-0 ${
                   currentStatus === "active"
                     ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                     : currentStatus === "trial"
@@ -406,13 +425,13 @@ export default function PlanAndBillingPage() {
               </span>
             </div>
 
-            <div className="space-y-1">
-              <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                <Building2 className="w-6 h-6 text-primary" />
-                {salon?.name || "Your Salon"}
+            <div className="space-y-1 min-w-0 max-w-full">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2 min-w-0">
+                <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
+                <span className="truncate">{salon?.name || "Your Salon"}</span>
               </h2>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" />
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
+                <Clock className="w-3.5 h-3.5 shrink-0" />
                 {currentStatus === "trial" && trialEndsAt && (
                   <span>
                     Trial ends{" "}
@@ -436,19 +455,19 @@ export default function PlanAndBillingPage() {
             </div>
 
             {storefrontUrl && (
-              <div className="pt-2">
+              <div className="pt-2 min-w-0 max-w-full">
                 <a
                   href={storefrontUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-muted/80 px-3 py-1.5 rounded-lg border border-border hover:border-primary/40 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-muted/80 px-3 py-1.5 rounded-lg border border-border hover:border-primary/40 transition-colors max-w-full min-w-0"
                 >
-                  <Globe className="w-3.5 h-3.5 text-primary" />
-                  <span>Storefront:</span>
-                  <span className="font-mono text-foreground font-semibold underline underline-offset-2">
+                  <Globe className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <span className="shrink-0">Storefront:</span>
+                  <span className="font-mono text-foreground font-semibold underline underline-offset-2 truncate min-w-0 max-w-[200px] sm:max-w-md">
                     {storefrontUrl}
                   </span>
-                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                  <ExternalLink className="w-3 h-3 text-muted-foreground shrink-0" />
                 </a>
               </div>
             )}
@@ -463,16 +482,16 @@ export default function PlanAndBillingPage() {
         </div>
 
         {currentStatus === "trial" && (
-          <div className="mt-6 pt-5 border-t border-border/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-primary/5 -mx-6 sm:-mx-8 -mb-6 sm:-mb-8 p-5 sm:p-6">
+          <div className="mt-6 pt-5 border-t border-border/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-primary/5 rounded-xl p-4 sm:p-5">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center text-primary shrink-0 mt-0.5">
                 <Sparkles className="w-4 h-4" />
               </div>
-              <div className="text-xs">
+              <div className="text-xs space-y-0.5">
                 <p className="font-bold text-foreground text-sm">
                   You are exploring the 14-Day Free Trial of the {currentPlan === "yearly" ? "Yearly Plan (Save ~20%)" : "Monthly Plan"}
                 </p>
-                <p className="text-muted-foreground mt-0.5">
+                <p className="text-muted-foreground">
                   {daysLeft !== null && daysLeft > 0 ? (
                     <>You have <strong>{daysLeft} days remaining</strong> until {trialEndsAt?.toLocaleDateString(undefined, { dateStyle: "medium" })}. Pay now to lock in your discounted rate and prevent service interruption.</>
                   ) : (
@@ -485,9 +504,9 @@ export default function PlanAndBillingPage() {
               size="sm"
               onClick={() => openCheckout(currentPlan === "yearly" ? "yearly" : "monthly")}
               disabled={loadingPlan !== null}
-              className="font-bold text-xs shrink-0 shadow-md shadow-primary/25 gap-1.5 h-9 px-4 cursor-pointer"
+              className="font-bold text-xs shrink-0 shadow-md shadow-primary/25 gap-1.5 h-9 px-4 cursor-pointer w-full sm:w-auto"
             >
-              {loadingPlan === currentPlan ? (
+              {loadingPlan !== null ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <>
@@ -513,15 +532,15 @@ export default function PlanAndBillingPage() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-stretch"
       >
         <motion.div
           variants={itemVariants}
-          className="rounded-2xl border border-border/80 bg-card p-6 flex flex-col justify-between shadow-xs relative transition-all"
+          className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all min-w-0 max-w-full"
         >
           {currentStatus === "trial" && currentPlan === "trial" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <span className="rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+              <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
                 Active Free Trial
               </span>
             </div>
@@ -531,12 +550,12 @@ export default function PlanAndBillingPage() {
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Zero Risk</span>
               <h4 className="text-xl font-bold text-foreground mt-1">14-Day Free Trial</h4>
               <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">
-                Test-drive the full ZenMonk platform with zero commitment.
+                Test-drive the full {appName} platform with zero commitment.
               </p>
             </div>
             <div className="pt-2 pb-3 border-b border-border/60">
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-foreground font-mono">₹0</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">₹0</span>
                 <span className="text-xs text-muted-foreground">for 14 days</span>
               </div>
               <p className="text-[10px] text-muted-foreground mt-0.5">Included with your registration</p>
@@ -559,7 +578,7 @@ export default function PlanAndBillingPage() {
 
         <motion.div
           variants={itemVariants}
-          className={`rounded-2xl border bg-card p-6 flex flex-col justify-between shadow-xs relative transition-all ${
+          className={`rounded-2xl border bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all min-w-0 max-w-full ${
             currentPlan === "monthly" && currentStatus === "active"
               ? "border-primary ring-2 ring-primary/20"
               : currentPlan === "monthly" && currentStatus === "trial"
@@ -568,15 +587,15 @@ export default function PlanAndBillingPage() {
           }`}
         >
           {currentPlan === "monthly" && currentStatus === "active" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <span className="rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+              <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground truncate max-w-full">
                 Current Plan
               </span>
             </div>
           )}
           {currentPlan === "monthly" && currentStatus === "trial" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <span className="rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+              <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
                 Selected Plan • Trial Active
               </span>
             </div>
@@ -591,7 +610,7 @@ export default function PlanAndBillingPage() {
             </div>
             <div className="pt-2 pb-3 border-b border-border/60">
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-foreground font-mono">₹2,499</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">₹2,499</span>
                 <span className="text-xs text-muted-foreground">/ month</span>
               </div>
               <p className="text-[10px] text-muted-foreground mt-0.5">Billed monthly • Cancel anytime</p>
@@ -640,7 +659,7 @@ export default function PlanAndBillingPage() {
 
         <motion.div
           variants={itemVariants}
-          className={`rounded-2xl border-2 border-primary bg-card p-6 flex flex-col justify-between shadow-xl shadow-primary/10 relative overflow-hidden ${
+          className={`rounded-2xl border-2 border-primary bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xl shadow-primary/10 relative overflow-hidden min-w-0 max-w-full ${
             currentPlan === "yearly" && currentStatus === "active"
               ? "ring-2 ring-primary"
               : currentPlan === "yearly" && currentStatus === "trial"
@@ -652,15 +671,15 @@ export default function PlanAndBillingPage() {
             Best Value • Save ~20%
           </div>
           {currentPlan === "yearly" && currentStatus === "active" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <span className="rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+              <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground truncate max-w-full">
                 Current Plan
               </span>
             </div>
           )}
           {currentPlan === "yearly" && currentStatus === "trial" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <span className="rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+              <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
                 Selected Plan • Trial Active
               </span>
             </div>
@@ -675,7 +694,7 @@ export default function PlanAndBillingPage() {
             </div>
             <div className="pt-2 pb-3 border-b border-border/60">
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-foreground font-mono">₹24,990</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">₹24,990</span>
                 <span className="text-xs text-muted-foreground">/ year</span>
               </div>
               <p className="text-[10px] text-primary font-semibold mt-0.5">
@@ -713,7 +732,7 @@ export default function PlanAndBillingPage() {
 
         <motion.div
           variants={itemVariants}
-          className="rounded-2xl border border-border/80 bg-card p-6 flex flex-col justify-between shadow-xs hover:border-primary/40 transition-all"
+          className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-primary/40 transition-all"
         >
           <div className="space-y-4">
             <div>
@@ -725,7 +744,7 @@ export default function PlanAndBillingPage() {
             </div>
             <div className="pt-2 pb-3 border-b border-border/60">
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-foreground font-mono">Custom</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">Custom</span>
               </div>
               <p className="text-[10px] text-muted-foreground mt-0.5">Custom SLA & volume pricing</p>
             </div>
@@ -752,8 +771,8 @@ export default function PlanAndBillingPage() {
         </motion.div>
       </motion.div>
 
-      <div className="space-y-4 pt-6 border-t border-border/70">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 pt-6 border-t border-border/70 max-w-full min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-lg font-bold text-foreground">Billing Receipts & Invoices</h3>
             <p className="text-xs text-muted-foreground">
@@ -765,7 +784,7 @@ export default function PlanAndBillingPage() {
             size="sm"
             onClick={fetchInvoices}
             disabled={isLoadingInvoices}
-            className="text-xs gap-1.5"
+            className="text-xs gap-1.5 self-start sm:self-auto"
           >
             {isLoadingInvoices ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -779,7 +798,7 @@ export default function PlanAndBillingPage() {
         </div>
 
         {invoices.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 p-8 text-center space-y-2">
+          <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 p-6 sm:p-8 text-center space-y-2">
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
               <FileText className="w-5 h-5" />
             </div>
@@ -789,8 +808,48 @@ export default function PlanAndBillingPage() {
             </p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
+          <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
+            {/* Mobile View: Card Stack */}
+            <div className="block sm:hidden divide-y divide-border/60">
+              {invoices.map((inv) => (
+                <div key={inv.uuid} className="p-4 space-y-2.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-semibold text-primary">{inv.invoice_number}</span>
+                    {inv.status === "paid" ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <Check className="w-3 h-3" />
+                        Paid
+                      </span>
+                    ) : inv.status === "failed" ? (
+                      <span
+                        title={inv.payment_details?.failure_reason || "Payment declined"}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                      >
+                        <AlertTriangle className="w-3 h-3" />
+                        Failed
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        Pending
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Plan: <strong className="text-foreground capitalize">{inv.plan}</strong></span>
+                    <span className="font-bold text-foreground font-mono text-sm">₹{Number(inv.amount).toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                    <span>{new Date(inv.created_at).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
+                    <span className="font-mono text-[10px]">
+                      {inv.stripe_payment_intent_id ? inv.stripe_payment_intent_id.slice(0, 16) + "…" : "Manual"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop View: Full Table */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
                   <tr>
@@ -861,7 +920,7 @@ export default function PlanAndBillingPage() {
                 </div>
                 <div className="min-w-0">
                   <DialogTitle className="text-base sm:text-lg font-bold text-foreground truncate">
-                    Subscribe to ZenMonk
+                    Subscribe to {appName}
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground">
                     Secure checkout powered by Stripe

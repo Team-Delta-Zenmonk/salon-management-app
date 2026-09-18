@@ -58,7 +58,7 @@ export default function BookingListModal({
                     onClose();
                     onEventClick(booking);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all hover:brightness-110 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 text-white"
+                  className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 rounded-xl text-left transition-all hover:brightness-110 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 text-white overflow-hidden max-w-full"
                   style={{ backgroundColor: color }}
                 >
                   <div className={`text-xs font-bold tabular-nums shrink-0 ${isCancelled ? "line-through opacity-70" : ""}`}>
@@ -66,26 +66,27 @@ export default function BookingListModal({
                     {format(new Date(booking.start_time), "h:mm a")}
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className={`font-semibold text-sm flex items-center gap-1.5 min-w-0 ${isCancelled ? "line-through opacity-70" : ""}`}>
-                      <User className="w-3.5 h-3.5 shrink-0 opacity-80" />
-                      <EllipsisCell value={booking.customer_name} className="text-sm font-semibold text-white" />
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className={`font-semibold text-xs sm:text-sm flex items-center gap-1 min-w-0 ${isCancelled ? "line-through opacity-70" : ""}`}>
+                      <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 opacity-80" />
+                      <EllipsisCell value={booking.customer_name} maxChars={14} className="text-xs sm:text-sm font-semibold text-white min-w-0 flex-1" />
                     </div>
                     {booking.service_name && (
                       <EllipsisCell
                         value={`${booking.service_name}${booking.staff_name ? ` · ${booking.staff_name}` : ""}`}
-                        className="text-[11px] opacity-75 mt-0.5 text-white/90"
+                        maxChars={18}
+                        className="text-[10px] sm:text-[11px] opacity-75 mt-0.5 text-white/90 min-w-0 block"
                       />
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0 ml-auto">
                     {booking.is_walk_in && (
-                      <div className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-amber-400 text-amber-950 font-extrabold shadow-sm">
+                      <div className="text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-amber-400 text-amber-950 font-extrabold shadow-sm">
                         Walk-in
                       </div>
                     )}
-                    <div className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-white/20 border border-white/10">
+                    <div className="text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-white/20 border border-white/10">
                       {booking.status}
                     </div>
                   </div>

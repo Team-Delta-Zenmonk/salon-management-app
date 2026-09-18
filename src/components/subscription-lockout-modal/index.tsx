@@ -19,6 +19,7 @@ export default function SubscriptionLockoutModal() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const appName = import.meta.env.VITE_APP_NAME || "Veloura";
 
   useEffect(() => {
     const handleExpiredEvent = (event: Event) => {
@@ -33,10 +34,10 @@ export default function SubscriptionLockoutModal() {
       setIsOpen(true);
     };
 
-    window.addEventListener("zenmonk:subscription-expired", handleExpiredEvent);
+    window.addEventListener(`${appName}:subscription-expired`, handleExpiredEvent);
     return () => {
       window.removeEventListener(
-        "zenmonk:subscription-expired",
+        `${appName}:subscription-expired`,
         handleExpiredEvent,
       );
     };
@@ -94,11 +95,11 @@ export default function SubscriptionLockoutModal() {
             <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
               {isSuspended
                 ? "Account Temporarily Inactive"
-                : "Your ZenMonk Trial Has Ended"}
+                : `Your ${appName} Trial Has Ended`}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
               {isSuspended
-                ? "Your salon account has been suspended or deactivated. Please reach out to ZenMonk administration to reactivate your access."
+                ? `Your salon account has been suspended or deactivated. Please reach out to ${appName} administration to reactivate your access.`
                 : errorMessage ||
                   "Your appointments, staff management, and operational services are currently on hold. Upgrade your subscription to continue seamlessly."}
             </DialogDescription>
@@ -126,10 +127,10 @@ export default function SubscriptionLockoutModal() {
           <div className="pt-2 flex flex-col gap-2">
             {isSuspended ? (
               <a
-                href="mailto:support@zenmonk.com?subject=Account%20Reactivation%20Request"
+                href={`mailto:support@${appName}.com?subject=Account%20Reactivation%20Request`}
                 className="w-full inline-flex items-center justify-center h-10 px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg shadow-md hover:bg-primary/90 transition-colors"
               >
-                Contact ZenMonk Support
+                Contact {appName} Support
               </a>
             ) : (
               <Button

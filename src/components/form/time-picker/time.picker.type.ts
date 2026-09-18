@@ -1,4 +1,4 @@
-import type { Control, FieldValues, Path } from "react-hook-form";
+import type { Control, FieldValues, Path, RegisterOptions } from "react-hook-form";
 import type { Dayjs } from "dayjs";
 
 export type CustomDateTimePickerProps<T extends FieldValues> = {
@@ -13,4 +13,8 @@ export type CustomDateTimePickerProps<T extends FieldValues> = {
   handleChange?: () => void;
   label?: string;
   triggerClassName?: string;
+  rules?: Omit<RegisterOptions<T, Path<T>>, "valueAsNumber" | "valueAsDate" | "setValueAs" | "disabled">;
+  helperText?: string;
+  intervalMinutes?: number;
+  isManual?: boolean;
 };

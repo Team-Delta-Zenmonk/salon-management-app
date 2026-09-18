@@ -4,7 +4,7 @@ import { VALIDATE_PATTERN } from "../../../common/validate-pattern";
 
 export const bookingServiceSchema = z.object({
   service_id: z.coerce.number({ message: "Required" }),
-  staff_id: z.coerce.number({ message: "Required" }),
+  staff_id: z.coerce.number().optional().nullable(),
 });
 
 export const bookingSchema = z.object({

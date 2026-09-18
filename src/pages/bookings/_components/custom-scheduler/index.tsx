@@ -8,6 +8,7 @@ import type { Booking, BookingStatus } from "../../types/booking.type";
 import MonthView from "./_components/month-view";
 import WeekView from "./_components/week-view";
 import DayView from "./_components/day-view";
+import EllipsisCell from "@/components/ellipse-cell";
 
 interface CustomSchedulerProps {
   bookings: Booking[];
@@ -76,7 +77,7 @@ export default function CustomScheduler({
               <CalendarIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </div>
             <h2 className="text-sm sm:text-lg md:text-xl text-foreground flex items-baseline gap-1 min-w-0">
-              <span className="font-bold truncate">{format(currentDate, "MMMM")}</span>
+              <EllipsisCell value={format(currentDate, "MMMM")} className="font-bold text-foreground min-w-0 flex-1" />
               <span className="font-medium text-muted-foreground text-xs sm:text-base shrink-0">{format(currentDate, "yyyy")}</span>
             </h2>
           </div>

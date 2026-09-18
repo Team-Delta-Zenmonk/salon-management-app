@@ -122,9 +122,17 @@ export default function MonthView({
                       >
                         {format(day, "d")}
                       </span>
-                    </div>
 
-                    <div className="flex flex-col gap-1 min-h-0 overflow-hidden">
+                    </div>
+                      {/* Mobile total count badge */}
+                      {dayBookings.length > 0 && (
+                        <span className="sm:hidden inline-flex items-center justify-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/20">
+                          {dayBookings.length}
+                        </span>
+                      )}
+
+                    {/* Desktop detailed booking chips */}
+                    <div className="hidden sm:flex flex-col gap-1 min-h-0 overflow-hidden">
                       {visibleBookings.map((booking) => {
                         const color = getStatusColor(booking.status);
                         const isCancelled = booking.status === BOOKING_STATUS.CANCELLED;
@@ -132,7 +140,10 @@ export default function MonthView({
                           <button
                             key={booking.uuid}
                             type="button"
-                            onClick={() => onEventClick(booking)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEventClick(booking);
+                            }}
                             className="w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium text-left transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 hover:brightness-110 hover:shadow-sm shrink-0 text-white"
                             style={{ backgroundColor: color }}
                           >
@@ -154,7 +165,10 @@ export default function MonthView({
                       {overflowCount > 0 && (
                         <button
                           type="button"
-                          onClick={() => setMoreDayDate(day)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMoreDayDate(day);
+                          }}
                           className="w-full shrink-0 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm focus:outline-none"
                         >
                           See all (+{overflowCount})

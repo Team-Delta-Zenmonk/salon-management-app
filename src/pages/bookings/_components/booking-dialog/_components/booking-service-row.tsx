@@ -10,7 +10,7 @@ interface BookingServiceRowProps {
   serviceOptions: { label: string; value: string }[];
   staffOptions: { label: string; value: string }[];
   staffLoading: boolean;
-  selectedStaff?: { duration: number; price: number };
+  selectedStaff?: { duration: number; price: number } | null;
   showRemoveButton: boolean;
   onRemove: () => void;
   watchedServiceId?: string | number;
@@ -46,7 +46,7 @@ export default function BookingServiceRow({
         <div className="flex-1 min-w-0">
           <Select
             name={`services.${index}.staff_id`}
-            placeholder={staffLoading ? "Loading..." : "Select Staff"}
+            placeholder={staffLoading ? "Loading..." : "Any Available"}
             identifier={`booking-staff-${index}`}
             options={staffOptions}
             translate={false}

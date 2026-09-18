@@ -58,13 +58,13 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+    <div className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors min-w-0 max-w-full overflow-hidden">
       <div className="h-8 w-8 rounded-lg bg-muted/60 border border-border/30 flex items-center justify-center text-muted-foreground shrink-0">
         {icon}
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 overflow-hidden">
         <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest mb-0.5">{label}</p>
-        <EllipsisCell value={value} className="text-sm font-semibold text-foreground" />
+        <EllipsisCell value={value} maxChars={18} className="text-sm font-semibold text-foreground w-full block min-w-0" />
       </div>
     </div>
   );

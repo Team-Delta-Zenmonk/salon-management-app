@@ -20,6 +20,7 @@ import { listStaffAction } from "../../features/staff/list-staff/list-staff.acti
 import { listServicesAction } from "../../features/service/list-services/list-service.action";
 import Select from "../../components/form/select";
 import { Button } from "@/components/ui/button";
+import BookingFilterDialog from "./_components/booking-filter-dialog";
 
 interface FilterForm {
   staff: string;
@@ -178,9 +179,11 @@ export default function BookingPage() {
   };
 
   const statusLegend = [
-    { status: BOOKING_STATUS.CONFIRMED, label: "Confirmed" },
-    { status: BOOKING_STATUS.COMPLETED, label: "Completed" },
-    { status: BOOKING_STATUS.CANCELLED, label: "Cancelled" },
+    { label: "Confirmed", color: getStatusColor(BOOKING_STATUS.CONFIRMED) },
+    { label: "Completed", color: getStatusColor(BOOKING_STATUS.COMPLETED) },
+    { label: "Cancelled", color: getStatusColor(BOOKING_STATUS.CANCELLED) },
+    { label: "Walk-in", color: "#f59e0b", dotClass: "bg-amber-500" },
+    { label: "Online", color: "#10b981", dotClass: "bg-emerald-500" },
   ];
 
   const liveReceiptBooking = useMemo(() => {
@@ -194,7 +197,7 @@ export default function BookingPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 pb-6 shrink-0 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 pb-4 sm:pb-6 shrink-0 gap-4"
       >
         <div className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Bookings</h1>
@@ -202,7 +205,17 @@ export default function BookingPage() {
             Manage your salon's appointments, schedule, and payment policies.
           </p>
         </div>
-        <div className="shrink-0">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end shrink-0">
+          {/* Mobile filter button */}
+          <div className="block sm:hidden">
+            <BookingFilterDialog
+              control={control}
+              staffOptions={staffOptions}
+              serviceOptions={serviceOptions}
+              paymentOptions={paymentOptions}
+              statusLegend={statusLegend}
+            />
+          </div>
           <CreateBooking />
         </div>
       </motion.div>
@@ -211,70 +224,70 @@ export default function BookingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="px-4 md:px-8 pb-5 shrink-0 flex items-center justify-between gap-3 flex-wrap"
+        className="px-4 md:px-8 pb-5 shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4"
       >
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="w-[175px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
-            <Select
-              name="staff"
-              control={control}
-              placeholder="All Staff"
-              options={staffOptions}
-              identifier="booking-staff-filter"
-              translate={false}
-              disabled={staffOptions.length === 1}
-            />
-          </div>
-          <div className="w-[175px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
-            <Select
-              name="service"
-              control={control}
-              placeholder="All Services"
-              options={serviceOptions}
-              identifier="booking-service-filter"
-              translate={false}
-              disabled={serviceOptions.length === 1}
-            />
-          </div>
-          <div className="w-[190px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
-            <Select
-              name="payment"
-              control={control}
-              placeholder="All Payment Modes"
-              options={paymentOptions}
-              identifier="booking-payment-filter"
-              translate={false}
-            />
+        <div className="w-full sm:w-auto">
+          {/* Desktop inline selects */}
+          <div className="hidden sm:flex items-center gap-3">
+            <div className="w-[175px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
+              <Select
+                name="staff"
+                control={control}
+                placeholder="All Staff"
+                options={staffOptions}
+                identifier="booking-staff-filter"
+                translate={false}
+                disabled={staffOptions.length === 1}
+              />
+            </div>
+            <div className="w-[175px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
+              <Select
+                name="service"
+                control={control}
+                placeholder="All Services"
+                options={serviceOptions}
+                identifier="booking-service-filter"
+                translate={false}
+                disabled={serviceOptions.length === 1}
+              />
+            </div>
+            <div className="w-[190px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
+              <Select
+                name="payment"
+                control={control}
+                placeholder="All Payment Modes"
+                options={paymentOptions}
+                identifier="booking-payment-filter"
+                translate={false}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 ml-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:ml-auto w-full sm:w-auto">
           {viewMode === "calendar" && (
-            <div className="hidden lg:flex items-center gap-2">
-              {statusLegend.map(({ status, label }) => {
-                const color = getStatusColor(status);
-                return (
+            <div className="hidden sm:flex items-center gap-2">
+              {statusLegend.map(({ label, color, dotClass }) => (
+                <span
+                  key={label}
+                  className={`inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold py-1.5 px-2 sm:w-[96px] rounded-full border backdrop-blur-sm transition-all border-border/60 bg-card/60 text-muted-foreground`}
+                >
                   <span
-                    key={status}
-                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-border/60 bg-card/60 text-muted-foreground backdrop-blur-sm"
-                  >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{ backgroundColor: color }}
-                    />
-                    {label}
-                  </span>
-                );
-              })}
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass || ""}`}
+                    style={!dotClass ? { backgroundColor: color } : undefined}
+                  />
+                  {label}
+                </span>
+              ))}
             </div>
           )}
 
-          <div className="flex items-center p-1 rounded-xl bg-card/60 backdrop-blur-md border border-border/60 shadow-sm gap-1">
+          <div className="flex items-center justify-center p-1 rounded-xl bg-card/60 backdrop-blur-md border border-border/60 shadow-sm gap-1 shrink-0">
             <Button
               variant={viewMode === "calendar" ? "secondary" : "ghost"}
               size="xs"
               onClick={() => setViewMode("calendar")}
-              className={`h-8 px-3 rounded-lg font-bold gap-1.5 text-xs transition-all ${
+              className={`h-8 px-3 flex-1 sm:flex-initial justify-center rounded-lg font-bold gap-1.5 text-xs transition-all ${
                 viewMode === "calendar"
                   ? "bg-background text-foreground shadow-sm border border-border/40"
                   : "text-muted-foreground hover:text-foreground"
@@ -287,7 +300,7 @@ export default function BookingPage() {
               variant={viewMode === "table" ? "secondary" : "ghost"}
               size="xs"
               onClick={() => setViewMode("table")}
-              className={`h-8 px-3 rounded-lg font-bold gap-1.5 text-xs transition-all ${
+              className={`h-8 px-3 flex-1 sm:flex-initial justify-center rounded-lg font-bold gap-1.5 text-xs transition-all ${
                 viewMode === "table"
                   ? "bg-background text-foreground shadow-sm border border-border/40"
                   : "text-muted-foreground hover:text-foreground"
@@ -304,7 +317,7 @@ export default function BookingPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="w-full px-4 md:px-8 pb-8 flex-1 flex flex-col min-h-[550px]"
+        className="w-full px-4 md:px-8 flex-1 flex flex-col"
       >
         {viewMode === "calendar" ? (
           <CustomScheduler
@@ -327,6 +340,9 @@ export default function BookingPage() {
           />
         )}
       </motion.div>
+
+      {/* Explicit bottom spacer element */}
+      <div className="h-16 sm:h-20 w-full shrink-0" />
 
       <BookingDetailsDialog
         open={isDrawerOpen}

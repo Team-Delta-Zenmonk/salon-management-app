@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Menu, Bell, CircleUser, LogOut, Loader2 } from "lucide-react";
+import { Menu, Bell, CircleUser, LogOut, Loader2, CreditCard } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { RootState } from "../../store/store";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { persistor } from "../../store/store";
 import { logout } from "../../features/auth/auth.slice";
 import { callSnack } from "../snackbar";
+import { EllipsisCell } from "../ellipse-cell";
 
 type TopbarProps = {
   onMenuClick?: () => void;
@@ -50,6 +51,8 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
     }
   };
 
+  const isSubscribed = salon?.subscription_status === "active";
+
   return (
     <header className="border-b border-border h-[72px] flex flex-col justify-center bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-30 sticky top-0">
       <div className="flex items-center justify-between px-4 w-full">
@@ -65,16 +68,14 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
           )}
 
           <div className="flex-1 min-w-0">
-            <h1 
-              title={salon?.name || "Salon Management Service"}
-              className="text-xl font-bold tracking-tight text-foreground truncate capitalize"
-            >
-              {salon?.name || "Salon Management Service"}
-            </h1>
+            <EllipsisCell
+              value={salon?.name || "Salon Management Service"}
+              maxChars={25}
+              className="text-lg sm:text-xl font-bold tracking-tight text-foreground capitalize min-w-0 block"
+            />
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0 ml-4">
-          <SubscriptionWidget />
           <ThemeToggle />
 
           {/* 2. Notifications Button */}
@@ -98,28 +99,43 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex items-center justify-center h-9 w-9 rounded-full transition-colors cursor-pointer outline-none shrink-0 p-1",
-                isProfileActive
+                "inline-flex items-center justify-center h-10 w-10 rounded-full transition-all cursor-pointer outline-none shrink-0 p-0.5 relative group",
+                isSubscribed
+                  ? "ring-2 ring-amber-400 dark:ring-amber-300 ring-offset-2 ring-offset-background shadow-[0_0_12px_rgba(251,191,36,0.5)]"
+                  : isProfileActive
                   ? "bg-accent text-accent-foreground"
                   : "hover:bg-accent/60 text-muted-foreground hover:text-foreground"
               )}
-              title="Profile Menu"
+              title={isSubscribed ? `${salon?.name} (PRO Subscriber)` : "Profile Menu"}
             >
-              <Avatar className="h-full w-full rounded-full overflow-hidden border border-border/40">
+              <Avatar className={cn("h-full w-full rounded-full overflow-hidden border", isSubscribed ? "border-amber-400/60" : "border-border/40")}>
                 <AvatarImage src={salon?.logo || "/management-icon.png"} alt={salon?.name || "Salon"} className="object-cover" />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-[11px]">
                   {salon?.name?.charAt(0).toUpperCase() || "S"}
                 </AvatarFallback>
               </Avatar>
+              {isSubscribed && (
+                <span className="absolute -bottom-1 -right-1 bg-amber-400 text-amber-950 font-black text-[9px] px-1 py-0.2 rounded-full border border-background shadow-xs flex items-center justify-center">
+                  PRO
+                </span>
+              )}
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-48 p-1.5 z-50">
+            <DropdownMenuContent align="end" className="w-52 p-1.5 z-50">
               <DropdownMenuItem
                 onClick={() => navigate("/my-profile")}
                 className="cursor-pointer font-medium py-2 px-2.5 gap-2.5 rounded-lg"
               >
                 <CircleUser className="w-4 h-4 text-muted-foreground" />
                 <span>My Profile</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => navigate("/billing")}
+                className="cursor-pointer font-medium py-2 px-2.5 gap-2.5 rounded-lg"
+              >
+                <CreditCard className="w-4 h-4 text-muted-foreground" />
+                <span>Plan & Billing</span>
               </DropdownMenuItem>
 
               <DropdownMenuSeparator className="my-1" />

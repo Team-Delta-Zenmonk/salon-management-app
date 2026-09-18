@@ -187,7 +187,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     if (mode === "update" && booking) {
       const bookingServices = booking.booking_services?.map((bs: any) => ({
         service_id: String(bs.service_id),
-        staff_id: String(bs.staff_id),
+        staff_id: bs.staff_id != null ? String(bs.staff_id) : undefined,
       })) ?? [{ ...EMPTY_SERVICE }];
 
       const d = new Date(booking.booking_start_time);
@@ -240,8 +240,19 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       });
   };
 
-  const getStaffService = (rowIndex: number, staffId: any): ServiceStaff | undefined => {
-    return staffMap[rowIndex]?.data?.find((ss) => ss.staff_id === Number(staffId));
+  const getServicePriceAndDuration = (rowIndex: number, serviceId: any, staffId: any): { duration: number; price: number } | undefined => {
+    if (!serviceId) return undefined;
+    const serviceObj = services.find((s) => s.id === Number(serviceId));
+    if (staffId != null && staffId !== "") {
+      const ss = staffMap[rowIndex]?.data?.find((item) => item.staff_id === Number(staffId));
+      if (ss) {
+        return { duration: Number(ss.duration) || 0, price: Number(ss.price) || 0 };
+      }
+    }
+    if (serviceObj) {
+      return { duration: Number(serviceObj.duration) || 0, price: Number(serviceObj.price) || 0 };
+    }
+    return undefined;
   };
 
   const isStaffLoading = (rowIndex: number) => staffMap[rowIndex]?.loading ?? false;
@@ -252,16 +263,16 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     let completedCount = 0;
 
     (watchedServices ?? []).forEach((svc, idx) => {
-      const ss = getStaffService(idx, svc.staff_id);
-      if (ss) {
-        totalPrice += Number(ss.price) || 0;
-        totalDuration += Number(ss.duration) || 0;
+      const info = getServicePriceAndDuration(idx, svc.service_id, svc.staff_id);
+      if (info) {
+        totalPrice += Number(info.price) || 0;
+        totalDuration += Number(info.duration) || 0;
         completedCount++;
       }
     });
 
     return { totalPrice, totalDuration, count: completedCount };
-  }, [watchedServices, staffMap]);
+  }, [watchedServices, staffMap, services]);
 
   const handleAddService = () => {
     append({ ...EMPTY_SERVICE });
@@ -306,7 +317,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         booking_start_time: `${bookingDate.format("YYYY-MM-DD")}T${values.booking_start_time}:00Z`,
         services: values.services.map((s, i) => ({
           service_id: Number(s.service_id),
-          staff_id: Number(s.staff_id),
+          staff_id: s.staff_id != null ? Number(s.staff_id) : null,
           sequence: i + 1,
         })),
         status: values.status,
@@ -447,7 +458,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                       serviceOptions={getServiceOptionsForRow(index)}
                       staffOptions={getStaffOptions(index)}
                       staffLoading={isStaffLoading(index)}
-                      selectedStaff={getStaffService(index, watchedServices?.[index]?.staff_id)}
+                      selectedStaff={getServicePriceAndDuration(index, watchedServices?.[index]?.service_id, watchedServices?.[index]?.staff_id)}
                       showRemoveButton={fields.length > 1}
                       onRemove={() => handleRemoveService(index)}
                       watchedServiceId={watchedServices?.[index]?.service_id}
@@ -484,6 +495,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Select Time"
                   control={control as any}
                   identifier="booking-start-time"
+                  isManual
                 />
               </div>
 

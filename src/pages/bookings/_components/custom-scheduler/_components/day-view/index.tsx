@@ -169,7 +169,7 @@ export default function DayView({
                           <div
                             key={`${booking.uuid}-${idx}`}
                             onClick={() => onEventClick(booking)}
-                            className="relative rounded-lg cursor-pointer transition-all hover:brightness-110 hover:shadow-md text-white flex items-center justify-between border border-white/10 shrink-0 flex-1 min-w-[160px] sm:min-w-[200px] max-w-[280px] h-[54px] z-10"
+                            className="relative rounded-lg cursor-pointer transition-all hover:brightness-110 hover:shadow-md text-white flex items-center justify-between border border-white/10 shrink-0 flex-1 min-w-[160px] sm:min-w-[200px] max-w-[280px] h-[54px] z-10 overflow-hidden"
                             style={{
                               backgroundColor: `color-mix(in srgb, ${color} 85%, transparent)`,
                               padding: "6px 10px",

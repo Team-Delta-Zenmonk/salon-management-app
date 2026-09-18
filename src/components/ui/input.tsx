@@ -1,13 +1,16 @@
 import * as React from "react"
 import { Input as InputPrimitive } from "@base-ui/react/input"
-
 import { cn } from "@/lib/utils"
+import { EllipsisCell } from "@/components/ellipse-cell"
 
-function Input({ className, type, title, ...props }: React.ComponentProps<"input">) {
-  const computedTitle = title ?? (props.value !== undefined && props.value !== null && props.value !== "" ? String(props.value) : undefined);
-  return (
+function Input({ className, type, title, value, ...props }: React.ComponentProps<"input">) {
+  const valString = value !== undefined && value !== null ? String(value) : "";
+  const computedTitle = title ?? (valString ? valString : undefined);
+
+  const inputElement = (
     <InputPrimitive
       type={type}
+      value={value}
       data-slot="input"
       title={computedTitle}
       className={cn(
@@ -16,7 +19,17 @@ function Input({ className, type, title, ...props }: React.ComponentProps<"input
       )}
       {...props}
     />
-  )
+  );
+
+  if (valString) {
+    return (
+      <EllipsisCell value={valString} className="w-full min-w-0 block">
+        {inputElement}
+      </EllipsisCell>
+    );
+  }
+
+  return inputElement;
 }
 
 export { Input }

@@ -111,47 +111,47 @@ export default function BookingReceiptDialog({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="sm:max-w-lg rounded-3xl border-border/60 bg-card p-6 shadow-xl">
-        <DialogHeader className="flex flex-row items-center justify-between pb-2 border-b border-border/40">
-          <div className="flex items-center gap-2">
+      <DialogContent className="w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl border-border/60 bg-card p-4 sm:p-6 shadow-xl max-w-full">
+        <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/40 pr-8 min-w-0">
+          <div className="flex items-center gap-2 shrink-0">
             <Badge variant={variant} className="font-bold text-xs py-0.5 px-3 rounded-full">
               {label}
             </Badge>
           </div>
-          <DialogTitle className="text-base font-bold text-foreground">
+          <DialogTitle className="text-sm sm:text-base font-bold text-foreground truncate min-w-0">
             Receipt #{booking.uuid?.slice(0, 8)}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 pt-4">
-          <div>
-            <EllipsisCell value={booking.customer_name} className="text-xl font-bold text-foreground" />
-            <EllipsisCell value={booking.service_name || "-"} className="text-xs text-muted-foreground mt-0.5" />
+        <div className="space-y-4 sm:space-y-6 pt-3 min-w-0 max-w-full">
+          <div className="min-w-0 max-w-full">
+            <EllipsisCell value={booking.customer_name} className="text-lg sm:text-xl font-bold text-foreground block min-w-0" />
+            <EllipsisCell value={booking.service_name || "-"} className="text-xs text-muted-foreground mt-0.5 block min-w-0" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-muted/40 border border-border/40">
-            <div className="space-y-1 min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-muted/40 border border-border/40 min-w-0 max-w-full">
+            <div className="space-y-1 min-w-0 max-w-full">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Appointment Time
               </span>
-              <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground min-w-0">
                 <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                <span className="truncate">{formattedDate} • {formattedTime}</span>
+                <EllipsisCell value={`${formattedDate} • ${formattedTime}`} className="text-xs font-semibold text-foreground min-w-0 flex-1" />
               </div>
             </div>
 
-            <div className="space-y-1 min-w-0">
+            <div className="space-y-1 min-w-0 max-w-full">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Assigned Staff
               </span>
-              <div className="flex items-center gap-2 text-xs font-semibold text-foreground min-w-0">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground min-w-0">
                 <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                <EllipsisCell value={booking.staff_name || "-"} className="text-xs font-semibold text-foreground" />
+                <EllipsisCell value={booking.staff_name || "-"} className="text-xs font-semibold text-foreground min-w-0 flex-1" />
               </div>
             </div>
           </div>
 
-          <div className="space-y-3 p-4 rounded-2xl bg-muted/30 border border-border/40">
+          <div className="space-y-3 p-3.5 sm:p-4 rounded-2xl bg-muted/30 border border-border/40 min-w-0 max-w-full">
             <div className="flex justify-between items-center text-xs font-bold text-foreground">
               <span>Payment Progress</span>
               <span className={cn(
@@ -181,10 +181,10 @@ export default function BookingReceiptDialog({
             </div>
           </div>
 
-          <div className="space-y-2 text-xs">
+          <div className="space-y-2 text-xs min-w-0 max-w-full">
             <div className="flex justify-between items-center py-2 border-b border-border/40">
               <span className="text-muted-foreground font-medium">Service Total</span>
-              <span className="font-bold text-foreground">₹{total.toFixed(2)}</span>
+              <span className="font-bold text-foreground font-mono">₹{total.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between items-center py-2">
@@ -196,12 +196,12 @@ export default function BookingReceiptDialog({
           </div>
         </div>
 
-        <DialogFooter className="pt-4 border-t border-border/40 gap-2 flex-row justify-between items-center">
+        <DialogFooter className="pt-4 border-t border-border/40 gap-2.5 flex-col-reverse sm:flex-row sm:justify-between sm:items-center -mx-4 -mb-4 p-4 sm:mx-0 sm:mb-0 sm:p-0 bg-transparent rounded-none">
           <Button
             variant="outline"
             onClick={handleDownloadInvoice}
             disabled={isDownloadingInvoice}
-            className="rounded-xl text-xs font-semibold gap-2 border-primary/30 text-primary hover:bg-primary/10"
+            className="rounded-xl text-xs font-semibold gap-2 border-primary/30 text-primary hover:bg-primary/10 w-full sm:w-auto"
           >
             {isDownloadingInvoice ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -212,14 +212,14 @@ export default function BookingReceiptDialog({
           </Button>
 
           {remaining > 0 && booking.status !== BOOKING_STATUS.CANCELLED ? (
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={onClose} className="rounded-xl text-xs font-semibold">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+              <Button variant="outline" onClick={onClose} className="rounded-xl text-xs font-semibold w-full sm:w-auto">
                 Dismiss
               </Button>
               <Button
                 onClick={handleCollectRemaining}
                 disabled={isCollecting}
-                className="rounded-xl text-xs font-bold gap-2 bg-primary text-primary-foreground"
+                className="rounded-xl text-xs font-bold gap-2 bg-primary text-primary-foreground w-full sm:w-auto"
               >
                 {isCollecting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -230,7 +230,7 @@ export default function BookingReceiptDialog({
               </Button>
             </div>
           ) : (
-            <Button variant="secondary" onClick={onClose} className="rounded-xl text-xs font-semibold">
+            <Button variant="secondary" onClick={onClose} className="rounded-xl text-xs font-semibold w-full sm:w-auto">
               Close Receipt
             </Button>
           )}

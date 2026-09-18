@@ -34,7 +34,8 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
           {!desktopCollapsed && (
             <div className="min-w-0 flex-1">
               <EllipsisCell
-                value={import.meta.env.VITE_APP_NAME ?? "Veloura"}
+                value={salon?.name || import.meta.env.VITE_APP_NAME || "Veloura"}
+                maxChars={20}
                 className="text-base font-semibold text-foreground capitalize"
               />
             </div>

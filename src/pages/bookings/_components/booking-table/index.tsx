@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight, Calendar, User, Scissors } from "lucide-react";
 import type { Booking } from "../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
 import {
@@ -101,8 +101,123 @@ export default function BookingTable({
 
   return (
     <div className="w-full space-y-4">
-      <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md overflow-x-auto shadow-sm">
-        <Table className="min-w-[700px] md:min-w-full">
+      {/* Mobile Card Layout (visible on small screens) */}
+      <div className="flex flex-col gap-3.5 md:hidden">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="p-4 rounded-2xl border border-border/60 bg-card/60 space-y-3 animate-pulse">
+              <div className="h-5 w-1/2 bg-muted/40 rounded-md" />
+              <div className="h-4 w-3/4 bg-muted/30 rounded-md" />
+              <div className="h-8 w-full bg-muted/30 rounded-md" />
+            </div>
+          ))
+        ) : bookings.length === 0 ? (
+          <div className="p-8 text-center rounded-2xl border border-border/60 bg-card/60 text-muted-foreground text-sm">
+            No bookings found matching your criteria.
+          </div>
+        ) : (
+          bookings.map((booking) => {
+            const { total, paid, label, percentage, variant } = getPaymentDetails(booking);
+
+            return (
+              <div
+                key={booking.uuid}
+                className="p-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md shadow-sm space-y-3.5"
+              >
+                {/* Header: Customer & Type Badge */}
+                <div className="flex items-start justify-between gap-2 border-b border-border/40 pb-3">
+                  <div className="min-w-0 flex-1">
+                    <EllipsisCell value={booking.customer_name} className="font-bold text-foreground text-base" />
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                      <Calendar className="w-3.5 h-3.5 shrink-0" />
+                      <span>
+                        {dayjs(booking.start_time).format("MMM D, YYYY")} • {dayjs(booking.start_time).format("h:mm A")}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="shrink-0">
+                    {booking.is_walk_in ? (
+                      <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0.5 px-2 font-bold gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        Walk-in
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0.5 px-2 font-bold gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Online
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
+                {/* Details Grid: Service & Staff */}
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="space-y-1 min-w-0">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 block">
+                      Service
+                    </span>
+                    <div className="flex items-center gap-1.5 font-medium text-foreground">
+                      <Scissors className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <EllipsisCell value={booking.service_name || "-"} className="font-medium text-foreground text-xs" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 min-w-0">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 block">
+                      Staff Assigned
+                    </span>
+                    <div className="flex items-center gap-1.5 font-medium text-foreground">
+                      <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <EllipsisCell value={booking.staff_name || "-"} className="font-medium text-foreground text-xs" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Badges: Status & Payment Mode */}
+                <div className="flex items-center justify-between gap-2 pt-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {getStatusBadge(booking.status)}
+                    <Badge variant={variant} className="font-semibold text-xs py-0.5">
+                      {label}
+                    </Badge>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={() => onViewReceipt(booking)}
+                    className="h-8 px-2.5 rounded-xl border-border/60 gap-1.5 font-semibold text-xs shrink-0"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    Receipt
+                  </Button>
+                </div>
+
+                {/* Amount Progress */}
+                <div className="pt-2 border-t border-border/40 space-y-1.5">
+                  <div className="flex justify-between items-center text-xs font-semibold text-foreground">
+                    <span className="text-muted-foreground font-medium">Payment Progress</span>
+                    <span>₹{paid.toFixed(2)} / ₹{total.toFixed(2)} ({percentage}%)</span>
+                  </div>
+                  <div className="w-full bg-muted/60 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all duration-500",
+                        percentage === 100 ? "bg-emerald-500" : percentage > 0 ? "bg-amber-500" : "bg-neutral-400"
+                      )}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop Table Layout (visible on medium & large screens) */}
+      <div className="hidden md:block rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md overflow-x-auto shadow-sm">
+        <Table className="min-w-full">
           <TableHeader className="bg-muted/40">
             <TableRow className="border-border/60 hover:bg-transparent">
               <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Client</TableHead>
