@@ -87,7 +87,7 @@ export default function BookingDetailsDialog({
 
   const handleDownloadInvoice = async () => {
     if (!booking) return;
-    const identifier = booking.id || booking.uuid;
+    const identifier = booking.uuid;
     if (!identifier) {
       callSnack("Booking identifier not found", "error");
       return;

@@ -65,7 +65,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   const [staffMap, setStaffMap] = useState<StaffMap>({});
 
   const handleDownloadInvoice = async () => {
-    const bookingIdentifier = booking?.id || booking?.uuid;
+    const bookingIdentifier = booking?.uuid;
     if (!bookingIdentifier) {
       callSnack("Booking identifier not found", "error");
       return;
