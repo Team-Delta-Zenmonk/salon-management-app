@@ -48,15 +48,15 @@ export default function OnboardingSuccessDialog({
     }
   };
 
-  const handleNavigateDashboard = () => {
+  const handleNavigateBilling = () => {
     if (onClose) onClose();
-    navigate("/dashboard");
+    navigate("/billing");
   };
 
   return (
     <Dialog
       open={open}
-      onOpenChange={(isOpen) => !isOpen && handleNavigateDashboard()}
+      onOpenChange={(isOpen) => !isOpen && handleNavigateBilling()}
     >
       <DialogContent
         showCloseButton={false}
@@ -138,10 +138,10 @@ export default function OnboardingSuccessDialog({
           <div className="pt-2 flex flex-col gap-2">
             <Button
               size="lg"
-              onClick={handleNavigateDashboard}
+              onClick={handleNavigateBilling}
               className="w-full gap-2 font-semibold shadow-md shadow-primary/20"
             >
-              <span>Continue to Dashboard</span>
+              <span>Continue to Billing</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>

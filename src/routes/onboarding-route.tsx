@@ -9,7 +9,7 @@ const OnboardingRoute = () => {
   }
 
   if (salon?.is_onboarded) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/billing" replace />;
   }
 
   return <Outlet />;
