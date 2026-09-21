@@ -70,7 +70,12 @@ const FileMultiPicker = <T extends FieldValues>({
         ? await uploadMultipleFn(fileList)
         : await uploadMultipleFiles(fileList);
 
-      onChange([...current, ...uploadedData]);
+      const formattedUploadedData = uploadedData.map((file) => ({
+        url: file.secure_url || file.url,
+        filename: file.filename || file.public_id || "file",
+      }));
+
+      onChange([...current, ...formattedUploadedData]);
       onBlur();
     } catch {
       callSnack("Failed to upload files", "error");

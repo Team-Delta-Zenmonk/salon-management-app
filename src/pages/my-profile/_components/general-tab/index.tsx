@@ -78,7 +78,10 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
       const uploadedData: Array<{ url: string; filename: string }> = [];
       for (const file of filesToUpload) {
         const result = await uploadImages(file);
-        uploadedData.push(result);
+        uploadedData.push({
+          url: result.secure_url || result.url,
+          filename: result.filename || result.public_id || file.name,
+        });
       }
       setValue("photos", [...photos, ...uploadedData], { shouldDirty: true });
     } catch {

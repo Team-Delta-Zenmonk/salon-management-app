@@ -8,7 +8,8 @@ import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import {
   Phone, Mail, MapPin, Cake,
-  Calendar, Shield, UserCircle, Clock
+  Calendar, Shield, UserCircle, Clock,
+  FileText, ExternalLink
 } from "lucide-react";
 import type { Staff } from "../../../../features/staff/staff.slice";
 import dayjs from "dayjs";
