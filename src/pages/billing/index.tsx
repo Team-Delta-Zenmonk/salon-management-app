@@ -30,6 +30,7 @@ import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { RootState } from "@/store/store";
 import { getSalonProfileAction } from "@/features/auth/profile/get-salon-profile/getSalonProfile.action";
+import { fetchSubscriptionPlans } from "@/features/subscription/plans.slice";
 import {
   createSubscriptionIntent,
   upgradeSalonSubscription,
@@ -61,44 +62,58 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
-const stripeAppearance = {
-  theme: "stripe" as const,
+const getStripeAppearance = (isDark: boolean) => ({
+  theme: (isDark ? "night" : "stripe") as "night" | "stripe",
   variables: {
     colorPrimary: "#f97316",
-    colorBackground: "#ffffff",
-    colorText: "#0f0f0f",
+    colorBackground: isDark ? "#171717" : "#ffffff",
+    colorText: isDark ? "#f5f5f5" : "#0f0f0f",
     colorDanger: "#ef4444",
+    colorTextSecondary: isDark ? "#a3a3a3" : "#6b7280",
+    colorTextPlaceholder: isDark ? "#737373" : "#9ca3af",
     fontFamily: "Inter, system-ui, -apple-system, sans-serif",
     spacingUnit: "4px",
     borderRadius: "10px",
   },
   rules: {
     ".Input": {
-      border: "1px solid #e5e7eb",
+      border: isDark ? "1px solid #262626" : "1px solid #e5e7eb",
+      backgroundColor: isDark ? "#0a0a0a" : "#ffffff",
+      color: isDark ? "#f5f5f5" : "#0f0f0f",
       boxShadow: "none",
       padding: "10px 12px",
     },
     ".Input:focus": {
       border: "1px solid #f97316",
-      boxShadow: "0 0 0 3px rgba(249,115,22,0.15)",
+      boxShadow: "0 0 0 3px rgba(249,115,22,0.2)",
     },
     ".Label": {
       fontWeight: "500",
       fontSize: "12px",
       marginBottom: "4px",
+      color: isDark ? "#d4d4d4" : "#374151",
     },
     ".Tab": {
-      border: "1px solid #e5e7eb",
+      border: isDark ? "1px solid #262626" : "1px solid #e5e7eb",
+      backgroundColor: isDark ? "#0a0a0a" : "#ffffff",
+      color: isDark ? "#d4d4d4" : "#374151",
     },
     ".Tab:hover": {
       border: "1px solid #f97316",
     },
     ".Tab--selected": {
       border: "2px solid #f97316",
-      backgroundColor: "#fff7ed",
+      backgroundColor: isDark ? "#261c14" : "#fff7ed",
+      color: isDark ? "#ffffff" : "#0f0f0f",
+    },
+    ".TabLabel": {
+      color: isDark ? "#f5f5f5" : "#0f0f0f",
+    },
+    ".TabIcon": {
+      fill: isDark ? "#f5f5f5" : "#0f0f0f",
     },
   },
-};
+});
 
 interface CheckoutFormProps {
   plan: typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY;
@@ -161,8 +176,8 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-      <div className="rounded-xl bg-muted/60 border border-border/80 p-3.5 sm:p-4 space-y-2 text-xs">
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 flex flex-col justify-between h-full">
+      <div className="rounded-xl bg-muted/60 border border-border/80 p-3 sm:p-3.5 space-y-1.5 text-xs shrink-0">
         <div className="flex justify-between items-center text-muted-foreground">
           <span>Target Plan:</span>
           <span className="font-semibold text-foreground capitalize">
@@ -181,15 +196,15 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
             ₹{plan === "yearly" ? "3,812" : "382"}
           </span>
         </div>
-        <div className="pt-2 border-t border-border flex justify-between items-baseline">
-          <span className="font-bold text-foreground text-sm">Total Due:</span>
-          <span className="text-xl sm:text-2xl font-extrabold text-primary font-mono">
+        <div className="pt-1.5 border-t border-border flex justify-between items-baseline">
+          <span className="font-bold text-foreground text-xs sm:text-sm">Total Due:</span>
+          <span className="text-lg sm:text-xl font-extrabold text-primary font-mono">
             ₹{amount.toLocaleString("en-IN")}
           </span>
         </div>
       </div>
 
-      <div className="min-h-[180px]">
+      <div className="py-1 min-h-[140px]">
         <PaymentElement
           options={{
             layout: {
@@ -203,45 +218,47 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
       </div>
 
       {errorMsg && (
-        <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive">
+        <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive shrink-0">
           <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
-      <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 pt-1">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isPaying}
-          className="w-full sm:flex-1 text-xs py-2.5 h-auto cursor-pointer"
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          disabled={!stripe || !elements || isPaying}
-          className="w-full sm:flex-1 text-xs font-bold gap-2 py-2.5 h-auto shadow-md shadow-primary/25 cursor-pointer"
-        >
-          {isPaying ? (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Pay ₹{amount.toLocaleString("en-IN")}
-            </>
-          )}
-        </Button>
-      </div>
+      <div className="space-y-2 shrink-0 pt-1">
+        <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isPaying}
+            className="w-full sm:flex-1 text-xs py-2 h-9 cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={!stripe || !elements || isPaying}
+            className="w-full sm:flex-1 text-xs font-bold gap-2 py-2 h-9 shadow-md shadow-primary/25 cursor-pointer"
+          >
+            {isPaying ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Pay ₹{amount.toLocaleString("en-IN")}
+              </>
+            )}
+          </Button>
+        </div>
 
-      <p className="text-center text-[10px] text-muted-foreground">
-        Secured by{" "}
-        <span className="font-semibold text-foreground">Stripe</span> • 256-bit encryption • Tax invoice generated automatically
-      </p>
+        <p className="text-center text-[10px] text-muted-foreground">
+          Secured by{" "}
+          <span className="font-semibold text-foreground">Stripe</span> • 256-bit encryption • Tax invoice generated automatically
+        </p>
+      </div>
     </form>
   );
 }
@@ -249,6 +266,7 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
 export default function PlanAndBillingPage() {
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state: RootState) => state.auth);
+  const { plans: reduxPlans } = useAppSelector((state: RootState) => state.plans);
 
   const [checkoutPlan, setCheckoutPlan] = useState<
     typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY | null
@@ -293,7 +311,8 @@ export default function PlanAndBillingPage() {
 
   useEffect(() => {
     fetchInvoices();
-  }, [fetchInvoices]);
+    dispatch(fetchSubscriptionPlans());
+  }, [fetchInvoices, dispatch]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -374,9 +393,11 @@ export default function PlanAndBillingPage() {
     setCheckoutPlan(null);
   };
 
+  const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+
   const stripeOptions: StripeElementsOptions = {
     clientSecret: clientSecret || undefined,
-    appearance: stripeAppearance,
+    appearance: getStripeAppearance(isDark),
   };
 
   return (
@@ -405,23 +426,22 @@ export default function PlanAndBillingPage() {
                 {currentPlan === "yearly"
                   ? "Yearly Plan (Best Value)"
                   : currentPlan === "monthly"
-                  ? "Monthly Plan"
-                  : "14-Day Free Trial"}
+                    ? "Monthly Plan"
+                    : "14-Day Free Trial"}
               </span>
               <span
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider shrink-0 ${
-                  currentStatus === "active"
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider shrink-0 ${currentStatus === "active"
                     ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                     : currentStatus === "trial"
-                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                    : "bg-destructive/10 text-destructive border border-destructive/20"
-                }`}
+                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                      : "bg-destructive/10 text-destructive border border-destructive/20"
+                  }`}
               >
                 {currentStatus === "active"
                   ? "Active"
                   : currentStatus === "trial"
-                  ? "14-Day Free Trial"
-                  : "Expired"}
+                    ? "14-Day Free Trial"
+                    : "Expired"}
               </span>
             </div>
 
@@ -578,13 +598,12 @@ export default function PlanAndBillingPage() {
 
         <motion.div
           variants={itemVariants}
-          className={`rounded-2xl border bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all min-w-0 max-w-full ${
-            currentPlan === "monthly" && currentStatus === "active"
+          className={`rounded-2xl border bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all min-w-0 max-w-full ${currentPlan === "monthly" && currentStatus === "active"
               ? "border-primary ring-2 ring-primary/20"
               : currentPlan === "monthly" && currentStatus === "trial"
-              ? "border-amber-500 ring-2 ring-amber-500/30"
-              : "border-border/80 hover:border-primary/40"
-          }`}
+                ? "border-amber-500 ring-2 ring-amber-500/30"
+                : "border-border/80 hover:border-primary/40"
+            }`}
         >
           {currentPlan === "monthly" && currentStatus === "active" && (
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
@@ -610,8 +629,12 @@ export default function PlanAndBillingPage() {
             </div>
             <div className="pt-2 pb-3 border-b border-border/60">
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">₹2,499</span>
-                <span className="text-xs text-muted-foreground">/ month</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
+                  {reduxPlans.find((p) => p.id === "monthly")?.formatted_price}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {reduxPlans.find((p) => p.id === "monthly")?.billing_cycle}
+                </span>
               </div>
               <p className="text-[10px] text-muted-foreground mt-0.5">Billed monthly • Cancel anytime</p>
             </div>
@@ -659,13 +682,12 @@ export default function PlanAndBillingPage() {
 
         <motion.div
           variants={itemVariants}
-          className={`rounded-2xl border-2 border-primary bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xl shadow-primary/10 relative overflow-hidden min-w-0 max-w-full ${
-            currentPlan === "yearly" && currentStatus === "active"
+          className={`rounded-2xl border-2 border-primary bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xl shadow-primary/10 relative overflow-hidden min-w-0 max-w-full ${currentPlan === "yearly" && currentStatus === "active"
               ? "ring-2 ring-primary"
               : currentPlan === "yearly" && currentStatus === "trial"
-              ? "ring-2 ring-amber-500/40"
-              : ""
-          }`}
+                ? "ring-2 ring-amber-500/40"
+                : ""
+            }`}
         >
           <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-xs">
             Best Value • Save ~20%
@@ -694,11 +716,15 @@ export default function PlanAndBillingPage() {
             </div>
             <div className="pt-2 pb-3 border-b border-border/60">
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">₹24,990</span>
-                <span className="text-xs text-muted-foreground">/ year</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
+                  {reduxPlans.find((p) => p.id === "yearly")?.formatted_price || 0}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {reduxPlans.find((p) => p.id === "yearly")?.billing_cycle || 0}
+                </span>
               </div>
               <p className="text-[10px] text-primary font-semibold mt-0.5">
-                = ₹2,082/mo • 2 Months Free (Save ₹4,998)
+                = ₹{Math.round((reduxPlans.find((p) => p.id === "yearly")?.amount || 0) / 12).toLocaleString()}/mo • 2 Months Free
               </p>
             </div>
             <ul className="space-y-2 text-xs text-foreground font-medium">
@@ -911,8 +937,8 @@ export default function PlanAndBillingPage() {
       </div>
 
       <Dialog open={!!clientSecret && !!checkoutPlan} onOpenChange={closeCheckout}>
-        <DialogContent className="w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-0 border border-border/80 rounded-2xl">
-          <div className="bg-primary/10 border-b border-primary/20 p-4 sm:p-6">
+        <DialogContent className="w-[95vw] sm:max-w-xl max-h-[92vh] flex flex-col p-0 border border-border/80 rounded-2xl overflow-hidden">
+          <div className="bg-primary/10 border-b border-primary/20 p-4 sm:p-5 shrink-0">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-md shadow-primary/30 shrink-0">
@@ -933,7 +959,7 @@ export default function PlanAndBillingPage() {
             </div>
           </div>
 
-          <div className="p-4 sm:p-6">
+          <div className="p-4 sm:p-6 flex-1 overflow-y-auto min-h-0">
             {clientSecret && checkoutPlan && (
               <Elements stripe={stripePromise} options={stripeOptions}>
                 <CheckoutForm

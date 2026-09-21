@@ -142,7 +142,7 @@ export default function SalonOnboarding() {
 
   return (
     <FormProvider {...methods}>
-      <div className="min-h-screen flex bg-background">
+      <div className="min-h-screen flex bg-background overflow-y-auto">
         <motion.div
           initial={{ x: -40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -210,21 +210,21 @@ export default function SalonOnboarding() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 relative overflow-hidden"
+          className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-y-auto min-h-screen my-auto"
         >
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-70 pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="lg:hidden flex items-center gap-2 mb-10">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-              <Scissors className="w-4.5 h-4.5 text-primary-foreground" />
+          <div className="lg:hidden flex items-center gap-2 mb-4 mt-2">
+            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
+              <Scissors className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-black text-foreground tracking-tight">Salonify</span>
+            <span className="text-base font-black text-foreground tracking-tight">Salonify</span>
           </div>
 
-          <div className="w-full max-w-3xl">
-            <div className="bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+          <div className="w-full max-w-3xl my-auto py-2">
+            <div className="bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 overflow-hidden flex flex-col md:flex-row h-[80vh] sm:h-[580px] max-h-[80vh] sm:max-h-[580px]">
               
-              <div className="flex md:hidden items-start justify-between px-6 pt-6 pb-4 border-b border-border/40 bg-muted/10">
+              <div className="flex md:hidden items-start justify-between px-6 pt-5 pb-3 border-b border-border/40 bg-muted/10 shrink-0">
                 {STEPS.map((step, i) => {
                   const Icon = step.icon;
                   const isCompleted = i < activeStep;
@@ -246,7 +246,7 @@ export default function SalonOnboarding() {
                           {isCompleted ? <Check className="w-3.5 h-3.5 text-primary-foreground" /> : <Icon className={`w-3.5 h-3.5 ${isCurrent ? "text-primary-foreground" : "text-muted-foreground"}`} />}
                           {isCurrent && <motion.div layoutId="stepRingMobile" className="absolute inset-0 rounded-full border-2 border-primary" style={{ margin: -4 }} transition={{ duration: 0.3 }} />}
                         </motion.div>
-                        <span className={`text-[10px] font-bold mt-2 transition-colors text-center ${isCurrent ? "text-primary font-black" : isCompleted ? "text-foreground" : "text-muted-foreground"}`}>
+                        <span className={`text-[10px] font-bold mt-1.5 transition-colors text-center ${isCurrent ? "text-primary font-black" : isCompleted ? "text-foreground" : "text-muted-foreground"}`}>
                           {step.label}
                         </span>
                       </div>
@@ -260,7 +260,7 @@ export default function SalonOnboarding() {
                 })}
               </div>
 
-              <div className="hidden md:flex w-[140px] flex-col justify-between py-10 border-r border-border/40 bg-muted/10 shrink-0">
+              <div className="hidden md:flex w-[140px] flex-col justify-between py-8 border-r border-border/40 bg-muted/10 shrink-0">
                 {STEPS.map((step, i) => {
                   const Icon = step.icon;
                   const isCompleted = i < activeStep;
@@ -296,11 +296,11 @@ export default function SalonOnboarding() {
                 })}
               </div>
 
-              <div className="flex-1 flex flex-col justify-between relative bg-card dark:bg-neutral-900">
+              <div className="flex-1 flex flex-col justify-between overflow-hidden bg-card dark:bg-neutral-900 h-full">
 
-              <div className="px-6 pt-6 pb-1">
+              <div className="px-6 pt-5 pb-2 shrink-0 border-b border-border/30 bg-card/80 backdrop-blur-xs z-10">
                 <motion.div key={activeStep} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-wider mb-2">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-wider mb-1.5">
                     Step {activeStep + 1} of {TOTAL_STEPS}
                   </div>
                   <h2 className="text-xl font-extrabold text-foreground tracking-tight">
@@ -309,7 +309,7 @@ export default function SalonOnboarding() {
                 </motion.div>
               </div>
 
-              <div className="px-6 py-5 min-h-[220px]">
+              <div className="px-6 py-4 flex-1 overflow-y-auto min-h-0">
                 <AnimatePresence mode="wait" custom={direction}>
                   <motion.div
                     key={activeStep}
@@ -327,12 +327,12 @@ export default function SalonOnboarding() {
                 </AnimatePresence>
               </div>
 
-              <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-muted/20">
+              <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-muted/20 shrink-0">
                 <Button
                   variant="ghost"
                   disabled={activeStep === 0}
                   onClick={handleBack}
-                  className="w-20 text-muted-foreground text-xs rounded-full hover:bg-muted/80 hover:text-foreground transition-colors"
+                  className="w-20 text-muted-foreground text-xs rounded-full hover:bg-muted/80 hover:text-foreground transition-colors cursor-pointer"
                 >
                   Back
                 </Button>
@@ -351,7 +351,7 @@ export default function SalonOnboarding() {
                 <Button
                   onClick={handleNext}
                   disabled={isLoading}
-                  className="w-28 text-xs font-semibold rounded-full shadow-md shadow-primary/20 hover:shadow-primary/35 transition-all"
+                  className="w-28 text-xs font-semibold rounded-full shadow-md shadow-primary/20 hover:shadow-primary/35 transition-all cursor-pointer"
                 >
                   {isLoading ? (
                     <>

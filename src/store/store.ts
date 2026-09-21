@@ -11,6 +11,7 @@ import inventoryItemReducer from "../features/inventory/inventory-item.slice";
 import inventoryLogReducer from "../features/inventory/inventory-log.slice";
 import itemsCategoryReducer from "../features/inventory/inventory-items-category.slice";
 import bookingReducer from "../features/booking/booking.slice";
+import plansReducer from "../features/subscription/plans.slice";
 
 const storage = createWebStorage("local");
 
@@ -23,6 +24,7 @@ const rootReducer = combineSlices({
   inventoryLog: inventoryLogReducer,
   itemsCategory: itemsCategoryReducer,
   booking: bookingReducer,
+  plans: plansReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

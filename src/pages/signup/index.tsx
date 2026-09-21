@@ -69,37 +69,37 @@ export default function SignUp() {
 
   return (
     <FormProvider {...methods}>
-      <div className="min-h-screen flex bg-background">
+      <div className="min-h-screen flex bg-background overflow-y-auto">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 relative overflow-hidden"
+          className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 md:p-10 relative overflow-y-auto min-h-screen my-auto"
         >
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-70 pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="lg:hidden flex items-center gap-2 mb-8">
+          <div className="lg:hidden flex items-center gap-2 mb-6 sm:mb-8 mt-4">
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
               <Scissors className="w-4.5 h-4.5 text-primary-foreground" />
             </div>
             <span className="text-lg font-black text-foreground tracking-tight">Salonify</span>
           </div>
 
-          <div className="w-full max-w-md relative z-10">
+          <div className="w-full max-w-md relative z-10 my-auto py-2 h-auto max-h-[85vh] sm:max-h-none flex flex-col">
             <motion.div
               initial={{ y: 16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.5 }}
-              className="bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 p-6 sm:p-10"
+              className="bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 p-6 sm:p-10 flex flex-col max-h-full overflow-hidden"
             >
-              <div className="mb-6">
-                <h2 className="text-2xl font-black text-foreground tracking-tight mb-1.5">
+              <div className="mb-4 sm:mb-6 shrink-0">
+                <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight mb-1">
                   Register your salon
                 </h2>
-                <p className="text-muted-foreground text-sm">Join thousands of salons managing smarter</p>
+                <p className="text-muted-foreground text-xs sm:text-sm">Join thousands of salons managing smarter</p>
                 {intendedPlan && (intendedPlan === "yearly" || intendedPlan === "monthly") ? (
-                  <div className="mt-4 p-3 rounded-2xl bg-primary/10 border border-primary/25 flex items-center gap-2.5">
+                  <div className="mt-3 p-2.5 sm:p-3 rounded-2xl bg-primary/10 border border-primary/25 flex items-center gap-2.5">
                     <Sparkles className="w-4 h-4 text-primary shrink-0" />
                     <p className="text-xs text-foreground font-medium">
                       Selected Plan:{" "}
@@ -109,8 +109,8 @@ export default function SignUp() {
                     </p>
                   </div>
                 ) : (
-                  <div className="mt-4 p-2.5 rounded-xl bg-muted/60 border border-border/70 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                  <div className="mt-3 p-2 rounded-xl bg-muted/60 border border-border/70 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                     <p className="text-xs text-muted-foreground">
                       Includes <strong>14-day full free trial</strong> • No card required upfront
                     </p>
@@ -118,105 +118,103 @@ export default function SignUp() {
                 )}
               </div>
 
-              <form onSubmit={onSubmit} className="space-y-4">
-                {[
-                  {
-                    delay: 0.2,
-                    content: (
-                      <TextField
-                        type="text"
-                        label="Salon Name"
-                        name="salon_name"
-                        control={control}
-                        identifier="signup-salon-name"
-                        placeholder="e.g. Glamour Studio"
-                        disabled={isLoading}
-                        pattern={VALIDATE_PATTERN.alphabet}
-                        inputPropsClassName="bg-white dark:bg-neutral-900"
-                      />
-                    ),
-                  },
-                  {
-                    delay: 0.27,
-                    content: (
-                      <TextField
-                        type="text"
-                        label="Email address"
-                        name="email"
-                        control={control}
-                        identifier="signup-email"
-                        placeholder="you@yoursalon.com"
-                        disabled={isLoading}
-                        pattern={VALIDATE_PATTERN.noSpace}
-                        inputPropsClassName="bg-white dark:bg-neutral-900"
-                      />
-                    ),
-                  },
-                  {
-                    delay: 0.34,
-                    content: (
-                      <PasswordField
-                        label="Password"
-                        name="password"
-                        control={control}
-                        identifier="signup-password"
-                        disabled={isLoading}
-                        placeholder="••••••••"
-                      />
-                    ),
-                  },
-                  {
-                    delay: 0.41,
-                    content: (
-                      <PasswordField
-                        label="Confirm password"
-                        name="confirm_password"
-                        control={control}
-                        identifier="signup-confirm-password"
-                        disabled={isLoading}
-                        placeholder="••••••••"
-                      />
-                    ),
-                  },
-                ].map(({ delay, content }, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ y: 10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay }}
-                  >
-                    {content}
-                  </motion.div>
-                ))}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+                <form id="signup-form" onSubmit={onSubmit} className="space-y-4">
+                  {[
+                    {
+                      delay: 0.2,
+                      content: (
+                        <TextField
+                          type="text"
+                          label="Salon Name"
+                          name="salon_name"
+                          control={control}
+                          identifier="signup-salon-name"
+                          placeholder="e.g. Glamour Studio"
+                          disabled={isLoading}
+                          pattern={VALIDATE_PATTERN.alphabet}
+                          inputPropsClassName="bg-white dark:bg-neutral-900"
+                        />
+                      ),
+                    },
+                    {
+                      delay: 0.27,
+                      content: (
+                        <TextField
+                          type="text"
+                          label="Email address"
+                          name="email"
+                          control={control}
+                          identifier="signup-email"
+                          placeholder="you@yoursalon.com"
+                          disabled={isLoading}
+                          pattern={VALIDATE_PATTERN.noSpace}
+                          inputPropsClassName="bg-white dark:bg-neutral-900"
+                        />
+                      ),
+                    },
+                    {
+                      delay: 0.34,
+                      content: (
+                        <PasswordField
+                          label="Password"
+                          name="password"
+                          control={control}
+                          identifier="signup-password"
+                          disabled={isLoading}
+                          placeholder="••••••••"
+                        />
+                      ),
+                    },
+                    {
+                      delay: 0.41,
+                      content: (
+                        <PasswordField
+                          label="Confirm password"
+                          name="confirm_password"
+                          control={control}
+                          identifier="signup-confirm-password"
+                          disabled={isLoading}
+                          placeholder="••••••••"
+                        />
+                      ),
+                    },
+                  ].map(({ delay, content }, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay }}
+                    >
+                      {content}
+                    </motion.div>
+                  ))}
+                </form>
+              </div>
 
-                <motion.div
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.48 }}
-                  className="pt-1"
+              <div className="mt-4 pt-3 border-t border-border/40 shrink-0 space-y-3">
+                <Button
+                  form="signup-form"
+                  disabled={isLoading}
+                  className="w-full h-11 font-semibold text-sm shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all cursor-pointer"
+                  type="submit"
                 >
-                  <Button
-                    disabled={isLoading}
-                    className="w-full h-11 font-semibold text-sm shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all"
-                    type="submit"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : "Create account"}
-                  </Button>
-                </motion.div>
-              </form>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : "Create account"}
+                </Button>
 
-              <div className="mt-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Already have an account?{" "}
-                  <Link to="/login" className="font-semibold text-primary hover:text-primary/80 transition-colors">
-                    Sign in
-                  </Link>
-                </p>
+                <div className="text-center">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Already have an account?{" "}
+                    <Link to="/login" className="font-semibold text-primary hover:text-primary/80 transition-colors">
+                      Sign in
+                    </Link>
+                  </p>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -226,7 +224,7 @@ export default function SignUp() {
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="hidden lg:flex lg:w-[42%] flex-col relative overflow-hidden bg-[#211922] dark:bg-black border-l border-border/30 dark:border-border/20"
+          className="hidden lg:flex lg:w-[42%] flex-col relative overflow-hidden bg-[#211922] dark:bg-black border-l border-border/30 dark:border-border/20 shrink-0"
         >
           <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 pointer-events-none" />

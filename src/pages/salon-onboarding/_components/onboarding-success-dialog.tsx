@@ -60,31 +60,31 @@ export default function OnboardingSuccessDialog({
     >
       <DialogContent
         showCloseButton={false}
-        className="sm:max-w-md p-6 overflow-hidden rounded-2xl border border-primary/20 shadow-2xl bg-card"
+        className="sm:max-w-md w-[92vw] max-h-[90vh] p-4 sm:p-6 overflow-hidden rounded-2xl border border-primary/20 shadow-2xl bg-card flex flex-col"
       >
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-lg shadow-primary/10">
-            <Sparkles className="w-8 h-8 animate-pulse text-primary" />
+        <div className="relative z-10 text-center space-y-4 overflow-y-auto max-h-full pr-1">
+          <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-lg shadow-primary/10 shrink-0">
+            <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 animate-pulse text-primary" />
           </div>
 
           <DialogHeader className="space-y-1.5 text-center">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold mx-auto">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>7-Day Free Trial Activated</span>
+              <span>14-Day Free Trial Activated</span>
             </div>
-            <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
+            <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               Your Salon is Officially Live!
             </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground max-w-sm mx-auto">
+            <DialogDescription className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
               Your dynamic booking portal is online and ready for clients to
               discover services and reserve appointments.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="p-4 rounded-xl bg-muted/60 border border-border/80 space-y-3 text-left">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-muted/60 border border-border/80 space-y-3 text-left">
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
               <span>Your Public Storefront URL:</span>
               <span className="text-[11px] text-primary font-semibold">
@@ -92,8 +92,8 @@ export default function OnboardingSuccessDialog({
               </span>
             </div>
 
-            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-background border border-border">
-              <span className="flex-1 font-mono text-xs font-semibold text-foreground truncate select-all">
+            <div className="flex items-center gap-2 p-2 sm:p-2.5 rounded-lg bg-background border border-border">
+              <span className="flex-1 font-mono text-[11px] sm:text-xs font-semibold text-foreground truncate select-all">
                 {canonicalUrl}
               </span>
               <Button
@@ -118,7 +118,7 @@ export default function OnboardingSuccessDialog({
               </Button>
             </div>
 
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pt-1">
               <a
                 href={previewUrl}
                 target="_blank"
@@ -130,16 +130,16 @@ export default function OnboardingSuccessDialog({
               </a>
               <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                 <CalendarCheck className="w-3 h-3 text-muted-foreground" />
-                Trial ends in 7 days
+                Trial ends in 14 days
               </span>
             </div>
           </div>
 
-          <div className="pt-2 flex flex-col gap-2">
+          <div className="pt-1 flex flex-col gap-2">
             <Button
               size="lg"
               onClick={handleNavigateBilling}
-              className="w-full gap-2 font-semibold shadow-md shadow-primary/20"
+              className="w-full gap-2 font-semibold shadow-md shadow-primary/20 text-xs sm:text-sm h-10 sm:h-11 cursor-pointer"
             >
               <span>Continue to Billing</span>
               <ArrowRight className="w-4 h-4" />

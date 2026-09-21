@@ -71,6 +71,7 @@ const FileMultiPicker = <T extends FieldValues>({
         : await uploadMultipleFiles(fileList);
 
       const formattedUploadedData = uploadedData.map((file) => ({
+        ...file,
         url: file.secure_url || file.url,
         filename: file.filename || file.public_id || "file",
       }));
