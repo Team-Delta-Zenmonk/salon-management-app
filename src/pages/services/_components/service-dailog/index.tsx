@@ -69,7 +69,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
       logo: logoUrl,
     };
 
-    if (data.discount !== undefined && data.discount !== null) {
+    if (data.discount !== undefined && data.discount !== null && data.discount !== "") {
       payload.discount = Number(data.discount);
     }
     if (data.discount_type) {
@@ -93,6 +93,11 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     try {
       setIsLoading(true);
       const logoUrl = data.logo?.url || (mode === "update" ? service?.logo : undefined);
+
+      if (mode === "create" && !isCreatingSubService && !data.category_id) {
+        callSnack("Category is required", "error");
+        return;
+      }
 
       const payload = buildPayload(data, logoUrl);
 
@@ -267,6 +272,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextField
                   type="number"
+                  min={0}
                   label="Price"
                   name="price"
                   control={control}
@@ -277,6 +283,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
                 <TextField
                   type="number"
+                  min={1}
                   label="Duration (in minutes)"
                   name="duration"
                   control={control}
@@ -289,6 +296,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextField
                   type="number"
+                  min={0}
                   label="Discount (optional)"
                   name="discount"
                   control={control}
