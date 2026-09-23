@@ -6,7 +6,7 @@ export const ServiceDistribution = () => {
   return (
     <motion.div
       variants={itemVariants}
-      className="p-6 md:p-8 bg-card/60 backdrop-blur-md rounded-3xl border border-border/50 shadow-sm flex flex-col justify-between"
+      className="p-6 md:p-8 bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between"
     >
       <div>
         <h3 className="text-lg font-bold text-foreground">Popular Services</h3>

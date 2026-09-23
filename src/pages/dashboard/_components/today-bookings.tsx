@@ -27,7 +27,7 @@ export const TodayBookingsSection = ({ todayBookings, bookingsLoading }: TodayBo
   return (
     <motion.div
       variants={itemVariants}
-      className="p-6 md:p-8 bg-card/60 backdrop-blur-md rounded-3xl border border-border/50 shadow-sm flex flex-col"
+      className="p-6 md:p-8 bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm flex flex-col"
     >
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -91,7 +91,7 @@ export const TodayBookingsSection = ({ todayBookings, bookingsLoading }: TodayBo
               `,
               }}
             />
-            {todayBookings.map((booking) => (
+            {todayBookings.slice(0, 4).map((booking) => (
               <div
                 key={booking.uuid}
                 className="group flex items-center justify-between p-3.5 bg-background/30 border border-border/40 rounded-2xl hover:border-primary/30 hover:bg-background/50 transition-all cursor-pointer"
@@ -102,9 +102,9 @@ export const TodayBookingsSection = ({ todayBookings, bookingsLoading }: TodayBo
                       {booking.initials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <EllipsisCell value={booking.customer} className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors" />
-                    <EllipsisCell value={booking.service} className="text-xs text-muted-foreground font-medium" />
+                  <div className="min-w-0 flex-1 flex flex-col gap-1">
+                    <EllipsisCell value={booking.customer} className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors capitalize" />
+                    <EllipsisCell value={booking.service} className="text-xs text-muted-foreground font-medium capitalize" />
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1.5 shrink-0 ml-4">

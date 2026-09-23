@@ -80,7 +80,7 @@ export default function ServiceSidebar({
                 </Avatar>
 
                 <div className="min-w-0 flex-1">
-                  <p className={clsx("truncate text-sm transition-colors", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}>
+                  <p className={clsx("truncate text-sm transition-colors capitalize", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}>
                     {s.name}
                   </p>
                   <p className="text-xs text-muted-foreground/80 truncate mt-0.5">

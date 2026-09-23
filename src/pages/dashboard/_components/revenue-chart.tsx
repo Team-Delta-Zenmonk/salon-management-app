@@ -44,7 +44,7 @@ export const RevenueChart = ({
   return (
     <motion.div
       variants={itemVariants}
-      className="xl:col-span-2 p-6 bg-card/60 backdrop-blur-md rounded-3xl border border-border/50 shadow-sm flex flex-col min-w-0"
+      className="xl:col-span-2 p-6 bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm flex flex-col min-w-0"
     >
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

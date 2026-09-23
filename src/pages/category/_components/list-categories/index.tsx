@@ -112,7 +112,7 @@ export default function ListCategories({
                 show: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
               }}
               key={category.uuid}
-              className="group relative overflow-hidden bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between"
+              className="group relative overflow-hidden bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               
@@ -178,7 +178,7 @@ export default function ListCategories({
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }} 
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-3xl p-10 text-center mt-6 flex flex-col items-center justify-center gap-3"
+          className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-2xl p-10 text-center mt-6 flex flex-col items-center justify-center gap-3"
         >
           <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
             <SearchX className="h-6 w-6 text-primary opacity-60" />

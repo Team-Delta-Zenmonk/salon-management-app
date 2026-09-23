@@ -98,7 +98,7 @@ export default function LivePreviewPanel({
   return (
     <div 
       style={styleVariables}
-      className="relative w-full rounded-3xl border border-border bg-background text-foreground shadow-xl overflow-hidden transition-all duration-300"
+      className="relative w-full rounded-2xl border border-border bg-background text-foreground shadow-xl overflow-hidden transition-all duration-300"
     >
       <div 
         className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none transition-all duration-500" 

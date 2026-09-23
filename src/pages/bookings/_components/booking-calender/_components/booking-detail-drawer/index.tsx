@@ -64,7 +64,7 @@ function InfoCard({
       </div>
       <div className="min-w-0 flex-1 overflow-hidden">
         <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest mb-0.5">{label}</p>
-        <EllipsisCell value={value} maxChars={18} className="text-sm font-semibold text-foreground w-full block min-w-0" />
+        <EllipsisCell value={value} maxChars={18} className="text-sm font-semibold text-foreground w-full block min-w-0 capitalize" />
       </div>
     </div>
   );
@@ -265,7 +265,7 @@ export default function BookingDetailsDialog({
                               </div>
                               <EllipsisCell
                                 value={bs.service?.name || "Unknown Service"}
-                                className="font-semibold text-sm text-foreground leading-tight"
+                                className="font-semibold text-sm text-foreground leading-tight capitalize"
                               />
                             </div>
                             <span className="text-sm font-bold shrink-0 px-2 py-0.5 rounded-lg bg-muted/60 text-foreground border border-border/40">
@@ -275,7 +275,7 @@ export default function BookingDetailsDialog({
                           <div className="flex items-center gap-3 flex-wrap">
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded-md">
                               <UserCheck className="h-3 w-3" />
-                              <span>{`${bs.staff?.first_name || "Unknown"} ${bs.staff?.last_name || ""}`.trim()}</span>
+                              <span className="capitalize">{`${bs.staff?.first_name || "Unknown"} ${bs.staff?.last_name || ""}`.trim()}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded-md">
                               <Timer className="h-3 w-3" />

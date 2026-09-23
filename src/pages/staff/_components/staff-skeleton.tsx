@@ -1,6 +1,6 @@
 export function StaffCardSkeleton() {
   return (
-    <div className="relative overflow-hidden bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-5 shadow-sm flex flex-col justify-between min-h-[240px] animate-pulse">
+    <div className="relative overflow-hidden bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-5 shadow-sm flex flex-col justify-between min-h-[240px] animate-pulse">
       <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
       
       <div className="relative z-10 space-y-4">

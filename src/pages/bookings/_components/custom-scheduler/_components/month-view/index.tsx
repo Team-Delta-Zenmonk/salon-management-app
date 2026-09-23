@@ -153,7 +153,7 @@ export default function MonthView({
                             <EllipsisCell
                               value={booking.customer_name}
                               maxChars={12}
-                              className={`flex-1 min-w-0 text-[11px] font-medium text-white opacity-90 ${isCancelled ? "line-through opacity-60" : ""}`}
+                              className={`flex-1 min-w-0 text-[11px] font-medium text-white opacity-90 capitalize ${isCancelled ? "line-through opacity-60" : ""}`}
                             />
                             {booking.is_walk_in && (
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 shadow-sm" title="Walk-in Booking" />

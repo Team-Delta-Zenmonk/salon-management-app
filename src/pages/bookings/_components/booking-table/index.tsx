@@ -127,7 +127,7 @@ export default function BookingTable({
                 {/* Header: Customer & Type Badge */}
                 <div className="flex items-start justify-between gap-2 border-b border-border/40 pb-3">
                   <div className="min-w-0 flex-1">
-                    <EllipsisCell value={booking.customer_name} className="font-bold text-foreground text-base" />
+                    <EllipsisCell value={booking.customer_name} className="font-bold text-foreground text-base capitalize" />
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                       <Calendar className="w-3.5 h-3.5 shrink-0" />
                       <span>
@@ -158,7 +158,7 @@ export default function BookingTable({
                     </span>
                     <div className="flex items-center gap-1.5 font-medium text-foreground">
                       <Scissors className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <EllipsisCell value={booking.service_name || "-"} className="font-medium text-foreground text-xs" />
+                      <EllipsisCell value={booking.service_name || "-"} className="font-medium text-foreground text-xs capitalize" />
                     </div>
                   </div>
 
@@ -168,7 +168,7 @@ export default function BookingTable({
                     </span>
                     <div className="flex items-center gap-1.5 font-medium text-foreground">
                       <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <EllipsisCell value={booking.staff_name || "-"} className="font-medium text-foreground text-xs" />
+                      <EllipsisCell value={booking.staff_name || "-"} className="font-medium text-foreground text-xs capitalize" />
                     </div>
                   </div>
                 </div>
@@ -256,7 +256,7 @@ export default function BookingTable({
                     className="border-border/40 hover:bg-muted/30 transition-colors"
                   >
                     <TableCell className="font-semibold text-foreground text-sm max-w-[160px]">
-                      <EllipsisCell value={booking.customer_name} className="font-semibold text-foreground text-sm" />
+                      <EllipsisCell value={booking.customer_name} className="font-semibold text-foreground text-sm capitalize" />
                     </TableCell>
 
                     <TableCell>
@@ -274,11 +274,11 @@ export default function BookingTable({
                     </TableCell>
 
                     <TableCell className="text-muted-foreground text-sm max-w-[180px]">
-                      <EllipsisCell value={booking.service_name || "-"} className="text-muted-foreground text-sm" />
+                      <EllipsisCell value={booking.service_name || "-"} className="text-muted-foreground text-sm capitalize" />
                     </TableCell>
 
                     <TableCell className="text-foreground text-sm font-medium max-w-[140px]">
-                      <EllipsisCell value={booking.staff_name || "-"} className="text-foreground text-sm font-medium" />
+                      <EllipsisCell value={booking.staff_name || "-"} className="text-foreground text-sm font-medium capitalize" />
                     </TableCell>
 
                     <TableCell>

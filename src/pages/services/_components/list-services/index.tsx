@@ -200,7 +200,7 @@ export default function ListServices({
       </InfiniteScroll>
 
       {filteredServices.length === 0 && (
-        <div className="bg-card/40 border border-dashed border-border/50 rounded-3xl p-12 flex flex-col items-center justify-center mt-4">
+        <div className="bg-card/40 border border-dashed border-border/50 rounded-2xl p-12 flex flex-col items-center justify-center mt-4">
           <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
             <SearchX className="w-8 h-8 text-primary/40" />
           </div>

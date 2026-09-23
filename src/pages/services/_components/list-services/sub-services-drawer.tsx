@@ -103,7 +103,7 @@ export function SubServicesDrawer({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <SheetTitle className="text-lg font-bold text-foreground truncate leading-tight">
+              <SheetTitle className="text-lg font-bold text-foreground truncate leading-tight capitalize">
                 {parentService.name}
               </SheetTitle>
               <SheetDescription className="text-xs text-muted-foreground truncate">
@@ -158,7 +158,7 @@ export function SubServicesDrawer({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                className="flex flex-col items-center justify-center p-8 border border-dashed border-border/60 rounded-3xl bg-muted/5 mt-4 text-center"
+                className="flex flex-col items-center justify-center p-8 border border-dashed border-border/60 rounded-2xl bg-muted/5 mt-4 text-center"
               >
                 <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-3">
                   <SparklesIcon className="w-6 h-6 text-primary/40" />
@@ -194,7 +194,7 @@ export function SubServicesDrawer({
                         )}
                       </Avatar>
                       <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-foreground text-[14px] truncate leading-snug">
+                        <div className="font-semibold text-foreground text-[14px] truncate leading-snug capitalize">
                           {sub.name}
                         </div>
                         {sub.description && (

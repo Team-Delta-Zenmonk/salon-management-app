@@ -190,7 +190,7 @@ export default function DayView({
                                 <EllipsisCell
                                   value={booking.customer_name}
                                   maxChars={18}
-                                  className="text-xs font-semibold text-white min-w-0 flex-1"
+                                  className="text-xs font-semibold text-white min-w-0 flex-1 capitalize"
                                 />
                               </div>
 
@@ -198,7 +198,7 @@ export default function DayView({
                                 <EllipsisCell
                                   value={`${booking.service_name}${booking.staff_name ? ` · ${booking.staff_name}` : ""}`}
                                   maxChars={22}
-                                  className="text-[10px] opacity-80 leading-tight text-white/90 min-w-0 block"
+                                  className="text-[10px] opacity-80 leading-tight text-white/90 min-w-0 block capitalize"
                                 />
                               )}
                             </div>

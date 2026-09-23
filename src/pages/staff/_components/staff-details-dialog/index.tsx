@@ -115,7 +115,7 @@ export default function StaffDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-[520px] w-full max-h-[90vh] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-3xl flex flex-col">
+      <DialogContent className="sm:max-w-[520px] w-full max-h-[90vh] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl flex flex-col">
 
         <div className="shrink-0 px-6 py-5 border-b border-border/40 bg-muted/20">
           <div className="flex items-start gap-4">

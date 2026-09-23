@@ -42,7 +42,7 @@ export default function PaymentPolicyCard({ isSaving }: Readonly<PaymentPolicyCa
   const { control } = useFormContext();
 
   return (
-    <Card className="rounded-3xl border border-border/50 bg-card/60 backdrop-blur-md shadow-sm overflow-hidden w-full max-w-full">
+    <Card className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md shadow-sm overflow-hidden w-full max-w-full">
       <CardHeader className="p-4 sm:p-6 pb-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1 min-w-0">

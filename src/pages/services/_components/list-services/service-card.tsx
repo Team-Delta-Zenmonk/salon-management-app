@@ -81,7 +81,7 @@ export function ServiceCard({
   return (
     <motion.div
       variants={cardVariants}
-      className="group relative bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[250px] overflow-hidden"
+      className="group relative bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[250px] overflow-hidden"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
@@ -98,7 +98,7 @@ export function ServiceCard({
           </div>
 
           <div className="flex-1 min-w-0 pr-24">
-            <h3 className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors truncate">
+            <h3 className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors truncate capitalize">
               {service.name}
             </h3>
             {service.description ? (
@@ -200,7 +200,7 @@ export function ServiceCard({
                 )}
               </div>
               
-              <div className="text-[11px] font-medium text-foreground truncate flex-1 min-w-0 pr-1">
+              <div className="text-[11px] font-medium text-foreground truncate flex-1 min-w-0 pr-1 capitalize">
                 {subServicesNames}
               </div>
             </div>

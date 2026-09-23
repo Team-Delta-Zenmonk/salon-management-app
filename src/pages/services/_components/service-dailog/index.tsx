@@ -58,7 +58,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
   const buildPayload = (data: ServiceForm, logoUrl?: string | null): CreateServicePayload => {
     const payload: CreateServicePayload = {
-      name: data.name?.trim().toLowerCase() ?? "",
+      name: data.name?.trim() ?? "",
       description: data.description,
       gender: data.gender!,
       price_type: data.price_type!,

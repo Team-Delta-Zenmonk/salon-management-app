@@ -175,7 +175,7 @@ export default function WeekView({
                                   <EllipsisCell
                                     value={booking.customer_name}
                                     maxChars={14}
-                                    className={`text-[11px] font-semibold text-white leading-tight min-w-0 flex-1 ${isCancelled ? "line-through opacity-70" : ""}`}
+                                    className={`text-[11px] font-semibold text-white leading-tight min-w-0 flex-1 capitalize ${isCancelled ? "line-through opacity-70" : ""}`}
                                   />
                                 </div>
                                 {booking.is_walk_in && (

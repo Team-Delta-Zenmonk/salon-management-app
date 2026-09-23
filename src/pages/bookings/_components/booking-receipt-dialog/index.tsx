@@ -111,7 +111,7 @@ export default function BookingReceiptDialog({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl border-border/60 bg-card p-4 sm:p-6 shadow-xl max-w-full">
+      <DialogContent className="w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border-border/60 bg-card p-4 sm:p-6 shadow-xl max-w-full">
         <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/40 pr-8 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
             <Badge variant={variant} className="font-bold text-xs py-0.5 px-3 rounded-full">

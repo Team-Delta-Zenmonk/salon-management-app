@@ -148,7 +148,7 @@ export default function Login() {
               initial={{ y: 16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.15, duration: 0.5 }}
-              className="bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 p-6 sm:p-10"
+              className="bg-card dark:bg-neutral-900 border border-border/60 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10"
             >
               <div className="mb-8">
                 <h2 data-test-id="text-login-form-title" className="text-2xl font-black text-foreground tracking-tight mb-1.5">

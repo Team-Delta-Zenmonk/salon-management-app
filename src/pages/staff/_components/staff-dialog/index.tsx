@@ -155,7 +155,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
         }
       }}
     >
-      <DialogContent className="sm:max-w-[680px] w-full max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-3xl">
+      <DialogContent className="sm:max-w-[680px] w-full max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
         <DialogHeader className="px-6 py-5 border-b border-border/40 bg-muted/20 shrink-0">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
             {mode === "create" ? "Add Staff Member" : "Update Staff Profile"}

@@ -222,7 +222,7 @@ export default function SalonOnboarding() {
           </div>
 
           <div className="w-full max-w-3xl my-auto py-2">
-            <div className="bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 overflow-hidden flex flex-col md:flex-row h-[80vh] sm:h-[580px] max-h-[80vh] sm:max-h-[580px]">
+            <div className="bg-card dark:bg-neutral-900 border border-border/60 rounded-2xl shadow-xl shadow-foreground/5 overflow-hidden flex flex-col md:flex-row h-[80vh] sm:h-[580px] max-h-[80vh] sm:max-h-[580px]">
               
               <div className="flex md:hidden items-start justify-between px-6 pt-5 pb-3 border-b border-border/40 bg-muted/10 shrink-0">
                 {STEPS.map((step, i) => {

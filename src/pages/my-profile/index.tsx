@@ -206,7 +206,7 @@ const MyProfile = () => {
               >
                 <motion.div
                   variants={itemVariants}
-                  className="relative group rounded-3xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg min-h-[210px] sm:min-h-[240px] md:h-[260px] hover:shadow-xl hover:border-primary/30 transition-all duration-300 w-full"
+                  className="relative group rounded-2xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg min-h-[210px] sm:min-h-[240px] md:h-[260px] hover:shadow-xl hover:border-primary/30 transition-all duration-300 w-full"
                 >
                   {activePhotos.length > 0 ? (
                     <Carousel

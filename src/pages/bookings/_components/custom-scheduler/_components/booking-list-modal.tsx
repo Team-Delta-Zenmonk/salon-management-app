@@ -69,13 +69,13 @@ export default function BookingListModal({
                   <div className="flex-1 min-w-0 overflow-hidden">
                     <div className={`font-semibold text-xs sm:text-sm flex items-center gap-1 min-w-0 ${isCancelled ? "line-through opacity-70" : ""}`}>
                       <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 opacity-80" />
-                      <EllipsisCell value={booking.customer_name} maxChars={14} className="text-xs sm:text-sm font-semibold text-white min-w-0 flex-1" />
+                      <EllipsisCell value={booking.customer_name} maxChars={14} className="text-xs sm:text-sm font-semibold text-white min-w-0 flex-1 capitalize" />
                     </div>
                     {booking.service_name && (
                       <EllipsisCell
                         value={`${booking.service_name}${booking.staff_name ? ` · ${booking.staff_name}` : ""}`}
                         maxChars={18}
-                        className="text-[10px] sm:text-[11px] opacity-75 mt-0.5 text-white/90 min-w-0 block"
+                        className="text-[10px] sm:text-[11px] opacity-75 mt-0.5 text-white/90 min-w-0 block capitalize"
                       />
                     )}
                   </div>

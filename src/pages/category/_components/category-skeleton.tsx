@@ -1,6 +1,6 @@
 export function CategoryCardSkeleton() {
   return (
-    <div className="relative overflow-hidden bg-card/80 backdrop-blur-sm border border-border/50 rounded-3xl p-6 flex flex-col justify-between min-h-[220px] animate-pulse">
+    <div className="relative overflow-hidden bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6 flex flex-col justify-between min-h-[220px] animate-pulse">
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-4 w-full">

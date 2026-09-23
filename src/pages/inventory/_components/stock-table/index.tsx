@@ -96,7 +96,7 @@ const StockCard: React.FC<{
   return (
     <motion.div
       variants={itemVariants}
-      className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 relative group overflow-hidden flex flex-col justify-between"
+      className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 relative group overflow-hidden flex flex-col justify-between"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
@@ -269,7 +269,7 @@ export const StockTable: React.FC<StockTableProps> = ({
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 shadow-sm flex flex-col justify-between min-h-[220px] gap-6 animate-pulse"
+            className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[220px] gap-6 animate-pulse"
           >
             <div>
               <div className="flex items-start gap-4">
@@ -343,7 +343,7 @@ export const StockTable: React.FC<StockTableProps> = ({
           ))}
 
           {data.length === 0 && (
-            <div className="col-span-full bg-card/40 border border-dashed border-border/50 rounded-3xl p-12 flex flex-col items-center justify-center mt-2">
+            <div className="col-span-full bg-card/40 border border-dashed border-border/50 rounded-2xl p-12 flex flex-col items-center justify-center mt-2">
               <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
                 <Package className="w-8 h-8 text-primary/40" />
               </div>

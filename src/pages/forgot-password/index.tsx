@@ -133,7 +133,7 @@ export default function ForgotPassword() {
           <span className="text-lg font-black text-foreground tracking-tight">Salonify</span>
         </div>
 
-        <div className="w-full max-w-md relative z-10 bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 p-6 sm:p-10">
+        <div className="w-full max-w-md relative z-10 bg-card dark:bg-neutral-900 border border-border/60 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10">
           <AnimatePresence mode="wait">
             {!emailSent ? (
               <motion.div

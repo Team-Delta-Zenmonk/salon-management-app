@@ -91,7 +91,7 @@ export default function SignUp() {
               initial={{ y: 16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.5 }}
-              className="bg-card dark:bg-neutral-900 border border-border/60 rounded-3xl shadow-xl shadow-foreground/5 p-6 sm:p-10 flex flex-col max-h-full overflow-hidden"
+              className="bg-card dark:bg-neutral-900 border border-border/60 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10 flex flex-col max-h-full overflow-hidden"
             >
               <div className="mb-4 sm:mb-6 shrink-0">
                 <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight mb-1">

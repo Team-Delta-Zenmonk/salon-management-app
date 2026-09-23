@@ -181,7 +181,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
-                  className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 shadow-sm flex flex-col justify-between min-h-[220px] gap-6 animate-pulse"
+                  className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[220px] gap-6 animate-pulse"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-4">

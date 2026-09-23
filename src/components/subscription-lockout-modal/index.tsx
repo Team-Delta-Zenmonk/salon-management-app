@@ -16,7 +16,7 @@ export default function SubscriptionLockoutModal() {
   const navigate = useNavigate();
   const location = useLocation();
   const { salon } = useAppSelector((state: RootState) => state.auth);
-
+  const [isBillingPage, setIsBillingPage] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const appName = import.meta.env.VITE_APP_NAME || "Veloura";
@@ -29,7 +29,7 @@ export default function SubscriptionLockoutModal() {
       }>;
       setErrorMessage(
         customEvt.detail?.message ||
-          "Your trial period has ended. Operational features are paused until you choose a plan.",
+        "Your trial period has ended. Operational features are paused until you choose a plan.",
       );
       setIsOpen(true);
     };
@@ -45,8 +45,6 @@ export default function SubscriptionLockoutModal() {
 
   useEffect(() => {
     const isUnlockedRoute =
-      location.pathname === "/billing" ||
-      location.pathname === "/my-profile" ||
       location.pathname === "/appearance" ||
       location.pathname.startsWith("/login") ||
       location.pathname.startsWith("/salon-onboarding");
@@ -57,10 +55,10 @@ export default function SubscriptionLockoutModal() {
       );
       setIsOpen(true);
     }
+    setIsBillingPage(location.pathname === "/billing")
   }, [location.pathname, salon?.subscription_status]);
 
   const handleNavigateToBilling = () => {
-    setIsOpen(false);
     navigate("/billing");
   };
 
@@ -71,7 +69,7 @@ export default function SubscriptionLockoutModal() {
     errorMessage.toLowerCase().includes("suspended");
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isBillingPage ? false : isOpen} onOpenChange={isBillingPage ? setIsOpen : undefined}>
       <DialogContent
         showCloseButton={false}
         className="sm:max-w-md p-6 overflow-hidden rounded-2xl border-2 border-destructive/30 bg-card shadow-2xl"
@@ -101,7 +99,7 @@ export default function SubscriptionLockoutModal() {
               {isSuspended
                 ? `Your salon account has been suspended or deactivated. Please reach out to ${appName} administration to reactivate your access.`
                 : errorMessage ||
-                  "Your appointments, staff management, and operational services are currently on hold. Upgrade your subscription to continue seamlessly."}
+                "Your appointments, staff management, and operational services are currently on hold. Upgrade your subscription to continue seamlessly."}
             </DialogDescription>
           </DialogHeader>
 
@@ -142,17 +140,6 @@ export default function SubscriptionLockoutModal() {
                 <ArrowRight className="w-4 h-4" />
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setIsOpen(false);
-                navigate("/my-profile");
-              }}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              Manage Profile Instead
-            </Button>
           </div>
         </div>
       </DialogContent>

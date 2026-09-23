@@ -556,10 +556,10 @@ export default function PlanAndBillingPage() {
       >
         <motion.div
           variants={itemVariants}
-          className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all min-w-0 max-w-full"
+          className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all min-w-0 max-w-full overflow-visible"
         >
           {currentStatus === "trial" && currentPlan === "trial" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
               <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
                 Active Free Trial
               </span>
@@ -598,7 +598,7 @@ export default function PlanAndBillingPage() {
 
         <motion.div
           variants={itemVariants}
-          className={`rounded-2xl border bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all min-w-0 max-w-full ${currentPlan === "monthly" && currentStatus === "active"
+          className={`rounded-2xl border bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all min-w-0 max-w-full overflow-visible ${currentPlan === "monthly" && currentStatus === "active"
               ? "border-primary ring-2 ring-primary/20"
               : currentPlan === "monthly" && currentStatus === "trial"
                 ? "border-amber-500 ring-2 ring-amber-500/30"
@@ -606,14 +606,14 @@ export default function PlanAndBillingPage() {
             }`}
         >
           {currentPlan === "monthly" && currentStatus === "active" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
               <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground truncate max-w-full">
                 Current Plan
               </span>
             </div>
           )}
           {currentPlan === "monthly" && currentStatus === "trial" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
               <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
                 Selected Plan • Trial Active
               </span>
@@ -682,25 +682,25 @@ export default function PlanAndBillingPage() {
 
         <motion.div
           variants={itemVariants}
-          className={`rounded-2xl border-2 border-primary bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xl shadow-primary/10 relative overflow-hidden min-w-0 max-w-full ${currentPlan === "yearly" && currentStatus === "active"
+          className={`rounded-2xl border-2 border-primary bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xl shadow-primary/10 relative overflow-visible min-w-0 max-w-full ${currentPlan === "yearly" && currentStatus === "active"
               ? "ring-2 ring-primary"
               : currentPlan === "yearly" && currentStatus === "trial"
                 ? "ring-2 ring-amber-500/40"
                 : ""
             }`}
         >
-          <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-xs">
+          <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
             Best Value • Save ~20%
           </div>
           {currentPlan === "yearly" && currentStatus === "active" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
               <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground truncate max-w-full">
                 Current Plan
               </span>
             </div>
           )}
           {currentPlan === "yearly" && currentStatus === "trial" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 max-w-[90%] text-center">
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
               <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
                 Selected Plan • Trial Active
               </span>

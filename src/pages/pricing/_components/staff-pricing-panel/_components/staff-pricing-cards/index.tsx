@@ -145,7 +145,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     <>
       <div className="flex flex-wrap items-start sm:items-center justify-between gap-4 pb-6 border-b border-border/60 mb-6">
         <div className="space-y-1">
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2 capitalize">
             <span className="w-1.5 h-6 rounded bg-primary shrink-0" />
             {selectedService.name} Staff Pricing
           </h2>
@@ -204,7 +204,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
               <div key={service.uuid} className="flex flex-col gap-4">
                 {showHeader && (
                   <div className="flex items-center gap-3">
-                    <h4 className="font-bold text-foreground/80 text-xs uppercase tracking-wider">
+                    <h4 className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize">
                       {service.name}
                     </h4>
                     <div className="h-px bg-border/55 flex-1" />
@@ -231,7 +231,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                             )}
                           </Avatar>
                           <div className="min-w-0">
-                            <p className="font-bold text-sm text-foreground truncate">
+                            <p className="font-bold text-sm text-foreground truncate capitalize">
                               {staff_name}
                             </p>
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">

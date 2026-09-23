@@ -188,7 +188,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
+      <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
         <div className="flex items-center gap-2 mb-5 relative z-10">
@@ -233,7 +233,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
         </div>
       </div>
 
-      <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
+      <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
         <div className="flex items-center gap-2 mb-5 relative z-10">

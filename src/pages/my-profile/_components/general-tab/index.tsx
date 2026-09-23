@@ -98,7 +98,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
   };
 
   return (
-    <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
+    <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
       <div className="flex items-center gap-2 mb-5 relative z-10">
@@ -267,7 +267,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
           </div>
 
           <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
-            <DialogContent className="sm:max-w-2xl rounded-3xl border-border/60 bg-card p-6 shadow-xl max-h-[85vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-2xl rounded-2xl border-border/60 bg-card p-6 shadow-xl max-h-[85vh] overflow-y-auto">
               <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/40">
                 <DialogTitle className="text-base font-bold text-foreground">
                   All Gallery & Cover Photos ({photos.length})
@@ -354,7 +354,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   control, 
 }) => {
   return (
-    <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-3xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
+    <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
       <div className="flex items-center gap-2 mb-5 relative z-10">
