@@ -5,7 +5,7 @@ import type { RootState } from "../../store/store";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { ThemeToggle } from "../theme-toggle";
-import SubscriptionWidget from "./_components/subscription-widget";
+import NotificationDropdown from "./_components/notification-dropdown";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -78,24 +78,8 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
         <div className="flex items-center gap-3 shrink-0 ml-4">
           <ThemeToggle />
 
-          {/* 2. Notifications Button */}
-          <Link to="/notifications">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-9 w-9 rounded-full transition-colors cursor-pointer shrink-0",
-                isNotificationsActive
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-              )}
-              title="Notifications"
-            >
-              <Bell className="h-[1.2rem] w-[1.2rem]" />
-            </Button>
-          </Link>
+          <NotificationDropdown />
 
-          {/* 3. Profile Avatar Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(

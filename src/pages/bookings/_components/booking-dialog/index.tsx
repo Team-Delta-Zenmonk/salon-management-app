@@ -198,7 +198,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         customer_name: booking.customer_name || booking.customer?.name || booking.admin_booking?.name || "",
         customer_phone: booking.customer_phone || booking.customer?.phone || booking.admin_booking?.phone || "",
         services: bookingServices,
-        booking_date: new Date(booking.booking_date),
+        booking_date: booking.booking_date ? dayjs(booking.booking_date).format("DD-MM-YYYY") : "",
         booking_start_time: `${hh}:${mm}`,
         status: booking.status,
         payment_preference: booking.payment_preference || booking.payment_policy || "pay_at_venue",
@@ -487,7 +487,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Select Date"
                   control={control as any}
                   identifier="booking-date"
-                  disablePast={true}
+                  disablePast={mode === "create"}
                 />
                 <TimePicker
                   name="booking_start_time"
