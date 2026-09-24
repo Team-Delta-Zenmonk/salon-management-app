@@ -20,7 +20,7 @@ export const StaffLeaderboard = () => {
         {STATIC_DASHBOARD_DATA.staffPerformance.map((staff) => (
           <div
             key={staff.name}
-            className="flex items-center justify-between p-4 bg-background/40 border border-border/40 rounded-2xl hover:border-primary/30 transition-all group"
+            className="flex items-center justify-between p-4 bg-background/40 border border-border/50 rounded-2xl hover:border-primary/30 transition-all group"
           >
             <div className="flex items-center gap-3 min-w-0">
               <Avatar className="h-10 w-10 border border-primary/10 shrink-0">

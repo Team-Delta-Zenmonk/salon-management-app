@@ -224,53 +224,51 @@ export default function BookingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="px-4 md:px-8 pb-5 shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4"
+        className="px-4 md:px-8 pb-5 shrink-0 flex flex-wrap items-center justify-start gap-3 sm:gap-4"
       >
-        <div className="w-full sm:w-auto">
-          {/* Desktop inline selects */}
-          <div className="hidden sm:flex items-center gap-3">
-            <div className="w-[175px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
-              <Select
-                name="staff"
-                control={control}
-                placeholder="All Staff"
-                options={staffOptions}
-                identifier="booking-staff-filter"
-                translate={false}
-                disabled={staffOptions.length === 1}
-              />
-            </div>
-            <div className="w-[175px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
-              <Select
-                name="service"
-                control={control}
-                placeholder="All Services"
-                options={serviceOptions}
-                identifier="booking-service-filter"
-                translate={false}
-                disabled={serviceOptions.length === 1}
-              />
-            </div>
-            <div className="w-[190px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/60 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
-              <Select
-                name="payment"
-                control={control}
-                placeholder="All Payment Modes"
-                options={paymentOptions}
-                identifier="booking-payment-filter"
-                translate={false}
-              />
-            </div>
+        {/* Desktop & Tablet inline selects */}
+        <div className="hidden sm:flex flex-wrap items-center gap-3">
+          <div className="w-[175px] min-w-[150px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/50 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
+            <Select
+              name="staff"
+              control={control}
+              placeholder="All Staff"
+              options={staffOptions}
+              identifier="booking-staff-filter"
+              translate={false}
+              disabled={staffOptions.length === 1}
+            />
+          </div>
+          <div className="w-[175px] min-w-[150px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/50 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
+            <Select
+              name="service"
+              control={control}
+              placeholder="All Services"
+              options={serviceOptions}
+              identifier="booking-service-filter"
+              translate={false}
+              disabled={serviceOptions.length === 1}
+            />
+          </div>
+          <div className="w-[190px] min-w-[160px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/50 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
+            <Select
+              name="payment"
+              control={control}
+              placeholder="All Payment Modes"
+              options={paymentOptions}
+              identifier="booking-payment-filter"
+              translate={false}
+            />
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:ml-auto w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-3 justify-start">
           {viewMode === "calendar" && (
-            <div className="hidden sm:flex items-center gap-2">
+            <div className="hidden sm:flex flex-wrap items-center gap-2">
               {statusLegend.map(({ label, color, dotClass }) => (
                 <span
                   key={label}
-                  className={`inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold py-1.5 px-2 sm:w-[96px] rounded-full border backdrop-blur-sm transition-all border-border/60 bg-card/60 text-muted-foreground`}
+                  className={`inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold py-1.5 px-2.5 rounded-full border backdrop-blur-sm transition-all border-border/50 bg-card/60 text-muted-foreground`}
                 >
                   <span
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass || ""}`}
@@ -282,14 +280,14 @@ export default function BookingPage() {
             </div>
           )}
 
-          <div className="flex items-center justify-center p-1 rounded-xl bg-card/60 backdrop-blur-md border border-border/60 shadow-sm gap-1 shrink-0">
+          <div className="flex items-center justify-center p-1 rounded-xl bg-card/60 backdrop-blur-md border border-border/50 shadow-sm gap-1 shrink-0">
             <Button
               variant={viewMode === "calendar" ? "secondary" : "ghost"}
               size="xs"
               onClick={() => setViewMode("calendar")}
               className={`h-8 px-3 flex-1 sm:flex-initial justify-center rounded-lg font-bold gap-1.5 text-xs transition-all ${
                 viewMode === "calendar"
-                  ? "bg-background text-foreground shadow-sm border border-border/40"
+                  ? "bg-background text-foreground shadow-sm border border-border/50"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -302,7 +300,7 @@ export default function BookingPage() {
               onClick={() => setViewMode("table")}
               className={`h-8 px-3 flex-1 sm:flex-initial justify-center rounded-lg font-bold gap-1.5 text-xs transition-all ${
                 viewMode === "table"
-                  ? "bg-background text-foreground shadow-sm border border-border/40"
+                  ? "bg-background text-foreground shadow-sm border border-border/50"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >

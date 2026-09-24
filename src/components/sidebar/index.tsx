@@ -8,6 +8,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAppSelector } from "../../store/hooks";
 import type { RootState } from "../../store/store";
 import { EllipsisCell } from "../ellipse-cell";
+import { APP_NAME } from "@/constants/app";
 
 type SidebarProps = {
   drawerWidth: number;
@@ -24,7 +25,7 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
     <div className="flex flex-col h-full bg-card">
       <div className={cn("border-b border-border h-[72px] flex items-center shrink-0", desktopCollapsed ? "justify-center px-0" : "px-4")}>
         <div className={cn("flex items-center", desktopCollapsed ? "justify-center" : "space-x-3 w-full")}>
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 overflow-hidden shrink-0 shadow-xs border border-border/40">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 overflow-hidden shrink-0 shadow-xs border border-border/50">
             <img
               src={salon?.logo || "/management-icon.png"}
               alt={salon?.name || "Salon Logo"}
@@ -34,7 +35,7 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
           {!desktopCollapsed && (
             <div className="min-w-0 flex-1">
               <EllipsisCell
-                value={salon?.name || import.meta.env.VITE_APP_NAME || "Veloura"}
+                value={salon?.name || APP_NAME}
                 maxChars={20}
                 className="text-base font-semibold text-foreground capitalize"
               />

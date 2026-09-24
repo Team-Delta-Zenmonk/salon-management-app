@@ -84,7 +84,7 @@ const SearchStaff = () => {
 
   return (
     <div className="w-full px-4 md:px-8 pb-8 space-y-6">
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-border/40 shadow-xs mb-2">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-border/50 shadow-xs mb-2">
         <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
           Staff Directory
           <span className="text-primary text-base font-medium bg-primary/10 px-2.5 py-0.5 rounded-full">

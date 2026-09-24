@@ -37,7 +37,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({ item, onRowCli
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-      <div className="p-4 border-b border-border/40 min-w-0 w-full overflow-hidden relative">
+      <div className="p-4 border-b border-border/50 min-w-0 w-full overflow-hidden relative">
         <div className="w-full min-w-0 overflow-hidden mb-3">
           <TooltipProvider delay={200}>
             <Tooltip

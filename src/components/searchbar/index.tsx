@@ -39,7 +39,7 @@ const SearchBar = ({ onSearch, placeholder }: SearchBarProps) => {
         <Search className="h-5 w-5" />
       </div>
       <Input
-        className="w-full pl-10 pr-10 py-2 h-10 bg-card/60 backdrop-blur-md shadow-sm border-border/60 hover:bg-card/80 transition-all focus-visible:bg-card"
+        className="w-full pl-10 pr-10 py-2 h-10 bg-card/60 backdrop-blur-md shadow-sm border-border/50 hover:bg-card/80 transition-all focus-visible:bg-card"
         placeholder={placeholder}
         value={searchQuery}
         onChange={handleOnChange}

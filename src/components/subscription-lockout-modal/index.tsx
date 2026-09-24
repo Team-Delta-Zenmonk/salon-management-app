@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { useAppSelector } from "@/store/hooks";
 import type { RootState } from "@/store/store";
 
+import { APP_NAME } from "@/constants/app";
+
 export default function SubscriptionLockoutModal() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,7 +21,7 @@ export default function SubscriptionLockoutModal() {
   const [isBillingPage, setIsBillingPage] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const appName = import.meta.env.VITE_APP_NAME || "Veloura";
+  const appName = APP_NAME;
 
   useEffect(() => {
     const handleExpiredEvent = (event: Event) => {

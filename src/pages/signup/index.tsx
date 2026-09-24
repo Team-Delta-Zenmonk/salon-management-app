@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/constants/app";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignUpSchema, type SignUpForm } from "./schema/signup.schema";
@@ -83,7 +84,7 @@ export default function SignUp() {
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
               <Scissors className="w-4.5 h-4.5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-black text-foreground tracking-tight">Salonify</span>
+            <span className="text-lg font-black text-foreground tracking-tight">{APP_NAME}</span>
           </div>
 
           <div className="w-full max-w-md relative z-10 my-auto py-2 h-auto max-h-[85vh] sm:max-h-none flex flex-col">
@@ -91,7 +92,7 @@ export default function SignUp() {
               initial={{ y: 16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.5 }}
-              className="bg-card dark:bg-neutral-900 border border-border/60 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10 flex flex-col max-h-full overflow-hidden"
+              className="bg-card dark:bg-neutral-900 border border-border/50 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10 flex flex-col max-h-full overflow-hidden"
             >
               <div className="mb-4 sm:mb-6 shrink-0">
                 <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight mb-1">
@@ -192,7 +193,7 @@ export default function SignUp() {
                 </form>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-border/40 shrink-0 space-y-3">
+              <div className="mt-4 pt-3 border-t border-border/50 shrink-0 space-y-3">
                 <Button
                   form="signup-form"
                   disabled={isLoading}
@@ -234,7 +235,7 @@ export default function SignUp() {
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
                 <Scissors className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-black text-white tracking-tight">Salonify</span>
+              <span className="text-xl font-black text-white tracking-tight">{APP_NAME}</span>
             </div>
           </div>
 

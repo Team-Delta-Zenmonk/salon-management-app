@@ -21,6 +21,7 @@ import MyProfile from "../pages/my-profile";
 import Appearance from "../pages/appearance";
 import PlanAndBillingPage from "../pages/billing";
 import UnProtectedRoute from "./unprotected-route";
+import NotFoundPage from "../pages/not-found";
 
 function AllRoutes() {
   return (
@@ -54,6 +55,8 @@ function AllRoutes() {
           <Route path="/billing" element={<PlanAndBillingPage />} />
         </Route>
       </Route>
+
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

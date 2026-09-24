@@ -53,14 +53,14 @@ export const RevenueChart = ({
             Your actual earnings over the last {timeRange === "7d" ? "7 days" : "30 days"}.
           </p>
         </div>
-        <div className="flex items-center p-1 rounded-xl bg-background/50 border border-border/40 shadow-sm gap-1 self-start sm:self-auto">
+        <div className="flex items-center p-1 rounded-xl bg-background/50 border border-border/50 shadow-sm gap-1 self-start sm:self-auto">
           <Button
             variant={timeRange === "7d" ? "secondary" : "ghost"}
             size="xs"
             onClick={() => onTimeRangeChange("7d")}
             className={`h-7 px-3 rounded-lg font-bold text-xs transition-all ${
               timeRange === "7d"
-                ? "bg-background text-foreground shadow-sm border border-border/40"
+                ? "bg-background text-foreground shadow-sm border border-border/50"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -72,7 +72,7 @@ export const RevenueChart = ({
             onClick={() => onTimeRangeChange("30d")}
             className={`h-7 px-3 rounded-lg font-bold text-xs transition-all ${
               timeRange === "30d"
-                ? "bg-background text-foreground shadow-sm border border-border/40"
+                ? "bg-background text-foreground shadow-sm border border-border/50"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >

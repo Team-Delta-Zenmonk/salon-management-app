@@ -173,7 +173,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
   if (loading && displayData.length === 0) {
     if (!isMobile) {
       return (
-        <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-md overflow-hidden animate-pulse min-h-[200px]">
+        <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md overflow-hidden animate-pulse min-h-[200px]">
           <Table>
             <TableHeader className="bg-muted/40 border-b border-border/50">
               <TableRow>
@@ -231,7 +231,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
     <div>
       {!isMobile && (
         <>
-          <div className="rounded-2xl border border-border/40 bg-card/45 backdrop-blur-md overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 mb-6 min-h-[200px]">
+          <div className="rounded-2xl border border-border/50 bg-card/45 backdrop-blur-md overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 mb-6 min-h-[200px]">
             <Table>
               <TableHeader className="bg-muted/40 border-b border-border/50">
                 <TableRow className="hover:bg-transparent border-b border-border/50">

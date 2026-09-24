@@ -23,7 +23,7 @@ import TimePicker from "../../../../components/form/time-picker";
 import { listServiceStaff } from "../../../../features/service/list-staff/list-staff.service";
 import { createBookingAction } from "../../../../features/booking/create-booking/create-booking.action";
 import { updateBookingAction } from "../../../../features/booking/update-booking/update-booking.action";
-import { downloadInvoiceService } from "../../../../features/invoice/download-invoice/download-invoice.service";
+import { useDownloadInvoice } from "../../../../features/invoice/hooks/use-download-invoice";
 import dayjs from "dayjs";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import BookingServiceRow from "./_components/booking-service-row";
@@ -61,31 +61,12 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   const { salon } = useAppSelector((state) => state.auth);
   const { data: services } = useAppSelector((state) => state.service);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+  const { downloadInvoice, isDownloading: isDownloadingInvoice } = useDownloadInvoice();
   const [staffMap, setStaffMap] = useState<StaffMap>({});
 
-  const handleDownloadInvoice = async () => {
-    const bookingIdentifier = booking?.uuid;
-    if (!bookingIdentifier) {
-      callSnack("Booking identifier not found", "error");
-      return;
-    }
-
-    setIsDownloadingInvoice(true);
-    try {
-      const res = await downloadInvoiceService(bookingIdentifier);
-      if (res?.url) {
-        window.open(res.url, "_blank");
-        callSnack("Opening invoice...", "success");
-      } else {
-        callSnack("Invoice URL not available", "error");
-      }
-    } catch (err: any) {
-      console.error("Failed to download invoice:", err);
-      const msg = err?.response?.data?.message || err?.message || "Failed to download invoice";
-      callSnack(msg, "error");
-    } finally {
-      setIsDownloadingInvoice(false);
+  const handleDownloadInvoice = () => {
+    if (booking?.uuid) {
+      downloadInvoice(booking.uuid);
     }
   };
 
@@ -382,7 +363,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                           "flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer",
                           !field.value
                             ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-500 shadow-sm ring-1 ring-emerald-500/30"
-                            : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40"
+                            : "border-border/50 bg-muted/20 text-muted-foreground hover:bg-muted/40"
                         )}
                       >
                         <span className={cn("w-2 h-2 rounded-full shrink-0", !field.value ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/40")} />
@@ -396,7 +377,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                           "flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer",
                           field.value
                             ? "border-amber-500/60 bg-amber-500/10 text-amber-500 shadow-sm ring-1 ring-amber-500/30"
-                            : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40"
+                            : "border-border/50 bg-muted/20 text-muted-foreground hover:bg-muted/40"
                         )}
                       >
                         <span className={cn("w-2 h-2 rounded-full shrink-0", field.value ? "bg-amber-500 animate-pulse" : "bg-muted-foreground/40")} />

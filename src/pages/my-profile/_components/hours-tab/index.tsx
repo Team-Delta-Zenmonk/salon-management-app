@@ -47,7 +47,7 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
           const label = DAY_LABELS[dayKey];
 
           return (
-            <div key={dayKey} className="border-b border-border/40 last:border-0 py-2">
+            <div key={dayKey} className="border-b border-border/50 last:border-0 py-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <div

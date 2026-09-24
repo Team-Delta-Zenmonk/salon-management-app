@@ -161,8 +161,8 @@ const StockCard: React.FC<{
                   <Tooltip open={categoryTooltipOpen} onOpenChange={setCategoryTooltipOpen}>
                     <TooltipTrigger>
                       <div onMouseEnter={() => setCategoryTooltipOpen(true)} onMouseLeave={() => setCategoryTooltipOpen(false)}>
-                        <Badge variant="secondary" className="max-w-[100px] text-[10px] font-semibold uppercase tracking-wider bg-secondary/40 text-secondary-foreground">
-                          <span className="overflow-hidden text-ellipsis whitespace-nowrap">{categoryLabel}</span>
+                        <Badge variant="secondary" className="max-w-[180px] text-[10px] font-semibold uppercase tracking-wider bg-secondary/40 text-secondary-foreground truncate">
+                          <span>{categoryLabel}</span>
                         </Badge>
                       </div>
                     </TooltipTrigger>
@@ -171,7 +171,7 @@ const StockCard: React.FC<{
                 </TooltipProvider>
               )}  
               {variantLabel && (
-                <Badge variant="outline" className="text-[10px] font-semibold uppercase tracking-wider bg-muted/20 border-border/60 text-muted-foreground/80">
+                <Badge variant="outline" className="text-[10px] font-semibold uppercase tracking-wider bg-muted/20 border-border/50 text-muted-foreground/80">
                   {variantLabel}
                 </Badge>
               )}
@@ -293,7 +293,7 @@ export const StockTable: React.FC<StockTableProps> = ({
               <div className="h-1.5 bg-foreground/10 rounded-full w-full" />
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-border/40 mt-2">
+            <div className="flex justify-between items-center pt-4 border-t border-border/50 mt-2">
               <div className="h-4 bg-foreground/10 rounded w-20" />
               <div className="flex gap-2">
                 <div className="h-8 w-8 bg-foreground/10 rounded-full" />

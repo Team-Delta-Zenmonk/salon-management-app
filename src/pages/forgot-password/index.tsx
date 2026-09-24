@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/constants/app";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ForgotPasswordSchema, type ForgotPasswordForm } from "./schema/forgot-password.schema";
@@ -62,7 +63,7 @@ export default function ForgotPassword() {
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
               <Scissors className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-black text-white tracking-tight">Salonify</span>
+            <span className="text-xl font-black text-white tracking-tight">{APP_NAME}</span>
           </div>
         </div>
 
@@ -130,10 +131,10 @@ export default function ForgotPassword() {
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
             <Scissors className="w-4.5 h-4.5 text-primary-foreground" />
           </div>
-          <span className="text-lg font-black text-foreground tracking-tight">Salonify</span>
+          <span className="text-lg font-black text-foreground tracking-tight">{APP_NAME}</span>
         </div>
 
-        <div className="w-full max-w-md relative z-10 bg-card dark:bg-neutral-900 border border-border/60 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10">
+        <div className="w-full max-w-md relative z-10 bg-card dark:bg-neutral-900 border border-border/50 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10">
           <AnimatePresence mode="wait">
             {!emailSent ? (
               <motion.div

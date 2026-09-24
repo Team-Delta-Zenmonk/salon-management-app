@@ -316,7 +316,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 />
               </div>
 
-              <div className="flex gap-6 mt-2 pt-4 border-t border-border/40">
+              <div className="flex gap-6 mt-2 pt-4 border-t border-border/50">
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_active"

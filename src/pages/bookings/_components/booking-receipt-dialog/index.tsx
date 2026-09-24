@@ -5,7 +5,7 @@ import type { Booking } from "../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
 import { useAppDispatch } from "../../../../store/hooks";
 import { collectRemainingPaymentAction } from "../../../../features/booking/collect-remaning-payment/collect-remaining-payment.action";
-import { downloadInvoiceService } from "../../../../features/invoice/download-invoice/download-invoice.service";
+import { useDownloadInvoice } from "../../../../features/invoice/hooks/use-download-invoice";
 import {
   Dialog,
   DialogContent,
@@ -32,30 +32,11 @@ export default function BookingReceiptDialog({
 }: Readonly<BookingReceiptDialogProps>) {
   const dispatch = useAppDispatch();
   const [isCollecting, setIsCollecting] = useState(false);
-  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+  const { downloadInvoice, isDownloading: isDownloadingInvoice } = useDownloadInvoice();
 
-  const handleDownloadInvoice = async () => {
-    if (!booking) return;
-    const identifier = booking.uuid;
-    if (!identifier) {
-      callSnack("Booking identifier not found", "error");
-      return;
-    }
-
-    setIsDownloadingInvoice(true);
-    try {
-      const res = await downloadInvoiceService(identifier);
-      if (res?.url) {
-        window.open(res.url, "_blank");
-      } else {
-        callSnack("Invoice URL not available", "error");
-      }
-    } catch (err: any) {
-      console.error("Failed to download invoice:", err);
-      const msg = err?.response?.data?.message || err?.message || "Failed to download invoice";
-      callSnack(msg, "error");
-    } finally {
-      setIsDownloadingInvoice(false);
+  const handleDownloadInvoice = () => {
+    if (booking?.uuid) {
+      downloadInvoice(booking.uuid);
     }
   };
 
@@ -111,8 +92,8 @@ export default function BookingReceiptDialog({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border-border/60 bg-card p-4 sm:p-6 shadow-xl max-w-full">
-        <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/40 pr-8 min-w-0">
+      <DialogContent className="w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border-border/50 bg-card p-4 sm:p-6 shadow-xl max-w-full">
+        <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/50 pr-8 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
             <Badge variant={variant} className="font-bold text-xs py-0.5 px-3 rounded-full">
               {label}
@@ -129,7 +110,7 @@ export default function BookingReceiptDialog({
             <EllipsisCell value={booking.service_name || "-"} className="text-xs text-muted-foreground mt-0.5 block min-w-0" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-muted/40 border border-border/40 min-w-0 max-w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-muted/40 border border-border/50 min-w-0 max-w-full">
             <div className="space-y-1 min-w-0 max-w-full">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Appointment Time
@@ -151,7 +132,7 @@ export default function BookingReceiptDialog({
             </div>
           </div>
 
-          <div className="space-y-3 p-3.5 sm:p-4 rounded-2xl bg-muted/30 border border-border/40 min-w-0 max-w-full">
+          <div className="space-y-3 p-3.5 sm:p-4 rounded-2xl bg-muted/30 border border-border/50 min-w-0 max-w-full">
             <div className="flex justify-between items-center text-xs font-bold text-foreground">
               <span>Payment Progress</span>
               <span className={cn(
@@ -182,7 +163,7 @@ export default function BookingReceiptDialog({
           </div>
 
           <div className="space-y-2 text-xs min-w-0 max-w-full">
-            <div className="flex justify-between items-center py-2 border-b border-border/40">
+            <div className="flex justify-between items-center py-2 border-b border-border/50">
               <span className="text-muted-foreground font-medium">Service Total</span>
               <span className="font-bold text-foreground font-mono">₹{total.toFixed(2)}</span>
             </div>
@@ -196,7 +177,7 @@ export default function BookingReceiptDialog({
           </div>
         </div>
 
-        <DialogFooter className="pt-4 border-t border-border/40 gap-2.5 flex-col-reverse sm:flex-row sm:justify-between sm:items-center -mx-4 -mb-4 p-4 sm:mx-0 sm:mb-0 sm:p-0 bg-transparent rounded-none">
+        <DialogFooter className="pt-4 border-t border-border/50 gap-2.5 flex-col-reverse sm:flex-row sm:justify-between sm:items-center -mx-4 -mb-4 p-4 sm:mx-0 sm:mb-0 sm:p-0 bg-transparent rounded-none">
           <Button
             variant="outline"
             onClick={handleDownloadInvoice}

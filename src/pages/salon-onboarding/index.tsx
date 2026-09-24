@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/constants/app";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FormProvider, useForm, type FieldPath } from "react-hook-form";
@@ -158,7 +159,7 @@ export default function SalonOnboarding() {
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
                 <Scissors className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-black text-white tracking-tight">Salonify</span>
+              <span className="text-xl font-black text-white tracking-tight">{APP_NAME}</span>
             </div>
           </div>
 
@@ -218,13 +219,13 @@ export default function SalonOnboarding() {
             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
               <Scissors className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-base font-black text-foreground tracking-tight">Salonify</span>
+            <span className="text-base font-black text-foreground tracking-tight">{APP_NAME}</span>
           </div>
 
           <div className="w-full max-w-3xl my-auto py-2">
-            <div className="bg-card dark:bg-neutral-900 border border-border/60 rounded-2xl shadow-xl shadow-foreground/5 overflow-hidden flex flex-col md:flex-row h-[80vh] sm:h-[580px] max-h-[80vh] sm:max-h-[580px]">
+            <div className="bg-card dark:bg-neutral-900 border border-border/50 rounded-2xl shadow-xl shadow-foreground/5 overflow-hidden flex flex-col md:flex-row h-[80vh] sm:h-[580px] max-h-[80vh] sm:max-h-[580px]">
               
-              <div className="flex md:hidden items-start justify-between px-6 pt-5 pb-3 border-b border-border/40 bg-muted/10 shrink-0">
+              <div className="flex md:hidden items-start justify-between px-6 pt-5 pb-3 border-b border-border/50 bg-muted/10 shrink-0">
                 {STEPS.map((step, i) => {
                   const Icon = step.icon;
                   const isCompleted = i < activeStep;
@@ -240,7 +241,7 @@ export default function SalonOnboarding() {
                           }}
                           transition={{ duration: 0.3 }}
                           className={`w-8 h-8 rounded-full flex items-center justify-center relative transition-all ${
-                            isCurrent ? "shadow-[0_0_15px_rgba(249,115,22,0.4)] ring-4 ring-primary/20" : isCompleted ? "shadow-sm" : "border border-border/40"
+                            isCurrent ? "shadow-[0_0_15px_rgba(249,115,22,0.4)] ring-4 ring-primary/20" : isCompleted ? "shadow-sm" : "border border-border/50"
                           }`}
                         >
                           {isCompleted ? <Check className="w-3.5 h-3.5 text-primary-foreground" /> : <Icon className={`w-3.5 h-3.5 ${isCurrent ? "text-primary-foreground" : "text-muted-foreground"}`} />}
@@ -260,7 +261,7 @@ export default function SalonOnboarding() {
                 })}
               </div>
 
-              <div className="hidden md:flex w-[140px] flex-col justify-between py-8 border-r border-border/40 bg-muted/10 shrink-0">
+              <div className="hidden md:flex w-[140px] flex-col justify-between py-8 border-r border-border/50 bg-muted/10 shrink-0">
                 {STEPS.map((step, i) => {
                   const Icon = step.icon;
                   const isCompleted = i < activeStep;
@@ -276,7 +277,7 @@ export default function SalonOnboarding() {
                           }}
                           transition={{ duration: 0.3 }}
                           className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center relative transition-all ${
-                            isCurrent ? "shadow-[0_0_15px_rgba(249,115,22,0.4)] ring-4 ring-primary/20" : isCompleted ? "shadow-sm" : "border border-border/40"
+                            isCurrent ? "shadow-[0_0_15px_rgba(249,115,22,0.4)] ring-4 ring-primary/20" : isCompleted ? "shadow-sm" : "border border-border/50"
                           }`}
                         >
                           {isCompleted ? <Check className="w-4 h-4 text-primary-foreground" /> : <Icon className={`w-4 h-4 ${isCurrent ? "text-primary-foreground" : "text-muted-foreground"}`} />}

@@ -93,7 +93,7 @@ export default function PredefinedCategoriesSection() {
                   <button
                     key={`${category.name}-${index}`}
                     onClick={() => handleCategoryClick(category)}
-                    className="group relative inline-flex items-center gap-3 rounded-full border border-border/60 bg-card/60 backdrop-blur-md px-5 py-2.5 text-sm font-medium transition-all hover:shadow-md hover:shadow-primary/5 hover:border-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 shrink-0"
+                    className="group relative inline-flex items-center gap-3 rounded-full border border-border/50 bg-card/60 backdrop-blur-md px-5 py-2.5 text-sm font-medium transition-all hover:shadow-md hover:shadow-primary/5 hover:border-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 shrink-0"
                   >
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                       <Icon className="h-3.5 w-3.5" />

@@ -25,7 +25,7 @@ export default function BookingListModal({
 }: Readonly<BookingListModalProps>) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[92vw] sm:max-w-md p-0 gap-0 rounded-2xl overflow-hidden border-border/60 shadow-2xl [&>button]:hidden">
+      <DialogContent className="w-[92vw] sm:max-w-md p-0 gap-0 rounded-2xl overflow-hidden border-border/50 shadow-2xl [&>button]:hidden">
         <div className="flex items-center justify-between px-5 py-4 bg-muted/30 border-b border-border/50">
           <div className="flex flex-col gap-0.5 min-w-0 flex-1 pr-3">
             <DialogTitle className="text-base font-bold flex items-center gap-2 text-foreground min-w-0">

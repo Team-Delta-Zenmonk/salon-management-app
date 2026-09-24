@@ -226,7 +226,7 @@ export default function AssignStaffDialog({
                   Select staff members to assign to this service:
                 </p>
 
-                <div className="mt-2 border border-border/40 rounded-2xl p-4 bg-muted/5 max-h-[300px] overflow-y-auto custom-scrollbar">
+                <div className="mt-2 border border-border/50 rounded-2xl p-4 bg-muted/5 max-h-[300px] overflow-y-auto custom-scrollbar">
                   <CheckboxGroup
                     name="staff_ids"
                     control={methods.control}

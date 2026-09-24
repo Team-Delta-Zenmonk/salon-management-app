@@ -144,7 +144,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
   if (!selectedStaffUuid || !selectedStaff) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[450px] p-8 text-center bg-card">
-        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/40">
+        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/50">
           <User className="text-muted-foreground w-8 h-8" />
         </div>
         <h3 className="text-lg font-bold text-foreground">
@@ -161,7 +161,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
 
   return (
     <div className="p-6 md:p-8 flex flex-col min-h-full bg-transparent">
-      <div className="flex flex-wrap items-start sm:items-center justify-between gap-4 pb-6 border-b border-border/60 mb-6">
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-4 pb-6 border-b border-border/50 mb-6">
         <div className="space-y-1">
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2 capitalize">
             <span className="w-1.5 h-6 rounded bg-primary shrink-0" />
@@ -187,7 +187,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
         </div>
       ) : assignedServices.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border/80 rounded-2xl bg-muted/10">
-          <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/40">
+          <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/50">
             <Scissors className="text-muted-foreground w-6 h-6" />
           </div>
           <h3 className="text-base font-bold text-foreground">
@@ -225,7 +225,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
                     <div className="flex items-center gap-3.5 min-w-0 pr-4 relative z-10">
-                      <Avatar className="w-11 h-11 bg-muted border border-border/40 text-muted-foreground transition-transform duration-200 group-hover:scale-105">
+                      <Avatar className="w-11 h-11 bg-muted border border-border/50 text-muted-foreground transition-transform duration-200 group-hover:scale-105">
                         {svc.logo ? (
                             <AvatarImage src={svc.logo} alt={svc.name} />
                         ) : (

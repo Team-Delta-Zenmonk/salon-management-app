@@ -47,15 +47,15 @@ export default function BookingFilterDialog({
         type="button"
         variant="outline"
         onClick={() => setOpen(true)}
-        className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border-border/60 bg-card/60 backdrop-blur-md text-foreground font-bold text-xs shadow-sm hover:bg-card/80 transition-all shrink-0"
+        className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border-border/50 bg-card/60 backdrop-blur-md text-foreground font-bold text-xs shadow-sm hover:bg-card/80 transition-all shrink-0"
       >
         <SlidersHorizontal className="w-3.5 h-3.5 text-primary" />
         <span>Filters</span>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="w-[92vw] max-w-sm rounded-2xl border-border/60 bg-card p-5 shadow-2xl [&>button]:hidden">
-          <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/40">
+        <DialogContent className="w-[92vw] max-w-sm rounded-2xl border-border/50 bg-card p-5 shadow-2xl [&>button]:hidden">
+          <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/50">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <SlidersHorizontal className="w-4 h-4" />
@@ -83,7 +83,7 @@ export default function BookingFilterDialog({
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Staff
               </label>
-              <div className="[&_button]:bg-muted/30 [&_button]:border-border/60 [&_button]:text-foreground [&_button]:rounded-xl">
+              <div className="[&_button]:bg-muted/30 [&_button]:border-border/50 [&_button]:text-foreground [&_button]:rounded-xl">
                 <Select
                   name="staff"
                   control={control}
@@ -100,7 +100,7 @@ export default function BookingFilterDialog({
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Service
               </label>
-              <div className="[&_button]:bg-muted/30 [&_button]:border-border/60 [&_button]:text-foreground [&_button]:rounded-xl">
+              <div className="[&_button]:bg-muted/30 [&_button]:border-border/50 [&_button]:text-foreground [&_button]:rounded-xl">
                 <Select
                   name="service"
                   control={control}
@@ -117,7 +117,7 @@ export default function BookingFilterDialog({
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Payment Mode
               </label>
-              <div className="[&_button]:bg-muted/30 [&_button]:border-border/60 [&_button]:text-foreground [&_button]:rounded-xl">
+              <div className="[&_button]:bg-muted/30 [&_button]:border-border/50 [&_button]:text-foreground [&_button]:rounded-xl">
                 <Select
                   name="payment"
                   control={control}
@@ -130,7 +130,7 @@ export default function BookingFilterDialog({
             </div>
 
             {statusLegend.length > 0 && (
-              <div className="space-y-2 pt-2 border-t border-border/40">
+              <div className="space-y-2 pt-2 border-t border-border/50">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
                   Status & Type Legend
                 </label>
@@ -139,7 +139,7 @@ export default function BookingFilterDialog({
                     <div
                       key={label}
                       className={`inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold py-1.5 px-2 rounded-xl border backdrop-blur-sm ${
-                        badgeClass || "border-border/60 bg-muted/30 text-foreground"
+                        badgeClass || "border-border/50 bg-muted/30 text-foreground"
                       }`}
                     >
                       <span

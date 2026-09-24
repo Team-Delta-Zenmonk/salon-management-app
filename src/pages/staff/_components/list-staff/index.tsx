@@ -22,7 +22,7 @@ dayjs.extend(customParseFormat);
 const getFullName = (staff: Staff) => `${staff.first_name} ${staff.last_name || ""}`.trim();
 
 const getGenderBadge = (gender: string) => (
-  <Badge variant="outline" className="capitalize text-[10px] font-medium px-2 py-0.5 rounded bg-muted/40 border-border/40 text-muted-foreground select-none">
+  <Badge variant="outline" className="capitalize text-[10px] font-medium px-2 py-0.5 rounded bg-muted/40 border-border/50 text-muted-foreground select-none">
     {gender}
   </Badge>
 );
@@ -148,7 +148,7 @@ function StaffCard({
         </div>
       </div>
 
-      <div className="mt-5 pt-3.5 border-t border-border/40 flex items-center gap-2 relative z-10" onClick={(e) => e.stopPropagation()}>
+      <div className="mt-5 pt-3.5 border-t border-border/50 flex items-center gap-2 relative z-10" onClick={(e) => e.stopPropagation()}>
         {isActive && <Button
           variant="outline"
           size="sm"

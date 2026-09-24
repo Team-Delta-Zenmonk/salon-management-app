@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { APP_NAME } from "@/constants/app";
 import {
   loadStripe,
   type StripeElementsOptions,
@@ -169,10 +170,12 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
       } catch (err) {
         console.warn("Direct activation fallback error:", err);
       }
+      callSnack("Payment successful! Activating your subscription...", "success");
+      onSuccess();
+    } else {
+      setErrorMsg("Payment was not completed. Please try again.");
+      setIsPaying(false);
     }
-
-    callSnack("Payment successful! Activating your subscription...", "success");
-    onSuccess();
   };
 
   return (
@@ -356,7 +359,7 @@ export default function PlanAndBillingPage() {
     }
   };
 
-  const appName = import.meta.env.VITE_APP_NAME || "Veloura";
+  const appName = APP_NAME;
 
   const handlePaymentSuccess = async () => {
     setIsActivating(true);
@@ -573,7 +576,7 @@ export default function PlanAndBillingPage() {
                 Test-drive the full {appName} platform with zero commitment.
               </p>
             </div>
-            <div className="pt-2 pb-3 border-b border-border/60">
+            <div className="pt-2 pb-3 border-b border-border/50">
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">₹0</span>
                 <span className="text-xs text-muted-foreground">for 14 days</span>
@@ -627,7 +630,7 @@ export default function PlanAndBillingPage() {
                 Flexible month-to-month for busy salons.
               </p>
             </div>
-            <div className="pt-2 pb-3 border-b border-border/60">
+            <div className="pt-2 pb-3 border-b border-border/50">
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
                   {reduxPlans.find((p) => p.id === "monthly")?.formatted_price}
@@ -714,7 +717,7 @@ export default function PlanAndBillingPage() {
                 Most cost-effective plan for long-term revenue growth.
               </p>
             </div>
-            <div className="pt-2 pb-3 border-b border-border/60">
+            <div className="pt-2 pb-3 border-b border-border/50">
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
                   {reduxPlans.find((p) => p.id === "yearly")?.formatted_price || 0}
@@ -768,7 +771,7 @@ export default function PlanAndBillingPage() {
                 Tailored for salon chains, multi-branch groups & franchises.
               </p>
             </div>
-            <div className="pt-2 pb-3 border-b border-border/60">
+            <div className="pt-2 pb-3 border-b border-border/50">
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">Custom</span>
               </div>
@@ -864,7 +867,7 @@ export default function PlanAndBillingPage() {
                     <span>Plan: <strong className="text-foreground capitalize">{inv.plan}</strong></span>
                     <span className="font-bold text-foreground font-mono text-sm">₹{Number(inv.amount).toLocaleString("en-IN")}</span>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/50">
                     <span>{new Date(inv.created_at).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
                     <span className="font-mono text-[10px]">
                       {inv.stripe_payment_intent_id ? inv.stripe_payment_intent_id.slice(0, 16) + "…" : "Manual"}

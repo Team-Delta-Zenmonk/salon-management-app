@@ -102,7 +102,7 @@ const CheckboxTree = <T extends FieldValues>({
                 ? "bg-primary/10 border-primary/20"
                 : indeterminate
                   ? "bg-primary/5 border-primary/15"
-                  : "bg-card/40 border-border/40 hover:bg-card hover:border-border/60",
+                  : "bg-card/40 border-border/50 hover:bg-card hover:border-border/50",
               node.disabled && "opacity-60 cursor-not-allowed"
             )}
           >
@@ -172,7 +172,7 @@ const CheckboxTree = <T extends FieldValues>({
                 transition={{ duration: 0.2, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
-                <div className="ml-5 flex flex-col gap-1.5 border-l border-border/40 pl-3.5 py-0.5">
+                <div className="ml-5 flex flex-col gap-1.5 border-l border-border/50 pl-3.5 py-0.5">
                   {node.children!.map((child) => renderNode(child, onChange, storedValue, onBlur, ref))}
                 </div>
               </motion.div>

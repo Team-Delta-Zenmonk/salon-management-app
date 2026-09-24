@@ -194,7 +194,7 @@ function Calendar({
           MonthGrid: ({ children, className, ...rest }: any) => {
             if (showYearGrid) {
               return (
-                <div className="w-full h-[220px] overflow-y-auto grid grid-cols-3 gap-1.5 p-2 bg-background border-t border-border/40 scrollbar-thin">
+                <div className="w-full h-[220px] overflow-y-auto grid grid-cols-3 gap-1.5 p-2 bg-background border-t border-border/50 scrollbar-thin">
                   {years.map((y) => {
                     const isSelected = y === currentYear;
                     return (

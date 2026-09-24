@@ -156,7 +156,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
       }}
     >
       <DialogContent className="sm:max-w-[680px] w-full max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
-        <DialogHeader className="px-6 py-5 border-b border-border/40 bg-muted/20 shrink-0">
+        <DialogHeader className="px-6 py-5 border-b border-border/50 bg-muted/20 shrink-0">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
             {mode === "create" ? "Add Staff Member" : "Update Staff Profile"}
           </DialogTitle>
@@ -194,7 +194,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
                             ? "bg-primary border-primary text-primary-foreground shadow-md shadow-primary/20"
                             : isActive
                             ? "bg-background border-primary text-primary shadow-md ring-4 ring-primary/10"
-                            : "bg-background border-border/60 text-muted-foreground/50"
+                            : "bg-background border-border/50 text-muted-foreground/50"
                         }`}
                       >
                         {isCompleted ? (

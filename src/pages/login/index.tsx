@@ -12,6 +12,7 @@ import { callSnack } from "../../components/snackbar";
 import { VALIDATE_PATTERN } from "../../common/validate-pattern";
 import { Button } from "../../components/ui/button";
 import { motion } from "framer-motion";
+import { APP_NAME } from "@/constants/app";
 
 const features = [
   { icon: CalendarCheck, label: "Smart Bookings", desc: "Manage appointments effortlessly" },
@@ -74,7 +75,7 @@ export default function Login() {
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
                 <Scissors className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-black text-white tracking-tight">Salonify</span>
+              <span className="text-xl font-black text-white tracking-tight">{APP_NAME}</span>
             </div>
           </div>
 
@@ -140,7 +141,7 @@ export default function Login() {
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
               <Scissors className="w-4.5 h-4.5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-black text-foreground tracking-tight">Salonify</span>
+            <span className="text-lg font-black text-foreground tracking-tight">{APP_NAME}</span>
           </div>
 
           <div className="w-full max-w-md relative z-10">
@@ -148,7 +149,7 @@ export default function Login() {
               initial={{ y: 16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.15, duration: 0.5 }}
-              className="bg-card dark:bg-neutral-900 border border-border/60 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10"
+              className="bg-card dark:bg-neutral-900 border border-border/50 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10"
             >
               <div className="mb-8">
                 <h2 data-test-id="text-login-form-title" className="text-2xl font-black text-foreground tracking-tight mb-1.5">

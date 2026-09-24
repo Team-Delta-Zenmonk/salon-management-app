@@ -45,7 +45,7 @@ export default function StaffSchedule({
               key={day} 
               className={`border rounded-2xl p-4 transition-all duration-300 ${
                 isClosed 
-                  ? "bg-muted/10 border-border/40 opacity-70" 
+                  ? "bg-muted/10 border-border/50 opacity-70" 
                   : "bg-card/40 border-primary/20 shadow-xs"
               }`}
             >

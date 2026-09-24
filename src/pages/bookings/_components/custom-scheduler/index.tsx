@@ -86,7 +86,7 @@ export default function CustomScheduler({
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 rounded-lg border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+              className="h-8 w-8 rounded-lg border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
               onClick={handlePrevious}
               aria-label="Previous"
             >
@@ -95,7 +95,7 @@ export default function CustomScheduler({
 
             <Button
               variant="outline"
-              className="h-8 px-2.5 sm:px-3.5 text-xs sm:text-sm font-semibold rounded-lg border-border/60 text-foreground hover:bg-muted/40 transition-colors"
+              className="h-8 px-2.5 sm:px-3.5 text-xs sm:text-sm font-semibold rounded-lg border-border/50 text-foreground hover:bg-muted/40 transition-colors"
               onClick={handleToday}
             >
               Today
@@ -104,7 +104,7 @@ export default function CustomScheduler({
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 rounded-lg border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+              className="h-8 w-8 rounded-lg border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
               onClick={handleNext}
               aria-label="Next"
             >

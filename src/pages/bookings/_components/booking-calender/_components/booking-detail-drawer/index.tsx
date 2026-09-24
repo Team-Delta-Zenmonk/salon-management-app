@@ -30,7 +30,7 @@ import EllipsisCell from "@/components/ellipse-cell";
 import BookingDialog from "../../../booking-dialog";
 import BookingActionConfirmDialog from "../booking-action-confirm-dialog";
 import BookingReceiptDialog from "../../../booking-receipt-dialog";
-import { downloadInvoiceService } from "../../../../../../features/invoice/download-invoice/download-invoice.service";
+import { useDownloadInvoice } from "../../../../../../features/invoice/hooks/use-download-invoice";
 
 type BookingDetailsDrawerProps = {
   open: boolean;
@@ -58,7 +58,7 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors min-w-0 max-w-full overflow-hidden">
+    <div className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors min-w-0 max-w-full overflow-hidden">
       <div className="h-8 w-8 rounded-lg bg-muted/60 border border-border/30 flex items-center justify-center text-muted-foreground shrink-0">
         {icon}
       </div>
@@ -84,30 +84,11 @@ export default function BookingDetailsDialog({
   const [editOpen, setEditOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+  const { downloadInvoice, isDownloading: isDownloadingInvoice } = useDownloadInvoice();
 
-  const handleDownloadInvoice = async () => {
-    if (!booking) return;
-    const identifier = booking.uuid;
-    if (!identifier) {
-      callSnack("Booking identifier not found", "error");
-      return;
-    }
-
-    setIsDownloadingInvoice(true);
-    try {
-      const res = await downloadInvoiceService(identifier);
-      if (res?.url) {
-        window.open(res.url, "_blank");
-      } else {
-        callSnack("Invoice URL not available", "error");
-      }
-    } catch (err: any) {
-      console.error("Failed to download invoice:", err);
-      const msg = err?.response?.data?.message || err?.message || "Failed to download invoice";
-      callSnack(msg, "error");
-    } finally {
-      setIsDownloadingInvoice(false);
+  const handleDownloadInvoice = () => {
+    if (booking?.uuid) {
+      downloadInvoice(booking.uuid);
     }
   };
 
@@ -160,7 +141,7 @@ export default function BookingDetailsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent className="w-[95vw] sm:max-w-[480px] max-h-[90vh] p-0 gap-0 flex flex-col overflow-hidden border-border/60 shadow-2xl rounded-2xl [&>button]:hidden">
+        <DialogContent className="w-[95vw] sm:max-w-[480px] max-h-[90vh] p-0 gap-0 flex flex-col overflow-hidden border-border/50 shadow-2xl rounded-2xl [&>button]:hidden">
           <DialogDescription className="sr-only">Booking Details Modal</DialogDescription>
           <AnimatePresence>
             {open && booking && (
@@ -201,7 +182,7 @@ export default function BookingDetailsDialog({
 
                   {timeInfo && (
                     <div className="relative flex flex-wrap items-center justify-between gap-3 px-5 sm:px-6 pb-4 pt-1">
-                      <div className="flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full bg-background border border-border/60 shadow-sm text-foreground">
+                      <div className="flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full bg-background border border-border/50 shadow-sm text-foreground">
                         <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span>{timeInfo.date} • {timeInfo.startTime} – {timeInfo.endTime}</span>
                       </div>
@@ -256,7 +237,7 @@ export default function BookingDetailsDialog({
                           initial={{ opacity: 0, y: 6 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.1 + i * 0.04, duration: 0.2 }}
-                          className="rounded-xl border border-border/40 p-4 bg-card shadow-sm hover:shadow-md transition-shadow"
+                          className="rounded-xl border border-border/50 p-4 bg-card shadow-sm hover:shadow-md transition-shadow"
                         >
                           <div className="flex items-start justify-between gap-2 mb-3">
                             <div className="flex items-center gap-2.5">
@@ -268,7 +249,7 @@ export default function BookingDetailsDialog({
                                 className="font-semibold text-sm text-foreground leading-tight capitalize"
                               />
                             </div>
-                            <span className="text-sm font-bold shrink-0 px-2 py-0.5 rounded-lg bg-muted/60 text-foreground border border-border/40">
+                            <span className="text-sm font-bold shrink-0 px-2 py-0.5 rounded-lg bg-muted/60 text-foreground border border-border/50">
                               ₹{Math.round(Number(bs.price) || 0).toLocaleString("en-IN")}
                             </span>
                           </div>
@@ -312,7 +293,7 @@ export default function BookingDetailsDialog({
                       transition={{ delay: 0.15, duration: 0.2 }}
                     >
                       <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-2.5 px-0.5">Notes</p>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap rounded-xl bg-muted/30 border border-border/40 p-3.5 leading-relaxed">
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap rounded-xl bg-muted/30 border border-border/50 p-3.5 leading-relaxed">
                         {booking.notes}
                       </p>
                     </motion.section>
@@ -323,7 +304,7 @@ export default function BookingDetailsDialog({
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
-                      className="rounded-xl px-4 py-3 text-center text-sm font-medium border border-border/60 bg-muted/30 text-foreground"
+                      className="rounded-xl px-4 py-3 text-center text-sm font-medium border border-border/50 bg-muted/30 text-foreground"
                     >
                       This booking is{" "}
                       <span className="font-bold capitalize">{STATUS_LABELS[booking.status] ?? booking.status}</span>.

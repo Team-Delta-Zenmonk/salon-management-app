@@ -6,7 +6,7 @@ export default function StaffPricingPanel({ selectedService }: Readonly<{ select
   if (!selectedService) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[450px] p-8 text-center bg-transparent">
-        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/40">
+        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/50">
           <Scissors className="text-muted-foreground w-8 h-8" />
         </div>
         <h3 className="text-lg font-bold text-foreground">

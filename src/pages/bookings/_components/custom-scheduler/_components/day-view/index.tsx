@@ -138,7 +138,7 @@ export default function DayView({
                 ))}
               </div>
 
-              <div ref={containerRef} className="flex-1 relative border-l border-border/40">
+              <div ref={containerRef} className="flex-1 relative border-l border-border/50">
                 {hours.map((hour) => {
                   const hourBookings = bookingsByHour.get(hour) ?? [];
                   const maxVisible = getVisibleCount(hourBookings.length);
@@ -153,7 +153,7 @@ export default function DayView({
                   return (
                     <div
                       key={hour}
-                      className="absolute w-full border-b border-dashed border-border/40 flex items-start px-2 gap-2 py-1.5 overflow-x-auto custom-scrollbar"
+                      className="absolute w-full border-b border-dashed border-border/50 flex items-start px-2 gap-2 py-1.5 overflow-x-auto custom-scrollbar"
                       style={{
                         top: `${topPx}px`,
                         height: `${HOUR_HEIGHT_PX}px`,

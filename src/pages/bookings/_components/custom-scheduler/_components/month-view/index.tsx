@@ -69,7 +69,7 @@ export default function MonthView({
               key={day}
               className={`py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider ${
                 i === 0 || i === 6 ? "text-muted-foreground/70" : "text-muted-foreground"
-              } ${i < 6 ? "border-r border-border/60" : ""}`}
+              } ${i < 6 ? "border-r border-border/50" : ""}`}
             >
               {day}
             </div>
@@ -84,7 +84,7 @@ export default function MonthView({
             <div
               key={weekIdx}
               className={`grid grid-cols-7 min-h-0 ${
-                weekIdx < weeks.length - 1 ? "border-b border-border/60" : ""
+                weekIdx < weeks.length - 1 ? "border-b border-border/50" : ""
               }`}
             >
               {week.map((day, dayIdx) => {
@@ -101,7 +101,7 @@ export default function MonthView({
                     key={day.toString()}
                     onClick={() => dayBookings.length > 0 && setMoreDayDate(day)}
                     className={`flex flex-col min-h-0 overflow-hidden p-2 justify-between transition-colors cursor-pointer group ${
-                      dayIdx < 6 ? "border-r border-border/60" : ""
+                      dayIdx < 6 ? "border-r border-border/50" : ""
                     } ${
                       !isCurrentMonth
                         ? "bg-muted/20"

@@ -105,7 +105,7 @@ export default function SlugInput() {
                   : "border-input hover:border-input-border-hover focus-within:border-primary"
               }`}
             >
-              <div className="px-3.5 py-2.5 bg-muted/60 text-muted-foreground text-xs font-semibold select-none border-r border-border/60">
+              <div className="px-3.5 py-2.5 bg-muted/60 text-muted-foreground text-xs font-semibold select-none border-r border-border/50">
                 https://
               </div>
               <input
@@ -124,7 +124,7 @@ export default function SlugInput() {
                 data-test-id="input-salon-slug"
                 className="flex-1 bg-transparent px-3 py-2 text-sm font-medium placeholder:text-muted-foreground/60 focus:outline-none min-w-0"
               />
-              <div className="px-3.5 py-2.5 bg-muted/60 text-muted-foreground text-xs font-semibold select-none border-l border-border/60">
+              <div className="px-3.5 py-2.5 bg-muted/60 text-muted-foreground text-xs font-semibold select-none border-l border-border/50">
                 .{getStorefrontDomain()}
               </div>
             </div>

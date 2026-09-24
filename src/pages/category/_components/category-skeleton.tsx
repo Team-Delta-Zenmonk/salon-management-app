@@ -15,7 +15,7 @@ export function CategoryCardSkeleton() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-border/40 relative z-10">
+      <div className="flex items-center justify-between pt-4 border-t border-border/50 relative z-10">
         <div className="h-4 w-24 bg-muted/60 rounded-md" />
         <div className="flex gap-2">
           <div className="h-8 w-8 rounded-full bg-muted/80" />

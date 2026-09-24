@@ -209,7 +209,7 @@ const FileMultiPicker = <T extends FieldValues>({
                   return (
                     <div
                       key={`${item.url}-${index}`}
-                      className="relative group w-12 h-12 rounded-xl overflow-hidden border border-border/60 bg-muted/20 shadow-sm animate-in fade-in zoom-in-95 duration-200 shrink-0 flex items-center justify-center"
+                      className="relative group w-12 h-12 rounded-xl overflow-hidden border border-border/50 bg-muted/20 shadow-sm animate-in fade-in zoom-in-95 duration-200 shrink-0 flex items-center justify-center"
                     >
                       {isPdf ? (
                         <div className="flex flex-col items-center justify-center text-primary p-1">

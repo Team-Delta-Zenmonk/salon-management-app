@@ -92,7 +92,7 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
               )}
               title={isSubscribed ? `${salon?.name} (PRO Subscriber)` : "Profile Menu"}
             >
-              <Avatar className={cn("h-full w-full rounded-full overflow-hidden border", isSubscribed ? "border-amber-400/60" : "border-border/40")}>
+              <Avatar className={cn("h-full w-full rounded-full overflow-hidden border", isSubscribed ? "border-amber-400/60" : "border-border/50")}>
                 <AvatarImage src={salon?.logo || "/management-icon.png"} alt={salon?.name || "Salon"} className="object-cover" />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-[11px]">
                   {salon?.name?.charAt(0).toUpperCase() || "S"}

@@ -201,7 +201,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
           <div className="min-w-0">
             <TextField
               name="email"
-              type="text"
+              type="email"
               control={control}
               label="Registered Email Address"
               placeholder="salon@example.com"

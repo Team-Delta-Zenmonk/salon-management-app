@@ -130,7 +130,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                 type="button" 
                 variant="outline" 
                 size="sm"
-                className="text-xs font-semibold cursor-pointer rounded-xl border border-border/60 hover:bg-card/85 transition-all shadow-xs h-8 px-3"
+                className="text-xs font-semibold cursor-pointer rounded-xl border border-border/50 hover:bg-card/85 transition-all shadow-xs h-8 px-3"
                 disabled={logoUploading || isSaving}
                 onClick={() => logoInputRef.current?.click()}
               >
@@ -177,7 +177,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
               type="button"
               onClick={handleAddPhotoClick}
               disabled={photosUploading || isSaving}
-              className="aspect-[4/3] rounded-2xl border-2 border-dashed border-border/60 hover:border-primary/50 bg-background/30 hover:bg-background/60 flex flex-col items-center justify-center text-muted-foreground hover:text-primary gap-1 transition-all duration-250 cursor-pointer p-2"
+              className="aspect-[4/3] rounded-2xl border-2 border-dashed border-border/50 hover:border-primary/50 bg-background/30 hover:bg-background/60 flex flex-col items-center justify-center text-muted-foreground hover:text-primary gap-1 transition-all duration-250 cursor-pointer p-2"
             >
               {photosUploading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -267,8 +267,8 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
           </div>
 
           <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
-            <DialogContent className="sm:max-w-2xl rounded-2xl border-border/60 bg-card p-6 shadow-xl max-h-[85vh] overflow-y-auto">
-              <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/40">
+            <DialogContent className="sm:max-w-2xl rounded-2xl border-border/50 bg-card p-6 shadow-xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/50">
                 <DialogTitle className="text-base font-bold text-foreground">
                   All Gallery & Cover Photos ({photos.length})
                 </DialogTitle>

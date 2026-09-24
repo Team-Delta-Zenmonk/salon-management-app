@@ -93,7 +93,7 @@ export function SubServicesDrawer({
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <SheetContent className="w-full sm:max-w-[480px] p-0 flex flex-col h-full bg-background border-l border-border/40 shadow-2xl">
+      <SheetContent className="w-full sm:max-w-[480px] p-0 flex flex-col h-full bg-background border-l border-border/50 shadow-2xl">
         <SheetHeader className="p-6 pb-4 border-b bg-muted/20">
           <div className="flex gap-4 items-center">
             <Avatar className="w-12 h-12 ring-2 ring-primary/10">
@@ -113,7 +113,7 @@ export function SubServicesDrawer({
           </div>
         </SheetHeader>
 
-        <div className="flex justify-between items-center px-6 py-4 bg-muted/5 border-b border-border/40 shrink-0">
+        <div className="flex justify-between items-center px-6 py-4 bg-muted/5 border-b border-border/50 shrink-0">
           <span className="text-xs font-semibold text-primary uppercase tracking-wider">
             Sub-services ({subServices.length})
           </span>
@@ -158,7 +158,7 @@ export function SubServicesDrawer({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                className="flex flex-col items-center justify-center p-8 border border-dashed border-border/60 rounded-2xl bg-muted/5 mt-4 text-center"
+                className="flex flex-col items-center justify-center p-8 border border-dashed border-border/50 rounded-2xl bg-muted/5 mt-4 text-center"
               >
                 <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-3">
                   <SparklesIcon className="w-6 h-6 text-primary/40" />
@@ -181,7 +181,7 @@ export function SubServicesDrawer({
                   <motion.div
                     key={sub.uuid}
                     variants={itemVariants}
-                    className="group relative bg-card border border-border/40 hover:border-primary/30 p-4 rounded-2xl flex flex-col gap-3.5 transition-all duration-300 shadow-xs hover:shadow-md"
+                    className="group relative bg-card border border-border/50 hover:border-primary/30 p-4 rounded-2xl flex flex-col gap-3.5 transition-all duration-300 shadow-xs hover:shadow-md"
                   >
                     <div className="flex gap-3 min-w-0">
                       <Avatar className="w-10 h-10 rounded-xl ring-1 ring-border/50 shrink-0 bg-background overflow-hidden">
@@ -207,7 +207,7 @@ export function SubServicesDrawer({
 
                     <div className="flex items-center justify-between mt-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/40 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/50 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
                           {sub.gender}
                         </div>
                         <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/5 border border-primary/10 text-[10px] font-medium text-primary uppercase tracking-wide">
@@ -218,7 +218,7 @@ export function SubServicesDrawer({
                           {sub.price}
                         </div>
                         {sub.duration && (
-                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/40 text-[10px] font-medium text-muted-foreground">
+                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/50 text-[10px] font-medium text-muted-foreground">
                             <ClockIcon className="w-3 h-3 opacity-60" />
                             {sub.duration} min
                           </div>

@@ -192,7 +192,7 @@ const TimePicker = <T extends FieldValues>({
                           </span>
                           <div
                             onWheel={handleWheelHour}
-                            className="flex flex-col items-center gap-1 bg-muted/30 border border-border/60 rounded-xl p-1.5 touch-pan-y"
+                            className="flex flex-col items-center gap-1 bg-muted/30 border border-border/50 rounded-xl p-1.5 touch-pan-y"
                           >
                             <button
                               type="button"
@@ -223,7 +223,7 @@ const TimePicker = <T extends FieldValues>({
                           </span>
                           <div
                             onWheel={handleWheelMinute}
-                            className="flex flex-col items-center gap-1 bg-muted/30 border border-border/60 rounded-xl p-1.5 touch-pan-y"
+                            className="flex flex-col items-center gap-1 bg-muted/30 border border-border/50 rounded-xl p-1.5 touch-pan-y"
                           >
                             <button
                               type="button"

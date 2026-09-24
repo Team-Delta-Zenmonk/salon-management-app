@@ -129,7 +129,7 @@ export default function ListCategories({
                     <div className="flex-1 min-w-0">
                       <EllipsisCell
                         value={category.name}
-                        className="text-foreground font-bold text-lg leading-tight group-hover:text-primary transition-colors duration-300"
+                        className="text-foreground font-bold text-lg leading-tight group-hover:text-primary transition-colors duration-300 capitalize"
                       />
                     </div>
                   </div>
@@ -144,7 +144,7 @@ export default function ListCategories({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-border/40 relative z-10">
+              <div className="flex items-center justify-between pt-4 border-t border-border/50 relative z-10">
                 <div className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
                   {dayjs(category.created_at).format("MMM DD, YYYY")}
                 </div>
@@ -178,7 +178,7 @@ export default function ListCategories({
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }} 
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-2xl p-10 text-center mt-6 flex flex-col items-center justify-center gap-3"
+          className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-10 text-center mt-6 flex flex-col items-center justify-center gap-3"
         >
           <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
             <SearchX className="h-6 w-6 text-primary opacity-60" />

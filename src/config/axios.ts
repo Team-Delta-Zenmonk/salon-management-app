@@ -1,6 +1,7 @@
 import axios from "axios";
+import { APP_NAME } from "@/constants/app";
 
-const appName = import.meta.env.VITE_APP_NAME || "Veloura";
+const appName = APP_NAME;
 
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,

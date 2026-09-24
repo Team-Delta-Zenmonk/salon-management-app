@@ -91,7 +91,7 @@ export default function PaymentPolicyCard({ isSaving }: Readonly<PaymentPolicyCa
                           "relative flex items-start gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer select-none min-w-0 w-full overflow-hidden",
                           isSelected
                             ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20"
-                            : "border-border/60 bg-background/50 hover:border-border hover:bg-accent/40"
+                            : "border-border/50 bg-background/50 hover:border-border hover:bg-accent/40"
                         )}
                       >
                         <Checkbox
@@ -121,7 +121,7 @@ export default function PaymentPolicyCard({ isSaving }: Readonly<PaymentPolicyCa
                           {option.value === "partial_deposit" && isSelected && (
                             <div
                               onClick={(e) => e.stopPropagation()}
-                              className="mt-3 pt-3 border-t border-border/40 flex flex-wrap items-center gap-3 min-w-0"
+                              className="mt-3 pt-3 border-t border-border/50 flex flex-wrap items-center gap-3 min-w-0"
                             >
                               <Label className="text-xs font-semibold text-foreground whitespace-nowrap">
                                 Deposit Percentage:

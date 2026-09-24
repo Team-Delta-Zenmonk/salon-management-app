@@ -162,7 +162,7 @@ const FilePicker = <T extends FieldValues>({
             </div>
 
             {value?.url && (
-              <div className="relative group w-12 h-12 mt-2 rounded-xl overflow-hidden border border-border/60 shadow-sm bg-muted/20 shrink-0">
+              <div className="relative group w-12 h-12 mt-2 rounded-xl overflow-hidden border border-border/50 shadow-sm bg-muted/20 shrink-0">
                 <img
                   src={value.url}
                   alt={value.filename || "Uploaded logo"}

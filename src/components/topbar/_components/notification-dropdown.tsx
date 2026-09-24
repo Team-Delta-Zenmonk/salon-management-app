@@ -67,7 +67,7 @@ export const NotificationDropdown: React.FC = () => {
         className="w-[360px] sm:w-[410px] p-0 overflow-hidden rounded-xl border border-border shadow-2xl bg-popover z-50 text-foreground"
       >
         {/* Header matching image 1 */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/60 bg-muted/15">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50 bg-muted/15">
           <div className="flex items-center gap-2">
             <h4 className="font-bold text-base tracking-tight text-foreground">
               Notifications
@@ -178,7 +178,7 @@ export const NotificationDropdown: React.FC = () => {
         </div>
 
         {displayNotifications.length > 0 && (
-          <div className="p-2 border-t border-border/60 bg-muted/10 flex items-center justify-between px-4">
+          <div className="p-2 border-t border-border/50 bg-muted/10 flex items-center justify-between px-4">
             <button
               type="button"
               onClick={markAllAsRead}

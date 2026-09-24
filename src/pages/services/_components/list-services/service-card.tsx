@@ -157,7 +157,7 @@ export function ServiceCard({
         </div>
 
         <div className="flex flex-wrap gap-2 mt-4 items-center relative z-10">
-          <Badge variant="outline" className="bg-muted/40 border-border/40 text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider">
+          <Badge variant="outline" className="bg-muted/40 border-border/50 text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider">
             {service.gender}
           </Badge>
           {hasSubServices && (
@@ -208,7 +208,7 @@ export function ServiceCard({
         )}
       </div>
 
-      <div className="mt-5 pt-4 border-t border-border/40 flex items-center justify-between gap-4 relative z-10">
+      <div className="mt-5 pt-4 border-t border-border/50 flex items-center justify-between gap-4 relative z-10">
         {hasSubServices ? (
           <>
             <div className="flex flex-col">

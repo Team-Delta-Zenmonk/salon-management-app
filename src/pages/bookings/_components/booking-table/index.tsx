@@ -105,14 +105,14 @@ export default function BookingTable({
       <div className="flex flex-col gap-3.5 md:hidden">
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="p-4 rounded-2xl border border-border/60 bg-card/60 space-y-3 animate-pulse">
+            <div key={i} className="p-4 rounded-2xl border border-border/50 bg-card/60 space-y-3 animate-pulse">
               <div className="h-5 w-1/2 bg-muted/40 rounded-md" />
               <div className="h-4 w-3/4 bg-muted/30 rounded-md" />
               <div className="h-8 w-full bg-muted/30 rounded-md" />
             </div>
           ))
         ) : bookings.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl border border-border/60 bg-card/60 text-muted-foreground text-sm">
+          <div className="p-8 text-center rounded-2xl border border-border/50 bg-card/60 text-muted-foreground text-sm">
             No bookings found matching your criteria.
           </div>
         ) : (
@@ -122,10 +122,10 @@ export default function BookingTable({
             return (
               <div
                 key={booking.uuid}
-                className="p-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md shadow-sm space-y-3.5"
+                className="p-4 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md shadow-sm space-y-3.5"
               >
                 {/* Header: Customer & Type Badge */}
-                <div className="flex items-start justify-between gap-2 border-b border-border/40 pb-3">
+                <div className="flex items-start justify-between gap-2 border-b border-border/50 pb-3">
                   <div className="min-w-0 flex-1">
                     <EllipsisCell value={booking.customer_name} className="font-bold text-foreground text-base capitalize" />
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
@@ -186,7 +186,7 @@ export default function BookingTable({
                     variant="outline"
                     size="xs"
                     onClick={() => onViewReceipt(booking)}
-                    className="h-8 px-2.5 rounded-xl border-border/60 gap-1.5 font-semibold text-xs shrink-0"
+                    className="h-8 px-2.5 rounded-xl border-border/50 gap-1.5 font-semibold text-xs shrink-0"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     Receipt
@@ -194,7 +194,7 @@ export default function BookingTable({
                 </div>
 
                 {/* Amount Progress */}
-                <div className="pt-2 border-t border-border/40 space-y-1.5">
+                <div className="pt-2 border-t border-border/50 space-y-1.5">
                   <div className="flex justify-between items-center text-xs font-semibold text-foreground">
                     <span className="text-muted-foreground font-medium">Payment Progress</span>
                     <span>₹{paid.toFixed(2)} / ₹{total.toFixed(2)} ({percentage}%)</span>
@@ -216,10 +216,10 @@ export default function BookingTable({
       </div>
 
       {/* Desktop Table Layout (visible on medium & large screens) */}
-      <div className="hidden md:block rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md overflow-x-auto shadow-sm">
+      <div className="hidden md:block rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md overflow-x-auto shadow-sm">
         <Table className="min-w-full">
           <TableHeader className="bg-muted/40">
-            <TableRow className="border-border/60 hover:bg-transparent">
+            <TableRow className="border-border/50 hover:bg-transparent">
               <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Client</TableHead>
               <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Booking Type</TableHead>
               <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Service</TableHead>
@@ -234,7 +234,7 @@ export default function BookingTable({
           <TableBody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="border-border/40">
+                <TableRow key={i} className="border-border/50">
                   <TableCell colSpan={9} className="py-4">
                     <div className="h-6 w-full bg-muted/30 animate-pulse rounded-md" />
                   </TableCell>
@@ -253,7 +253,7 @@ export default function BookingTable({
                 return (
                   <TableRow
                     key={booking.uuid}
-                    className="border-border/40 hover:bg-muted/30 transition-colors"
+                    className="border-border/50 hover:bg-muted/30 transition-colors"
                   >
                     <TableCell className="font-semibold text-foreground text-sm max-w-[160px]">
                       <EllipsisCell value={booking.customer_name} className="font-semibold text-foreground text-sm capitalize" />
@@ -356,7 +356,7 @@ export default function BookingTable({
               size="xs"
               disabled={page <= 1 || loading}
               onClick={() => onPageChange(page - 1)}
-              className="h-8 px-2.5 rounded-lg border-border/60"
+              className="h-8 px-2.5 rounded-lg border-border/50"
             >
               <ChevronLeft className="w-4 h-4 mr-1" />
               Previous
@@ -369,7 +369,7 @@ export default function BookingTable({
               size="xs"
               disabled={page >= totalPages || loading}
               onClick={() => onPageChange(page + 1)}
-              className="h-8 px-2.5 rounded-lg border-border/60"
+              className="h-8 px-2.5 rounded-lg border-border/50"
             >
               Next
               <ChevronRight className="w-4 h-4 ml-1" />

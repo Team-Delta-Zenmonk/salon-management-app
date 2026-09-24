@@ -63,7 +63,7 @@ export default function ThemeColorCard({
                   className={`relative flex flex-col items-start p-3 rounded-2xl border text-left transition-all duration-200 active:scale-[0.98] ${
                     active
                       ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                      : "border-border/40 bg-muted/20 hover:bg-muted/40 hover:border-border/80"
+                      : "border-border/50 bg-muted/20 hover:bg-muted/40 hover:border-border/80"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1 w-full">

@@ -55,7 +55,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
 
       if (mode === "create") {
         await createCategoryService({
-          name: data?.name?.trim().toLowerCase(),
+          name: data?.name?.trim(),
           description: data?.description,
           logo: logoUrl
         });
@@ -67,7 +67,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
           updateCategoryAction({
             uuid: category?.uuid,
             body: {
-              name: data?.name?.trim().toLowerCase(),
+              name: data?.name?.trim(),
               description: data?.description,
               logo: logoUrl
             },

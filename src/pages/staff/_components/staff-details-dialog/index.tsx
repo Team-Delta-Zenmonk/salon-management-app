@@ -71,7 +71,7 @@ function InfoRow({
     return (
       <a
         href={href}
-        className="flex p-3.5 bg-muted/30 border border-border/40 rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 no-underline group"
+        className="flex p-3.5 bg-muted/30 border border-border/50 rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 no-underline group"
       >
         {inner}
       </a>
@@ -79,7 +79,7 @@ function InfoRow({
   }
 
   return (
-    <div className="flex p-3.5 bg-muted/30 border border-border/40 rounded-2xl">
+    <div className="flex p-3.5 bg-muted/30 border border-border/50 rounded-2xl">
       {inner}
     </div>
   );
@@ -117,7 +117,7 @@ export default function StaffDetailsDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-[520px] w-full max-h-[90vh] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl flex flex-col">
 
-        <div className="shrink-0 px-6 py-5 border-b border-border/40 bg-muted/20">
+        <div className="shrink-0 px-6 py-5 border-b border-border/50 bg-muted/20">
           <div className="flex items-start gap-4">
             <Avatar className="w-14 h-14 rounded-2xl ring-2 ring-primary/10 shadow-md overflow-hidden shrink-0">
               <AvatarImage src={staff.photos?.url} alt={fullName} className="object-cover" />
@@ -155,7 +155,7 @@ export default function StaffDetailsDialog({
           </div>
         </div>
 
-        <div className="shrink-0 flex items-stretch border-b border-border/40 bg-muted/10 px-2">
+        <div className="shrink-0 flex items-stretch border-b border-border/50 bg-muted/10 px-2">
           {TABS.map((t) => {
             const isActive = tab === t.value;
             return (
@@ -278,7 +278,7 @@ export default function StaffDetailsDialog({
               {tab === "documents" && (
                 <div className="flex flex-col gap-3">
                   {!staff.staff_docs || staff.staff_docs.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 border border-dashed border-border/60 rounded-2xl">
+                    <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 border border-dashed border-border/50 rounded-2xl">
                       <FileText className="h-8 w-8 text-muted-foreground/40 mb-2" />
                       <p className="text-xs font-semibold text-muted-foreground">No documents uploaded</p>
                       <p className="text-[11px] text-muted-foreground/60 mt-0.5">Documents can be added when editing staff details.</p>
@@ -290,7 +290,7 @@ export default function StaffDetailsDialog({
                         return (
                           <div
                             key={doc.url || i}
-                            className="flex items-center justify-between p-3 bg-muted/30 border border-border/40 rounded-2xl hover:border-primary/30 transition-all duration-200"
+                            className="flex items-center justify-between p-3 bg-muted/30 border border-border/50 rounded-2xl hover:border-primary/30 transition-all duration-200"
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
@@ -305,7 +305,7 @@ export default function StaffDetailsDialog({
                               href={doc.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="w-8 h-8 flex items-center justify-center rounded-xl bg-background border border-border/60 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors shrink-0"
+                              className="w-8 h-8 flex items-center justify-center rounded-xl bg-background border border-border/50 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors shrink-0"
                             >
                               <ExternalLink className="h-4 w-4" />
                             </a>
@@ -356,7 +356,7 @@ export default function StaffDetailsDialog({
                             isToday
                               ? "bg-primary border-primary shadow-md shadow-primary/20"
                               : isClosed
-                              ? "bg-muted/30 border-border/40"
+                              ? "bg-muted/30 border-border/50"
                               : "bg-muted/30 border-border/30"
                           }`}
                         >
@@ -391,7 +391,7 @@ export default function StaffDetailsDialog({
           </AnimatePresence>
         </div>
 
-        <div className="shrink-0 px-6 py-4 border-t border-border/40 bg-muted/10 flex items-center justify-end">
+        <div className="shrink-0 px-6 py-4 border-t border-border/50 bg-muted/10 flex items-center justify-end">
           <Button
             size="sm"
             onClick={onClose}

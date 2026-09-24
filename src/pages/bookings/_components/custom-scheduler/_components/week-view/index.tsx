@@ -79,13 +79,13 @@ export default function WeekView({
         <div className="flex-1 overflow-y-auto custom-scrollbar bg-card">
           <div className="grid grid-cols-[56px_repeat(7,minmax(120px,1fr))] min-w-full">
 
-            <div className="sticky top-0 z-20 bg-muted/40 border-r border-b border-border/60 backdrop-blur-sm" />
+            <div className="sticky top-0 z-20 bg-muted/40 border-r border-b border-border/50 backdrop-blur-sm" />
             {days.map((day) => {
               const isToday = isSameDay(day, new Date());
               return (
                 <div
                   key={`head-${day.toString()}`}
-                  className="sticky top-0 z-20 py-2.5 text-center border-r border-b border-border/60 last:border-r-0 bg-muted/40 backdrop-blur-sm"
+                  className="sticky top-0 z-20 py-2.5 text-center border-r border-b border-border/50 last:border-r-0 bg-muted/40 backdrop-blur-sm"
                 >
                   <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                     {format(day, "EEE")}
@@ -102,9 +102,9 @@ export default function WeekView({
               );
             })}
 
-            <div className="bg-muted/10 border-r border-border/60">
+            <div className="bg-muted/10 border-r border-border/50">
               {hours.map((hour) => (
-                <div key={hour} style={{ height: `${HOUR_HEIGHT_PX}px` }} className="border-b border-border/60 relative">
+                <div key={hour} style={{ height: `${HOUR_HEIGHT_PX}px` }} className="border-b border-border/50 relative">
                   <span className="absolute -top-2.5 right-2 text-[10px] font-medium text-muted-foreground/70 tabular-nums">
                     {format(new Date().setHours(hour, 0), "HH:mm")}
                   </span>
@@ -120,7 +120,7 @@ export default function WeekView({
               return (
                 <div
                   key={day.toString()}
-                  className={`border-r border-border/60 last:border-r-0 relative ${isToday ? "bg-primary/[0.04]" : "bg-card"
+                  className={`border-r border-border/50 last:border-r-0 relative ${isToday ? "bg-primary/[0.04]" : "bg-card"
                     }`}
                   style={{ height: `${hours.length * HOUR_HEIGHT_PX}px` }}
                 >
@@ -136,7 +136,7 @@ export default function WeekView({
                     return (
                       <div
                         key={hour}
-                        className="absolute w-full border-b border-border/60 flex flex-col gap-1 p-1 overflow-hidden"
+                        className="absolute w-full border-b border-border/50 flex flex-col gap-1 p-1 overflow-hidden"
                         style={{
                           top: `${topPx}px`,
                           height: `${HOUR_HEIGHT_PX}px`,

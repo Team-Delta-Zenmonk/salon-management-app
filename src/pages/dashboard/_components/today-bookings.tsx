@@ -45,7 +45,7 @@ export const TodayBookingsSection = ({ todayBookings, bookingsLoading }: TodayBo
           {[1, 2, 3].map((j) => (
             <div
               key={`sk-today-${j}`}
-              className="flex items-center justify-between p-3.5 bg-background/30 border border-border/40 rounded-2xl"
+              className="flex items-center justify-between p-3.5 bg-background/30 border border-border/50 rounded-2xl"
             >
               <div className="flex items-center gap-4 min-w-0">
                 <div className="w-10 h-10 bg-foreground/10 rounded-full shrink-0 animate-pulse" />
@@ -73,7 +73,7 @@ export const TodayBookingsSection = ({ todayBookings, bookingsLoading }: TodayBo
           <Button
             variant="outline"
             size="sm"
-            className="mt-3 rounded-full border-border/60 hover:bg-background/80 gap-2"
+            className="mt-3 rounded-full border-border/50 hover:bg-background/80 gap-2"
             onClick={() => navigate("/bookings")}
           >
             <CalendarDays className="w-4 h-4" />
@@ -94,7 +94,7 @@ export const TodayBookingsSection = ({ todayBookings, bookingsLoading }: TodayBo
             {todayBookings.slice(0, 4).map((booking) => (
               <div
                 key={booking.uuid}
-                className="group flex items-center justify-between p-3.5 bg-background/30 border border-border/40 rounded-2xl hover:border-primary/30 hover:bg-background/50 transition-all cursor-pointer"
+                className="group flex items-center justify-between p-3.5 bg-background/30 border border-border/50 rounded-2xl hover:border-primary/30 hover:bg-background/50 transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <Avatar className="h-10 w-10 border border-primary/10 shrink-0">
@@ -128,7 +128,7 @@ export const TodayBookingsSection = ({ todayBookings, bookingsLoading }: TodayBo
           </div>
           <Button
             variant="outline"
-            className="w-full mt-4 rounded-full border-border/60 hover:bg-background/80"
+            className="w-full mt-4 rounded-full border-border/50 hover:bg-background/80"
             onClick={() => navigate("/bookings")}
           >
             View All Bookings

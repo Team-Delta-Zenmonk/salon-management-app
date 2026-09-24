@@ -42,7 +42,7 @@ export default function PreferencesCard({
                 className={`relative flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-200 active:scale-[0.98] ${
                   themeMode === mode.id
                     ? "border-primary bg-primary/5 text-primary ring-1 ring-primary/20"
-                    : "border-border/40 bg-muted/20 hover:bg-muted/40 hover:border-border/80 text-foreground"
+                    : "border-border/50 bg-muted/20 hover:bg-muted/40 hover:border-border/80 text-foreground"
                 }`}
               >
                 <mode.icon className="h-5 w-5 mb-1.5 shrink-0" />

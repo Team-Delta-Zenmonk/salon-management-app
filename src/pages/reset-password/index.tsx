@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/constants/app";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ResetPasswordSchema, type ResetPasswordForm } from "./schema/reset-password.schema";
@@ -59,7 +60,7 @@ export default function ResetPassword() {
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
               <Scissors className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-black text-white tracking-tight">Salonify</span>
+            <span className="text-xl font-black text-white tracking-tight">{APP_NAME}</span>
           </div>
         </div>
 
@@ -127,7 +128,7 @@ export default function ResetPassword() {
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
             <Scissors className="w-4.5 h-4.5 text-primary-foreground" />
           </div>
-          <span className="text-lg font-black text-foreground tracking-tight">Salonify</span>
+          <span className="text-lg font-black text-foreground tracking-tight">{APP_NAME}</span>
         </div>
 
         <div className="w-full max-w-md relative z-10">
@@ -135,7 +136,7 @@ export default function ResetPassword() {
             initial={{ y: 16, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1, duration: 0.45 }}
-            className="bg-card dark:bg-neutral-900 border border-border/60 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10"
+            className="bg-card dark:bg-neutral-900 border border-border/50 rounded-2xl shadow-xl shadow-foreground/5 p-6 sm:p-10"
           >
             <div className="mb-8">
               <h2 className="text-2xl font-black text-foreground tracking-tight mb-1.5">
