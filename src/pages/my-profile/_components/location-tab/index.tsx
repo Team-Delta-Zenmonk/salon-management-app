@@ -6,6 +6,7 @@ import TextField from "../../../../components/form/textfield";
 import LocationMap from "../../../../components/map";
 import { Phone, MapPin, Search, Loader2, CheckCircle2 } from "lucide-react";
 import { Badge } from "../../../../components/ui/badge";
+import { VALIDATE_PATTERN } from "@/common/validate-pattern";
 
 interface NominatimPlace {
   place_id: number;
@@ -228,6 +229,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               rules={{ required: "Contact number is required" }}
               maxLength={10}
               inputPropsClassName="bg-white dark:bg-neutral-900"
+              pattern={VALIDATE_PATTERN.number}
             />
           </div>
         </div>
@@ -306,6 +308,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               type="text"
               placeholder="Enter street address"
               value={street}
+              maxLength={500}
               onChange={(e) => handleFieldChange("street", e.target.value)}
               className="flex h-10 w-full rounded-xl border border-border/50 bg-white dark:bg-neutral-900 px-3 py-2 text-sm shadow-xs transition-all focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 hover:bg-background/60 hover:border-border/80"
             />
@@ -317,6 +320,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               type="text"
               placeholder="Enter city"
               value={city}
+              maxLength={250}
               onChange={(e) => handleFieldChange("city", e.target.value)}
               className="flex h-10 w-full rounded-xl border border-border/50 bg-white dark:bg-neutral-900 px-3 py-2 text-sm shadow-xs transition-all focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 hover:bg-background/60 hover:border-border/80"
             />
@@ -328,6 +332,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               type="text"
               placeholder="Enter state"
               value={state}
+              maxLength={250}
               onChange={(e) => handleFieldChange("state", e.target.value)}
               className="flex h-10 w-full rounded-xl border border-border/50 bg-white dark:bg-neutral-900 px-3 py-2 text-sm shadow-xs transition-all focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 hover:bg-background/60 hover:border-border/80"
             />
@@ -340,6 +345,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="Enter pincode"
               value={pincode}
               onChange={(e) => handleFieldChange("pincode", e.target.value)}
+              maxLength={12}
               className="flex h-10 w-full rounded-xl border border-border/50 bg-white dark:bg-neutral-900 px-3 py-2 text-sm shadow-xs transition-all focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 hover:bg-background/60 hover:border-border/80"
             />
           </div>
@@ -353,6 +359,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="https://maps.google.com/..."
               identifier="salon-maplink-field"
               inputPropsClassName="bg-white dark:bg-neutral-900"
+              maxLength={500}
             />
           </div>
         </div>

@@ -420,6 +420,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             multiline
             rows={3}
             maxLength={300}
+            pattern={VALIDATE_PATTERN.alphabet}
             inputPropsClassName="bg-white dark:bg-neutral-900"
           />
         </div>
