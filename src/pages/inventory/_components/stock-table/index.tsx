@@ -151,28 +151,26 @@ const StockCard: React.FC<{
               )}
             </div>
             
-            <div className="flex gap-1.5 flex-wrap w-full mt-2.5">
-              <Badge className={status.color}>
+            <div className="flex items-center gap-1.5 flex-wrap w-full mt-2.5">
+              <Badge className={`h-6 py-0 px-2.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 inline-flex items-center justify-center leading-none shrink-0 ${status.color}`}>
                 {status.label}
               </Badge>
 
               {categoryLabel && (
                 <TooltipProvider>
-                  <Tooltip open={categoryTooltipOpen} onOpenChange={setCategoryTooltipOpen}>
+                  <Tooltip>
                     <TooltipTrigger>
-                      <div onMouseEnter={() => setCategoryTooltipOpen(true)} onMouseLeave={() => setCategoryTooltipOpen(false)}>
-                        <Badge variant="secondary" className="max-w-[180px] text-[10px] font-semibold uppercase tracking-wider bg-secondary/40 text-secondary-foreground truncate">
-                          <span>{categoryLabel}</span>
-                        </Badge>
-                      </div>
+                      <Badge variant="secondary" className="h-6 py-0 px-2.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 max-w-[180px] bg-secondary/40 text-secondary-foreground shrink-0 inline-flex items-center justify-center leading-none cursor-default">
+                        <span className="truncate leading-none">{categoryLabel}</span>
+                      </Badge>
                     </TooltipTrigger>
                     <TooltipContent><p>{categoryLabel}</p></TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               )}  
               {variantLabel && (
-                <Badge variant="outline" className="text-[10px] font-semibold uppercase tracking-wider bg-muted/20 border-border/50 text-muted-foreground/80">
-                  {variantLabel}
+                <Badge variant="outline" className="h-6 py-0 px-2.5 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-muted/20 border-border/50 text-muted-foreground/80 shrink-0 inline-flex items-center justify-center leading-none">
+                  <span className="leading-none">{variantLabel}</span>
                 </Badge>
               )}
             </div>
@@ -193,12 +191,11 @@ const StockCard: React.FC<{
                 }`}>
                   {item.current_stock}
                 </span>
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase">{item.unit || "units"}</span>
               </div>
             </div>
             <div className="flex flex-col items-end">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Min Stock Level</span>
-              <span className="text-sm font-semibold text-foreground/80 mt-1">{item.min_stock_level || 0} {item.unit || "units"}</span>
+              <span className="text-sm font-semibold text-foreground/80 mt-1">{item.min_stock_level || 0}</span>
             </div>
           </div>
           

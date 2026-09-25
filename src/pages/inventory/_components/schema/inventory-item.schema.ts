@@ -27,11 +27,12 @@ export const inventoryItemSchema = z.object({
   unit_price: z.coerce
     .number()
     .min(0, "Cannot be negative")
-    .max(50000, "Maximum Value 50000").default(0),
+    .max(100000, "Maximum Value 100000")
+    .default(0),
   min_stock_level: z.coerce
     .number()
     .min(0, "Cannot be negative")
-    .max(50000, "Maximum Value 50000")
+    .max(10000, "Maximum Value 10000")
     .optional()
     .default(0),
 });

@@ -20,7 +20,7 @@ function ArrowButtons<T extends FieldValues>({
   error,
   identifier,
   min = 0,
-  max = 50000,
+  max = Number.MAX_SAFE_INTEGER,
 }: Readonly<ArrowButtonsProps<T>>)  {
   const handleUp = () => {
     const numericValue = Number(value) || 0;
