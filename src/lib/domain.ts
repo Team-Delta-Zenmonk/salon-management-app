@@ -12,14 +12,17 @@ export const getStorefrontUrl = (slug?: string): string => {
   const devBaseUrl = import.meta.env.VITE_STOREFRONT_URL || "http://localhost:3001";
   const baseDomain = getStorefrontDomain();
 
-  if (isDev) {
-    return slug ? `${devBaseUrl}/?salon=${slug}` : devBaseUrl;
-  }
+  // if (isDev) {
+  //   return slug ? `${devBaseUrl}/?salon=${slug}` : devBaseUrl;
+  // }
+  return `${devBaseUrl}/?salon=${slug}`;
 
-  return slug ? `https://${slug}.${baseDomain}` : `https://${baseDomain}`;
+  // return slug ? `https://${slug}.${baseDomain}` : `https://${baseDomain}`;
 };
 
 export const getCanonicalStorefrontUrl = (slug: string): string => {
   const baseDomain = getStorefrontDomain();
-  return `https://${slug}.${baseDomain}`;
+  // return `https://${slug}.${baseDomain}`;
+
+  return `${baseDomain}/?salon=${slug}`;
 };
