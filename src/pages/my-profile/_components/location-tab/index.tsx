@@ -37,11 +37,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
   setValue, 
   clearErrors,
 }) => {
-  const [street, setStreet] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [pincode, setPincode] = useState("");
-
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<NominatimPlace[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -79,10 +74,10 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
           const stateName = addr.state || "";
           const pincodeValue = addr.postcode || "";
 
-          setStreet(streetName);
-          setCity(cityName);
-          setState(stateName);
-          setPincode(pincodeValue);
+          setValue("address.street", streetName, { shouldDirty: true });
+          setValue("address.city", cityName, { shouldDirty: true });
+          setValue("address.state", stateName, { shouldDirty: true });
+          setValue("address.pincode", pincodeValue, { shouldDirty: true });
         }
       } catch (error) {
         console.error("Reverse geocoding error:", error);
@@ -90,7 +85,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
     };
 
     fetchStructuredAddress();
-  }, [latVal, lngVal]);
+  }, [latVal, lngVal, setValue]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -148,43 +143,15 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
     const stateName = addr.state || "";
     const pincodeValue = addr.postcode || "";
 
-    setStreet(streetName);
-    setCity(cityName);
-    setState(stateName);
-    setPincode(pincodeValue);
+    setValue("address.street", streetName, { shouldDirty: true });
+    setValue("address.city", cityName, { shouldDirty: true });
+    setValue("address.state", stateName, { shouldDirty: true });
+    setValue("address.pincode", pincodeValue, { shouldDirty: true });
 
-    const compiled = [streetName, cityName, stateName, pincodeValue].filter(Boolean).join(", ");
-    setValue("address.address", compiled, { shouldDirty: true });
     setValue("address.map_link", `https://www.google.com/maps?q=${lat},${lon}`, { shouldDirty: true });
-    clearErrors("address.address");
 
     setShowSuggestions(false);
     setSearchQuery("");
-  };
-
-  const handleFieldChange = (field: "street" | "city" | "state" | "pincode", val: string) => {
-    let newStreet = street;
-    let newCity = city;
-    let newState = state;
-    let newPincode = pincode;
-
-    if (field === "street") {
-      setStreet(val);
-      newStreet = val;
-    } else if (field === "city") {
-      setCity(val);
-      newCity = val;
-    } else if (field === "state") {
-      setState(val);
-      newState = val;
-    } else if (field === "pincode") {
-      setPincode(val);
-      newPincode = val;
-    }
-
-    const compiled = [newStreet, newCity, newState, newPincode].filter(Boolean).join(", ");
-    setValue("address.address", compiled, { shouldDirty: true });
-    clearErrors("address.address");
   };
 
   return (
@@ -303,50 +270,57 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
 
         <div className="grid grid-cols-3 gap-4 relative z-10">
           <div className="flex flex-col gap-1.5 w-full col-span-3">
-            <label className="text-sm font-semibold text-foreground">Street Address</label>
-            <input 
+            <TextField
+              name="address.street"
               type="text"
+              control={control}
+              label="Street Address"
               placeholder="Enter street address"
-              value={street}
+              identifier="salon-street-field"
               maxLength={500}
-              onChange={(e) => handleFieldChange("street", e.target.value)}
-              className="flex h-10 w-full rounded-xl border border-border/50 bg-white dark:bg-neutral-900 px-3 py-2 text-sm shadow-xs transition-all focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 hover:bg-background/60 hover:border-border/80"
+              inputPropsClassName="bg-white dark:bg-neutral-900"
             />
           </div>
 
           <div className="flex flex-col gap-1.5 w-full col-span-1">
-            <label className="text-sm font-semibold text-foreground">City</label>
-            <input 
+            <TextField
+              name="address.city"
               type="text"
+              control={control}
+              label="City"
               placeholder="Enter city"
-              value={city}
+              identifier="salon-city-field"
               maxLength={250}
-              onChange={(e) => handleFieldChange("city", e.target.value)}
-              className="flex h-10 w-full rounded-xl border border-border/50 bg-white dark:bg-neutral-900 px-3 py-2 text-sm shadow-xs transition-all focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 hover:bg-background/60 hover:border-border/80"
+              pattern={VALIDATE_PATTERN.alphabet}
+              inputPropsClassName="bg-white dark:bg-neutral-900"
             />
           </div>
 
           <div className="flex flex-col gap-1.5 w-full col-span-1">
-            <label className="text-sm font-semibold text-foreground">State</label>
-            <input 
+            <TextField
+              name="address.state"
               type="text"
+              control={control}
+              label="State"
               placeholder="Enter state"
-              value={state}
+              identifier="salon-state-field"
               maxLength={250}
-              onChange={(e) => handleFieldChange("state", e.target.value)}
-              className="flex h-10 w-full rounded-xl border border-border/50 bg-white dark:bg-neutral-900 px-3 py-2 text-sm shadow-xs transition-all focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 hover:bg-background/60 hover:border-border/80"
+              pattern ={VALIDATE_PATTERN.alphabet}
+              inputPropsClassName="bg-white dark:bg-neutral-900"
             />
           </div>
 
           <div className="flex flex-col gap-1.5 w-full col-span-1">
-            <label className="text-sm font-semibold text-foreground">Pincode</label>
-            <input 
+            <TextField
+              name="address.pincode"
               type="text"
+              control={control}
+              label="Pincode"
               placeholder="Enter pincode"
-              value={pincode}
-              onChange={(e) => handleFieldChange("pincode", e.target.value)}
+              identifier="salon-pincode-field"
+              pattern={VALIDATE_PATTERN.number}
               maxLength={12}
-              className="flex h-10 w-full rounded-xl border border-border/50 bg-white dark:bg-neutral-900 px-3 py-2 text-sm shadow-xs transition-all focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 hover:bg-background/60 hover:border-border/80"
+              inputPropsClassName="bg-white dark:bg-neutral-900"
             />
           </div>
 

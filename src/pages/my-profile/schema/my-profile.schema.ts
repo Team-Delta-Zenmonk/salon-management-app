@@ -35,7 +35,7 @@ export const MyProfileSchema = z.object({
     map_link: z.string().optional().nullable(),
     latitude: z.union([z.string(), z.number()]).optional().nullable(),
     longitude: z.union([z.string(), z.number()]).optional().nullable(),
-    street: z.string().max(500, "Max 500 characters").regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed").optional(),
+    street: z.string().max(500, "Max 500 characters").optional().or(z.literal("")),
     city: z.string().max(250, "Max 250 characters").regex(VALIDATE_PATTERN.alphabet, "Only alphabets are allowed").optional().or(z.literal("")),
     state: z.string().max(250, "Max 250 characters").regex(VALIDATE_PATTERN.alphabet, "Only alphabets are allowed").optional().or(z.literal("")),
     pincode: z.string().max(12, "Max 12 digits").regex(VALIDATE_PATTERN.number, "Only numbers allowed").optional().or(z.literal("")),

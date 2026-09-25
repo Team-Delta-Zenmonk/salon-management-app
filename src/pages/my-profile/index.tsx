@@ -111,6 +111,10 @@ const MyProfile = () => {
     setIsSaving(true);
     try {
       const { logo, address } = data;
+      const compiledAddress = [address.street, address.city, address.state, address.pincode]
+        .filter(Boolean)
+        .join(", ");
+      const finalAddress = (compiledAddress || address.address || "").trim().toLowerCase();
 
       const payload = {
         name: data.name.trim().toLowerCase(),
@@ -120,7 +124,7 @@ const MyProfile = () => {
         type: data.type ? data.type.trim().toLowerCase() : "",
         photos: data.photos,
         business_hours: data.business_hours,
-        address: address.address.trim().toLowerCase(),
+        address: finalAddress,
         map_link: address.map_link ? address.map_link.trim().toLowerCase() : null,
         latitude: address.latitude?.toString().trim() || null,
         longitude: address.longitude?.toString().trim() || null,
