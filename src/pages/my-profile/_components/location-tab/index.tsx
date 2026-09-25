@@ -175,6 +175,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="salon@example.com"
               identifier="salon-email-field"
               disabled
+              maxLength={100}
               endAdornment={
                 <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 py-0.5 px-2 rounded-full text-[9px] font-bold gap-1 backdrop-blur-xs shrink-0 select-none">
                   <CheckCircle2 className="w-2.5 h-2.5" />
@@ -277,7 +278,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               label="Street Address"
               placeholder="Enter street address"
               identifier="salon-street-field"
-              maxLength={500}
+              maxLength={300}
               inputPropsClassName="bg-white dark:bg-neutral-900"
             />
           </div>

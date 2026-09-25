@@ -9,9 +9,10 @@ type PasswordFieldProps = {
   identifier: string;
   disabled?: boolean;
   placeholder?: string;
+  maxLength?: number;
 };
 
-const PasswordField = ({ label, name, control, identifier, disabled, placeholder }: PasswordFieldProps) => {
+const PasswordField = ({ label, name, control, identifier, disabled, placeholder, maxLength }: PasswordFieldProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleShowPassword = () => {
@@ -30,6 +31,7 @@ const PasswordField = ({ label, name, control, identifier, disabled, placeholder
       endAdornment={showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
       onEndAdornmentClick={toggleShowPassword}
       highlightPrimaryIconButton
+      maxLength={maxLength}
     />
   );
 };

@@ -113,7 +113,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 control={control}
                 label="Item Name"
                 placeholder="e.g., Haircare Shampoo"
-                maxLength={50}
+                maxLength={250}
                 disabled={loading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
@@ -125,7 +125,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 control={control}
                 label="Brand Name"
                 placeholder="e.g., BrandName"
-                maxLength={50}
+                maxLength={250}
                 disabled={loading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />

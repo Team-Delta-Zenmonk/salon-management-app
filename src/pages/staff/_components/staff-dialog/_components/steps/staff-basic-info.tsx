@@ -18,7 +18,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           identifier="staff-first"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.alphabet}
-          maxLength={50}
+          maxLength={250}
           placeholder="First name"
         />
 
@@ -30,7 +30,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           identifier="staff-last"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.alphabet}
-          maxLength={50}
+          maxLength={250}
           placeholder="Last name"
         />
       </div>
@@ -43,7 +43,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           control={control}
           identifier="staff-email"
           disabled={disabled}
-          maxLength={50}
+          maxLength={100}
           placeholder="Email address"
         />
 

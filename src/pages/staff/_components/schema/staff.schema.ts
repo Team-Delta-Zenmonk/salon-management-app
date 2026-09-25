@@ -56,11 +56,12 @@ const ActiveHoursSchema = z
   .optional();
 
 export const StaffSchema = z.object({
-  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(50, { message: "Max 50 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
-  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(50, { message: "Max 50 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(250, { message: "Max 250 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(250, { message: "Max 250 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
   email: z
     .string({ message: "Required" })
     .min(1, { message: "Required" })
+    .max(100, { message: "Max 100 characters" })
     .email({ message: "Invalid email" }),
   phone_number: z
     .string({ message: "Required" })
@@ -90,7 +91,7 @@ export const StaffSchema = z.object({
       },
       { message: "Invalid date" }
     ),
-  title: z.string({ message: "Required" }).min(1, { message: "Required" }).max(50, { message: "Max 30 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed " }),
+  title: z.string({ message: "Required" }).min(1, { message: "Required" }).max(100, { message: "Max 100 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed " }),
   joining_date: z
     .any()
     .refine((val) => val !== null && val !== undefined && val !== "", {
@@ -115,9 +116,9 @@ export const StaffSchema = z.object({
       { message: "Invalid date" }
     ),
 
-  address: z.string({ message: "Required" }).min(1, { message: "Required" }).max(100, { message: "Address must be less than 100 characters" }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Invalid characters in address" }),
+  address: z.string({ message: "Required" }).min(1, { message: "Required" }).max(300, { message: "Address must be less than 300 characters" }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Invalid characters in address" }),
   emergency_contact: z.object({
-    name: z.string({ message: "Required" }).min(1, { message: "Required" }),
+    name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(250, { message: "Max 250 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
     phone: z
       .string({ message: "Required" })
       .min(1, { message: "Required" })

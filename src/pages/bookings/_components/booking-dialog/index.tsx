@@ -396,7 +396,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Enter name"
                   control={control as any}
                   identifier="booking-customer-name"
-                  maxLength={50}
+                  maxLength={250}
                   pattern={VALIDATE_PATTERN.alphabet}
                 />
                 <TextField

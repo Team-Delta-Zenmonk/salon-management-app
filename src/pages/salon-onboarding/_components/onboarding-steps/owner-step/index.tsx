@@ -16,6 +16,7 @@ export default function OwnerStep() {
         identifier="owner-name"
         placeholder="Enter owner name"
         pattern={VALIDATE_PATTERN.alphabet}
+        maxLength={250}
       />
     </div>
   );

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import type { StaffPricingType } from "../../types/staff-service.types";
 import Select from "../../../../components/form/select";
 import { PriceTypeOptions } from "../../../../common/enums/price-type.enum";
@@ -7,7 +9,9 @@ import TextField from "../../../../components/form/textfield";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { staffPricingSchema } from "../schema/staff-pricing.schema";
 
+export type StaffPricingFormValues = z.infer<typeof staffPricingSchema>;
 
 type DialogContext = {
   staff_name: string;
@@ -22,12 +26,6 @@ type StaffServicePricingDialogProps = {
   onSave: (payload: { price_type: string; price: number; duration: number }) => Promise<void> | void;
 };
 
-type FormValues = {
-  price_type: string;
-  price: string | number;
-  duration: string | number;
-};
-
 export default function StaffServicePricingDialog({
   open,
   onClose,
@@ -37,7 +35,8 @@ export default function StaffServicePricingDialog({
   const { staff_name, service_name, current } = context;
   const [loading, setLoading] = useState(false);
 
-  const methods = useForm<FormValues>({
+  const methods = useForm<StaffPricingFormValues>({
+    resolver: zodResolver(staffPricingSchema),
     defaultValues: {
       price_type: current?.price_type ?? "fixed",
       price: current?.price ? String(current.price) : "0",
@@ -155,4 +154,3 @@ export default function StaffServicePricingDialog({
     </Dialog>
   );
 }
-

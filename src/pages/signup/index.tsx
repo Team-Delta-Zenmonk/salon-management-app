@@ -135,6 +135,7 @@ export default function SignUp() {
                           disabled={isLoading}
                           pattern={VALIDATE_PATTERN.alphabet}
                           inputPropsClassName="bg-white dark:bg-neutral-900"
+                          maxLength={250}
                         />
                       ),
                     },
@@ -151,6 +152,7 @@ export default function SignUp() {
                           disabled={isLoading}
                           pattern={VALIDATE_PATTERN.noSpace}
                           inputPropsClassName="bg-white dark:bg-neutral-900"
+                          maxLength={100}
                         />
                       ),
                     },
@@ -164,6 +166,7 @@ export default function SignUp() {
                           identifier="signup-password"
                           disabled={isLoading}
                           placeholder="••••••••"
+                          maxLength={50}
                         />
                       ),
                     },
@@ -177,6 +180,7 @@ export default function SignUp() {
                           identifier="signup-confirm-password"
                           disabled={isLoading}
                           placeholder="••••••••"
+                          maxLength={50}
                         />
                       ),
                     },

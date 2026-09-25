@@ -374,7 +374,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
               placeholder="Enter salon name"
               identifier="salon-name-field"
               rules={{ required: "Salon name is required" }}
-              maxLength={50}
+              maxLength={250}
               pattern={VALIDATE_PATTERN.alphabet}
               inputPropsClassName="bg-white dark:bg-neutral-900"
             />
@@ -389,7 +389,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
               placeholder="Enter owner name"
               identifier="salon-owner-field"
               rules={{ required: "Owner name is required" }}
-              maxLength={50}
+              maxLength={250}
               pattern={VALIDATE_PATTERN.alphabet}
               inputPropsClassName="bg-white dark:bg-neutral-900"
             />

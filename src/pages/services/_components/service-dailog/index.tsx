@@ -201,7 +201,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 identifier="service-name"
                 placeholder="Enter service name"
                 disabled={isLoading}
-                maxLength={50}
+                maxLength={250}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
 
@@ -213,10 +213,9 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 identifier="service-description"
                 placeholder="Enter service description"
                 disabled={isLoading}
-                maxLength={100}
+                maxLength={300}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
                 multiline
-                rows={2}
               />
 
               <div className="flex flex-col gap-1.5">

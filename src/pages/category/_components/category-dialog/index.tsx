@@ -105,7 +105,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 identifier="category-name"
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
                 disabled={isLoading}
-                maxLength={50}
+                maxLength={250}
               />
 
               <TextField
@@ -116,9 +116,8 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 identifier="category-description"
                 disabled={isLoading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
-                maxLength={100}
+                maxLength={300}
                 multiline
-                rows={3}
               />
 
               <div className="flex flex-col gap-1.5">

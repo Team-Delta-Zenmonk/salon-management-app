@@ -10,14 +10,14 @@ export const serviceSchema = z
     name: z
       .string({ message: "Required" })
       .min(2, { message: "Minimum 2 characters" })
-      .max(50, { message: "Maximum 50 characters" })
+      .max(250, { message: "Maximum 250 characters" })
       .regex(VALIDATE_PATTERN.alphabetWithSpecial, {
         message: "Only alphabets and special characters are allowed",
       }),
     description: z
       .string({ message: "Required" })
       .min(2, { message: "Minimum 2 characters" })
-      .max(100, { message: "Maximum 100 characters" })
+      .max(300, { message: "Maximum 300 characters" })
       .regex(VALIDATE_PATTERN.alphabetWithSpecial, {
         message: "Only alphabets and special characters are allowed",
       }),

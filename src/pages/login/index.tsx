@@ -174,6 +174,7 @@ export default function Login() {
                     disabled={isLoading}
                     pattern={VALIDATE_PATTERN.noSpace}
                     inputPropsClassName="bg-white dark:bg-neutral-900"
+                    maxLength={100}
                   />
                 </motion.div>
 
@@ -198,6 +199,7 @@ export default function Login() {
                     identifier="login-form-password"
                     disabled={isLoading}
                     placeholder="••••••••"
+                    maxLength={50}
                   />
                 </motion.div>
 

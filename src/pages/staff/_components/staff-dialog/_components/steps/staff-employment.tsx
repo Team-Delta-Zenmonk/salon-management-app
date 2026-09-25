@@ -19,7 +19,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           identifier="staff-title"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.alphabet}
-          maxLength={50}
+          maxLength={100}
           placeholder="Stylist, Barber, Receptionist, etc."
         />
 
@@ -82,7 +82,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
         identifier="staff-address"
         disabled={disabled}
         pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
-        maxLength={100}
+        maxLength={300}
         placeholder="Staff residential address"
       />
 
@@ -95,7 +95,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           identifier="staff-ec-name"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.alphabet}
-          maxLength={50}
+          maxLength={250}
           placeholder="Contact relative name"
         />
 
