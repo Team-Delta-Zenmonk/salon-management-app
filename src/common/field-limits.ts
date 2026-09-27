@@ -1,0 +1,13 @@
+export const FIELD_LIMITS = {
+  NAME: 255,
+  EMAIL: 100,
+  PHONE: 10,
+  TITLE: 100,
+  ADDRESS: 255,
+  CITY_STATE: 100,
+  PINCODE: 12,
+  ITEM_NAME: 250,
+  DESCRIPTION: 300,
+  CODE: 50,
+  PASSWORD: 50,
+} as const;

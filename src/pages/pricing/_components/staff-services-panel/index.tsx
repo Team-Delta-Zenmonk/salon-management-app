@@ -14,6 +14,7 @@ import { Button } from "../../../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
 import type { Staff } from "../../../../features/staff/staff.slice";
 import type { Service } from "../../../../features/service/service.slice";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 interface StaffServicesPanelProps {
   selectedStaffUuid: string | null;
@@ -162,11 +163,14 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
   return (
     <div className="p-6 md:p-8 flex flex-col min-h-full bg-transparent">
       <div className="flex flex-wrap items-start sm:items-center justify-between gap-4 pb-6 border-b border-border/50 mb-6">
-        <div className="space-y-1">
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2 capitalize">
+        <div className="space-y-1 min-w-0 flex-1">
+          <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-6 rounded bg-primary shrink-0" />
-            {staffDisplayName}'s Services
-          </h2>
+            <EllipsisCell
+              value={`${staffDisplayName}'s Services`}
+              className="text-lg font-bold text-foreground capitalize block min-w-0"
+            />
+          </div>
           <p className="text-muted-foreground/80 text-xs sm:text-sm">
             Manage the services provided by this staff member and their custom pricing.
           </p>
@@ -209,10 +213,11 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
         <div className="flex flex-col gap-8">
           {groupedServices.map((group) => (
             <div key={group.parent.id} className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <h4 className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize">
-                  {group.parent.name}
-                </h4>
+              <div className="flex items-center gap-3 min-w-0">
+                <EllipsisCell
+                  value={group.parent.name}
+                  className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize shrink-0 max-w-[300px]"
+                />
                 <div className="h-px bg-border/55 flex-1" />
               </div>
 
@@ -233,9 +238,10 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                         )}
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="font-bold text-sm text-foreground truncate capitalize">
-                          {svc.name}
-                        </p>
+                        <EllipsisCell
+                          value={svc.name}
+                          className="font-bold text-sm text-foreground capitalize block"
+                        />
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
                           <span
                             className={clsx(

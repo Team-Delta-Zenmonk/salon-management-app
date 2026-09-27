@@ -13,8 +13,8 @@ import { Button } from "../../../../components/ui/button";
 import { listSubServicesService } from "../../../../features/service/list-sub-services/list-sub-services.service";
 import { callSnack } from "../../../../components/snackbar";
 import { Edit2Icon, Trash2Icon, UserPlusIcon, SparklesIcon, PlusIcon, ClockIcon } from "lucide-react";
-
 import type { Service } from "../../../../features/service/service.slice";
+import { EllipsisCell } from "../../../../components/ellipse-cell";
 
 interface SubServicesDrawerProps {
   open: boolean;
@@ -97,16 +97,21 @@ export function SubServicesDrawer({
         <SheetHeader className="p-6 pb-4 border-b bg-muted/20">
           <div className="flex gap-4 items-center">
             <Avatar className="w-12 h-12 ring-2 ring-primary/10">
-              <AvatarImage src={parentService.logo || undefined} alt={parentService.name} />
+              <AvatarImage
+                src={parentService.logo || undefined}
+                alt={parentService.name}
+              />
               <AvatarFallback className="bg-primary/5 text-primary font-bold text-lg">
-                {parentService.name ? parentService.name.charAt(0).toUpperCase() : "?"}
+                {parentService.name
+                  ? parentService.name.charAt(0).toUpperCase()
+                  : "?"}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <SheetTitle className="text-lg font-bold text-foreground truncate leading-tight capitalize">
-                {parentService.name}
+              <SheetTitle className="text-lg font-bold text-foreground leading-tight capitalize">
+                <EllipsisCell value={parentService.name} maxChars={20} />
               </SheetTitle>
-              <SheetDescription className="text-xs text-muted-foreground truncate">
+              <SheetDescription className="text-xs text-muted-foreground">
                 Manage all sub-services and pricing configurations.
               </SheetDescription>
             </div>
@@ -139,7 +144,10 @@ export function SubServicesDrawer({
                 className="space-y-4"
               >
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="p-4 border border-border/30 bg-muted/10 rounded-2xl animate-pulse space-y-3">
+                  <div
+                    key={i}
+                    className="p-4 border border-border/30 bg-muted/10 rounded-2xl animate-pulse space-y-3"
+                  >
                     <div className="flex gap-3 items-center">
                       <div className="w-10 h-10 rounded-xl bg-foreground/10" />
                       <div className="flex-1 space-y-2 py-1">
@@ -163,9 +171,12 @@ export function SubServicesDrawer({
                 <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-3">
                   <SparklesIcon className="w-6 h-6 text-primary/40" />
                 </div>
-                <h4 className="font-semibold text-foreground text-sm mb-1">No sub-services configured</h4>
+                <h4 className="font-semibold text-foreground text-sm mb-1">
+                  No sub-services configured
+                </h4>
                 <p className="text-muted-foreground text-xs max-w-[240px]">
-                  Create sub-services to offer variations (e.g. Mens Cut, Womens Cut, etc.) for this service.
+                  Create sub-services to offer variations (e.g. Mens Cut, Womens
+                  Cut, etc.) for this service.
                 </p>
               </motion.div>
             ) : (
@@ -186,7 +197,11 @@ export function SubServicesDrawer({
                     <div className="flex gap-3 min-w-0">
                       <Avatar className="w-10 h-10 rounded-xl ring-1 ring-border/50 shrink-0 bg-background overflow-hidden">
                         {sub.logo ? (
-                          <AvatarImage src={sub.logo} alt={sub.name} className="object-cover" />
+                          <AvatarImage
+                            src={sub.logo}
+                            alt={sub.name}
+                            className="object-cover"
+                          />
                         ) : (
                           <AvatarFallback className="bg-primary/5 text-primary rounded-xl">
                             <SparklesIcon className="w-4 h-4 opacity-60" />
@@ -194,13 +209,19 @@ export function SubServicesDrawer({
                         )}
                       </Avatar>
                       <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-foreground text-[14px] truncate leading-snug capitalize">
-                          {sub.name}
-                        </div>
+                        <EllipsisCell
+                          value={sub.name}
+                          maxChars={50}
+                          className="font-semibold text-foreground text-[14px] leading-snug capitalize"
+                        />
                         {sub.description && (
-                          <p className="text-muted-foreground text-[11px] mt-0.5 line-clamp-1">
-                            {sub.description}
-                          </p>
+                          <EllipsisCell
+                            value={
+                              sub.description || "No description provided."
+                            }
+                            maxChars={50}
+                            className="text-muted-foreground text-[11px] mt-0.5 line-clamp-1"
+                          />
                         )}
                       </div>
                     </div>
@@ -212,7 +233,9 @@ export function SubServicesDrawer({
                         </div>
                         <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/5 border border-primary/10 text-[10px] font-medium text-primary uppercase tracking-wide">
                           {sub.price_type !== "fixed" && (
-                            <span className="opacity-60 font-normal mr-0.5">{sub.price_type}</span>
+                            <span className="opacity-60 font-normal mr-0.5">
+                              {sub.price_type}
+                            </span>
                           )}
                           <span className="font-semibold text-[9px]">₹</span>
                           {sub.price}
@@ -224,7 +247,10 @@ export function SubServicesDrawer({
                           </div>
                         )}
                         {!sub.is_active && (
-                          <Badge variant="destructive" className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-none text-[9px] h-5 px-1.5 py-0">
+                          <Badge
+                            variant="destructive"
+                            className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-none text-[9px] h-5 px-1.5 py-0"
+                          >
                             Inactive
                           </Badge>
                         )}

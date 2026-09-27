@@ -13,6 +13,7 @@ import type { ItemCategory } from "../../../../../../features/inventory/types/ca
 import { inventoryItemSchema, type InventoryItemForm } from "../../../schema/inventory-item.schema";
 import type { InventoryItem } from "../../../../../../features/inventory/inventory-item.slice";
 import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 interface ItemDetailsSectionProps {
   selectedCategory: ItemCategory;
@@ -95,11 +96,14 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
   return (
     <div className="flex flex-col h-full min-h-0 overflow-hidden">
       <div className="p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar">
-        <div className="flex items-center gap-2 mb-4 sm:mb-6 px-1">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Organizing in:</span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            {selectedCategory?.name}
+        <div className="flex items-center gap-2 mb-4 sm:mb-6 px-1 min-w-0">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0">Organizing in:</span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 min-w-0 max-w-[250px]">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
+            <EllipsisCell
+              value={selectedCategory?.name || ""}
+              className="capitalize block min-w-0 text-primary"
+            />
           </span>
         </div>
 

@@ -7,6 +7,7 @@ import { callSnack } from "../../../../../../components/snackbar";
 import type { ItemCategory } from "../../../../../../features/inventory/types/category.type";
 import { useAppDispatch, useAppSelector } from "../../../../../../store/hooks";
 import { fetchItemCategoriesAction } from "../../../../../../features/inventory/list-inventory-items-category/list-inventory-items-category.action";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 interface CategorySelectionSectionProps {
   selectedCategory: ItemCategory | null;
@@ -134,11 +135,12 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
                 }`}>
                   {category.name ? category.name.charAt(0).toUpperCase() : "?"}
                 </div>
-                <div className={`font-bold text-xs transition-colors truncate max-w-full px-2 ${
-                  isSelected ? "text-primary" : "text-foreground/80 group-hover:text-foreground"
-                }`}>
-                  {category.name}
-                </div>
+                <EllipsisCell
+                  value={category.name}
+                  className={`font-bold text-xs transition-colors block max-w-full px-2 capitalize ${
+                    isSelected ? "text-primary" : "text-foreground/80 group-hover:text-foreground"
+                  }`}
+                />
               </button>
             );
           })}

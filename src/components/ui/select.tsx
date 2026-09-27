@@ -3,6 +3,7 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 
 import { cn } from "@/lib/utils"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
+import EllipsisCell from "@/components/ellipse-cell"
 
 const Select = SelectPrimitive.Root
 
@@ -111,6 +112,7 @@ function SelectItem({
   children,
   ...props
 }: SelectPrimitive.Item.Props) {
+  const isString = typeof children === "string";
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
@@ -120,8 +122,8 @@ function SelectItem({
       )}
       {...props}
     >
-      <SelectPrimitive.ItemText className="flex flex-1 shrink-0 gap-2 whitespace-nowrap">
-        {children}
+      <SelectPrimitive.ItemText className="flex flex-1 min-w-0 shrink gap-2 overflow-hidden truncate">
+        {isString ? <EllipsisCell value={children} className="min-w-0 flex-1" /> : children}
       </SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator
         render={

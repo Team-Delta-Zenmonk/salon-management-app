@@ -7,6 +7,7 @@ import LocationMap from "../../../../components/map";
 import { Phone, MapPin, Search, Loader2, CheckCircle2 } from "lucide-react";
 import { Badge } from "../../../../components/ui/badge";
 import { VALIDATE_PATTERN } from "@/common/validate-pattern";
+import { FIELD_LIMITS } from "@/common/field-limits";
 
 interface NominatimPlace {
   place_id: number;
@@ -74,10 +75,10 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
           const stateName = addr.state || "";
           const pincodeValue = addr.postcode || "";
 
-          setValue("address.street", streetName, { shouldDirty: true });
-          setValue("address.city", cityName, { shouldDirty: true });
-          setValue("address.state", stateName, { shouldDirty: true });
-          setValue("address.pincode", pincodeValue, { shouldDirty: true });
+          setValue("address.street", streetName);
+          setValue("address.city", cityName);
+          setValue("address.state", stateName);
+          setValue("address.pincode", pincodeValue);
         }
       } catch (error) {
         console.error("Reverse geocoding error:", error);
@@ -278,7 +279,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               label="Street Address"
               placeholder="Enter street address"
               identifier="salon-street-field"
-              maxLength={300}
+              maxLength={FIELD_LIMITS.ADDRESS}
               inputPropsClassName="bg-white dark:bg-neutral-900"
             />
           </div>
@@ -291,7 +292,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               label="City"
               placeholder="Enter city"
               identifier="salon-city-field"
-              maxLength={250}
+              maxLength={FIELD_LIMITS.CITY_STATE}
               pattern={VALIDATE_PATTERN.alphabet}
               inputPropsClassName="bg-white dark:bg-neutral-900"
             />
@@ -305,8 +306,8 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               label="State"
               placeholder="Enter state"
               identifier="salon-state-field"
-              maxLength={250}
-              pattern ={VALIDATE_PATTERN.alphabet}
+              maxLength={FIELD_LIMITS.CITY_STATE}
+              pattern={VALIDATE_PATTERN.alphabet}
               inputPropsClassName="bg-white dark:bg-neutral-900"
             />
           </div>
@@ -320,7 +321,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="Enter pincode"
               identifier="salon-pincode-field"
               pattern={VALIDATE_PATTERN.number}
-              maxLength={12}
+              maxLength={FIELD_LIMITS.PINCODE}
               inputPropsClassName="bg-white dark:bg-neutral-900"
             />
           </div>

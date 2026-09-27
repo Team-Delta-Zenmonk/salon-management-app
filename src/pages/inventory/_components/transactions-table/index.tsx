@@ -19,16 +19,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../../../../components/ui/pagination";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../../../components/ui/tooltip";
 
 import type { InventoryTransaction } from "../../../../features/inventory/inventory-log.slice";
+import { EllipsisCell } from "@/components/ellipse-cell";
 import { TransactionCard } from "../transaction-card";
-import { shouldShowTooltip } from "../../../../common/shouldShowTooltip";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -62,44 +56,14 @@ const TransactionTableRow: React.FC<{
       onClick={() => onRowClick?.(item)}
     >
       <TableCell className="w-[220px] p-4 border-b border-border/30">
-        <TooltipProvider>
-          <Tooltip open={nameTooltipOpen} onOpenChange={setNameTooltipOpen}>
-            <TooltipTrigger className="text-left max-w-full">
-              <div
-                onMouseEnter={(e) => {
-                  if (shouldShowTooltip(e.currentTarget)) setNameTooltipOpen(true);
-                }}
-                onMouseLeave={() => setNameTooltipOpen(false)}
-                className="overflow-hidden text-ellipsis whitespace-nowrap font-bold text-foreground capitalize"
-              >
-                {item.item.name}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{item.item.name}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <EllipsisCell
+          value={item.item?.name || ""}
+          maxChars={8}
+          className="font-bold text-foreground capitalize block"
+        />
       </TableCell>
       <TableCell className="w-[120px] p-4 text-center border-b border-border/30">
-        <TooltipProvider>
-          <Tooltip open={variantTooltipOpen} onOpenChange={setVariantTooltipOpen}>
-            <TooltipTrigger className="text-center mx-auto max-w-full">
-              <div
-                onMouseEnter={(e) => {
-                  if (variantText !== "-" && shouldShowTooltip(e.currentTarget)) setVariantTooltipOpen(true);
-                }}
-                onMouseLeave={() => setVariantTooltipOpen(false)}
-                className="overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground text-xs font-semibold uppercase text-center"
-              >
-                {variantText}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{variantText}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <EllipsisCell value={variantText} maxChars={8} />
       </TableCell>
       <TableCell className="w-[130px] text-center text-xs font-medium text-foreground/80 p-4 border-b border-border/30">
         {item.ordered_date ? dayjs(item.ordered_date).format("MMM DD, YYYY") : "N/A"}

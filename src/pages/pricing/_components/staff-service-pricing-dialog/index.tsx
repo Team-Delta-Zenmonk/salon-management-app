@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { staffPricingSchema } from "../schema/staff-pricing.schema";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 export type StaffPricingFormValues = z.infer<typeof staffPricingSchema>;
 
@@ -89,9 +90,9 @@ export default function StaffServicePricingDialog({
         <DialogHeader className="px-6 py-5 border-b bg-muted/20">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex flex-col items-start gap-1">
             Edit Pricing
-            <span className="text-xs text-muted-foreground font-normal mt-1.5">
-              {staff_name} &bull; {service_name}
-            </span>
+            <EllipsisCell value={`${staff_name} &bull; ${service_name}`} maxChars={30} className="text-xs text-muted-foreground font-normal mt-1.5" />
+              {/* {staff_name} &bull; {service_name}
+            </span> */}
           </DialogTitle>
         </DialogHeader>
 

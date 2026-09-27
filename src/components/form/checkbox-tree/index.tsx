@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { ChevronDown, Layers, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { CustomCheckboxTreeProps, CheckboxTreeNode } from "./checkbox-tree.type";
+import EllipsisCell from "@/components/ellipse-cell";
 
 const CheckboxTree = <T extends FieldValues>({
   name,
@@ -137,11 +138,11 @@ const CheckboxTree = <T extends FieldValues>({
               <Label
                 htmlFor={nodeId}
                 className={clsx(
-                  "text-sm font-semibold tracking-wide text-foreground truncate select-none cursor-pointer",
+                  "text-sm font-semibold tracking-wide text-foreground min-w-0 flex-1 select-none cursor-pointer",
                   node.disabled && "cursor-not-allowed"
                 )}
               >
-                {node.label}
+                <EllipsisCell value={node.label} className="min-w-0 w-full" />
               </Label>
             </div>
             
@@ -223,11 +224,11 @@ const CheckboxTree = <T extends FieldValues>({
           <Label
             htmlFor={nodeId}
             className={clsx(
-              "text-xs font-medium text-foreground/80 truncate select-none cursor-pointer",
+              "text-xs font-medium text-foreground/80 min-w-0 flex-1 select-none cursor-pointer",
               node.disabled && "cursor-not-allowed"
             )}
           >
-            {node.label}
+            <EllipsisCell value={node.label} className="min-w-0 w-full" />
           </Label>
         </div>
       </div>

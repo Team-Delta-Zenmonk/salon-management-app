@@ -6,6 +6,7 @@ import FilePicker from "../../../../../../components/form/file-picker";
 import FileMultiPicker from "../../../../../../components/form/multi-file-picker";
 import { uploadImages } from "../../../../../../features/upload-images/upload-images.service";
 import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../../../common/field-limits";
 
 export default function StaffEmployment({ control, disabled }: Readonly<{ control: Control<StaffForm>; disabled: boolean }>) {
   return (
@@ -19,7 +20,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           identifier="staff-title"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.alphabet}
-          maxLength={100}
+          maxLength={FIELD_LIMITS.TITLE}
           placeholder="Stylist, Barber, Receptionist, etc."
         />
 
@@ -82,7 +83,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
         identifier="staff-address"
         disabled={disabled}
         pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
-        maxLength={300}
+        maxLength={FIELD_LIMITS.ADDRESS}
         placeholder="Staff residential address"
       />
 
@@ -95,7 +96,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           identifier="staff-ec-name"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.alphabet}
-          maxLength={250}
+          maxLength={FIELD_LIMITS.NAME}
           placeholder="Contact relative name"
         />
 
@@ -107,7 +108,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           identifier="staff-ec-phone"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.number}
-          maxLength={10}
+          maxLength={FIELD_LIMITS.PHONE}
           placeholder="Emergency phone number"
         />
       </div>

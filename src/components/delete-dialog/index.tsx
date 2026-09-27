@@ -1,6 +1,13 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
-import { Button } from "../ui/button";
 import { Loader2 } from "lucide-react";
+import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { EllipsisCell } from "../ellipse-cell";
 
 interface DeleteDialogProps {
   open: boolean;
@@ -37,7 +44,13 @@ export default function DeleteDialog({
 
         <div className="px-6 py-6">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Are you sure you want to delete <strong className="text-foreground font-semibold">"{itemName}"</strong>? This action cannot be undone.
+            Are you sure you want to delete{" "}
+            <EllipsisCell
+              value={itemName}
+              maxChars={30}
+              className="text-foreground font-semibold inline align-baseline"
+            />
+            ? This action cannot be undone.
           </p>
         </div>
 

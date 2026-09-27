@@ -4,6 +4,7 @@ import { Layers } from "lucide-react";
 import { useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 interface ServiceSideBarProps {
   services: ServiceType[];
@@ -80,9 +81,10 @@ export default function ServiceSidebar({
                 </Avatar>
 
                 <div className="min-w-0 flex-1">
-                  <p className={clsx("truncate text-sm transition-colors capitalize", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}>
-                    {s.name}
-                  </p>
+                  <EllipsisCell
+                    value={s.name}
+                    className={clsx("text-sm transition-colors capitalize block", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}
+                  />
                   <p className="text-xs text-muted-foreground/80 truncate mt-0.5">
                     Base: ₹{s.price ?? "-"} · {s.duration ?? "-"}m
                   </p>

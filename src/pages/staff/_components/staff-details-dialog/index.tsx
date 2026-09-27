@@ -15,6 +15,7 @@ import type { Staff } from "../../../../features/staff/staff.slice";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { motion, AnimatePresence } from "framer-motion";
+import { EllipsisCell } from "../../../../components/ellipse-cell";
 
 dayjs.extend(customParseFormat);
 
@@ -116,11 +117,14 @@ export default function StaffDetailsDialog({
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-[520px] w-full max-h-[90vh] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl flex flex-col">
-
         <div className="shrink-0 px-6 py-5 border-b border-border/50 bg-muted/20">
           <div className="flex items-start gap-4">
             <Avatar className="w-14 h-14 rounded-2xl ring-2 ring-primary/10 shadow-md overflow-hidden shrink-0">
-              <AvatarImage src={staff.photos?.url} alt={fullName} className="object-cover" />
+              <AvatarImage
+                src={staff.photos?.url}
+                alt={fullName}
+                className="object-cover"
+              />
               <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg rounded-2xl">
                 {initials}
               </AvatarFallback>
@@ -128,9 +132,11 @@ export default function StaffDetailsDialog({
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-bold text-foreground capitalize leading-tight tracking-tight truncate">
-                  {fullName}
-                </h2>
+                <EllipsisCell
+                  value={fullName}
+                  className="text-lg font-bold text-foreground capitalize leading-tight tracking-tight truncate"
+                  maxChars={15}
+                />
                 {isActive ? (
                   <Badge className="bg-emerald-500/15 text-emerald-600 border border-emerald-500/20 rounded-full px-2 py-0 text-[10px] font-bold gap-1 select-none h-5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
@@ -146,7 +152,11 @@ export default function StaffDetailsDialog({
 
               <p className="text-xs text-muted-foreground font-medium mt-1 flex items-center gap-1.5">
                 <UserCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                <span className="capitalize">{staff.title || 'Staff Member'}</span>
+                <EllipsisCell
+                  value={staff.email}
+                  className="text-muted-foreground"
+                  maxChars={15}
+                />
                 <span className="text-border mx-0.5">•</span>
                 <Calendar className="h-3 w-3 shrink-0 text-muted-foreground/60" />
                 <span>Joined {formatDisplayDate(staff.joining_date)}</span>
@@ -210,7 +220,9 @@ export default function StaffDetailsDialog({
                     label="Email Address"
                     value={staff.email || "No email on file"}
                     href={staff.email ? `mailto:${staff.email}` : undefined}
-                    iconColor={staff.email ? "text-primary" : "text-muted-foreground/50"}
+                    iconColor={
+                      staff.email ? "text-primary" : "text-muted-foreground/50"
+                    }
                     iconBg={staff.email ? "bg-primary/10" : "bg-muted/30"}
                   />
                   {staff.address && (
@@ -258,9 +270,15 @@ export default function StaffDetailsDialog({
                         <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-destructive/10 text-destructive shrink-0">
                           <Shield className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] text-destructive/70 uppercase tracking-widest font-bold">Emergency Contact</p>
+                        <p className="text-[10px] text-destructive/70 uppercase tracking-widest font-bold">
+                          Emergency Contact
+                        </p>
                       </div>
-                      <p className="text-sm font-bold text-foreground pl-10">{staff.emergency_contact.name || '—'}</p>
+                      <EllipsisCell
+                        value={staff.emergency_contact.name}
+                        className="text-sm font-bold text-foreground pl-10"
+                        maxChars={15}
+                      />
                       {staff.emergency_contact.phone && (
                         <a
                           href={`tel:${staff.emergency_contact.phone}`}
@@ -280,13 +298,20 @@ export default function StaffDetailsDialog({
                   {!staff.staff_docs || staff.staff_docs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 border border-dashed border-border/50 rounded-2xl">
                       <FileText className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                      <p className="text-xs font-semibold text-muted-foreground">No documents uploaded</p>
-                      <p className="text-[11px] text-muted-foreground/60 mt-0.5">Documents can be added when editing staff details.</p>
+                      <p className="text-xs font-semibold text-muted-foreground">
+                        No documents uploaded
+                      </p>
+                      <p className="text-[11px] text-muted-foreground/60 mt-0.5">
+                        Documents can be added when editing staff details.
+                      </p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 gap-2.5">
                       {staff.staff_docs.map((doc, i) => {
-                        const isPdf = doc.format === "pdf" || doc.url?.toLowerCase().endsWith(".pdf") || doc.filename?.toLowerCase().endsWith(".pdf");
+                        const isPdf =
+                          doc.format === "pdf" ||
+                          doc.url?.toLowerCase().endsWith(".pdf") ||
+                          doc.filename?.toLowerCase().endsWith(".pdf");
                         return (
                           <div
                             key={doc.url || i}
@@ -294,11 +319,19 @@ export default function StaffDetailsDialog({
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
-                                {isPdf ? <FileText className="h-4 w-4 text-destructive" /> : <UserCircle className="h-4 w-4 text-primary" />}
+                                {isPdf ? (
+                                  <FileText className="h-4 w-4 text-destructive" />
+                                ) : (
+                                  <UserCircle className="h-4 w-4 text-primary" />
+                                )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs font-semibold text-foreground truncate">{doc.filename || `Document ${i + 1}`}</p>
-                                <p className="text-[10px] text-muted-foreground uppercase font-bold">{isPdf ? "PDF Document" : "Image File"}</p>
+                                <p className="text-xs font-semibold text-foreground truncate">
+                                  {doc.filename || `Document ${i + 1}`}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground uppercase font-bold">
+                                  {isPdf ? "PDF Document" : "Image File"}
+                                </p>
                               </div>
                             </div>
                             <a
@@ -321,22 +354,35 @@ export default function StaffDetailsDialog({
                 <>
                   {(() => {
                     const todayHours = staff.active_hours?.[todayKey];
-                    const hasHours = todayHours?.start_time && todayHours?.end_time;
+                    const hasHours =
+                      todayHours?.start_time && todayHours?.end_time;
                     return (
-                      <div className={`flex items-center gap-3 p-4 rounded-2xl border mb-1 ${
-                        hasHours
-                          ? "bg-primary/8 border-primary/20"
-                          : "bg-muted/20 border-border/30"
-                      }`}>
-                        <div className={`w-9 h-9 flex items-center justify-center rounded-xl shrink-0 ${
-                          hasHours ? "bg-primary/15 text-primary" : "bg-muted/40 text-muted-foreground/50"
-                        }`}>
+                      <div
+                        className={`flex items-center gap-3 p-4 rounded-2xl border mb-1 ${
+                          hasHours
+                            ? "bg-primary/8 border-primary/20"
+                            : "bg-muted/20 border-border/30"
+                        }`}
+                      >
+                        <div
+                          className={`w-9 h-9 flex items-center justify-center rounded-xl shrink-0 ${
+                            hasHours
+                              ? "bg-primary/15 text-primary"
+                              : "bg-muted/40 text-muted-foreground/50"
+                          }`}
+                        >
                           <Clock className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-0.5">Today's Shift</p>
-                          <p className={`text-sm font-bold ${hasHours ? "text-primary" : "text-muted-foreground"}`}>
-                            {hasHours ? `${todayHours.start_time} – ${todayHours.end_time}` : "Off Today"}
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-0.5">
+                            Today's Shift
+                          </p>
+                          <p
+                            className={`text-sm font-bold ${hasHours ? "text-primary" : "text-muted-foreground"}`}
+                          >
+                            {hasHours
+                              ? `${todayHours.start_time} – ${todayHours.end_time}`
+                              : "Off Today"}
                           </p>
                         </div>
                       </div>
@@ -356,27 +402,43 @@ export default function StaffDetailsDialog({
                             isToday
                               ? "bg-primary border-primary shadow-md shadow-primary/20"
                               : isClosed
-                              ? "bg-muted/30 border-border/50"
-                              : "bg-muted/30 border-border/30"
+                                ? "bg-muted/30 border-border/50"
+                                : "bg-muted/30 border-border/30"
                           }`}
                         >
-                          <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                            isToday ? "text-primary-foreground" : isClosed ? "text-muted-foreground" : "text-foreground/80"
-                          }`}>
+                          <span
+                            className={`text-[10px] font-bold uppercase tracking-wider ${
+                              isToday
+                                ? "text-primary-foreground"
+                                : isClosed
+                                  ? "text-muted-foreground"
+                                  : "text-foreground/80"
+                            }`}
+                          >
                             {DAY_ABBR[day]}
                           </span>
 
                           {isClosed ? (
-                            <span className={`text-[9px] font-semibold ${isToday ? "text-primary-foreground/80" : "text-destructive"}`}>
+                            <span
+                              className={`text-[9px] font-semibold ${isToday ? "text-primary-foreground/80" : "text-destructive"}`}
+                            >
                               Off
                             </span>
                           ) : (
                             <div className="flex flex-col items-center gap-0.5">
-                              <span className={`text-[9px] font-semibold leading-none ${isToday ? "text-primary-foreground" : "text-foreground/80"}`}>
+                              <span
+                                className={`text-[9px] font-semibold leading-none ${isToday ? "text-primary-foreground" : "text-foreground/80"}`}
+                              >
                                 {hours.start_time}
                               </span>
-                              <span className={`text-[8px] ${isToday ? "text-primary-foreground/60" : "text-muted-foreground"}`}>to</span>
-                              <span className={`text-[9px] font-semibold leading-none ${isToday ? "text-primary-foreground" : "text-foreground/80"}`}>
+                              <span
+                                className={`text-[8px] ${isToday ? "text-primary-foreground/60" : "text-muted-foreground"}`}
+                              >
+                                to
+                              </span>
+                              <span
+                                className={`text-[9px] font-semibold leading-none ${isToday ? "text-primary-foreground" : "text-foreground/80"}`}
+                              >
                                 {hours.end_time}
                               </span>
                             </div>

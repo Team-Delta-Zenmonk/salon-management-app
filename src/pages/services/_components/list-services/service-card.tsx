@@ -6,7 +6,7 @@ import { callSnack } from "../../../../components/snackbar";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
-
+import { EllipsisCell } from "../../../../components/ellipse-cell";
 import type { Service } from "../../../../features/service/service.slice";
 
 interface ServiceCardProps {
@@ -90,7 +90,11 @@ export function ServiceCard({
           <div className="relative shrink-0">
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <Avatar className="w-14 h-14 rounded-2xl ring-2 ring-primary/10 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10 shrink-0 overflow-hidden">
-              <AvatarImage src={service.logo || undefined} alt={service.name} className="object-cover" />
+              <AvatarImage
+                src={service.logo || undefined}
+                alt={service.name}
+                className="object-cover"
+              />
               <AvatarFallback className="bg-primary/5 text-primary font-bold text-lg rounded-2xl">
                 {service.name ? service.name.charAt(0).toUpperCase() : "?"}
               </AvatarFallback>
@@ -98,13 +102,17 @@ export function ServiceCard({
           </div>
 
           <div className="flex-1 min-w-0 pr-24">
-            <h3 className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors truncate capitalize">
-              {service.name}
-            </h3>
+            <EllipsisCell
+              value={service.name}
+              maxChars={100}
+              className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors truncate capitalize"
+            />
             {service.description ? (
-              <p className="text-muted-foreground text-xs mt-1.5 line-clamp-2">
-                {service.description}
-              </p>
+              <EllipsisCell
+                value={service.description}
+                maxChars={100}
+                className="text-muted-foreground text-xs mt-1.5 line-clamp-2"
+              />
             ) : (
               <p className="text-muted-foreground/50 text-xs mt-1.5 italic">
                 No description provided.
@@ -157,7 +165,10 @@ export function ServiceCard({
         </div>
 
         <div className="flex flex-wrap gap-2 mt-4 items-center relative z-10">
-          <Badge variant="outline" className="bg-muted/40 border-border/50 text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider">
+          <Badge
+            variant="outline"
+            className="bg-muted/40 border-border/50 text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider"
+          >
             {service.gender}
           </Badge>
           {hasSubServices && (
@@ -171,7 +182,10 @@ export function ServiceCard({
             </Badge>
           )}
           {!service.is_active && (
-            <Badge variant="destructive" className="bg-destructive/10 text-destructive border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-destructive/10">
+            <Badge
+              variant="destructive"
+              className="bg-destructive/10 text-destructive border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-destructive/10"
+            >
               Inactive
             </Badge>
           )}
@@ -179,7 +193,9 @@ export function ServiceCard({
 
         {hasSubServices && (
           <div className="mt-4 relative z-10">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">Sub-services</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">
+              Sub-services
+            </div>
             <div className="flex items-center gap-3 bg-primary/5 border border-primary/10 rounded-2xl p-2.5">
               <div className="flex -space-x-2.5 overflow-hidden shrink-0">
                 {subServices.slice(0, 4).map((sub) => (
@@ -187,7 +203,11 @@ export function ServiceCard({
                     key={sub.uuid}
                     className="w-7 h-7 rounded-full ring-2 ring-background border border-primary/20 overflow-hidden shrink-0"
                   >
-                    <AvatarImage src={sub.logo || undefined} alt={sub.name} className="object-cover" />
+                    <AvatarImage
+                      src={sub.logo || undefined}
+                      alt={sub.name}
+                      className="object-cover"
+                    />
                     <AvatarFallback className="bg-primary/10 text-primary font-bold text-[9px] flex items-center justify-center">
                       {sub.name ? sub.name.charAt(0).toUpperCase() : "?"}
                     </AvatarFallback>
@@ -199,10 +219,13 @@ export function ServiceCard({
                   </div>
                 )}
               </div>
-              
-              <div className="text-[11px] font-medium text-foreground truncate flex-1 min-w-0 pr-1 capitalize">
-                {subServicesNames}
-              </div>
+              <EllipsisCell
+                value={subServicesNames}
+                maxChars={20}
+                className={
+                  "text-[11px] font-medium text-foreground truncate flex-1 min-w-0 pr-1 capitalize"
+                }
+              />
             </div>
           </div>
         )}
@@ -212,8 +235,12 @@ export function ServiceCard({
         {hasSubServices ? (
           <>
             <div className="flex flex-col">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Price Range</span>
-              <span className="text-sm font-bold text-primary">{priceRangeString}</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                Price Range
+              </span>
+              <span className="text-sm font-bold text-primary">
+                {priceRangeString}
+              </span>
             </div>
             <Button
               onClick={() => onManageOptions(service)}
@@ -228,7 +255,9 @@ export function ServiceCard({
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
                 Price ({service.price_type})
               </span>
-              <span className="text-sm font-bold text-primary">₹{service.price}</span>
+              <span className="text-sm font-bold text-primary">
+                ₹{service.price}
+              </span>
             </div>
             {service.duration && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

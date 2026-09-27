@@ -18,6 +18,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { motion } from "framer-motion";
 import { listInventoryItemsService } from "../../features/inventory/list-inventory-items/list-inventory-items.service";
 import type { InventoryItem } from "../../features/inventory/inventory-item.slice";
+import EllipsisCell from "@/components/ellipse-cell";
 
 const PAGE_LIMIT = 10;
 
@@ -257,7 +258,7 @@ export default function Inventory() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full bg-background">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
@@ -268,7 +269,8 @@ export default function Inventory() {
             Inventory
           </h1>
           <p className="text-muted-foreground/80 text-sm">
-            Track and manage your products, stock levels, and supply transactions.
+            Track and manage your products, stock levels, and supply
+            transactions.
           </p>
         </div>
         <div className="shrink-0 flex gap-2">
@@ -283,7 +285,7 @@ export default function Inventory() {
       </motion.div>
 
       <div className="w-full px-4 md:px-8 pb-8 space-y-6">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
@@ -292,14 +294,20 @@ export default function Inventory() {
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">Total Products</span>
+              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
+                Total Products
+              </span>
               <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-primary">
                 <Package className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-1 relative z-10">
               <p className="text-xl font-bold tracking-tight text-foreground">
-                {allStockLoading ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /> : totalProducts}
+                {allStockLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                ) : (
+                  totalProducts
+                )}
               </p>
             </div>
           </div>
@@ -307,14 +315,20 @@ export default function Inventory() {
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-amber-500/20 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-amber-500/5 rounded-full blur-xl group-hover:bg-amber-500/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">Low Stock</span>
+              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
+                Low Stock
+              </span>
               <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-amber-500">
                 <AlertTriangle className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-1 relative z-10">
               <p className="text-xl font-bold tracking-tight text-foreground">
-                {allStockLoading ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /> : lowStockCount}
+                {allStockLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                ) : (
+                  lowStockCount
+                )}
               </p>
             </div>
           </div>
@@ -322,14 +336,20 @@ export default function Inventory() {
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-destructive/20 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-destructive/5 rounded-full blur-xl group-hover:bg-destructive/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">Out of Stock</span>
+              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
+                Out of Stock
+              </span>
               <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-destructive">
                 <XCircle className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-1 relative z-10">
               <p className="text-xl font-bold tracking-tight text-foreground">
-                {allStockLoading ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /> : outOfStockCount}
+                {allStockLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                ) : (
+                  outOfStockCount
+                )}
               </p>
             </div>
           </div>
@@ -337,14 +357,20 @@ export default function Inventory() {
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-emerald-500/20 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">Stock Value</span>
+              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
+                Stock Value
+              </span>
               <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-emerald-500">
                 <Coins className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-1 relative z-10">
               <p className="text-xl font-bold tracking-tight text-foreground truncate">
-                {allStockLoading ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /> : `₹${inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+                {allStockLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                ) : (
+                  `₹${inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+                )}
               </p>
             </div>
           </div>
@@ -352,15 +378,18 @@ export default function Inventory() {
           <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-primary/20 col-span-2 sm:col-span-1 transition-all duration-300">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">Latest Action</span>
+              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
+                Latest Action
+              </span>
               <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-primary">
                 <ClipboardList className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-1 relative z-10">
-              <p className="text-[11px] font-bold text-foreground truncate uppercase tracking-wide leading-snug">
-                {getLatestActivityText()}
-              </p>
+              <EllipsisCell
+                value={getLatestActivityText()}
+                className="text-[11px] font-bold text-foreground truncate uppercase tracking-wide leading-snug"
+              />
             </div>
           </div>
         </motion.div>
@@ -383,7 +412,9 @@ export default function Inventory() {
               <button
                 onClick={() => handleTabChange("logs")}
                 className={`flex-1 sm:flex-initial relative z-10 inline-flex h-full items-center justify-center rounded-lg px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 whitespace-nowrap ${
-                  activeTab === 0 ? "text-primary-foreground font-bold" : "text-muted-foreground hover:text-foreground"
+                  activeTab === 0
+                    ? "text-primary-foreground font-bold"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {activeTab === 0 && (
@@ -394,12 +425,16 @@ export default function Inventory() {
                   />
                 )}
                 <ClipboardList className="w-4 h-4 mr-1.5 sm:mr-2 relative z-20 shrink-0" />
-                <span className="relative z-20 whitespace-nowrap">Inventory Logs</span>
+                <span className="relative z-20 whitespace-nowrap">
+                  Inventory Logs
+                </span>
               </button>
               <button
                 onClick={() => handleTabChange("stock")}
                 className={`flex-1 sm:flex-initial relative z-10 inline-flex h-full items-center justify-center rounded-lg px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 whitespace-nowrap ${
-                  activeTab === 1 ? "text-primary-foreground font-bold" : "text-muted-foreground hover:text-foreground"
+                  activeTab === 1
+                    ? "text-primary-foreground font-bold"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {activeTab === 1 && (
@@ -410,7 +445,9 @@ export default function Inventory() {
                   />
                 )}
                 <Package className="w-4 h-4 mr-1.5 sm:mr-2 relative z-20 shrink-0" />
-                <span className="relative z-20 whitespace-nowrap">Current Stocks</span>
+                <span className="relative z-20 whitespace-nowrap">
+                  Current Stocks
+                </span>
               </button>
             </div>
           </div>

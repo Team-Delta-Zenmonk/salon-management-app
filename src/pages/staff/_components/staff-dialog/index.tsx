@@ -90,7 +90,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
         dob: data.dob,
         title: data.title,
         joining_date: data.joining_date,
-        end_date: data.end_date?.trim() ? data.end_date : undefined,
+        end_date: data.end_date?.trim() ? data.end_date : null,
         address: data.address,
         emergency_contact: data.emergency_contact,
         gender: data.gender,

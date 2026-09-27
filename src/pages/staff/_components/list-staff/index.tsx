@@ -1,35 +1,63 @@
-import InfiniteScroll from "react-infinite-scroll-component";
-import { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import type { Staff, StaffActiveHours } from "../../../../features/staff/staff.slice";
-import { useAppDispatch } from "../../../../store/hooks";
-import StaffDialog from "../staff-dialog";
+import {
+  Loader2,
+  Mail,
+  Phone,
+  Pencil,
+  Trash2,
+  ClipboardCheck,
+  Users,
+} from "lucide-react";
+import { useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import DeleteDialog from "../../../../components/delete-dialog";
-import { listStaffAction } from "../../../../features/staff/list-staff/list-staff.action";
 import { callSnack } from "../../../../components/snackbar";
-import { removeStaffService } from "../../../../features/staff/remove-staff/remove-staff.service";
-import AssignServicesDialog from "../assign-services-dialog";
-import StaffDetailsDialog from "../staff-details-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../../../components/ui/avatar";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
-import { Pencil, Trash2, Phone, Mail, ClipboardCheck, Loader2, Users } from "lucide-react";
+import { listStaffAction } from "../../../../features/staff/list-staff/list-staff.action";
+import { removeStaffService } from "../../../../features/staff/remove-staff/remove-staff.service";
+import type {
+  Staff,
+  StaffActiveHours,
+} from "../../../../features/staff/staff.slice";
+import { useAppDispatch } from "../../../../store/hooks";
+import AssignServicesDialog from "../assign-services-dialog";
+import StaffDetailsDialog from "../staff-details-dialog";
+import StaffDialog from "../staff-dialog";
 import { motion, type Variants } from "framer-motion";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 dayjs.extend(customParseFormat);
 
-const getFullName = (staff: Staff) => `${staff.first_name} ${staff.last_name || ""}`.trim();
+const getFullName = (staff: Staff) =>
+  `${staff.first_name} ${staff.last_name || ""}`.trim();
 
 const getGenderBadge = (gender: string) => (
-  <Badge variant="outline" className="capitalize text-[10px] font-medium px-2 py-0.5 rounded bg-muted/40 border-border/50 text-muted-foreground select-none">
+  <Badge
+    variant="outline"
+    className="capitalize text-[10px] font-medium px-2 py-0.5 rounded bg-muted/40 border-border/50 text-muted-foreground select-none"
+  >
     {gender}
   </Badge>
 );
 
 const getTodayShift = (activeHours?: StaffActiveHours | null) => {
   if (!activeHours) return "Off Today";
-  const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const dayNames = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
   const todayName = dayNames[dayjs().day()];
   const todayHours = activeHours[todayName];
   if (!todayHours || !todayHours.start_time || !todayHours.end_time) {
@@ -54,7 +82,8 @@ function StaffCard({
   deleteLoading: boolean;
 }) {
   const initials = staff.first_name?.charAt(0).toUpperCase() || "S";
-  const isActive = !staff.end_date || dayjs(staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
+  const isActive =
+    !staff.end_date || dayjs(staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
 
   const cardVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95 },
@@ -78,7 +107,11 @@ function StaffCard({
           <div className="relative shrink-0">
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <Avatar className="w-14 h-14 rounded-2xl ring-2 ring-primary/10 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10 shrink-0 overflow-hidden">
-              <AvatarImage src={staff.photos?.url || undefined} alt={getFullName(staff)} className="object-cover" />
+              <AvatarImage
+                src={staff.photos?.url || undefined}
+                alt={getFullName(staff)}
+                className="object-cover"
+              />
               <AvatarFallback className="bg-primary/5 text-primary font-bold text-lg rounded-2xl">
                 {initials}
               </AvatarFallback>
@@ -87,22 +120,33 @@ function StaffCard({
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors truncate capitalize">
-                {getFullName(staff)}
-              </h3>
+              <EllipsisCell
+                value={getFullName(staff)}
+                className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors capitalize"
+              />
               {isActive ? (
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Active" />
+                <span
+                  className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"
+                  title="Active"
+                />
               ) : (
-                <span className="w-2.5 h-2.5 rounded-full bg-destructive shrink-0" title="Inactive" />
+                <span
+                  className="w-2.5 h-2.5 rounded-full bg-destructive shrink-0"
+                  title="Inactive"
+                />
               )}
             </div>
-            <p className="text-muted-foreground/80 text-sm mt-1 truncate capitalize">
-              {staff.title || "Staff Member"}
-            </p>
+            <EllipsisCell
+              value={staff.title || "Staff Member"}
+              className="text-muted-foreground/80 text-sm mt-1 truncate capitalize"
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-2 mt-4 text-[11px] text-muted-foreground bg-muted/5 border border-border/30 rounded-2xl p-3" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="grid grid-cols-1 gap-2 mt-4 text-[11px] text-muted-foreground bg-muted/5 border border-border/30 rounded-2xl p-3"
+          onClick={(e) => e.stopPropagation()}
+        >
           {staff.email ? (
             <a
               href={`mailto:${staff.email}`}
@@ -116,7 +160,9 @@ function StaffCard({
           ) : (
             <div className="flex items-center gap-2 truncate">
               <Mail className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
-              <span className="truncate italic text-muted-foreground/50">No Email</span>
+              <span className="truncate italic text-muted-foreground/50">
+                No Email
+              </span>
             </div>
           )}
 
@@ -131,9 +177,13 @@ function StaffCard({
           </a>
 
           <div className="flex items-center gap-2 truncate pt-1.5 border-t border-border/10">
-            <span className="font-bold text-foreground/60 shrink-0">Joined:</span>
+            <span className="font-bold text-foreground/60 shrink-0">
+              Joined:
+            </span>
             <span className="text-foreground/80 font-medium">
-              {staff.joining_date ? dayjs(staff.joining_date, "DD-MM-YYYY").format("DD MMM YYYY") : "—"}
+              {staff.joining_date
+                ? dayjs(staff.joining_date, "DD-MM-YYYY").format("DD MMM YYYY")
+                : "—"}
             </span>
             <span className="mx-1 text-border">•</span>
             {getGenderBadge(staff.gender)}
@@ -142,24 +192,37 @@ function StaffCard({
 
         <div className="mt-3 relative z-10">
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-primary/5 border border-primary/10 rounded-2xl p-2.5">
-            <span className="font-semibold text-foreground/80 select-none">Today's Shift:</span>
-            <span className="font-medium text-primary">{getTodayShift(staff.active_hours)}</span>
+            <span className="font-semibold text-foreground/80 select-none">
+              Today's Shift:
+            </span>
+            <span className="font-medium text-primary">
+              {getTodayShift(staff.active_hours)}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="mt-5 pt-3.5 border-t border-border/50 flex items-center gap-2 relative z-10" onClick={(e) => e.stopPropagation()}>
-        {isActive && <Button
-          variant="outline"
-          size="sm"
-          className="flex-1 h-9 rounded-full hover:bg-green-500/10 hover:text-green-600 border-border/50 text-muted-foreground transition-all gap-1 px-2 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => onAssign(staff)}
-          disabled={deleteLoading || !isActive}
-          title={isActive ? "Assign Services" : "Cannot assign services to inactive staff"}
-        >
-          <ClipboardCheck className="w-3.5 h-3.5 text-green-600" />
-          <span className="text-[11px] font-semibold">Assign</span>
-        </Button>}
+      <div
+        className="mt-5 pt-3.5 border-t border-border/50 flex items-center gap-2 relative z-10"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {isActive && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 h-9 rounded-full hover:bg-green-500/10 hover:text-green-600 border-border/50 text-muted-foreground transition-all gap-1 px-2 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => onAssign(staff)}
+            disabled={deleteLoading || !isActive}
+            title={
+              isActive
+                ? "Assign Services"
+                : "Cannot assign services to inactive staff"
+            }
+          >
+            <ClipboardCheck className="w-3.5 h-3.5 text-green-600" />
+            <span className="text-[11px] font-semibold">Assign</span>
+          </Button>
+        )}
         <Button
           variant="outline"
           size="sm"
@@ -230,13 +293,16 @@ export default function ListStaff({
           page: 1,
           limit: 1000,
           search: searchQuery.trim() || undefined,
-        })
+        }),
       ).unwrap();
 
       callSnack("Staff deleted successfully", "success");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      callSnack(error?.response?.data?.message || "Failed to delete staff", "error");
+      callSnack(
+        error?.response?.data?.message || "Failed to delete staff",
+        "error",
+      );
     } finally {
       setDeleteLoading(false);
       setDeleteDialogOpen(false);
@@ -246,7 +312,6 @@ export default function ListStaff({
 
   return (
     <>
-
       <InfiniteScroll
         dataLength={staffs.length}
         next={fetchMoreStaff}
@@ -303,9 +368,12 @@ export default function ListStaff({
           <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
             <Users className="w-8 h-8 text-primary/40" />
           </div>
-          <h3 className="text-lg font-medium text-foreground mb-1">No staff members found</h3>
+          <h3 className="text-lg font-medium text-foreground mb-1">
+            No staff members found
+          </h3>
           <p className="text-muted-foreground text-sm text-center max-w-sm">
-            We couldn't find any team members matching your current filters. Try adding a new staff member or clearing the search fields.
+            We couldn't find any team members matching your current filters. Try
+            adding a new staff member or clearing the search fields.
           </p>
         </div>
       )}
@@ -345,7 +413,7 @@ export default function ListStaff({
                 page: 1,
                 limit: 1000,
                 search: searchQuery.trim() || undefined,
-              })
+              }),
             ).unwrap();
           }}
         />

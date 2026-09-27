@@ -80,8 +80,10 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   };
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
+    const activeEl = document.activeElement;
+    const isFocused = elementRef.current?.contains(activeEl);
     const overflowing = checkCurrentlyOverflowing();
-    if (overflowing || forceTooltip || isCharTruncated) {
+    if (!isFocused && (overflowing || forceTooltip || isCharTruncated)) {
       updatePosition();
       setShowTooltip(true);
     }
@@ -94,9 +96,17 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
     props.onMouseLeave?.(e);
   };
 
+  const handleFocus = (e: React.FocusEvent<HTMLSpanElement>) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setShowTooltip(false);
+    props.onFocus?.(e);
+  };
+
   const handleMouseDown = (e: React.MouseEvent<HTMLSpanElement>) => {
+    const activeEl = document.activeElement;
+    const isFocused = elementRef.current?.contains(activeEl);
     const overflowing = checkCurrentlyOverflowing();
-    if (overflowing || forceTooltip || isCharTruncated) {
+    if (!isFocused && (overflowing || forceTooltip || isCharTruncated)) {
       updatePosition();
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
@@ -181,6 +191,7 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
         ref={elementRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onFocus={handleFocus}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}

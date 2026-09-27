@@ -5,6 +5,7 @@ import type { RootState } from "../../../../store/store";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
 import { motion } from "framer-motion";
 import type { Staff } from "../../../../features/staff/staff.slice";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 interface StaffSidebarProps {
   selectedStaffUuid: string | null;
@@ -74,9 +75,10 @@ export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Reado
                 </Avatar>
 
                 <div className="min-w-0 flex-1">
-                  <p className={clsx("truncate text-sm transition-colors capitalize", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}>
-                    {staffName}
-                  </p>
+                  <EllipsisCell
+                    value={staffName}
+                    className={clsx("text-sm transition-colors capitalize block", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}
+                  />
                   <p className="text-xs text-muted-foreground/80 truncate mt-0.5">{staff.email}</p>
                 </div>
               </motion.div>

@@ -13,6 +13,7 @@ import { Edit2, Trash2, User, UserPlus, Plus, Loader2 } from "lucide-react";
 import { Button } from "../../../../../../components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../../../../../components/ui/avatar";
 import type { Staff } from "../../../../../../features/staff/staff.slice";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 interface DialogContext {
   staff_uuid: string;
@@ -144,11 +145,14 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
   return (
     <>
       <div className="flex flex-wrap items-start sm:items-center justify-between gap-4 pb-6 border-b border-border/50 mb-6">
-        <div className="space-y-1">
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2 capitalize">
+        <div className="space-y-1 min-w-0 flex-1">
+          <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-6 rounded bg-primary shrink-0" />
-            {selectedService.name} Staff Pricing
-          </h2>
+            <EllipsisCell
+              value={`${selectedService.name} Staff Pricing`}
+              className="text-lg font-bold text-foreground capitalize block min-w-0"
+            />
+          </div>
           <p className="text-muted-foreground/80 text-xs sm:text-sm">
             View staff price & duration for this service and its subservices.
           </p>
@@ -203,10 +207,11 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
             return (
               <div key={service.uuid} className="flex flex-col gap-4">
                 {showHeader && (
-                  <div className="flex items-center gap-3">
-                    <h4 className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize">
-                      {service.name}
-                    </h4>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <EllipsisCell
+                      value={service.name}
+                      className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize shrink-0 max-w-[300px]"
+                    />
                     <div className="h-px bg-border/55 flex-1" />
                   </div>
                 )}
@@ -231,9 +236,10 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                             )}
                           </Avatar>
                           <div className="min-w-0">
-                            <p className="font-bold text-sm text-foreground truncate capitalize">
-                              {staff_name}
-                            </p>
+                            <EllipsisCell
+                              value={staff_name}
+                              className="font-bold text-sm text-foreground capitalize block"
+                            />
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
                               <span
                                 className={clsx(

@@ -5,6 +5,7 @@ import DatePicker from "../../../../../../components/form/date-picker";
 import Select from "../../../../../../components/form/select";
 import { GenderOptions } from "../../../../../../common/enums/gender.enum";
 import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../../../common/field-limits";
 
 export default function StaffBasicInformation({ control, disabled }: Readonly<{ control: Control<StaffForm>; disabled: boolean }>) {
   return (
@@ -18,7 +19,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           identifier="staff-first"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.alphabet}
-          maxLength={250}
+          maxLength={FIELD_LIMITS.NAME}
           placeholder="First name"
         />
 
@@ -30,7 +31,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           identifier="staff-last"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.alphabet}
-          maxLength={250}
+          maxLength={FIELD_LIMITS.NAME}
           placeholder="Last name"
         />
       </div>
@@ -43,7 +44,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           control={control}
           identifier="staff-email"
           disabled={disabled}
-          maxLength={100}
+          maxLength={FIELD_LIMITS.EMAIL}
           placeholder="Email address"
         />
 
@@ -70,7 +71,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           identifier="staff-phone"
           disabled={disabled}
           pattern={VALIDATE_PATTERN.number}
-          maxLength={10}
+          maxLength={FIELD_LIMITS.PHONE}
           placeholder="10-digit mobile number"
         />
 
@@ -82,7 +83,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           identifier="staff-add-phone"
           disabled={disabled}
           pattern={/^\d*$/}
-          maxLength={10}
+          maxLength={FIELD_LIMITS.PHONE}
           placeholder="Secondary phone (optional)"
         />
       </div>

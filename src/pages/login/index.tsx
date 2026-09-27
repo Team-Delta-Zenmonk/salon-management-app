@@ -10,6 +10,7 @@ import { loginSalonAction } from "../../features/auth/login/login.action";
 import { useAppDispatch } from "../../store/hooks";
 import { callSnack } from "../../components/snackbar";
 import { VALIDATE_PATTERN } from "../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../common/field-limits";
 import { Button } from "../../components/ui/button";
 import { motion } from "framer-motion";
 import { APP_NAME } from "@/constants/app";
@@ -174,7 +175,7 @@ export default function Login() {
                     disabled={isLoading}
                     pattern={VALIDATE_PATTERN.noSpace}
                     inputPropsClassName="bg-white dark:bg-neutral-900"
-                    maxLength={100}
+                    maxLength={FIELD_LIMITS.EMAIL}
                   />
                 </motion.div>
 
@@ -199,7 +200,7 @@ export default function Login() {
                     identifier="login-form-password"
                     disabled={isLoading}
                     placeholder="••••••••"
-                    maxLength={50}
+                    maxLength={FIELD_LIMITS.PASSWORD}
                   />
                 </motion.div>
 

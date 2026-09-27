@@ -4,20 +4,21 @@ import { SERVICE_GENDER } from "../../../../common/enums/service-gender.enum";
 import { PRICE_TYPE } from "../../../../common/enums/price-type.enum";
 import { DISCOUNT_TYPE } from "../../../../common/enums/discount-type.enum";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 
 export const serviceSchema = z
   .object({
     name: z
       .string({ message: "Required" })
       .min(2, { message: "Minimum 2 characters" })
-      .max(250, { message: "Maximum 250 characters" })
+      .max(FIELD_LIMITS.ITEM_NAME, { message: `Maximum ${FIELD_LIMITS.ITEM_NAME} characters` })
       .regex(VALIDATE_PATTERN.alphabetWithSpecial, {
         message: "Only alphabets and special characters are allowed",
       }),
     description: z
       .string({ message: "Required" })
       .min(2, { message: "Minimum 2 characters" })
-      .max(300, { message: "Maximum 300 characters" })
+      .max(FIELD_LIMITS.DESCRIPTION, { message: `Maximum ${FIELD_LIMITS.DESCRIPTION} characters` })
       .regex(VALIDATE_PATTERN.alphabetWithSpecial, {
         message: "Only alphabets and special characters are allowed",
       }),

@@ -16,6 +16,7 @@ import { listCategoriesAction } from "../../../../features/category/list-categor
 import { createServiceService } from "../../../../features/service/create-service/create-service.service";
 import { updateServiceAction } from "../../../../features/service/update-service/update-service.action";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 import {
   Dialog,
   DialogContent,
@@ -201,7 +202,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 identifier="service-name"
                 placeholder="Enter service name"
                 disabled={isLoading}
-                maxLength={250}
+                maxLength={FIELD_LIMITS.ITEM_NAME}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
 
@@ -213,7 +214,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 identifier="service-description"
                 placeholder="Enter service description"
                 disabled={isLoading}
-                maxLength={300}
+                maxLength={FIELD_LIMITS.DESCRIPTION}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
                 multiline
               />

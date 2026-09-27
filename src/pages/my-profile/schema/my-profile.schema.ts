@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { VALIDATE_PATTERN } from "../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../common/field-limits";
 
 const BusinessDaySchema = z.object({
   start_time: z.string().min(1, "Required"),
@@ -17,28 +18,28 @@ const BusinessDaySchema = z.object({
 export const MyProfileSchema = z.object({
   name: z.string()
     .min(1, "Required")
-    .max(250, "Max 250 characters")
+    .max(FIELD_LIMITS.ITEM_NAME, `Max ${FIELD_LIMITS.ITEM_NAME} characters`)
     .regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
   owner_name: z.string()
     .min(1, "Required")
-    .max(250, "Max 250 characters")
+    .max(FIELD_LIMITS.NAME, `Max ${FIELD_LIMITS.NAME} characters`)
     .regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
   email: z.string().email(),
   phone: z.string()
     .min(1, "Required")
-    .length(10, "Must be 10 digits")
+    .length(FIELD_LIMITS.PHONE, `Must be ${FIELD_LIMITS.PHONE} digits`)
     .regex(VALIDATE_PATTERN.number, "Only numbers allowed"),
-  about: z.string().max(300, "Maximum 300 characters").regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
+  about: z.string().max(FIELD_LIMITS.DESCRIPTION, `Maximum ${FIELD_LIMITS.DESCRIPTION} characters`).regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
   type: z.string(),
   address: z.object({
     address: z.string().min(1, "Required"),
     map_link: z.string().optional().nullable(),
     latitude: z.union([z.string(), z.number()]).optional().nullable(),
     longitude: z.union([z.string(), z.number()]).optional().nullable(),
-    street: z.string().max(300, "Max 300 characters").optional().or(z.literal("")),
-    city: z.string().max(250, "Max 250 characters").regex(VALIDATE_PATTERN.alphabet, "Only alphabets are allowed").optional().or(z.literal("")),
-    state: z.string().max(250, "Max 250 characters").regex(VALIDATE_PATTERN.alphabet, "Only alphabets are allowed").optional().or(z.literal("")),
-    pincode: z.string().max(12, "Max 12 digits").regex(VALIDATE_PATTERN.number, "Only numbers allowed").optional().or(z.literal("")),
+    street: z.string().max(FIELD_LIMITS.ADDRESS, `Max ${FIELD_LIMITS.ADDRESS} characters`).optional().or(z.literal("")),
+    city: z.string().max(FIELD_LIMITS.CITY_STATE, `Max ${FIELD_LIMITS.CITY_STATE} characters`).regex(VALIDATE_PATTERN.alphabet, "Only alphabets are allowed").optional().or(z.literal("")),
+    state: z.string().max(FIELD_LIMITS.CITY_STATE, `Max ${FIELD_LIMITS.CITY_STATE} characters`).regex(VALIDATE_PATTERN.alphabet, "Only alphabets are allowed").optional().or(z.literal("")),
+    pincode: z.string().max(FIELD_LIMITS.PINCODE, `Max ${FIELD_LIMITS.PINCODE} digits`).regex(VALIDATE_PATTERN.number, "Only numbers allowed").optional().or(z.literal("")),
   }),
   logo: z.any().nullable(),
   photos: z.array(z.any()),

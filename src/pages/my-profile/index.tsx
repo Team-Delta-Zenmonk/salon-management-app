@@ -80,6 +80,44 @@ const MyProfile = () => {
     return hours as SalonProfileForm["business_hours"];
   };
 
+  const getMappedInitialAddress = () => {
+    const fullAddr = salon?.address || "";
+    let street = "";
+    let city = "";
+    let state = "";
+    let pincode = "";
+
+    if (fullAddr) {
+      const parts = fullAddr.split(",").map((p) => p.trim()).filter(Boolean);
+      if (parts.length >= 4) {
+        street = parts.slice(0, parts.length - 3).join(", ");
+        city = parts[parts.length - 3];
+        state = parts[parts.length - 2];
+        pincode = parts[parts.length - 1];
+      } else if (parts.length === 3) {
+        street = parts[0];
+        city = parts[1];
+        state = parts[2];
+      } else if (parts.length === 2) {
+        street = parts[0];
+        city = parts[1];
+      } else {
+        street = fullAddr;
+      }
+    }
+
+    return {
+      address: fullAddr,
+      map_link: salon?.map_link || "",
+      latitude: salon?.latitude?.toString() || "",
+      longitude: salon?.longitude?.toString() || "",
+      street,
+      city,
+      state,
+      pincode
+    };
+  };
+
   const methods = useForm<SalonProfileForm>({
     resolver: zodResolver(MyProfileSchema),
     values: {
@@ -89,12 +127,7 @@ const MyProfile = () => {
       phone: salon?.phone || "",
       about: salon?.about || "",
       type: salon?.type || "",
-      address: {
-        address: salon?.address || "",
-        map_link: salon?.map_link || "",
-        latitude: salon?.latitude?.toString() || "",
-        longitude: salon?.longitude?.toString() || ""
-      },
+      address: getMappedInitialAddress(),
       logo: salon?.logo ? { url: salon.logo, filename: "Logo" } : null,
       photos: salon?.photos || [],
       business_hours: getMappedInitialHours(),

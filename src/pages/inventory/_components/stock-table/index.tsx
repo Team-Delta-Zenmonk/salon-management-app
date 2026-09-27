@@ -3,13 +3,6 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { Edit2Icon, MinusCircleIcon, Loader2, Package } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../../../components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
@@ -17,7 +10,6 @@ import { Button } from "../../../../components/ui/button";
 import type { InventoryItem } from "../../../../features/inventory/inventory-item.slice";
 import { DecreaseStockModal } from "../decrease-stock-modal";
 import { EditProductModal } from "../edit-product-modal";
-import { shouldShowTooltip } from "../../../../common/shouldShowTooltip";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -60,6 +52,8 @@ const StockProgressBar = ({
     </div>
   );
 };
+
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 interface StockTableProps {
   data: InventoryItem[];
@@ -110,67 +104,26 @@ const StockCard: React.FC<{
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex flex-col min-w-0 w-full">
-              <TooltipProvider>
-                <Tooltip open={nameTooltipOpen} onOpenChange={setNameTooltipOpen}>
-                  <TooltipTrigger className="text-left w-full">
-                    <span
-                      onMouseEnter={(e) => {
-                        if (shouldShowTooltip(e.currentTarget)) setNameTooltipOpen(true);
-                      }}
-                      onMouseLeave={() => setNameTooltipOpen(false)}
-                      className="font-bold text-lg text-foreground capitalize overflow-hidden text-ellipsis whitespace-nowrap leading-tight block w-full"
-                    >
-                      {item.name}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{item.name}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <EllipsisCell value={item.name || "-"} maxChars={20} className="text-sm font-semibold text-foreground/90" />
 
               {brandLabel && (
-                <TooltipProvider>
-                  <Tooltip open={brandTooltipOpen} onOpenChange={setBrandTooltipOpen}>
-                    <TooltipTrigger className="text-left w-full">
-                      <span
-                        onMouseEnter={(e) => {
-                          if (shouldShowTooltip(e.currentTarget)) setBrandTooltipOpen(true);
-                        }}
-                        onMouseLeave={() => setBrandTooltipOpen(false)}
-                        className="text-[11px] font-semibold text-muted-foreground/80 uppercase tracking-wider overflow-hidden text-ellipsis whitespace-nowrap mt-0.5 block w-full"
-                      >
-                        {brandLabel}
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{brandLabel}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <EllipsisCell value=""/>
               )}
             </div>
             
             <div className="flex items-center gap-1.5 flex-wrap w-full mt-2.5">
-              <Badge className={`h-6 py-0 px-2.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 inline-flex items-center justify-center leading-none shrink-0 ${status.color}`}>
-                {status.label}
+              <Badge className={`h-6 py-0 px-2 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 inline-flex items-center justify-center leading-none shrink-0 w-24 overflow-hidden ${status.color}`}>
+                <EllipsisCell value={status.label} className="w-full text-center block" />
               </Badge>
 
               {categoryLabel && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Badge variant="secondary" className="h-6 py-0 px-2.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 max-w-[180px] bg-secondary/40 text-secondary-foreground shrink-0 inline-flex items-center justify-center leading-none cursor-default">
-                        <span className="truncate leading-none">{categoryLabel}</span>
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent><p>{categoryLabel}</p></TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Badge variant="secondary" className="h-6 py-0 px-2 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 bg-secondary/40 text-secondary-foreground shrink-0 inline-flex items-center justify-center leading-none w-28 overflow-hidden">
+                  <EllipsisCell value={categoryLabel} className="w-full text-center block" />
+                </Badge>
               )}  
               {variantLabel && (
-                <Badge variant="outline" className="h-6 py-0 px-2.5 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-muted/20 border-border/50 text-muted-foreground/80 shrink-0 inline-flex items-center justify-center leading-none">
-                  <span className="leading-none">{variantLabel}</span>
+                <Badge variant="outline" className="h-6 py-0 px-2 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-muted/20 border-border/50 text-muted-foreground/80 shrink-0 inline-flex items-center justify-center leading-none w-24 overflow-hidden">
+                  <EllipsisCell value={variantLabel} className="w-full text-center block" />
                 </Badge>
               )}
             </div>

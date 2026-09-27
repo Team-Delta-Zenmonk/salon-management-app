@@ -4,6 +4,7 @@ import { categorySchema, type categoryForm } from "../schema/create-category.sch
 import TextField from "../../../../components/form/textfield";
 import FilePicker from "../../../../components/form/file-picker";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 import { uploadImages } from "../../../../features/upload-images/upload-images.service";
 import { useAppDispatch } from "../../../../store/hooks";
 import { updateCategoryAction } from "../../../../features/category/update-category/update-category.action";
@@ -105,7 +106,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 identifier="category-name"
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
                 disabled={isLoading}
-                maxLength={250}
+                maxLength={FIELD_LIMITS.ITEM_NAME}
               />
 
               <TextField
@@ -116,7 +117,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 identifier="category-description"
                 disabled={isLoading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
-                maxLength={300}
+                maxLength={FIELD_LIMITS.DESCRIPTION}
                 multiline
               />
 

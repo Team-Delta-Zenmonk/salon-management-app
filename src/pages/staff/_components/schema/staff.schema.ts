@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { GENDER } from "../../../../common/enums/gender.enum";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 
 dayjs.extend(customParseFormat);
 
@@ -56,12 +57,12 @@ const ActiveHoursSchema = z
   .optional();
 
 export const StaffSchema = z.object({
-  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(250, { message: "Max 250 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
-  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(250, { message: "Max 250 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
   email: z
     .string({ message: "Required" })
     .min(1, { message: "Required" })
-    .max(100, { message: "Max 100 characters" })
+    .max(FIELD_LIMITS.EMAIL, { message: `Max ${FIELD_LIMITS.EMAIL} characters` })
     .email({ message: "Invalid email" }),
   phone_number: z
     .string({ message: "Required" })
@@ -91,7 +92,7 @@ export const StaffSchema = z.object({
       },
       { message: "Invalid date" }
     ),
-  title: z.string({ message: "Required" }).min(1, { message: "Required" }).max(100, { message: "Max 100 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed " }),
+  title: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.TITLE, { message: `Max ${FIELD_LIMITS.TITLE} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed " }),
   joining_date: z
     .any()
     .refine((val) => val !== null && val !== undefined && val !== "", {
@@ -116,9 +117,9 @@ export const StaffSchema = z.object({
       { message: "Invalid date" }
     ),
 
-  address: z.string({ message: "Required" }).min(1, { message: "Required" }).max(300, { message: "Address must be less than 300 characters" }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Invalid characters in address" }),
+  address: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.ADDRESS, { message: `Address must be less than ${FIELD_LIMITS.ADDRESS} characters` }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Invalid characters in address" }),
   emergency_contact: z.object({
-    name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(250, { message: "Max 250 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+    name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
     phone: z
       .string({ message: "Required" })
       .min(1, { message: "Required" })

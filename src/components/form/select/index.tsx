@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 const Select = <T extends FieldValues>({
   placeholder,
@@ -35,14 +36,17 @@ const Select = <T extends FieldValues>({
         const hasError = !!error;
 
         return (
-          <div className="flex flex-col gap-1.5 w-full" data-test-id={`select-wrapper-${identifier}`}>
+          <div
+            className="flex flex-col gap-1.5 w-full"
+            data-test-id={`select-wrapper-${identifier}`}
+          >
             {label && (
-              <Label 
+              <Label
                 htmlFor={selectId}
                 className={clsx(
                   "text-sm font-medium",
                   hasError ? "text-destructive" : "text-foreground",
-                  disabled && "opacity-50"
+                  disabled && "opacity-50",
                 )}
                 data-test-id={`label-${identifier}`}
               >
@@ -61,14 +65,21 @@ const Select = <T extends FieldValues>({
                 onBlur={onBlur}
                 className={clsx(
                   "w-full shadow-sm",
-                  hasError && "border-destructive focus:ring-destructive aria-invalid:border-destructive aria-invalid:ring-destructive",
-                  triggerClassName
+                  hasError &&
+                    "border-destructive focus:ring-destructive aria-invalid:border-destructive aria-invalid:ring-destructive",
+                  triggerClassName,
                 )}
                 data-test-id={`select-${identifier}`}
                 aria-invalid={hasError}
               >
-                <div className="truncate flex-1 text-left flex items-center gap-1.5 line-clamp-1 pr-2">
-                  {value ? options?.find((o) => String(o.value) === String(value))?.label || value : <span className="text-muted-foreground">{placeholder}</span>}
+                <div className="truncate flex-1 text-left flex items-center gap-1.5 line-clamp-1 pr-2 w-1">
+                  <EllipsisCell value={String(value ? (options?.find((o) => String(o.value) === String(value))?.label || value) : placeholder)} />
+                  {/* {value ? (
+                    options?.find((o) => String(o.value) === String(value))
+                      ?.label || value
+                  ) : (
+                    <span className="text-muted-foreground">{placeholder}</span>
+                  )} */}
                 </div>
                 {value && (
                   <div
@@ -85,7 +96,7 @@ const Select = <T extends FieldValues>({
                   </div>
                 )}
               </SelectTrigger>
-              <SelectContent align="start" >
+              <SelectContent align="start">
                 {options && options.length > 0 ? (
                   options.map((option) => (
                     <SelectItem
@@ -97,7 +108,11 @@ const Select = <T extends FieldValues>({
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="" disabled data-test-id={`li-${identifier}-no-options`}>
+                  <SelectItem
+                    value=""
+                    disabled
+                    data-test-id={`li-${identifier}-no-options`}
+                  >
                     No options
                   </SelectItem>
                 )}
@@ -105,8 +120,8 @@ const Select = <T extends FieldValues>({
             </ShadcnSelect>
 
             {hasError && (
-              <p 
-                className="text-xs font-medium text-destructive mt-0.5" 
+              <p
+                className="text-xs font-medium text-destructive mt-0.5"
                 data-test-id={`text-error-${identifier}`}
               >
                 {error?.message as string}
