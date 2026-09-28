@@ -44,14 +44,17 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const [page, setPage] = useState<number>(NOTIFICATION_PAGINATION.DEFAULT_PAGE);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const fetchNotifications = useCallback(
     async (
       targetPage: number = NOTIFICATION_PAGINATION.DEFAULT_PAGE,
       isReadFilter?: boolean
     ) => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const res = await fetchNotificationsService({
@@ -98,6 +101,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       setNotifications([]);
       setUnreadCount(0);
       setTotal(0);
+      setLoading(false);
       return;
     }
 

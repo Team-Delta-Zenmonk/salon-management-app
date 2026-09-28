@@ -10,6 +10,7 @@ import { listCategoriesAction } from "../../../../features/category/list-categor
 import { listServicesAction, type ListServicesParams } from "../../../../features/service/list-services/list-service.action";
 import { resetServices } from "../../../../features/service/service.slice";
 import { callSnack } from "../../../../components/snackbar";
+import { Loader2 } from "lucide-react";
 
 type FilterForm = {
   category_uuid: string;
@@ -34,6 +35,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   const total = serviceState?.total ?? 0;
   const page = serviceState?.page ?? 1;
   const limit = serviceState?.limit ?? 10;
+  const isInitialLoading = serviceState?.isInitialLoading ?? false;
 
   const methods = useForm<FilterForm>({
     defaultValues: {
@@ -176,7 +178,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
           </div>
         </div>
         <div className="flex-1 min-h-0 pt-2">
-          {isLoading && data.length === 0 ? (
+          {(isLoading || isInitialLoading) ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div

@@ -177,10 +177,13 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     placeholder="Select Category"
                     identifier="edit-category"
                     label="Category"
-                    options={categories.map((cat) => ({
-                      label: cat.name,
-                      value: cat.uuid,
-                    }))}
+                    options={(categories || [])
+                      .filter((cat) => cat && cat.uuid)
+                      .map((cat) => {
+                        const name = cat.name || "";
+                        const formattedName = name ? name.charAt(0).toUpperCase() + name.slice(1) : "Unnamed";
+                        return { label: formattedName, value: cat.uuid };
+                      })}
                     disabled={loading}
                   />
                 </div>

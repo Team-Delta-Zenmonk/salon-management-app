@@ -6,6 +6,7 @@ import { resetCategories } from "../../../../features/category/category.slice";
 import ListCategories from "../list-categories";
 import { callSnack } from "../../../../components/snackbar";
 import { CategoryListSkeleton } from "../category-skeleton";
+import { Loader2 } from "lucide-react";
 
 interface SearchCategoriesProps {
   searchQuery: string;

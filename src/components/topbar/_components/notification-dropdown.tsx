@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bell, Mail, MailOpen, Trash2, CheckCheck } from "lucide-react";
+import { Bell, Mail, MailOpen, Trash2, CheckCheck, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNotifications } from "../../../features/notification/notification-context";
@@ -19,6 +19,7 @@ export const NotificationDropdown: React.FC = () => {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    loading,
   } = useNotifications();
 
   const handleSeeAll = () => {
@@ -88,7 +89,12 @@ export const NotificationDropdown: React.FC = () => {
         </div>
 
         <div className="max-h-[380px] overflow-y-auto custom-scrollbar divide-y divide-border/40">
-          {displayNotifications.length === 0 ? (
+          {loading && displayNotifications.length === 0 ? (
+            <div className="py-12 px-6 text-center flex flex-col items-center justify-center gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <p className="text-xs text-muted-foreground font-medium">Loading notifications...</p>
+            </div>
+          ) : displayNotifications.length === 0 ? (
             <div className="py-12 px-6 text-center flex flex-col items-center justify-center gap-3">
               <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center text-muted-foreground/60">
                 <Bell className="w-6 h-6" />

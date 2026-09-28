@@ -55,10 +55,10 @@ export default function StaffServiceManagementPage() {
           </p>
         </div>
 
-        <div className="relative inline-flex h-11 items-center justify-center rounded-xl bg-muted/60 p-1 text-muted-foreground border border-border/50 backdrop-blur-sm">
+        <div className="relative inline-flex h-11 items-center justify-center rounded-xl bg-muted/60 p-1 text-muted-foreground border border-border/50 backdrop-blur-sm w-full sm:w-auto">
           <button
             onClick={() => handleViewChange("staff")}
-            className={`relative z-10 inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
+            className={`relative z-10 flex-1 sm:flex-initial inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
               viewMode === "staff" ? "text-primary-foreground font-bold" : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -74,7 +74,7 @@ export default function StaffServiceManagementPage() {
           </button>
           <button
             onClick={() => handleViewChange("service")}
-            className={`relative z-10 inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
+            className={`relative z-10 flex-1 sm:flex-initial inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
               viewMode === "service" ? "text-primary-foreground font-bold" : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -91,7 +91,7 @@ export default function StaffServiceManagementPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="w-full flex-1 min-h-[600px] flex flex-col">
+      <motion.div variants={itemVariants} className="w-full flex-1 min-h-0 sm:min-h-[600px] flex flex-col">
         {viewMode === "service" ? <ServiceView /> : <StaffView />}
       </motion.div>
     </motion.div>

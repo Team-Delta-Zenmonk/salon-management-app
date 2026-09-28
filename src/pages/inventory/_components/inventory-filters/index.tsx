@@ -77,7 +77,13 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
 
   const categoryOptions = [
     { value: "", label: "All Categories" },
-    ...categories.map((cat) => ({ value: cat.uuid, label: cat.name.charAt(0).toUpperCase() + cat.name.slice(1) })),
+    ...(categories || [])
+      .filter((cat) => cat && cat.uuid)
+      .map((cat) => {
+        const name = cat.name || "";
+        const formattedName = name ? name.charAt(0).toUpperCase() + name.slice(1) : "Unnamed";
+        return { value: cat.uuid, label: formattedName };
+      }),
   ];
 
   const sortOptionsWithDefault = [

@@ -20,7 +20,7 @@ export default function StaffPricingPanel({ selectedService }: Readonly<{ select
   }
 
   return (
-    <div className="p-6 md:p-8 flex flex-col min-h-full bg-transparent">
+    <div className="p-4 sm:p-6 md:p-8 flex flex-col min-h-full bg-transparent">
       <StaffPricingCards selectedService={selectedService} />
     </div>
   );

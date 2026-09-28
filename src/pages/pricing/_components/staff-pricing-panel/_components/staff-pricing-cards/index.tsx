@@ -144,13 +144,13 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
 
   return (
     <>
-      <div className="flex flex-wrap items-start sm:items-center justify-between gap-4 pb-6 border-b border-border/50 mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-border/50 mb-6">
         <div className="space-y-1 min-w-0 flex-1">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-6 rounded bg-primary shrink-0" />
             <EllipsisCell
               value={`${selectedService.name} Staff Pricing`}
-              className="text-lg font-bold text-foreground capitalize block min-w-0"
+              className="text-base sm:text-lg font-bold text-foreground capitalize block min-w-0"
             />
           </div>
           <p className="text-muted-foreground/80 text-xs sm:text-sm">
@@ -159,7 +159,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
         </div>
         <Button
           onClick={() => setAssignDialogOpen(true)}
-          className="shrink-0 rounded-xl shadow-sm shadow-primary/10"
+          className="w-full sm:w-auto shrink-0 rounded-xl shadow-sm shadow-primary/10"
         >
           <Plus className="mr-2 h-4 w-4" />
           Assign Staff
@@ -223,66 +223,67 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                     return (
                       <div
                         key={staff.uuid}
-                        className="group relative border border-border/50 rounded-2xl p-4.5 flex items-center justify-between bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 overflow-hidden"
+                        className="group relative border border-border/50 rounded-2xl p-4 flex flex-col justify-between bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-                        <div className="flex items-center gap-3.5 min-w-0 pr-4 relative z-10">
-                          <Avatar className="w-11 h-11 bg-muted border border-border/50 text-muted-foreground transition-transform duration-200 group-hover:scale-105">
-                            {staff.photos?.url ? (
-                               <AvatarImage src={staff.photos.url} alt={staff_name} />
-                            ) : (
-                               <AvatarFallback className="bg-transparent"><User className="h-5 w-5"/></AvatarFallback>
-                            )}
-                          </Avatar>
-                          <div className="min-w-0">
+                        <div className="flex items-center justify-between w-full min-w-0 gap-3 relative z-10">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <Avatar className="w-10 h-10 sm:w-11 sm:h-11 bg-muted border border-border/50 text-muted-foreground transition-transform duration-200 group-hover:scale-105 shrink-0">
+                              {staff.photos?.url ? (
+                                 <AvatarImage src={staff.photos.url} alt={staff_name} />
+                              ) : (
+                                 <AvatarFallback className="bg-transparent"><User className="h-5 w-5"/></AvatarFallback>
+                              )}
+                            </Avatar>
                             <EllipsisCell
                               value={staff_name}
-                              className="font-bold text-sm text-foreground capitalize block"
+                              className="font-bold text-sm sm:text-base text-foreground capitalize block min-w-0"
                             />
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
-                              <span
-                                className={clsx(
-                                  "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold whitespace-nowrap border",
-                                  staffServiceRow.price_type === "fixed"
-                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10"
-                                    : staffServiceRow.price_type === "from"
-                                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/10"
-                                      : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/10",
-                                )}
-                              >
-                                {staffServiceRow.price_type}
-                              </span>
-                              <span className="text-xs text-foreground/80 font-bold whitespace-nowrap">
-                                ₹{staffServiceRow.price ?? "-"}
-                              </span>
-                              <span className="text-xs text-muted-foreground/50 select-none">•</span>
-                              <span className="text-xs text-muted-foreground font-semibold whitespace-nowrap">
-                                {staffServiceRow.duration ?? "-"} min
-                              </span>
-                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 shrink-0 relative z-10">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleOpenEdit(staff.uuid, service, staffServiceRow)}
+                              className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-purple-500/10 hover:text-purple-600 text-muted-foreground transition-all"
+                              title="Edit Custom Pricing"
+                            >
+                              <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemove(service.uuid, staffServiceRow.uuid!)}
+                              className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
+                              title="Unassign Staff"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            </Button>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1 shrink-0 relative z-10">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleOpenEdit(staff.uuid, service, staffServiceRow)}
-                            className="h-8.5 w-8.5 rounded-full hover:bg-purple-500/10 hover:text-purple-600 text-muted-foreground transition-all"
-                            title="Edit Custom Pricing"
+                        <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/40 w-full relative z-10">
+                          <span
+                            className={clsx(
+                              "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold whitespace-nowrap border shrink-0",
+                              staffServiceRow.price_type === "fixed"
+                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10"
+                                : staffServiceRow.price_type === "from"
+                                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/10"
+                                  : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/10",
+                            )}
                           >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemove(service.uuid, staffServiceRow.uuid!)}
-                            className="h-8.5 w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
-                            title="Unassign Staff"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            {staffServiceRow.price_type}
+                          </span>
+                          <span className="text-xs sm:text-sm text-foreground/90 font-bold whitespace-nowrap shrink-0">
+                            ₹{staffServiceRow.price ?? "-"}
+                          </span>
+                          <span className="text-xs text-muted-foreground/50 select-none shrink-0">•</span>
+                          <span className="text-xs text-muted-foreground font-semibold whitespace-nowrap shrink-0">
+                            {staffServiceRow.duration ?? "-"} min
+                          </span>
                         </div>
                       </div>
                     );

@@ -32,6 +32,7 @@ export default function NotificationPage() {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    loading,
   } = useNotifications();
 
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
@@ -123,7 +124,31 @@ export default function NotificationPage() {
         </div>
 
         <div className="bg-card border border-border/70 rounded-2xl overflow-hidden shadow-xs divide-y divide-border/40">
-          {filteredNotifications.length === 0 ? (
+          {loading ? (
+            <div className="divide-y divide-border/40">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={`notification-skeleton-${i}`}
+                  className="p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 animate-pulse"
+                >
+                  <div className="w-2.5 shrink-0 pt-2 flex items-center justify-center">
+                    <div className="w-2.5 h-2.5 rounded-full bg-muted/80" />
+                  </div>
+
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-muted/80 shrink-0" />
+
+                  <div className="flex-1 min-w-0 space-y-2 pt-1">
+                    <div className="h-4 bg-muted/80 rounded-md w-1/3" />
+                    <div className="h-3.5 bg-muted/50 rounded-md w-3/4" />
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1.5 shrink-0 self-start pt-1">
+                    <div className="w-16 h-3 bg-muted/60 rounded-md" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredNotifications.length === 0 ? (
             <div className="py-20 px-6 text-center flex flex-col items-center justify-center gap-3">
               <div className="w-14 h-14 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground/70">
                 <Bell className="w-7 h-7 stroke-[1.5]" />

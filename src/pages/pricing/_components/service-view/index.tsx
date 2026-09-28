@@ -89,8 +89,8 @@ export default function ServiceView() {
   );
 
   return (
-    <div className="flex flex-1 min-h-0 gap-6 w-full flex-col lg:flex-row items-stretch">
-      <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl w-full lg:w-[380px] flex flex-col min-h-[500px] lg:min-h-0 shadow-sm overflow-hidden">
+    <div className="flex flex-1 min-h-0 gap-4 sm:gap-6 w-full flex-col lg:flex-row items-stretch">
+      <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl w-full lg:w-[380px] flex flex-col h-[260px] sm:h-[300px] lg:h-auto lg:min-h-0 shadow-sm overflow-hidden shrink-0">
         <div className="flex-1 min-h-0 overflow-y-auto">
           <ServiceSidebar
             services={servicesTree}

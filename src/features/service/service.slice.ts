@@ -32,6 +32,8 @@ export type ServicesState = {
   total: number;
   page: number;
   limit: number;
+  loading: boolean;
+  isInitialLoading: boolean;
 };
 
 const initialState: ServicesState = {
@@ -39,6 +41,8 @@ const initialState: ServicesState = {
   total: 0,
   page: 1,
   limit: 10,
+  loading: false,
+  isInitialLoading: true,
 };
 
 export const serviceSlice = createSlice({
@@ -57,6 +61,14 @@ export const serviceSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(listServicesAction.pending, (state, { meta }) => {
+      state.loading = true;
+      const page = meta.arg?.page ?? 1;
+      if (page === 1) {
+        state.isInitialLoading = true;
+      }
+    });
+
     builder.addCase(listServicesAction.fulfilled, (state, { payload }) => {
       const { data, total, page, limit } = payload;
       if (page === 1) {
@@ -68,6 +80,13 @@ export const serviceSlice = createSlice({
       state.total = total;
       state.page = page;
       state.limit = limit;
+      state.loading = false;
+      state.isInitialLoading = false;
+    });
+
+    builder.addCase(listServicesAction.rejected, (state) => {
+      state.loading = false;
+      state.isInitialLoading = false;
     });
 
     builder.addCase(updateServiceAction.fulfilled, (state, { payload }) => {
