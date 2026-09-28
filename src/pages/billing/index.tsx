@@ -34,7 +34,6 @@ import { getSalonProfileAction } from "@/features/auth/profile/get-salon-profile
 import { fetchSubscriptionPlans } from "@/features/subscription/plans.slice";
 import {
   createSubscriptionIntent,
-  upgradeSalonSubscription,
   getSubscriptionInvoices,
   type SubscriptionInvoice,
 } from "@/features/subscription/subscription.service";
@@ -158,19 +157,6 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
     }
 
     if (paymentIntent && paymentIntent.status === "succeeded") {
-      try {
-        await upgradeSalonSubscription({
-          plan,
-          billing_cycle: plan,
-          payment_method: "card",
-          transaction_id: paymentIntent.id,
-          payment_details: {
-            stripe_payment_intent_id: paymentIntent.id,
-          },
-        });
-      } catch (err) {
-        console.warn("Direct activation fallback error:", err);
-      }
       callSnack("Payment successful! Activating your subscription...", "success");
       onSuccess();
     } else {
