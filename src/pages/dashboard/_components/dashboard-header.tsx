@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
+import { EllipsisCell } from "../../../components/ellipse-cell";
 
 interface DashboardHeaderProps {
   salonName?: string;
@@ -28,8 +29,13 @@ export const DashboardHeader = ({
     >
       <div className="flex flex-col gap-1.5">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground/80 text-sm">
-          Welcome back, {salonName || "Owner"}! Here's a quick overview of your salon today.
+        <p className="text-muted-foreground/80 text-sm flex flex-wrap items-center gap-x-1 gap-y-0.5">
+          <span>Welcome back,</span>
+          <span className="inline-flex items-center font-medium text-foreground">
+            <EllipsisCell value={salonName || "Owner"} maxChars={20} className="align-middle" />
+            <span>!</span>
+          </span>
+          <span>Here's a quick overview of your salon today.</span>
         </p>
       </div>
 
