@@ -114,7 +114,7 @@ export default function NotificationPage() {
                   "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
                   activeTab === "unread"
                     ? "bg-primary-foreground text-primary"
-                    : "bg-blue-600 text-white"
+                    : "bg-primary text-primary-foreground"
                 )}
               >
                 {unreadCount}
@@ -191,12 +191,12 @@ export default function NotificationPage() {
                   className={cn(
                     "p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 transition-colors cursor-pointer group relative",
                     "hover:bg-muted/40",
-                    !item.is_read && "bg-blue-500/[0.04] dark:bg-blue-500/[0.08]"
+                    !item.is_read && "bg-primary/[0.04]"
                   )}
                 >
                   <div className="w-2.5 shrink-0 flex items-center justify-center pt-2">
                     {!item.is_read && (
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-blue-400 ring-4 ring-blue-500/20 shrink-0" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-primary/20 shrink-0" />
                     )}
                   </div>
 
@@ -259,7 +259,7 @@ export default function NotificationPage() {
                             }}
                             className="text-xs font-medium gap-2 cursor-pointer py-2"
                           >
-                            <Check className="w-3.5 h-3.5 text-blue-600" />
+                            <Check className="w-3.5 h-3.5 text-primary" />
                             Mark as read
                           </DropdownMenuItem>
                         ) : (

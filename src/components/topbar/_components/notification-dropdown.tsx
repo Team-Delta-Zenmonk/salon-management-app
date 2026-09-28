@@ -53,8 +53,8 @@ export const NotificationDropdown: React.FC = () => {
         {unreadCount > 0 && (
           <span
             className={cn(
-              "absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-white shadow-sm border border-background",
-              "bg-blue-600 animate-in zoom-in-50"
+              "absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-primary-foreground shadow-sm border border-background",
+              "bg-primary animate-in zoom-in-50"
             )}
           >
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -74,7 +74,7 @@ export const NotificationDropdown: React.FC = () => {
               Notifications
             </h4>
             {unreadCount > 0 && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
                 {unreadCount} unread
               </span>
             )}
@@ -119,11 +119,11 @@ export const NotificationDropdown: React.FC = () => {
                   onClick={() => handleNotificationClick(item)}
                   className={cn(
                     "p-3.5 flex items-start gap-3 transition-colors cursor-pointer group relative hover:bg-muted/40",
-                    !item.is_read && "bg-blue-500/5 dark:bg-blue-500/10"
+                    !item.is_read && "bg-primary/5"
                   )}
                 >
                   {!item.is_read && (
-                    <span className="absolute left-1.5 top-5 w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0" />
+                    <span className="absolute left-1.5 top-5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                   )}
 
                   <div
@@ -162,7 +162,7 @@ export const NotificationDropdown: React.FC = () => {
                       {item.is_read ? (
                         <MailOpen className="w-4 h-4 opacity-50" />
                       ) : (
-                        <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <Mail className="w-4 h-4 text-primary" />
                       )}
                     </button>
                     <button

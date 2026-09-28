@@ -186,6 +186,15 @@ export default function AssignServicesDialog({
               <div className="flex justify-center items-center py-12 flex-1">
                 <Loader2 className="h-8 w-8 animate-spin text-primary/60" />
               </div>
+            ) : services.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+                <div className="space-y-1">
+                  <p className="text-base font-semibold text-foreground">No services found</p>
+                  <p className="text-xs text-muted-foreground max-w-[280px] leading-relaxed">
+                    You haven't added any services yet. Add services first to assign them to staff members.
+                  </p>
+                </div>
+              </div>
             ) : (
               <form id="assign-services-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 <p className="text-sm text-muted-foreground">
@@ -214,15 +223,17 @@ export default function AssignServicesDialog({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              form="assign-services-form"
-              disabled={saving || loading}
-              className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
-            >
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
-            </Button>
+            {services.length > 0 && (
+              <Button
+                type="submit"
+                form="assign-services-form"
+                disabled={saving || loading}
+                className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
+              >
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save
+              </Button>
+            )}
           </DialogFooter>
         </FormProvider>
       </DialogContent>

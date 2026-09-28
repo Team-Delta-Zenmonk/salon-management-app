@@ -220,6 +220,15 @@ export default function AssignStaffDialog({
               <div className="flex justify-center items-center py-12 flex-1">
                 <Loader2 className="h-8 w-8 animate-spin text-primary/60" />
               </div>
+            ) : allStaff.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+                <div className="space-y-1">
+                  <p className="text-base font-semibold text-foreground">No staff members found</p>
+                  <p className="text-xs text-muted-foreground max-w-[280px] leading-relaxed">
+                    You haven't added any staff members yet. Add staff to assign them to this service.
+                  </p>
+                </div>
+              </div>
             ) : (
               <form id="assign-staff-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 <p className="text-sm text-muted-foreground">
@@ -249,15 +258,17 @@ export default function AssignStaffDialog({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              form="assign-staff-form"
-              disabled={saving || loading}
-              className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
-            >
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
-            </Button>
+            {allStaff.length > 0 && (
+              <Button
+                type="submit"
+                form="assign-staff-form"
+                disabled={saving || loading}
+                className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
+              >
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save
+              </Button>
+            )}
           </DialogFooter>
         </FormProvider>
       </DialogContent>

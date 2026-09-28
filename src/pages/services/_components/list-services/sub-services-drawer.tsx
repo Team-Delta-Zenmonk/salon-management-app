@@ -246,6 +246,11 @@ export function SubServicesDrawer({
                             {sub.duration} min
                           </div>
                         )}
+                        {sub.is_popular && (
+                          <Badge className="bg-amber-500/10 text-amber-600 border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-amber-500/10">
+                            Popular
+                          </Badge>
+                        )}
                         {!sub.is_active && (
                           <Badge
                             variant="destructive"
