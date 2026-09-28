@@ -7,9 +7,10 @@ import Select from "../../../../components/form/select";
 import { TypeOfSalon } from "../constants/salon.constants";
 import { uploadImages } from "../../../../features/upload-images/upload-images.service";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 import { Store, Sparkles, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
-
+import { EllipsisCell } from "@/components/ellipse-cell";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../../components/ui/dialog";
 import { callSnack } from "../../../../components/snackbar";
 import Lightbox from "yet-another-react-lightbox";
@@ -212,9 +213,11 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                   <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </button>
                 <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-xs px-2 py-1 flex items-center justify-between pointer-events-none">
-                  <p className="text-[9px] font-medium text-white truncate max-w-[85%]" title={photos[0].filename}>
-                    {photos[0].filename || "Photo 1"}
-                  </p>
+                  <EllipsisCell
+                    value={photos[0].filename || "Photo 1"}
+                    maxChars={20}
+                    className="text-[9px] font-medium text-white flex-1 min-w-0 pr-1 capitalize"
+                  />
                 </div>
               </div>
             ) : null}
@@ -256,9 +259,11 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                       <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
                     <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-xs px-2 py-1 flex items-center justify-between pointer-events-none">
-                      <p className="text-[9px] font-medium text-white truncate max-w-[85%]" title={photos[1].filename}>
-                        {photos[1].filename || "Photo 2"}
-                      </p>
+                      <EllipsisCell
+                        value={photos[1].filename || "Photo 2"}
+                        maxChars={20}
+                          className="text-[9px] font-medium text-white max-w-[85%]"
+                      />
                     </div>
                   </>
                 )}
@@ -300,9 +305,11 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                       <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
                     <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-xs px-2.5 py-1.5 pointer-events-none">
-                      <p className="text-[10px] font-medium text-white truncate" title={photo.filename}>
-                        {photo.filename || `Photo ${index + 1}`}
-                      </p>
+                      <EllipsisCell
+                        value={photo.filename || `Photo ${index + 1}`}
+                        maxChars={20}
+                        className="text-[10px] font-medium text-white"
+                      />
                     </div>
                   </div>
                 ))}
@@ -374,7 +381,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
               placeholder="Enter salon name"
               identifier="salon-name-field"
               rules={{ required: "Salon name is required" }}
-              maxLength={250}
+              maxLength={FIELD_LIMITS.NAME}
               pattern={VALIDATE_PATTERN.alphabet}
               inputPropsClassName="bg-white dark:bg-neutral-900"
             />
@@ -389,7 +396,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
               placeholder="Enter owner name"
               identifier="salon-owner-field"
               rules={{ required: "Owner name is required" }}
-              maxLength={250}
+              maxLength={FIELD_LIMITS.NAME}
               pattern={VALIDATE_PATTERN.alphabet}
               inputPropsClassName="bg-white dark:bg-neutral-900"
             />
@@ -419,7 +426,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             identifier="salon-about-field"
             multiline
             rows={3}
-            maxLength={300}
+            maxLength={FIELD_LIMITS.DESCRIPTION}
             pattern={VALIDATE_PATTERN.alphabet}
             inputPropsClassName="bg-white dark:bg-neutral-900"
           />

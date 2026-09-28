@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { BOOKING_STATUS } from "../../../common/enums/booking-status.enum";
 import { VALIDATE_PATTERN } from "../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../common/field-limits";
 
 export const bookingServiceSchema = z.object({
   service_id: z.coerce.number({ message: "Required" }),
@@ -8,8 +9,8 @@ export const bookingServiceSchema = z.object({
 });
 
 export const bookingSchema = z.object({
-  customer_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(50, { message: "Max 50 characters" }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
-  customer_phone: z.string({ message: "Required" }).min(10, { message: "Phone number must be at least 10 digits" }).regex(/^\d{10}$/, { message: "Phone number must be exactly 10 digits" }),
+  customer_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  customer_phone: z.string({ message: "Required" }).min(10, { message: "Phone number must be at least 10 digits" }).max(FIELD_LIMITS.PHONE, { message: `Max ${FIELD_LIMITS.PHONE} digits` }).regex(/^\d{10}$/, { message: "Phone number must be exactly 10 digits" }),
   services: z.array(bookingServiceSchema).min(1, { message: "At least one service is required" }),
   booking_date: z.any().refine(
     (val) => {

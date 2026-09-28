@@ -12,6 +12,7 @@ import { callSnack } from "../../components/snackbar";
 import { VALIDATE_PATTERN } from "../../common/validate-pattern";
 import { Button } from "../../components/ui/button";
 import { motion } from "framer-motion";
+import { FIELD_LIMITS } from "@/common/field-limits";
 
 const benefits = [
   "Unlimited appointments & bookings",
@@ -135,7 +136,7 @@ export default function SignUp() {
                           disabled={isLoading}
                           pattern={VALIDATE_PATTERN.alphabet}
                           inputPropsClassName="bg-white dark:bg-neutral-900"
-                          maxLength={250}
+                          maxLength={FIELD_LIMITS.NAME}
                         />
                       ),
                     },
@@ -152,7 +153,7 @@ export default function SignUp() {
                           disabled={isLoading}
                           pattern={VALIDATE_PATTERN.noSpace}
                           inputPropsClassName="bg-white dark:bg-neutral-900"
-                          maxLength={100}
+                          maxLength={FIELD_LIMITS.EMAIL}
                         />
                       ),
                     },
@@ -166,7 +167,7 @@ export default function SignUp() {
                           identifier="signup-password"
                           disabled={isLoading}
                           placeholder="••••••••"
-                          maxLength={50}
+                          maxLength={FIELD_LIMITS.PASSWORD}
                         />
                       ),
                     },
@@ -180,7 +181,7 @@ export default function SignUp() {
                           identifier="signup-confirm-password"
                           disabled={isLoading}
                           placeholder="••••••••"
-                          maxLength={50}
+                          maxLength={FIELD_LIMITS.PASSWORD}
                         />
                       ),
                     },

@@ -106,7 +106,7 @@ export function ServiceCard({
               <EllipsisCell
                 value={service.name}
                 maxChars={100}
-                className="font-bold text-foreground text-base sm:text-lg leading-tight group-hover:text-primary transition-colors block truncate capitalize"
+                className="font-bold text-foreground text-base sm:text-lg leading-tight group-hover:text-primary transition-colors block capitalize"
               />
             </div>
           </div>
@@ -228,7 +228,7 @@ export function ServiceCard({
                 value={subServicesNames}
                 maxChars={20}
                 className={
-                  "text-[11px] font-medium text-foreground truncate flex-1 min-w-0 pr-1 capitalize"
+                  "text-[11px] font-medium text-foreground flex-1 min-w-0 pr-1 capitalize"
                 }
               />
             </div>

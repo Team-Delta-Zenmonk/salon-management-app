@@ -10,4 +10,12 @@ export const FIELD_LIMITS = {
   DESCRIPTION: 300,
   CODE: 50,
   PASSWORD: 50,
+  SLUG: 50,
+  URL: 500,
+  SKU: 50,
+  PRICE: 10,
+  DURATION: 5,
+  QUANTITY: 10,
+  STOCK: 10,
+  PERCENTAGE: 3,
 } as const;

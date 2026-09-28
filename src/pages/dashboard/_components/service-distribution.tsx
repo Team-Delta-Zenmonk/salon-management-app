@@ -45,7 +45,7 @@ export const ServiceDistribution = () => {
           {STATIC_DASHBOARD_DATA.serviceDistribution.map((entry) => (
             <div key={entry.name} className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
-              <span className="truncate text-foreground/80">{entry.name}</span>
+              <span className="text-foreground/80">{entry.name}</span>
               <span className="ml-auto font-bold text-foreground">{entry.value}%</span>
             </div>
           ))}

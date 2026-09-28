@@ -79,7 +79,7 @@ export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Reado
                     value={staffName}
                     className={clsx("text-sm transition-colors capitalize block", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}
                   />
-                  <p className="text-xs text-muted-foreground/80 truncate mt-0.5">{staff.email}</p>
+                  <p className="text-xs text-muted-foreground/80 mt-0.5">{staff.email}</p>
                 </div>
               </motion.div>
             );

@@ -138,7 +138,7 @@ function StaffCard({
             </div>
             <EllipsisCell
               value={staff.title || "Staff Member"}
-              className="text-muted-foreground/80 text-sm mt-1 truncate capitalize"
+              className="text-muted-foreground/80 text-sm mt-1 capitalize"
             />
           </div>
         </div>

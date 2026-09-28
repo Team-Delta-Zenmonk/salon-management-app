@@ -72,7 +72,7 @@ const Select = <T extends FieldValues>({
                 data-test-id={`select-${identifier}`}
                 aria-invalid={hasError}
               >
-                <div className="truncate flex-1 text-left flex items-center gap-1.5 line-clamp-1 pr-2 w-1">
+                <div className="flex-1 text-left flex items-center gap-1.5 line-clamp-1 pr-2 w-1">
                   <EllipsisCell value={String(value ? (options?.find((o) => String(o.value) === String(value))?.label || value) : placeholder)} />
                   {/* {value ? (
                     options?.find((o) => String(o.value) === String(value))

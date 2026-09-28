@@ -270,7 +270,9 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
 export default function PlanAndBillingPage() {
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state: RootState) => state.auth);
-  const { plans: reduxPlans } = useAppSelector((state: RootState) => state.plans);
+  const { plans: reduxPlans, isLoading: isLoadingPlans } = useAppSelector(
+    (state: RootState) => state.plans
+  );
 
   const [checkoutPlan, setCheckoutPlan] = useState<
     typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY | null
@@ -558,149 +560,182 @@ export default function PlanAndBillingPage() {
         animate="show"
         className="flex flex-wrap gap-4 sm:gap-6 items-stretch pl-1"
       >
-        {reduxPlans
-          .map((plan) => {
-          const isCurrentPlan = currentPlan === plan.id;
-          const isYearlyPlan = plan.id === "yearly";
+        {isLoadingPlans && reduxPlans.length === 0 ? (
+          <>
+            {[1, 2].map((i) => (
+              <div
+                key={`plan-skeleton-${i}`}
+                className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6 flex flex-col justify-between flex-1 min-w-[260px] max-w-full animate-pulse space-y-6"
+              >
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="h-3 w-28 bg-muted rounded-md" />
+                    <div className="h-6 w-36 bg-muted rounded-md" />
+                    <div className="h-4 w-full bg-muted/60 rounded-md" />
+                  </div>
+                  <div className="pt-2 pb-3 border-b border-border/50 space-y-2">
+                    <div className="h-8 w-32 bg-muted rounded-md" />
+                    <div className="h-3 w-40 bg-muted/60 rounded-md" />
+                  </div>
+                  <div className="space-y-2.5 pt-2">
+                    {[1, 2, 3, 4, 5].map((f) => (
+                      <div key={f} className="flex items-center gap-2">
+                        <div className="w-3.5 h-3.5 rounded-full bg-muted shrink-0" />
+                        <div className="h-3.5 bg-muted/60 rounded-md w-3/4" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-6">
+                  <div className="h-10 w-full bg-muted rounded-xl" />
+                </div>
+              </div>
+            ))}
+          </>
+        ) : (
+          reduxPlans.map((plan) => {
+            const isCurrentPlan = currentPlan === plan.id;
+            const isYearlyPlan = plan.id === "yearly";
 
-          const featuresMap: Record<string, string[]> = {
-            monthly: [
-              "Unlimited bookings",
-              "Branded storefront",
-              "Walk-in POS & receipts",
-              "Staff commissions & tips",
-              "Inventory depletion",
-            ],
-            yearly: [
-              "Everything in Monthly Plan",
-              "Save ₹4,998/year (2 months free)",
-              "Priority live chat & VIP support",
+            const featuresMap: Record<string, string[]> = {
+              monthly: [
+                "Unlimited bookings",
+                "Branded storefront",
+                "Walk-in POS & receipts",
+                "Staff commissions & tips",
+                "Inventory depletion",
+              ],
+              yearly: [
+                "Everything in Monthly Plan",
+                "Save ₹4,998/year (2 months free)",
+                "Priority live chat & VIP support",
+                "Unlimited staff seats",
+                "Full POS, inventory & daily reports",
+              ],
+            };
+
+            const features = featuresMap[plan.id] || [
+              "Full platform access",
               "Unlimited staff seats",
-              "Full POS, inventory & daily reports",
-            ],
-          };
+              "POS, Inventory & Analytics",
+            ];
 
-          const features = featuresMap[plan.id] || [
-            "Full platform access",
-            "Unlimited staff seats",
-            "POS, Inventory & Analytics",
-          ];
-
-          return (
-            <motion.div
-              key={plan.id}
-              variants={itemVariants}
-              className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all flex-1 min-w-[260px] max-w-full overflow-visible ${
-                isYearlyPlan
-                  ? "border-2 border-primary shadow-xl shadow-primary/10"
-                  : "border border-border/80 hover:border-primary/40"
-              } ${
-                isCurrentPlan && currentStatus === "active"
-                  ? "border-primary ring-2 ring-primary"
-                  : isCurrentPlan && currentStatus === "trial"
-                    ? "border-amber-500 ring-2 ring-amber-500/40"
-                    : ""
-              }`}
-            >
-              {plan.badge && (
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
-                  {plan.badge}
-                </div>
-              )}
-              {isCurrentPlan && currentStatus === "active" && (
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
-                  <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground truncate max-w-full">
-                    Current Plan
-                  </span>
-                </div>
-              )}
-              {isCurrentPlan && currentStatus === "trial" && (
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
-                  <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
-                    Selected Plan • Trial Active
-                  </span>
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div>
-                  <span className={`text-xs font-bold uppercase tracking-wider ${isYearlyPlan ? "text-primary" : "text-muted-foreground"}`}>
-                    {isYearlyPlan ? "Annual Commitment" : "Pay As You Go"}
-                  </span>
-                  <h4 className="text-xl font-bold text-foreground mt-1 capitalize">{plan.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">
-                    {plan.description}
-                  </p>
-                </div>
-
-                <div className="pt-2 pb-3 border-b border-border/50">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
-                      {plan.formatted_price}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {plan.billing_cycle}
+            return (
+              <motion.div
+                key={plan.id}
+                variants={itemVariants}
+                className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all flex-1 min-w-[260px] max-w-full overflow-visible ${
+                  isYearlyPlan
+                    ? "border-2 border-primary shadow-xl shadow-primary/10"
+                    : "border border-border/80 hover:border-primary/40"
+                } ${
+                  isCurrentPlan && currentStatus === "active"
+                    ? "border-primary ring-2 ring-primary"
+                    : isCurrentPlan && currentStatus === "trial"
+                      ? "border-amber-500 ring-2 ring-amber-500/40"
+                      : ""
+                }`}
+              >
+                {plan.badge && (
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
+                    {plan.badge}
+                  </div>
+                )}
+                {isCurrentPlan && currentStatus === "active" && (
+                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
+                    <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground truncate max-w-full">
+                      Current Plan
                     </span>
                   </div>
-                  {isYearlyPlan ? (
-                    <p className="text-[10px] text-primary font-semibold mt-0.5">
-                      = ₹{Math.round(plan.amount / 12).toLocaleString()}/mo • 2 Months Free
+                )}
+                {isCurrentPlan && currentStatus === "trial" && (
+                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
+                    <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
+                      Selected Plan • Trial Active
+                    </span>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <span className={`text-xs font-bold uppercase tracking-wider ${isYearlyPlan ? "text-primary" : "text-muted-foreground"}`}>
+                      {isYearlyPlan ? "Annual Commitment" : "Pay As You Go"}
+                    </span>
+                    <h4 className="text-xl font-bold text-foreground mt-1 capitalize">{plan.name}</h4>
+                    <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">
+                      {plan.description}
                     </p>
+                  </div>
+
+                  <div className="pt-2 pb-3 border-b border-border/50">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
+                        {plan.formatted_price}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {plan.billing_cycle}
+                      </span>
+                    </div>
+                    {isYearlyPlan ? (
+                      <p className="text-[10px] text-primary font-semibold mt-0.5">
+                        = ₹{Math.round(plan.amount / 12).toLocaleString()}/mo • 2 Months Free
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Billed monthly   • Cancel anytime</p>
+                    )}
+                  </div>
+
+                  <ul className="space-y-2 text-xs text-muted-foreground">
+                    {features.map((f) => (
+                      <li key={f} className="flex items-center gap-2">
+                        <Check className={`w-3.5 h-3.5 shrink-0 ${isYearlyPlan ? "text-primary" : "text-emerald-500"}`} />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="pt-6 space-y-2">
+                  {plan.id === "trial" ? (
+                    <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-80">
+                      {currentStatus === "trial" ? "Trial Active (14 Days)" : "Trial Concluded"}
+                    </Button>
+                  ) : !isYearlyPlan && isActiveYearly ? (
+                    <div className="w-full text-center">
+                      <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-60 cursor-not-allowed">
+                        Not Available During Yearly Plan
+                      </Button>
+                      <p className="text-[10px] text-muted-foreground mt-1.5">
+                        Available after{" "}
+                        {expiresAt?.toLocaleDateString("en-IN", { dateStyle: "medium" })}
+                      </p>
+                    </div>
                   ) : (
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Billed monthly   • Cancel anytime</p>
+                    <Button
+                      variant={isYearlyPlan || isCurrentPlan ? "default" : "outline"}
+                      size="default"
+                      onClick={() => openCheckout(plan.id as typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY)}
+                      disabled={loadingPlan !== null}
+                      className={`w-full text-xs font-bold cursor-pointer ${
+                        isYearlyPlan ? "shadow-md shadow-primary/25" : ""
+                      }`}
+                    >
+                      {loadingPlan === plan.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : isCurrentPlan && currentStatus === "active" ? (
+                        `Renew ${plan.name}`
+                      ) : isCurrentPlan && currentStatus === "trial" ? (
+                        `Pay & Activate ${plan.name}`
+                      ) : (
+                        `Choose ${plan.name}`
+                      )}
+                    </Button>
                   )}
                 </div>
-
-                <ul className="space-y-2 text-xs text-muted-foreground">
-                  {features.map((f) => (
-                    <li key={f} className="flex items-center gap-2">
-                      <Check className={`w-3.5 h-3.5 shrink-0 ${isYearlyPlan ? "text-primary" : "text-emerald-500"}`} />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="pt-6 space-y-2">
-                {plan.id === "trial" ? (
-                  <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-80">
-                    {currentStatus === "trial" ? "Trial Active (14 Days)" : "Trial Concluded"}
-                  </Button>
-                ) : !isYearlyPlan && isActiveYearly ? (
-                  <div className="w-full text-center">
-                    <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-60 cursor-not-allowed">
-                      Not Available During Yearly Plan
-                    </Button>
-                    <p className="text-[10px] text-muted-foreground mt-1.5">
-                      Available after{" "}
-                      {expiresAt?.toLocaleDateString("en-IN", { dateStyle: "medium" })}
-                    </p>
-                  </div>
-                ) : (
-                  <Button
-                    variant={isYearlyPlan || isCurrentPlan ? "default" : "outline"}
-                    size="default"
-                    onClick={() => openCheckout(plan.id as typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY)}
-                    disabled={loadingPlan !== null}
-                    className={`w-full text-xs font-bold cursor-pointer ${
-                      isYearlyPlan ? "shadow-md shadow-primary/25" : ""
-                    }`}
-                  >
-                    {loadingPlan === plan.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : isCurrentPlan && currentStatus === "active" ? (
-                      `Renew ${plan.name}`
-                    ) : isCurrentPlan && currentStatus === "trial" ? (
-                      `Pay & Activate ${plan.name}`
-                    ) : (
-                      `Choose ${plan.name}`
-                    )}
-                  </Button>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
+              </motion.div>
+            );
+          })
+        )}
         <motion.div
           variants={itemVariants}
           className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-primary/40 transition-all flex-1 min-w-[260px] max-w-full"

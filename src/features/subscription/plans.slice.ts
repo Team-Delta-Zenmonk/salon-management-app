@@ -21,7 +21,7 @@ export interface PlansState {
 
 const initialState: PlansState = {
   plans: [],
-  isLoading: false,
+  isLoading: true,
   error: null,
 };
 

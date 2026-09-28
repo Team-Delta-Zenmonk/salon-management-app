@@ -19,6 +19,7 @@ import { LocationSection } from "./_components/location-tab/index";
 import { HoursSection } from "./_components/hours-tab/index";
 import PaymentPolicyCard from "./_components/payment-policy-card/index";
 import { UnsavedChangesBanner } from "../../components/unsaved-changes-banner";
+import { EllipsisCell } from "../../components/ellipse-cell";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -308,9 +309,10 @@ const MyProfile = () => {
                       </div>
 
                       <div className="space-y-1 sm:space-y-1.5 min-w-0 flex-1">
-                        <h2 className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white drop-shadow-md truncate">
-                          {activeName || "Your Salon"}
-                        </h2>
+                        <EllipsisCell
+                          value={activeName || "Your Salon"}
+                          className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white drop-shadow-md capitalize block min-w-0"
+                        />
                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                           {activeType && (
                             <Badge variant="secondary" className="bg-white/15 text-white border-white/10 backdrop-blur-sm text-[9px] sm:text-[10px] font-bold py-0.5 px-2 sm:px-2.5 rounded-full capitalize">

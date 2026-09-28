@@ -279,6 +279,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   identifier="service-price"
                   placeholder="Enter price"
                   disabled={isLoading}
+                  maxLength={FIELD_LIMITS.PRICE}
                 />
 
                 <TextField
@@ -290,6 +291,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   identifier="service-duration"
                   placeholder="Enter duration"
                   disabled={isLoading}
+                  maxLength={FIELD_LIMITS.DURATION}
                 />
               </div>
 
@@ -303,6 +305,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   identifier="service-discount"
                   placeholder="Enter discount"
                   disabled={isLoading}
+                  maxLength={FIELD_LIMITS.PRICE}
                 />
 
                 <Select

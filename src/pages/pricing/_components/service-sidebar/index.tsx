@@ -85,7 +85,7 @@ export default function ServiceSidebar({
                     value={s.name}
                     className={clsx("text-sm transition-colors capitalize block", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}
                   />
-                  <p className="text-xs text-muted-foreground/80 truncate mt-0.5">
+                  <p className="text-xs text-muted-foreground/80 mt-0.5">
                     Base: ₹{s.price ?? "-"} · {s.duration ?? "-"}m
                   </p>
                 </div>

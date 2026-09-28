@@ -388,7 +388,7 @@ export default function Inventory() {
             <div className="mt-1 relative z-10">
               <EllipsisCell
                 value={getLatestActivityText()}
-                className="text-[11px] font-bold text-foreground truncate uppercase tracking-wide leading-snug"
+                className="text-[11px] font-bold text-foreground uppercase tracking-wide leading-snug"
               />
             </div>
           </div>

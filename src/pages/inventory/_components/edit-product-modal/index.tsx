@@ -20,6 +20,7 @@ import type { InventoryItem } from "../../../../features/inventory/inventory-ite
 import Select from "../../../../components/form/select";
 import { useAppSelector } from "../../../../store/hooks";
 import { inventoryItemSchema, type InventoryItemForm } from "../schema/inventory-item.schema";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 
 interface EditProductModalProps {
   open: boolean;
@@ -144,7 +145,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                 control={control}
                 type="text"
                 label="Item Name"
-                maxLength={50}
+                maxLength={FIELD_LIMITS.ITEM_NAME}
                 disabled={loading}
               />
 
@@ -154,7 +155,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                 control={control}
                 type="text"
                 label="Brand"
-                maxLength={50}
+                maxLength={FIELD_LIMITS.NAME}
                 disabled={loading}
               />
 
@@ -206,7 +207,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     control={control}
                     type="text"
                     label="Variant / Size"
-                    maxLength={5}
+                    maxLength={FIELD_LIMITS.CODE}
                     disabled={loading}
                   />
                 </div>
@@ -231,6 +232,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     control={control}
                     type="number"
                     label="Unit Price"
+                    maxLength={FIELD_LIMITS.PRICE}
                     disabled={loading}
                   />
                 </div>
@@ -241,6 +243,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     control={control}
                     type="number"
                     label="Min Stock Level"
+                    maxLength={FIELD_LIMITS.STOCK}
                     disabled={loading}
                   />
                 </div>

@@ -1,18 +1,19 @@
 import * as z from "zod";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 
 export const inventoryItemSchema = z.object({
   name: z
     .string()
     .trim()
     .min(1, "Required")
-    .max(250, "Max 250 characters")
+    .max(FIELD_LIMITS.ITEM_NAME, `Max ${FIELD_LIMITS.ITEM_NAME} characters`)
     .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, "Only alphanumeric, spaces, hyphens, apostrophes, and dots allowed"),
   brand: z
     .string()
     .trim()
     .min(1, "Required")
-    .max(250, "Max 250 characters")
+    .max(FIELD_LIMITS.NAME, `Max ${FIELD_LIMITS.NAME} characters`)
     .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, "Only alphanumeric, spaces, hyphens, apostrophes, and dots allowed"),
   item_type: z.string().min(1, "Required"),
   category_id: z.string().min(1, "Required").optional().or(z.literal("")),
@@ -20,7 +21,7 @@ export const inventoryItemSchema = z.object({
   variant_name: z
     .string()
     .trim()
-    .max(5, "Max 5 characters")
+    .max(FIELD_LIMITS.CODE, `Max ${FIELD_LIMITS.CODE} characters`)
     .or(z.literal(""))
     .optional(),
   unit: z.string().optional().or(z.literal("")),

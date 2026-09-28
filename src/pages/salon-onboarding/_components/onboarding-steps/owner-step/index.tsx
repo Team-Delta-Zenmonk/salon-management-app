@@ -2,6 +2,7 @@ import { useFormContext } from "react-hook-form";
 import TextField from "../../../../../components/form/textfield";
 import type { SalonOnboardingForm } from "../../../schema/salon-onboarding.schema";
 import { VALIDATE_PATTERN } from "../../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../../common/field-limits";
 
 export default function OwnerStep() {
   const { control } = useFormContext<SalonOnboardingForm>();
@@ -16,7 +17,7 @@ export default function OwnerStep() {
         identifier="owner-name"
         placeholder="Enter owner name"
         pattern={VALIDATE_PATTERN.alphabet}
-        maxLength={250}
+        maxLength={FIELD_LIMITS.NAME}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import type { SalonOnboardingForm } from "../../../schema/salon-onboarding.schem
 import TextField from "../../../../../components/form/textfield";
 import LocationMap from "../../../../../components/map";
 import { MapPin, Loader2 } from "lucide-react";
+import { FIELD_LIMITS } from "../../../../../common/field-limits";
 
 interface NominatimPlace {
   place_id: number;
@@ -88,6 +89,7 @@ export default function AddressStep() {
             value={fullAddress}
             onChange={handleInputChange}
             onFocus={() => setShowSuggestions(true)}
+            maxLength={FIELD_LIMITS.ADDRESS}
             className="w-full h-10 px-3 pr-10 text-sm rounded-xl border border-border/50 bg-white dark:bg-neutral-900 shadow-xs focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
           />
           {searchLoading && (
@@ -132,6 +134,7 @@ export default function AddressStep() {
           identifier="salon-map-link"
           placeholder="Google Maps link will generate automatically from map"
           disabled
+          maxLength={FIELD_LIMITS.URL}
         />
       </div>
 

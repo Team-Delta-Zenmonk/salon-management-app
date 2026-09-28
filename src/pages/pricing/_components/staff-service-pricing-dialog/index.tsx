@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { staffPricingSchema } from "../schema/staff-pricing.schema";
 import { EllipsisCell } from "@/components/ellipse-cell";
+import { FIELD_LIMITS } from "@/common/field-limits";
 
 export type StaffPricingFormValues = z.infer<typeof staffPricingSchema>;
 
@@ -117,6 +118,7 @@ export default function StaffServicePricingDialog({
                 identifier="edit-price"
                 placeholder="Enter price"
                 disabled={loading || isFree}
+                maxLength={FIELD_LIMITS.PRICE}
               />
 
               <TextField
@@ -127,6 +129,7 @@ export default function StaffServicePricingDialog({
                 identifier="edit-duration"
                 placeholder="Enter duration"
                 disabled={loading}
+                maxLength={FIELD_LIMITS.DURATION}
               />
             </div>
 

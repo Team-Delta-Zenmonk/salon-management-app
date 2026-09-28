@@ -5,6 +5,7 @@ import { checkSlugAvailability } from "@/features/salon-onboarding/check-slug/ch
 import { getStorefrontDomain } from "@/lib/domain";
 import type { SalonOnboardingForm } from "@/pages/salon-onboarding/schema/salon-onboarding.schema";
 import { Label } from "@/components/ui/label";
+import { FIELD_LIMITS } from "@/common/field-limits";
 
 type StatusState = "idle" | "checking" | "available" | "unavailable" | "error";
 
@@ -118,7 +119,7 @@ export default function SlugInput() {
                 }}
                 onBlur={onBlur}
                 placeholder="your-salon"
-                maxLength={50}
+                maxLength={FIELD_LIMITS.SLUG}
                 autoComplete="off"
                 spellCheck="false"
                 data-test-id="input-salon-slug"

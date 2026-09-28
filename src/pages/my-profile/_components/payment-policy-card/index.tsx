@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { FIELD_LIMITS } from "@/common/field-limits";
 
 interface PaymentPolicyCardProps {
   isSaving?: boolean;
@@ -135,7 +136,7 @@ export default function PaymentPolicyCard({ isSaving }: Readonly<PaymentPolicyCa
                                       <Input
                                         type="text"
                                         inputMode="numeric"
-                                        maxLength={2}
+                                        maxLength={FIELD_LIMITS.PERCENTAGE}
                                         disabled={isSaving}
                                         placeholder="20"
                                         className="h-8 text-xs pr-7 font-bold text-foreground"

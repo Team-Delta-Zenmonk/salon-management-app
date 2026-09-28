@@ -134,7 +134,7 @@ export default function StaffDetailsDialog({
               <div className="flex items-center gap-2 flex-wrap">
                 <EllipsisCell
                   value={fullName}
-                  className="text-lg font-bold text-foreground capitalize leading-tight tracking-tight truncate"
+                  className="text-lg font-bold text-foreground capitalize leading-tight tracking-tight"
                   maxChars={15}
                 />
                 {isActive ? (

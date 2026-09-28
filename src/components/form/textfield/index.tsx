@@ -152,7 +152,7 @@ const TextField = <T extends FieldValues>({
                 onBeforeInput={handleBeforeInput}
                 data-test-id={`input-${identifier}`}
                 className={clsx(
-                  "w-full shadow-sm truncate",
+                  "w-full shadow-sm",
                   startAdornment && "pl-10",
                   (endAdornment || type === "number") && "pr-10",
                   hasError && "border-destructive focus-visible:ring-destructive aria-invalid:border-destructive aria-invalid:ring-destructive",

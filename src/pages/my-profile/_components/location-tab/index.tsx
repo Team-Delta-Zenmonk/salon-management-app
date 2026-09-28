@@ -176,7 +176,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="salon@example.com"
               identifier="salon-email-field"
               disabled
-              maxLength={100}
+              maxLength={FIELD_LIMITS.EMAIL}
               endAdornment={
                 <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 py-0.5 px-2 rounded-full text-[9px] font-bold gap-1 backdrop-blur-xs shrink-0 select-none">
                   <CheckCircle2 className="w-2.5 h-2.5" />
@@ -196,7 +196,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="Enter contact number"
               identifier="salon-phone-field"
               rules={{ required: "Contact number is required" }}
-              maxLength={10}
+              maxLength={FIELD_LIMITS.PHONE}
               inputPropsClassName="bg-white dark:bg-neutral-900"
               pattern={VALIDATE_PATTERN.number}
             />
@@ -335,7 +335,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="https://maps.google.com/..."
               identifier="salon-maplink-field"
               inputPropsClassName="bg-white dark:bg-neutral-900"
-              maxLength={500}
+              maxLength={FIELD_LIMITS.URL}
             />
           </div>
         </div>

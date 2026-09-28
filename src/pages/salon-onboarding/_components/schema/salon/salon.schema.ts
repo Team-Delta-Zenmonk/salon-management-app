@@ -1,11 +1,12 @@
 import * as z from "zod";
 import { CloudinaryFileSchema } from "../../../../../common/cloudinary.schema";
+import { FIELD_LIMITS } from "../../../../../common/field-limits";
 
 export const SalonSchema = z.object({
   slug: z
     .string()
     .min(3, "Subdomain must be at least 3 characters")
-    .max(50, "Subdomain cannot exceed 50 characters")
+    .max(FIELD_LIMITS.SLUG, `Subdomain cannot exceed ${FIELD_LIMITS.SLUG} characters`)
     .regex(
       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
       "Use lowercase letters, numbers, and single hyphens"

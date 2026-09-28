@@ -17,6 +17,7 @@ import type { ItemCategory } from "../../../../features/inventory/types/category
 import { createCategorySchema, type CreateCategoryForm } from "../schema/create-category.schema";
 import type { UseFormSetValue } from "react-hook-form";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 
 interface CreateCategoryModalProps {
   open: boolean;
@@ -85,7 +86,7 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
               control={control}
               label="Category Name"
               placeholder="Enter category name"
-              maxLength={250}
+              maxLength={FIELD_LIMITS.ITEM_NAME}
               disabled={loading}
               pattern={VALIDATE_PATTERN.alphabetWithSpecial}
             />

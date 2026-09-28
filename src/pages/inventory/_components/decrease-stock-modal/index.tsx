@@ -14,6 +14,7 @@ import { useAppDispatch } from "../../../../store/hooks";
 import { decreaseStockAction } from "../../../../features/inventory/decrease-items-stock/decrease-items-stock.action";
 import { callSnack } from "../../../../components/snackbar";
 import type { InventoryItem } from "../../../../features/inventory/inventory-item.slice";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 
 interface DecreaseStockModalProps {
   open: boolean;
@@ -81,6 +82,7 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
               type="number"
               label="Quantity to Decrease"
               placeholder="e.g. 5"
+              maxLength={FIELD_LIMITS.QUANTITY}
               rules={{
                 required: "Required",
                 min: { value: 1, message: "Quantity must be at least 1" },

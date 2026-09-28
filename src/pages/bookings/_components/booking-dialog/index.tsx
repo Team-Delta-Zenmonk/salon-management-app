@@ -17,6 +17,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
 import { bookingSchema, type BookingFormValues } from "../../schema/booking.schema";
 import TextField from "../../../../components/form/textfield";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 import Select from "../../../../components/form/select";
 import DatePicker from "../../../../components/form/date-picker";
 import TimePicker from "../../../../components/form/time-picker";
@@ -396,7 +397,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Enter name"
                   control={control as any}
                   identifier="booking-customer-name"
-                  maxLength={250}
+                  maxLength={FIELD_LIMITS.NAME}
                   pattern={VALIDATE_PATTERN.alphabet}
                 />
                 <TextField
@@ -406,7 +407,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   placeholder="Enter phone number"
                   control={control as any}
                   identifier="booking-customer-phone"
-                  maxLength={10}
+                  maxLength={FIELD_LIMITS.PHONE}
                   pattern={VALIDATE_PATTERN.number}
                 />
               </div>

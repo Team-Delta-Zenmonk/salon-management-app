@@ -13,6 +13,7 @@ import type { ItemCategory } from "../../../../../../features/inventory/types/ca
 import { inventoryItemSchema, type InventoryItemForm } from "../../../schema/inventory-item.schema";
 import type { InventoryItem } from "../../../../../../features/inventory/inventory-item.slice";
 import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
+import { FIELD_LIMITS } from "../../../../../../common/field-limits";
 import { EllipsisCell } from "@/components/ellipse-cell";
 
 interface ItemDetailsSectionProps {
@@ -117,7 +118,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 control={control}
                 label="Item Name"
                 placeholder="e.g., Haircare Shampoo"
-                maxLength={250}
+                maxLength={FIELD_LIMITS.ITEM_NAME}
                 disabled={loading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
@@ -129,7 +130,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 control={control}
                 label="Brand Name"
                 placeholder="e.g., BrandName"
-                maxLength={250}
+                maxLength={FIELD_LIMITS.NAME}
                 disabled={loading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
               />
@@ -164,7 +165,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 control={control}
                 label="Variant / Size"
                 placeholder="e.g., 500ml / Large"
-                maxLength={5}
+                maxLength={FIELD_LIMITS.CODE}
                 disabled={loading}
               />
 
@@ -186,6 +187,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 name="unit_price"
                 control={control}
                 label="Unit Price (₹)"
+                maxLength={FIELD_LIMITS.PRICE}
                 disabled={loading}
               />
 
@@ -195,6 +197,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 name="min_stock_level"
                 control={control}
                 label="Minimum Stock Level"
+                maxLength={FIELD_LIMITS.STOCK}
                 disabled={loading}
               />
             </div>

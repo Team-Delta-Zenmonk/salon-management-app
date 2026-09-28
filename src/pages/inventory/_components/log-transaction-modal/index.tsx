@@ -21,6 +21,7 @@ import TextField from "../../../../components/form/textfield";
 import DatePicker from "../../../../components/form/date-picker";
 import Select from "../../../../components/form/select";
 import { inventoryLogSchema, type InventoryLogForm } from "../schema/inventory-log.schema";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 
 interface LogTransactionModalProps {
   open: boolean;
@@ -203,6 +204,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                       control={control}
                       type="number"
                       label="Ordered Quantity"
+                      maxLength={FIELD_LIMITS.QUANTITY}
                     />
                   </div>
                   <div className="flex-1">
@@ -212,6 +214,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                       control={control}
                       type="number"
                       label="Received Quantity"
+                      maxLength={FIELD_LIMITS.QUANTITY}
                     />
                   </div>
                 </div>
@@ -223,6 +226,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                       control={control}
                       type="number"
                       label="Damaged Quantity"
+                      maxLength={FIELD_LIMITS.QUANTITY}
                     />
                   </div>
                   <div className="flex-1">
@@ -232,6 +236,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                       control={control}
                       type="number"
                       label="Returned Quantity"
+                      maxLength={FIELD_LIMITS.QUANTITY}
                     />
                   </div>
                 </div>
@@ -242,6 +247,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                     control={control}
                     type="number"
                     label="Bill Amount"
+                    maxLength={FIELD_LIMITS.PRICE}
                   />
                 </div>
               </div>

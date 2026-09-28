@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ForgotPasswordSchema, type ForgotPasswordForm } from "./schema/forgot-password.schema";
 import { Scissors, Loader2, ArrowLeft, CheckCircle2, ShieldAlert, KeyRound } from "lucide-react";
 import TextField from "../../components/form/textfield";
+import { FIELD_LIMITS } from "@/common/field-limits";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { forgotPassword } from "../../features/auth/forgot-password/forgot-password.service";
@@ -163,6 +164,7 @@ export default function ForgotPassword() {
                       identifier="forgot-password-email"
                       placeholder="you@yoursalon.com"
                       disabled={isLoading}
+                      maxLength={FIELD_LIMITS.EMAIL}
                       inputPropsClassName="bg-white dark:bg-neutral-900"
                     />
                     <Button
