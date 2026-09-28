@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, type FieldPath } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAppDispatch } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
 import { createStaffService } from "../../../../features/staff/create-staff/create-staff.service";
@@ -42,10 +42,31 @@ const STEP_FIELDS: Record<number, FieldPath<StaffForm>[]> = {
   2: ["active_hours"],
 };
 
+const normalizeValue = (val: any): any => {
+  if (val === null || val === undefined) return "";
+  if (typeof val === "boolean" || typeof val === "number") return val;
+  if (typeof val === "string") return val.trim();
+  if (Array.isArray(val)) return val.map(normalizeValue);
+  if (typeof val === "object") {
+    const res: Record<string, any> = {};
+    for (const key of Object.keys(val).sort()) {
+      res[key] = normalizeValue(val[key]);
+    }
+    return res;
+  }
+  return val;
+};
+
+const isFormChanged = (initial: StaffForm | null, current: StaffForm): boolean => {
+  if (!initial) return false;
+  return JSON.stringify(normalizeValue(initial)) !== JSON.stringify(normalizeValue(current));
+};
+
 export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Props>) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(0);
+  const [initialValues, setInitialValues] = useState<StaffForm | null>(null);
 
   const methods = useForm<StaffForm>({
     resolver: zodResolver(StaffSchema),
@@ -55,6 +76,13 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
   });
 
   const { handleSubmit, control, reset, watch, setValue, trigger, formState: { errors } } = methods;
+
+  const currentValues = watch();
+
+  const isChanged = useMemo(
+    () => isFormChanged(initialValues, currentValues),
+    [initialValues, currentValues]
+  );
 
   const close = () => {
     if (isLoading) return;
@@ -76,6 +104,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
   };
 
   const onSubmit = handleSubmit(async (data) => {
+    if (!isChanged) return;
     try {
       setIsLoading(true);
       const photos = data.photos || (mode === "update" ? staff?.photos : undefined);
@@ -135,11 +164,11 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
   useEffect(() => {
     if (!open) return;
     setStep(0);
-    if (mode === "create") {
-      reset(createStaffDefaultPayload());
-    } else if (mode === "update" && staff) {
-      reset(updateStaffDefaultPayload(staff));
-    }
+    const defaults = mode === "create"
+      ? createStaffDefaultPayload()
+      : updateStaffDefaultPayload(staff!);
+    setInitialValues(defaults);
+    reset(defaults);
   }, [open, mode, staff, reset]);
 
   const totalSteps = STEPS.length;
@@ -155,7 +184,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
         }
       }}
     >
-      <DialogContent className="sm:max-w-[680px] w-full max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+      <DialogContent className="sm:max-w-[680px] w-full h-[640px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
         <DialogHeader className="px-6 py-5 border-b border-border/50 bg-muted/20 shrink-0">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
             {mode === "create" ? "Add Staff Member" : "Update Staff Profile"}
@@ -276,13 +305,13 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
                   <Button
                     type="button"
                     onClick={() => onSubmit()}
-                    disabled={isLoading}
+                    disabled={isLoading || !isChanged}
                     className="rounded-full px-6 h-9 text-sm font-semibold shadow-md hover:shadow-lg transition-shadow"
                   >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {mode === "create"
                       ? isLoading ? "Creating..." : "Create Staff"
-                      : isLoading ? "Saving..." : "Save Changes"}
+                      : isLoading ? "Saving..." : "Save"}
                   </Button>
                 )}
               </div>

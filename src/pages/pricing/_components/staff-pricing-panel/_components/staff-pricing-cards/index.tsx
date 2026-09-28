@@ -130,7 +130,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
 
   if (initialLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-3 bg-card">
+      <div className="flex flex-col items-center justify-center py-24 gap-3">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <span className="text-xs text-muted-foreground font-semibold">Loading staff pricing...</span>
       </div>
@@ -144,13 +144,14 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-border/50 mb-6">
-        <div className="space-y-1 min-w-0 flex-1">
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-border/50 mb-6">
+        <div className="space-y-1 min-w-[240px] flex-1">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-6 rounded bg-primary shrink-0" />
             <EllipsisCell
               value={`${selectedService.name} Staff Pricing`}
               className="text-base sm:text-lg font-bold text-foreground capitalize block min-w-0"
+              maxChars={30}
             />
           </div>
           <p className="text-muted-foreground/80 text-xs sm:text-sm">
@@ -216,7 +217,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
                   {assignedStaffs.map(({ staff, staffServiceRow }) => {
                     const staff_name = `${staff.first_name} ${staff.last_name || ""}`.trim();
 

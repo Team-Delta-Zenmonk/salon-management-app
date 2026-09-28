@@ -35,60 +35,79 @@ export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Reado
 
       <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-5 custom-scrollbar">
         <div className="flex flex-col gap-2">
-          {staffs.map((staff: Staff, idx: number) => {
-            const isSelected = selectedStaffUuid === staff.uuid;
-            const staffName = `${staff.first_name} ${staff.last_name || ""}`.trim();
-            const initials = `${staff.first_name?.[0] || ""}${staff.last_name?.[0] || ""}`.toUpperCase();
-
-            return (
-              <motion.div
-                key={staff.uuid}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: idx * 0.04 }}
-                className={clsx(
-                  "flex items-center gap-3.5 p-3.5 rounded-xl cursor-pointer border transition-all duration-200 relative overflow-hidden group",
-                  isSelected
-                    ? "bg-primary/10 border-primary/40 shadow-[0_2px_8px_rgba(var(--primary),0.08)]"
-                    : "bg-card/60 backdrop-blur-md border-border/50 hover:bg-card/80 hover:border-border/80",
-                )}
-                onClick={() => onSelectStaff(staff.uuid)}
-              >
-                {isSelected && (
-                  <motion.div
-                    layoutId="activeStaffIndicator"
-                    className="absolute left-0 top-0 bottom-0 w-1 bg-primary"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-
-                <Avatar
-                  className={clsx(
-                    "w-10 h-10 text-sm font-semibold border-2 transition-transform duration-200 group-hover:scale-105",
-                    isSelected 
-                      ? "border-primary bg-primary/10 text-primary" 
-                      : "border-border bg-muted text-muted-foreground",
-                  )}
+          {staffState?.isInitialLoading || (staffState?.loading && staffs.length === 0) ? (
+            <div className="flex flex-col gap-2.5 pt-1">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3.5 p-3.5 rounded-xl border border-border/40 bg-card/40 animate-pulse"
                 >
-                  {staff.photos?.url && <AvatarImage src={staff.photos.url} alt={staffName} />}
-                  <AvatarFallback className="bg-transparent font-bold">{initials}</AvatarFallback>
-                </Avatar>
-
-                <div className="min-w-0 flex-1">
-                  <EllipsisCell
-                    value={staffName}
-                    className={clsx("text-sm transition-colors capitalize block", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}
-                  />
-                  <p className="text-xs text-muted-foreground/80 mt-0.5">{staff.email}</p>
+                  <div className="w-10 h-10 rounded-full bg-foreground/10 shrink-0" />
+                  <div className="flex-1 space-y-2 py-0.5">
+                    <div className="h-3.5 bg-foreground/10 rounded w-2/3" />
+                    <div className="h-3 bg-foreground/10 rounded w-1/2" />
+                  </div>
                 </div>
-              </motion.div>
-            );
-          })}
-
-          {staffs.length === 0 && (
-            <div className="border border-dashed border-border rounded-xl p-8 text-center text-muted-foreground text-sm mt-2 bg-muted/20">
-              No staff available.
+              ))}
             </div>
+          ) : (
+            <>
+              {staffs.map((staff: Staff, idx: number) => {
+                const isSelected = selectedStaffUuid === staff.uuid;
+                const staffName = `${staff.first_name} ${staff.last_name || ""}`.trim();
+                const initials = `${staff.first_name?.[0] || ""}${staff.last_name?.[0] || ""}`.toUpperCase();
+
+                return (
+                  <motion.div
+                    key={staff.uuid}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: idx * 0.04 }}
+                    className={clsx(
+                      "flex items-center gap-3.5 p-3.5 rounded-xl cursor-pointer border transition-all duration-200 relative overflow-hidden group",
+                      isSelected
+                        ? "bg-primary/10 border-primary/40 shadow-[0_2px_8px_rgba(var(--primary),0.08)]"
+                        : "bg-card/60 backdrop-blur-md border-border/50 hover:bg-card/80 hover:border-border/80",
+                    )}
+                    onClick={() => onSelectStaff(staff.uuid)}
+                  >
+                    {isSelected && (
+                      <motion.div
+                        layoutId="activeStaffIndicator"
+                        className="absolute left-0 top-0 bottom-0 w-1 bg-primary"
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
+
+                    <Avatar
+                      className={clsx(
+                        "w-10 h-10 text-sm font-semibold border-2 transition-transform duration-200 group-hover:scale-105",
+                        isSelected
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {staff.photos?.url && <AvatarImage src={staff.photos.url} alt={staffName} />}
+                      <AvatarFallback className="bg-transparent font-bold">{initials}</AvatarFallback>
+                    </Avatar>
+
+                    <div className="min-w-0 flex-1">
+                      <EllipsisCell
+                        value={staffName}
+                        className={clsx("text-sm transition-colors capitalize block", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}
+                      />
+                      <p className="text-xs text-muted-foreground/80 mt-0.5">{staff.email}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+
+              {staffs.length === 0 && (
+                <div className="border border-dashed border-border rounded-xl p-8 text-center text-muted-foreground text-sm mt-2 bg-muted/20">
+                  No staff available.
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

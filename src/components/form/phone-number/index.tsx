@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { type FieldValues, useController } from "react-hook-form";
 import clsx from "clsx";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Search } from "lucide-react";
 
 import {
   Popover,
@@ -75,14 +75,17 @@ const PhoneNumberSelect = <T extends FieldValues>({
 
       <PopoverContent className="w-64 p-0 shadow-lg" align="start">
         <div className="p-2 border-b border-border">
-          <Input
-            placeholder="Search flag..."
-            value={textValue}
-            onChange={(e) => setTextValue(e.target.value)}
-            className="h-8 shadow-none focus-visible:ring-1"
-            data-test-id="input-filter-flag"
-            autoFocus
-          />
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground z-10 pointer-events-none" />
+            <Input
+              placeholder="Search flag..."
+              value={textValue}
+              onChange={(e) => setTextValue(e.target.value)}
+              className="h-8 pl-8 shadow-none focus-visible:ring-1"
+              data-test-id="input-filter-flag"
+              autoFocus
+            />
+          </div>
         </div>
         {sortedOptions.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground" data-test-id={`text-${identifier}-no-options`}>

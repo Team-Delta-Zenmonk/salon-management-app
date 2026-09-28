@@ -12,7 +12,7 @@ import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import { listSubServicesService } from "../../../../features/service/list-sub-services/list-sub-services.service";
 import { callSnack } from "../../../../components/snackbar";
-import { Edit2Icon, Trash2Icon, UserPlusIcon, SparklesIcon, PlusIcon, ClockIcon } from "lucide-react";
+import { Edit2Icon, Trash2Icon, UserPlusIcon, SparklesIcon, PlusIcon, ClockIcon, Loader2 } from "lucide-react";
 import type { Service } from "../../../../features/service/service.slice";
 import { EllipsisCell } from "../../../../components/ellipse-cell";
 
@@ -119,12 +119,14 @@ export function SubServicesDrawer({
         </SheetHeader>
 
         <div className="flex justify-between items-center px-6 py-4 bg-muted/5 border-b border-border/50 shrink-0">
-          <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+          <span className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
             Sub-services ({subServices.length})
+            {loading && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
           </span>
           <Button
             size="sm"
             onClick={() => onAddSubService(parentService)}
+            disabled={loading}
             className="h-8 rounded-full px-3 text-xs flex items-center gap-1.5 shadow-sm"
           >
             <PlusIcon className="w-3.5 h-3.5" />

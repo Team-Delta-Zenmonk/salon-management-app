@@ -35,6 +35,8 @@ export interface StaffState {
   total: number;
   page: number;
   limit: number;
+  loading: boolean;
+  isInitialLoading: boolean;
 }
 
 const initialState: StaffState = {
@@ -42,6 +44,8 @@ const initialState: StaffState = {
   total: 0,
   page: 1,
   limit: 10,
+  loading: false,
+  isInitialLoading: true,
 };
 
 export const staffSlice = createSlice({
@@ -52,9 +56,19 @@ export const staffSlice = createSlice({
       state.data = [];
       state.total = 0;
       state.page = 1;
+      state.loading = false;
+      state.isInitialLoading = true;
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(listStaffAction.pending, (state, { meta }) => {
+      state.loading = true;
+      const page = meta.arg?.page ?? 1;
+      if (page === 1) {
+        state.isInitialLoading = true;
+      }
+    });
+
     builder.addCase(listStaffAction.fulfilled, (state, action) => {
       const { data, total, page, limit } = action.payload;
 
@@ -67,6 +81,13 @@ export const staffSlice = createSlice({
       state.total = total;
       state.page = page;
       state.limit = limit;
+      state.loading = false;
+      state.isInitialLoading = false;
+    });
+
+    builder.addCase(listStaffAction.rejected, (state) => {
+      state.loading = false;
+      state.isInitialLoading = false;
     });
 
     builder.addCase(updateStaffAction.fulfilled, (state, { payload }) => {

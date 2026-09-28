@@ -21,6 +21,7 @@ const FileMultiPicker = <T extends FieldValues>({
   maxSizeBytes = 5 * 1024 * 1024,
   maxFiles = 10,
   uploadMultipleFn,
+  placeholder,
 }: FileMultiPickerProps<T>) => {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -66,7 +67,7 @@ const FileMultiPicker = <T extends FieldValues>({
 
     try {
       const fileList = Array.from(files);
-      const uploadedData = uploadMultipleFn 
+      const uploadedData = uploadMultipleFn
         ? await uploadMultipleFn(fileList)
         : await uploadMultipleFiles(fileList);
 
@@ -107,10 +108,10 @@ const FileMultiPicker = <T extends FieldValues>({
   ) => {
     if (loading) {
       return (
-        <Loader2 
-          className="animate-spin text-muted-foreground mr-2" 
-          size={20} 
-          data-test-id={`loading-${identifier}`} 
+        <Loader2
+          className="animate-spin text-muted-foreground mr-2"
+          size={20}
+          data-test-id={`loading-${identifier}`}
         />
       );
     }
@@ -170,7 +171,7 @@ const FileMultiPicker = <T extends FieldValues>({
                 </Label>
               )}
 
-              <div 
+              <div
                 className="relative flex items-center"
                 onClick={openFilePicker}
               >
@@ -178,7 +179,7 @@ const FileMultiPicker = <T extends FieldValues>({
                   readOnly
                   disabled={isDisabled}
                   value={arr.length ? `${arr.length} file(s) selected` : ""}
-                  placeholder="Select files"
+                  placeholder={placeholder || "Select files"}
                   className={clsx(
                     "cursor-pointer pr-10",
                     hasError && "border-destructive focus-visible:ring-destructive",

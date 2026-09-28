@@ -265,89 +265,101 @@ export default function StaffDetailsDialog({
                   )}
 
                   {staff.emergency_contact && (
-                    <div className="p-4 rounded-2xl border border-destructive/20 bg-destructive/5 flex flex-col gap-2.5 mt-1">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-destructive/10 text-destructive shrink-0">
+                    <div className="flex p-3.5 bg-destructive/5 border border-destructive/20 rounded-2xl">
+                      <div className="flex items-center gap-3.5 w-full">
+                        <div className="w-9 h-9 flex items-center justify-center rounded-xl shrink-0 bg-destructive/10 text-destructive">
                           <Shield className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] text-destructive/70 uppercase tracking-widest font-bold">
-                          Emergency Contact
+                        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] text-destructive/70 uppercase tracking-widest font-semibold mb-0.5 leading-none">
+                              Emergency Contact
+                            </p>
+                            <EllipsisCell
+                              value={staff.emergency_contact.name}
+                              className="text-sm font-semibold text-foreground leading-snug"
+                              maxChars={25}
+                            />
+                          </div>
+                          {staff.emergency_contact.phone && (
+                            <a
+                              href={`tel:${staff.emergency_contact.phone}`}
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-destructive/80 hover:text-destructive transition-colors shrink-0"
+                            >
+                              <Phone className="h-3.5 w-3.5 shrink-0 text-destructive" />
+                              <span>{staff.emergency_contact.phone}</span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2.5 mt-2 pt-3 border-t border-border/30">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                        <FileText className="h-3.5 w-3.5" />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+                        Uploaded Documents ({staff.staff_docs?.length || 0})
+                      </p>
+                    </div>
+
+                    {!staff.staff_docs || staff.staff_docs.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-6 text-center bg-muted/20 border border-dashed border-border/50 rounded-2xl">
+                        <FileText className="h-6 w-6 text-muted-foreground/40 mb-1.5" />
+                        <p className="text-xs font-semibold text-muted-foreground">
+                          No documents uploaded
+                        </p>
+                        <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                          Documents can be added when editing staff details.
                         </p>
                       </div>
-                      <EllipsisCell
-                        value={staff.emergency_contact.name}
-                        className="text-sm font-bold text-foreground pl-10"
-                        maxChars={15}
-                      />
-                      {staff.emergency_contact.phone && (
-                        <a
-                          href={`tel:${staff.emergency_contact.phone}`}
-                          className="pl-10 flex items-center gap-2 text-xs font-semibold text-destructive/70 hover:text-destructive transition-colors"
-                        >
-                          <Phone className="h-3.5 w-3.5 shrink-0" />
-                          {staff.emergency_contact.phone}
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-
-              {tab === "documents" && (
-                <div className="flex flex-col gap-3">
-                  {!staff.staff_docs || staff.staff_docs.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 border border-dashed border-border/50 rounded-2xl">
-                      <FileText className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                      <p className="text-xs font-semibold text-muted-foreground">
-                        No documents uploaded
-                      </p>
-                      <p className="text-[11px] text-muted-foreground/60 mt-0.5">
-                        Documents can be added when editing staff details.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-2.5">
-                      {staff.staff_docs.map((doc, i) => {
-                        const isPdf =
-                          doc.format === "pdf" ||
-                          doc.url?.toLowerCase().endsWith(".pdf") ||
-                          doc.filename?.toLowerCase().endsWith(".pdf");
-                        return (
-                          <div
-                            key={doc.url || i}
-                            className="flex items-center justify-between p-3 bg-muted/30 border border-border/50 rounded-2xl hover:border-primary/30 transition-all duration-200"
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
-                                {isPdf ? (
-                                  <FileText className="h-4 w-4 text-destructive" />
-                                ) : (
-                                  <UserCircle className="h-4 w-4 text-primary" />
-                                )}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-xs font-semibold text-foreground truncate">
-                                  {doc.filename || `Document ${i + 1}`}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground uppercase font-bold">
-                                  {isPdf ? "PDF Document" : "Image File"}
-                                </p>
-                              </div>
-                            </div>
-                            <a
-                              href={doc.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="w-8 h-8 flex items-center justify-center rounded-xl bg-background border border-border/50 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors shrink-0"
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2.5">
+                        {staff.staff_docs.map((doc, i) => {
+                          const isPdf =
+                            doc.format === "pdf" ||
+                            doc.url?.toLowerCase().endsWith(".pdf") ||
+                            doc.filename?.toLowerCase().endsWith(".pdf");
+                          return (
+                            <div
+                              key={doc.url || i}
+                              className="flex items-center justify-between p-3 bg-muted/30 border border-border/50 rounded-2xl hover:border-primary/30 transition-all duration-200"
                             >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+                                  {isPdf ? (
+                                    <FileText className="h-4 w-4 text-destructive" />
+                                  ) : (
+                                    <UserCircle className="h-4 w-4 text-primary" />
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs font-semibold text-foreground truncate">
+                                    {doc.filename || `Document ${i + 1}`}
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground uppercase font-bold">
+                                    {isPdf ? "PDF Document" : "Image File"}
+                                  </p>
+                                </div>
+                              </div>
+                              <a
+                                href={doc.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="w-8 h-8 flex items-center justify-center rounded-xl bg-background border border-border/50 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors shrink-0"
+                                title="View / Download Document"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
 
               {tab === "schedule" && (

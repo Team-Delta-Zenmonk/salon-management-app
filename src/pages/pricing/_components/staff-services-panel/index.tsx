@@ -162,8 +162,8 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
 
   return (
     <div className="p-4 sm:p-6 md:p-8 flex flex-col min-h-full bg-transparent">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-border/50 mb-6">
-        <div className="space-y-1 min-w-0 flex-1">
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-border/50 mb-6">
+        <div className="space-y-1 min-w-[240px] flex-1">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-6 rounded bg-primary shrink-0" />
             <EllipsisCell
@@ -221,7 +221,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                 <div className="h-px bg-border/55 flex-1" />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
                 {group.services.map((svc) => (
                   <div
                     key={svc.uuid}

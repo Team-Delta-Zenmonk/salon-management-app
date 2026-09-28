@@ -31,9 +31,16 @@ export const getSnackBarStyles = (state: string) => {
   return {
     boxShadow: "0 20px 30px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08)",
     borderRadius: "14px",
-    padding: "10px 18px",
+    padding: "10px 14px",
     fontWeight: "600",
     letterSpacing: "-0.01em",
+    display: "flex",
+    flexDirection: "row" as const,
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "nowrap" as const,
+    maxWidth: "min(420px, calc(100vw - 32px))",
+    width: "fit-content",
     ...getVariantStyle(),
   };
 };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Edit2Icon, Trash2Icon, UserPlusIcon, Clock, PlusIcon } from "lucide-react";
+import { Edit2Icon, Trash2Icon, UserPlusIcon, Clock, PlusIcon, Loader2 } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import { listSubServicesService } from "../../../../features/service/list-sub-services/list-sub-services.service";
 import { callSnack } from "../../../../components/snackbar";
@@ -8,6 +8,7 @@ import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import { EllipsisCell } from "../../../../components/ellipse-cell";
 import type { Service } from "../../../../features/service/service.slice";
+import { cn } from "@/lib/utils";
 
 interface ServiceCardProps {
   service: Service;
@@ -81,34 +82,88 @@ export function ServiceCard({
   return (
     <motion.div
       variants={cardVariants}
-      className="group relative bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[250px] overflow-hidden"
+      className={cn(
+        "group relative bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[250px] overflow-hidden",
+        subLoading && "ring-1 ring-primary/30"
+      )}
     >
+      {subLoading && (
+        <div className="absolute inset-0 bg-background/55 backdrop-blur-xs flex flex-col items-center justify-center z-30 transition-all duration-300 animate-in fade-in">
+          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-card border border-primary/20 shadow-lg">
+            <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />
+            <span className="text-xs font-bold text-foreground whitespace-nowrap">
+              {subServices.length > 0 ? "Updating sub-services..." : "Loading sub-services..."}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
       <div>
-        <div className="flex items-start justify-between gap-3 relative z-10 w-full">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="relative shrink-0">
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <Avatar className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ring-2 ring-primary/10 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10 shrink-0 overflow-hidden">
-                <AvatarImage
-                  src={service.logo || undefined}
-                  alt={service.name}
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-primary/5 text-primary font-bold text-base sm:text-lg rounded-2xl">
-                  {service.name ? service.name.charAt(0).toUpperCase() : "?"}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <EllipsisCell
-                value={service.name}
-                maxChars={100}
-                className="font-bold text-foreground text-base sm:text-lg leading-tight group-hover:text-primary transition-colors block capitalize"
+        {/* Top Header: Avatar + Title & Description */}
+        <div className="flex items-start gap-3.5 relative z-10 w-full">
+          <div className="relative shrink-0 mt-0.5">
+            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <Avatar className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ring-2 ring-primary/10 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10 shrink-0 overflow-hidden">
+              <AvatarImage
+                src={service.logo || undefined}
+                alt={service.name}
+                className="object-cover"
               />
-            </div>
+              <AvatarFallback className="bg-primary/5 text-primary font-bold text-base sm:text-lg rounded-2xl">
+                {service.name ? service.name.charAt(0).toUpperCase() : "?"}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+
+          <div className="min-w-0 flex-1 flex flex-col gap-1">
+            <EllipsisCell
+              value={service.name}
+              maxChars={100}
+              className="font-bold text-foreground text-base sm:text-lg leading-tight group-hover:text-primary transition-colors block capitalize"
+            />
+            {service.description ? (
+              <EllipsisCell
+                value={service.description}
+                maxChars={120}
+                className="text-muted-foreground text-xs leading-relaxed line-clamp-2 mt-0.5"
+              />
+            ) : (
+              <p className="text-muted-foreground/50 text-xs italic mt-0.5">
+                No description provided.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Action Row & Badges (New Line) */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 mt-4 pt-3 border-t border-border/30 relative z-10">
+          <div className="flex flex-wrap gap-1.5 items-center">
+            <Badge
+              variant="outline"
+              className="bg-muted/40 border-border/50 text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider"
+            >
+              {service.gender}
+            </Badge>
+            {hasSubServices && (
+              <Badge className="bg-primary/10 text-primary border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-primary/10">
+                {subServices.length} Sub-services
+              </Badge>
+            )}
+            {service.is_popular && (
+              <Badge className="bg-amber-500/10 text-amber-600 border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-amber-500/10">
+                Popular
+              </Badge>
+            )}
+            {!service.is_active && (
+              <Badge
+                variant="destructive"
+                className="bg-destructive/10 text-destructive border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-destructive/10"
+              >
+                Inactive
+              </Badge>
+            )}
           </div>
 
           <div className="flex items-center gap-0.5 bg-background/80 backdrop-blur-xs rounded-full p-1 border border-border/40 opacity-90 group-hover:opacity-100 transition-all duration-300 shadow-xs shrink-0 z-20">
@@ -117,7 +172,7 @@ export function ServiceCard({
               size="icon"
               className="h-7.5 w-7.5 sm:h-8 sm:w-8 rounded-full hover:bg-primary/10 hover:text-primary text-muted-foreground transition-colors"
               onClick={() => onAddSubService(service)}
-              disabled={deleteLoading}
+              disabled={deleteLoading || subLoading}
               title="Add Sub-service"
             >
               <PlusIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -127,7 +182,7 @@ export function ServiceCard({
               size="icon"
               className="h-7.5 w-7.5 sm:h-8 sm:w-8 rounded-full hover:bg-green-500/10 hover:text-green-600 text-muted-foreground transition-colors"
               onClick={() => onAssignStaff(service)}
-              disabled={deleteLoading}
+              disabled={deleteLoading || subLoading}
               title="Assign Staff"
             >
               <UserPlusIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -137,7 +192,7 @@ export function ServiceCard({
               size="icon"
               className="h-7.5 w-7.5 sm:h-8 sm:w-8 rounded-full hover:bg-purple-500/10 hover:text-purple-600 text-muted-foreground transition-colors"
               onClick={() => onEdit(service)}
-              disabled={deleteLoading}
+              disabled={deleteLoading || subLoading}
               title="Edit Service"
             >
               <Edit2Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -147,53 +202,12 @@ export function ServiceCard({
               size="icon"
               className="h-7.5 w-7.5 sm:h-8 sm:w-8 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors"
               onClick={() => onDelete(service)}
-              disabled={deleteLoading}
+              disabled={deleteLoading || subLoading}
               title="Delete Service"
             >
               <Trash2Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Button>
           </div>
-        </div>
-
-        <div className="mt-3 relative z-10 w-full">
-          {service.description ? (
-            <EllipsisCell
-              value={service.description}
-              maxChars={120}
-              className="text-muted-foreground text-xs leading-relaxed line-clamp-2"
-            />
-          ) : (
-            <p className="text-muted-foreground/50 text-xs italic">
-              No description provided.
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-wrap gap-2 mt-4 items-center relative z-10">
-          <Badge
-            variant="outline"
-            className="bg-muted/40 border-border/50 text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-md uppercase tracking-wider"
-          >
-            {service.gender}
-          </Badge>
-          {hasSubServices && (
-            <Badge className="bg-primary/10 text-primary border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-primary/10">
-              {subServices.length} Sub-services
-            </Badge>
-          )}
-          {service.is_popular && (
-            <Badge className="bg-amber-500/10 text-amber-600 border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-amber-500/10">
-              Popular
-            </Badge>
-          )}
-          {!service.is_active && (
-            <Badge
-              variant="destructive"
-              className="bg-destructive/10 text-destructive border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-destructive/10"
-            >
-              Inactive
-            </Badge>
-          )}
         </div>
 
         {hasSubServices && (
@@ -236,7 +250,7 @@ export function ServiceCard({
         )}
       </div>
 
-      <div className="mt-5 pt-4 border-t border-border/50 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 relative z-10 w-full">
+      <div className="mt-5 pt-4 border-t border-border/50 flex flex-wrap items-center justify-between gap-3 relative z-10 w-full">
         {hasSubServices ? (
           <>
             <div className="flex flex-col min-w-0 shrink-0">

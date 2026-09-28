@@ -14,7 +14,7 @@ export interface EllipsisCellProps extends React.HTMLAttributes<HTMLSpanElement>
 export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   value,
   maxLines = 1,
-  maxChars,
+  maxChars = 50,
   className,
   forceTooltip = false,
   children,

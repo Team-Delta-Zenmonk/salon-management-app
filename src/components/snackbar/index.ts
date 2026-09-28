@@ -16,12 +16,12 @@ export const callSnack = async (msg: string, variant: VariantType, maxWidth?: nu
         "button",
         { 
           onClick: () => closeSnackbar(key), 
-          className: "p-1.5 rounded-full hover:bg-black/15 dark:hover:bg-white/20 transition-all ml-3 shrink-0 opacity-80 hover:opacity-100 active:scale-95", 
+          className: "p-1.5 rounded-full hover:bg-black/15 dark:hover:bg-white/20 transition-all ml-2 shrink-0 self-center opacity-80 hover:opacity-100 active:scale-95", 
           "data-testid": `btn-snackbar-close-${key}` 
         } as any,
         React.createElement(X, {
           size: 16,
-          className: "text-current stroke-[2.5]",
+          className: "text-current stroke-[2.5] shrink-0",
           "data-testid": "icon-snackbar-close",
         } as any)
       ),

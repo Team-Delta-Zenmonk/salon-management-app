@@ -15,11 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../../co
 import { callSnack } from "../../../../components/snackbar";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-
-interface PhotoType {
-  url: string;
-  filename: string;
-}
+import type { CloudinaryFile } from "../../../../common/cloudinary.schema";
 
 interface BrandingSectionProps {
   control: Control<SalonProfileForm>;
@@ -32,8 +28,8 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
   setValue,
   isSaving,
 }) => {
-  const logo = useWatch({ control, name: "logo" }) as PhotoType | null;
-  const photos = (useWatch({ control, name: "photos" }) || []) as PhotoType[];
+  const logo = useWatch({ control, name: "logo" }) as CloudinaryFile | { url: string; filename?: string } | null;
+  const photos = (useWatch({ control, name: "photos" }) || []) as CloudinaryFile[];
 
   const [logoUploading, setLogoUploading] = React.useState(false);
   const [photosUploading, setPhotosUploading] = React.useState(false);
@@ -76,10 +72,11 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
 
     setPhotosUploading(true);
     try {
-      const uploadedData: Array<{ url: string; filename: string }> = [];
+      const uploadedData: CloudinaryFile[] = [];
       for (const file of filesToUpload) {
         const result = await uploadImages(file);
         uploadedData.push({
+          ...result,
           url: result.secure_url || result.url,
           filename: result.filename || result.public_id || file.name,
         });
@@ -280,7 +277,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
               </DialogHeader>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4">
-                {photos.map((photo: PhotoType, index: number) => (
+                {photos.map((photo: CloudinaryFile, index: number) => (
                   <div
                     key={photo.url || index}
                     className="group relative rounded-2xl overflow-hidden border border-border/50 bg-background/40 shadow-sm aspect-[4/3] cursor-pointer"

@@ -12,4 +12,5 @@ export type FileMultiPickerProps<T extends FieldValues> = {
   maxFiles?: number;
   uploadFn?: (file: File) => Promise<CloudinaryFile>;
   uploadMultipleFn?: (files: File[]) => Promise<CloudinaryFile[]>;
+  placeholder?: string;
 };

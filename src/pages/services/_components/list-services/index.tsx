@@ -1,5 +1,5 @@
 import InfiniteScroll from "react-infinite-scroll-component";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
 import { Loader2, SearchX } from "lucide-react";
@@ -21,6 +21,7 @@ interface ListServicesProps {
   hasMore: boolean;
   fetchMoreServices: () => void;
   total: number;
+  onDrawerOpenChange?: (open: boolean) => void;
 }
 
 export default function ListServices({
@@ -29,6 +30,7 @@ export default function ListServices({
   refreshServices: refreshServicesProp,
   hasMore,
   fetchMoreServices,
+  onDrawerOpenChange,
 }: Readonly<ListServicesProps>) {
   const dispatch = useAppDispatch();
   const servicesState = useAppSelector((state: RootState) => state.service);
@@ -49,6 +51,10 @@ export default function ListServices({
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeParentService, setActiveParentService] = useState<Service | null>(null);
+
+  useEffect(() => {
+    onDrawerOpenChange?.(drawerOpen);
+  }, [drawerOpen, onDrawerOpenChange]);
 
   const [refreshTriggers, setRefreshTriggers] = useState<Record<string, number>>({});
 

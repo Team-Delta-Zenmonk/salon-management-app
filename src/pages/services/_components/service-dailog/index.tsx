@@ -57,17 +57,17 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
   const { handleSubmit, control, reset, watch, setValue } = methods;
 
-  const buildPayload = (data: ServiceForm, logoUrl?: string | null): CreateServicePayload => {
+  const buildPayload = (data: ServiceForm, logoUrl?: string): CreateServicePayload => {
     const payload: CreateServicePayload = {
       name: data.name?.trim() ?? "",
-      description: data.description,
+      description: data.description || undefined,
       gender: data.gender!,
       price_type: data.price_type!,
       price: Number(data.price),
       duration: Number(data.duration),
       is_active: data.is_active ?? false,
       is_popular: data.is_popular ?? false,
-      logo: logoUrl,
+      logo: logoUrl || undefined,
     };
 
     if (data.discount !== undefined && data.discount !== null && data.discount !== "") {
@@ -100,7 +100,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         return;
       }
 
-      const payload = buildPayload(data, logoUrl);
+      const payload = buildPayload(data, logoUrl || undefined);
 
       if (mode === "create") {
         await createServiceService(payload);

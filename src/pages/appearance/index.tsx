@@ -92,27 +92,36 @@ export default function Appearance() {
   };
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-0 w-full overflow-hidden">
+    <div className="flex flex-col flex-1 h-full min-h-0 w-full overflow-y-auto">
       
       <motion.div 
         initial={{ opacity: 0, y: -15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 pb-6 shrink-0 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 pt-6 pb-4 shrink-0 gap-4"
       >
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Appearance & Branding
             <Sparkles className="h-5 w-5 text-primary shrink-0" />
           </h1>
-          <p className="text-muted-foreground/80 text-sm">
+          <p className="text-muted-foreground/80 text-xs sm:text-sm">
             Elevate your salon workspace branding and theme colors
           </p>
         </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleResetToDefaults}
+          className="rounded-full px-4 h-8 text-xs font-bold border-border/50 hover:bg-muted/50 transition-all text-muted-foreground hover:text-foreground shrink-0"
+        >
+          Reset to Defaults
+        </Button>
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 pt-4 pb-0">
-        <div className="max-w-[1600px] mx-auto w-full pb-24">
+      <div className="flex-1 px-4 md:px-8 pt-2 pb-12">
+        <div className="max-w-[1600px] mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
             
             <motion.div 
@@ -137,7 +146,7 @@ export default function Appearance() {
               </motion.div>
             </motion.div>
 
-            <div className="lg:col-span-2 lg:sticky lg:top-0 space-y-4">
+            <div className="lg:col-span-2 lg:sticky lg:top-4 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Branding Real-Time Preview
@@ -162,19 +171,6 @@ export default function Appearance() {
         onSave={handleSave}
         onDiscard={handleCancelChanges}
       />
-
-      {!isDirty && (
-        <div className="shrink-0 px-8 py-4 border-t border-border/20 bg-muted/10 flex items-center justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleResetToDefaults}
-            className="rounded-full px-5 h-9 text-xs font-bold border-border/50 hover:bg-muted/50 transition-all text-muted-foreground hover:text-foreground"
-          >
-            Reset to Defaults
-          </Button>
-        </div>
-      )}
 
     </div>
   );

@@ -11,6 +11,7 @@ import { listServicesAction, type ListServicesParams } from "../../../../feature
 import { resetServices } from "../../../../features/service/service.slice";
 import { callSnack } from "../../../../components/snackbar";
 import { Loader2 } from "lucide-react";
+import { cn } from "../../../../lib/utils";
 
 type FilterForm = {
   category_uuid: string;
@@ -28,6 +29,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   const dispatch = useDispatch<AppDispatch>();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const categories = useAppSelector((state: RootState) => state.category.data);
   const serviceState = useAppSelector((state: RootState) => state.service);
@@ -154,18 +156,33 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   return (
     <div className="w-full px-4 md:px-8 pb-8 space-y-6">
       <FormProvider {...methods}>
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-border/50 shadow-xs mb-2">
+        <div
+          className={cn(
+            "sticky top-0 z-30 bg-background/95 backdrop-blur-md flex flex-col justify-between gap-4 pt-4 pb-4 border-b border-border/60 shadow-[0_3px_5px_-2px_rgba(0,0,0,0.05)] mb-2",
+            !isDrawerOpen && "min-[1012px]:flex-row min-[1012px]:items-center"
+          )}
+        >
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             All Services
             <span className="text-primary text-base font-medium bg-primary/10 px-2.5 py-0.5 rounded-full">
               {total}
             </span>
           </h2>
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="w-full sm:w-[260px]">
+          <div
+            className={cn(
+              "flex flex-col gap-3 w-full",
+              !isDrawerOpen && "min-[1012px]:flex-row min-[1012px]:items-center min-[1012px]:w-auto"
+            )}
+          >
+            <div className={cn("w-full", !isDrawerOpen && "min-[1012px]:w-[260px]")}>
               <SearchBar onSearch={setSearchQuery} placeholder="Search Services..." />
             </div>
-            <div className="w-full sm:w-[200px] bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-xs [&_button]:h-11 [&_button]:border-none [&_button]:bg-transparent">
+            <div
+              className={cn(
+                "w-full bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-xs [&_button]:h-11 [&_button]:border-none [&_button]:bg-transparent",
+                !isDrawerOpen && "min-[1012px]:w-[200px]"
+              )}
+            >
               <Select
                 name="category_uuid"
                 control={control}
@@ -216,6 +233,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
               hasMore={hasMore}
               fetchMoreServices={fetchMoreServices}
               total={total}
+              onDrawerOpenChange={setIsDrawerOpen}
             />
           )}
         </div>

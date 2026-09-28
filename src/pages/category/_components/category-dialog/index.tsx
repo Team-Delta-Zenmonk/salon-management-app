@@ -52,13 +52,13 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
     try {
       setIsLoading(true);
 
-      const logoUrl = data.logo?.url || (mode === "update" ? category.logo : undefined);
+      const logoUrl = data.logo?.url || (mode === "update" && category?.logo ? category.logo : undefined);
 
       if (mode === "create") {
         await createCategoryService({
           name: data?.name?.trim(),
-          description: data?.description,
-          logo: logoUrl
+          description: data?.description || undefined,
+          logo: logoUrl || undefined,
         });
         await dispatch(listCategoriesAction({ page: 1, limit: 10 })).unwrap();
 
@@ -69,8 +69,8 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
             uuid: category?.uuid,
             body: {
               name: data?.name?.trim(),
-              description: data?.description,
-              logo: logoUrl
+              description: data?.description || undefined,
+              logo: logoUrl || undefined,
             },
           })
         ).unwrap();

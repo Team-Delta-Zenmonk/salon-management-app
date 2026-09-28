@@ -20,6 +20,7 @@ import { HoursSection } from "./_components/hours-tab/index";
 import PaymentPolicyCard from "./_components/payment-policy-card/index";
 import { UnsavedChangesBanner } from "../../components/unsaved-changes-banner";
 import { EllipsisCell } from "../../components/ellipse-cell";
+import type { CloudinaryFile } from "../../common/cloudinary.schema";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -34,7 +35,7 @@ const itemVariants: Variants = {
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 26 } }
 };
 
-interface PhotoType {
+interface PhotoType extends Partial<CloudinaryFile> {
   url: string;
   filename?: string;
 }

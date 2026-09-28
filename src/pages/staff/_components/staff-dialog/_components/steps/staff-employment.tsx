@@ -42,7 +42,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           <DatePicker
             name="end_date"
             control={control}
-            placeholder="End Date"
+            placeholder="End Date (Optional)"
             identifier="staff-end"
             format="DD-MM-YYYY"
             disabled={disabled}
@@ -58,6 +58,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             label="Photo"
             uploadFn={uploadImages}
             disabled={disabled}
+            placeholder="Select photo (optional)"
           />
         </div>
       </div>
@@ -72,6 +73,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           maxFiles={Number(import.meta.env.VITE_MAX_STAFF_DOCS_LIMIT) || 10}
           uploadFn={uploadImages}
           disabled={disabled}
+          placeholder="Select staff documents (Optional)"
         />
       </div>
 

@@ -35,7 +35,7 @@ const SearchBar = ({ onSearch, placeholder }: SearchBarProps) => {
 
   return (
     <div className="relative w-full max-w-[700px]">
-      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10 pointer-events-none">
         <Search className="h-5 w-5" />
       </div>
       <Input

@@ -18,9 +18,9 @@ export default function StaffSchedule({
 }>) {
   const activeHours = watch("active_hours");
 
-  const setDayClosed = (day: DayKey, closed: boolean) => {
+  const handleToggleDay = (day: DayKey, isOpen: boolean) => {
     const path = `active_hours.${day}` as FieldPath<StaffForm>;
-    if (closed) {
+    if (!isOpen) {
       setValue(path, null, { shouldDirty: true });
       return;
     }
@@ -38,35 +38,34 @@ export default function StaffSchedule({
       <div className="flex flex-col gap-4">
         {DaysList.map((day) => {
           const val = activeHours ? (activeHours as Record<DayKey, { start_time: string; end_time: string } | null | undefined>)[day] : undefined;
-          const isClosed = val === null || val === undefined;
+          const isOpen = Boolean(val && val.start_time !== undefined);
 
           return (
-            <div 
-              key={day} 
-              className={`border rounded-2xl p-4 transition-all duration-300 ${
-                isClosed 
-                  ? "bg-muted/10 border-border/50 opacity-70" 
-                  : "bg-card/40 border-primary/20 shadow-xs"
-              }`}
+            <div
+              key={day}
+              className={`border rounded-2xl p-4 transition-all duration-300 ${!isOpen
+                ? "bg-muted/10 border-border/50 opacity-70"
+                : "bg-card/40 border-primary/20 shadow-xs"
+                }`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold capitalize text-foreground flex items-center gap-2">
-                  <span className={`w-2.5 h-2.5 rounded-full ${isClosed ? "bg-muted-foreground/30" : "bg-primary"}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full ${!isOpen ? "bg-muted-foreground/30" : "bg-primary"}`} />
                   {day}
                 </span>
 
                 <div className="flex items-center space-x-2.5 bg-background/50 border border-border/30 px-3 py-1.5 rounded-full">
                   <Switch
-                    id={`closed-${day}`}
-                    checked={isClosed}
-                    onCheckedChange={(checked) => setDayClosed(day, checked)}
+                    id={`open-${day}`}
+                    checked={isOpen}
+                    onCheckedChange={(checked) => handleToggleDay(day, checked)}
                     disabled={disabled}
                   />
-                  <Label htmlFor={`closed-${day}`} className="text-xs font-semibold select-none cursor-pointer">Closed</Label>
+                  <Label htmlFor={`open-${day}`} className="text-xs font-semibold select-none cursor-pointer">{isOpen ? "Open" : "Closed"}</Label>
                 </div>
               </div>
 
-              {!isClosed && (
+              {isOpen && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-3 border-t border-border/10">
                   <TimePicker
                     name={`active_hours.${day}.start_time` as FieldPath<StaffForm>}
@@ -75,6 +74,7 @@ export default function StaffSchedule({
                     identifier={`staff-${day}-start`}
                     disabled={disabled}
                     label="Start Time"
+                    isManual
                   />
 
                   <TimePicker
@@ -84,6 +84,7 @@ export default function StaffSchedule({
                     identifier={`staff-${day}-end`}
                     disabled={disabled}
                     label="End Time"
+                    isManual
                   />
                 </div>
               )}

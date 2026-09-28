@@ -73,7 +73,7 @@ const SearchCategories = ({ searchQuery }: SearchCategoriesProps) => {
 
   return (
     <div className="w-full px-4 md:px-8 pb-8 space-y-4">
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md flex items-center justify-between pt-4 pb-3.5 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-border/50 shadow-xs">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md flex items-center justify-between pt-4 pb-3.5 border-b border-border/60 shadow-[0_3px_5px_-2px_rgba(0,0,0,0.05)]">
         <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
           All Categories
           <span className="text-primary text-base font-medium bg-primary/10 px-2.5 py-0.5 rounded-full">

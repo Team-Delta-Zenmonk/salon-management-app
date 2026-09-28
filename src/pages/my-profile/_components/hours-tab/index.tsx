@@ -84,6 +84,7 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
                       placeholder="09:00 AM"
                       identifier={`start-time-${dayKey}`}
                       triggerClassName="bg-white dark:bg-neutral-900 !h-8 text-xs"
+                      isManual
                     />
                   </div>
                   <div className="space-y-1">
@@ -94,6 +95,7 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
                       placeholder="09:00 PM"
                       identifier={`end-time-${dayKey}`}
                       triggerClassName="bg-white dark:bg-neutral-900 !h-8 text-xs"
+                      isManual
                     />
                   </div>
                 </div>

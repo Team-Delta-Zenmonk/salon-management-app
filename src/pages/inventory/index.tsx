@@ -394,7 +394,7 @@ export default function Inventory() {
           </div>
         </motion.div>
 
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-4 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-border/50 shadow-xs mb-2">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-4 pb-4 border-b border-border/60 shadow-[0_3px_5px_-2px_rgba(0,0,0,0.05)] mb-2">
           <InventoryFilters
             activeTab={activeTab}
             onSearch={setSearchTerm}

@@ -20,6 +20,7 @@ const FilePicker = <T extends FieldValues>({
   accept = "image/*",
   maxSizeBytes = 5 * 1024 * 1024,
   uploadFn,
+  placeholder
 }: FilePickerProps<T>) => {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -147,7 +148,7 @@ const FilePicker = <T extends FieldValues>({
                 readOnly
                 disabled={isDisabled}
                 value={value?.filename ?? ""}
-                placeholder="Select a file"
+                placeholder={placeholder || "Select a file"}
                 className={clsx(
                   "cursor-pointer pr-10",
                   hasError && "border-destructive focus-visible:ring-destructive",
