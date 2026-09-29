@@ -25,64 +25,64 @@ export function getNotificationMetadata(type: NotificationType): NotificationMet
     case "BOOKING_CREATED":
       return {
         icon: CalendarPlus,
-        colorClass: "text-emerald-600 dark:text-emerald-400",
-        bgClass: "bg-emerald-500/10",
-        borderClass: "border-emerald-500/20",
-        dotClass: "bg-emerald-500",
+        colorClass: "text-primary",
+        bgClass: "bg-primary/10",
+        borderClass: "border-primary/20",
+        dotClass: "bg-primary",
         targetRoute: () => "/bookings",
       };
     case "BOOKING_CONFIRMED":
       return {
         icon: CheckCircle2,
-        colorClass: "text-blue-600 dark:text-blue-400",
-        bgClass: "bg-blue-500/10",
-        borderClass: "border-blue-500/20",
-        dotClass: "bg-blue-500",
+        colorClass: "text-primary",
+        bgClass: "bg-primary/10",
+        borderClass: "border-primary/20",
+        dotClass: "bg-primary",
         targetRoute: () => "/bookings",
       };
     case "BOOKING_RESCHEDULED":
       return {
         icon: Clock,
-        colorClass: "text-amber-600 dark:text-amber-400",
-        bgClass: "bg-amber-500/10",
-        borderClass: "border-amber-500/20",
-        dotClass: "bg-amber-500",
+        colorClass: "text-primary",
+        bgClass: "bg-primary/10",
+        borderClass: "border-primary/20",
+        dotClass: "bg-primary",
         targetRoute: () => "/bookings",
       };
     case "BOOKING_CANCELLED":
       return {
         icon: Ban,
-        colorClass: "text-rose-600 dark:text-rose-400",
-        bgClass: "bg-rose-500/10",
-        borderClass: "border-rose-500/20",
-        dotClass: "bg-rose-500",
+        colorClass: "text-destructive",
+        bgClass: "bg-destructive/10",
+        borderClass: "border-destructive/20",
+        dotClass: "bg-destructive",
         targetRoute: () => "/bookings",
       };
     case "BOOKING_COMPLETED":
       return {
         icon: CheckCheck,
-        colorClass: "text-purple-600 dark:text-purple-400",
-        bgClass: "bg-purple-500/10",
-        borderClass: "border-purple-500/20",
-        dotClass: "bg-purple-500",
+        colorClass: "text-primary",
+        bgClass: "bg-primary/10",
+        borderClass: "border-primary/20",
+        dotClass: "bg-primary",
         targetRoute: () => "/bookings",
       };
     case "BOOKING_DELETED":
       return {
         icon: Trash2,
-        colorClass: "text-neutral-500 dark:text-neutral-400",
-        bgClass: "bg-neutral-500/10",
-        borderClass: "border-neutral-500/20",
-        dotClass: "bg-neutral-500",
+        colorClass: "text-muted-foreground",
+        bgClass: "bg-muted",
+        borderClass: "border-border",
+        dotClass: "bg-muted-foreground",
         targetRoute: () => "/bookings",
       };
     case "SALON_ONBOARDED":
       return {
         icon: Sparkles,
-        colorClass: "text-amber-500 dark:text-amber-300",
-        bgClass: "bg-amber-500/15",
-        borderClass: "border-amber-500/30",
-        dotClass: "bg-amber-500",
+        colorClass: "text-primary",
+        bgClass: "bg-primary/10",
+        borderClass: "border-primary/20",
+        dotClass: "bg-primary",
         targetRoute: () => "/dashboard",
       };
     default:

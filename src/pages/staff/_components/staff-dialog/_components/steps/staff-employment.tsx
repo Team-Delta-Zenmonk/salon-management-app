@@ -22,6 +22,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           pattern={VALIDATE_PATTERN.alphabet}
           maxLength={FIELD_LIMITS.TITLE}
           placeholder="Stylist, Barber, Receptionist, etc."
+          inputPropsClassName="capitalize"
         />
 
         <div className="flex flex-col gap-1.5 w-full">
@@ -87,6 +88,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
         pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
         maxLength={FIELD_LIMITS.ADDRESS}
         placeholder="Staff residential address"
+        inputPropsClassName="capitalize"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -100,6 +102,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           pattern={VALIDATE_PATTERN.alphabet}
           maxLength={FIELD_LIMITS.NAME}
           placeholder="Contact relative name"
+          inputPropsClassName="capitalize"
         />
 
         <TextField

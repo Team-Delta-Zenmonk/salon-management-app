@@ -55,9 +55,12 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
   const receivedDate = watch("received_date");
 
   const options = stockItems.map((item: InventoryItem) => {
+    const itemName = item.name ? item.name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "";
+    const brandName = item.brand ? item.brand.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "No Brand";
     const variantStr = [item.variant_name, item.unit].filter(Boolean).join(" ");
+    const formattedVariant = variantStr ? variantStr.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "Standard";
     return {
-      label: `${item.name} - ${variantStr || 'Standard'} (${item.brand || 'No Brand'})`,
+      label: `${itemName} - ${formattedVariant} (${brandName})`,
       value: item.uuid,
       item_uuid: item.uuid,
     };
@@ -155,6 +158,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                   label="Search Inventory Item"
                   options={options}
                   disabled={false}
+                  triggerClassName="capitalize"
                 />
               </div>
               {!transactionToEdit && (

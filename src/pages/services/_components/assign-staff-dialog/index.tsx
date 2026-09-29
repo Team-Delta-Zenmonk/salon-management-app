@@ -122,10 +122,14 @@ export default function AssignStaffDialog({
   }, [assignedStaffMap, allStaff, reset]);
 
   const staffOptions = useMemo(() => {
-    return allStaff.map((staff: Staff) => ({
-      label: `${staff.first_name} ${staff.last_name ?? ""}`,
-      value: staff.uuid,
-    }));
+    return allStaff.map((staff: Staff) => {
+      const firstName = staff.first_name ? staff.first_name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "";
+      const lastName = staff.last_name ? staff.last_name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "";
+      return {
+        label: `${firstName} ${lastName}`.trim(),
+        value: staff.uuid,
+      };
+    });
   }, [allStaff]);
 
   const onSubmit = async (values: FormValues) => {

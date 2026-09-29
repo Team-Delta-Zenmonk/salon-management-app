@@ -27,6 +27,61 @@ interface NominatimPlace {
   };
 }
 
+interface ContactSectionProps {
+  control: Control<SalonProfileForm>;
+}
+
+export const ContactSection: React.FC<ContactSectionProps> = ({ control }) => {
+  return (
+    <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
+
+      <div className="flex items-center gap-2 mb-5 relative z-10">
+        <Phone className="w-4 h-4 text-primary" />
+        <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Contact & Authentication</span>
+        <div className="flex-1 h-px bg-border/50" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+        <div className="min-w-0">
+          <TextField
+            name="email"
+            type="email"
+            control={control}
+            label="Registered Email Address"
+            placeholder="salon@example.com"
+            identifier="salon-email-field"
+            disabled
+            maxLength={FIELD_LIMITS.EMAIL}
+            endAdornment={
+              <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 py-0.5 px-2 rounded-full text-[9px] font-bold gap-1 backdrop-blur-xs shrink-0 select-none">
+                <CheckCircle2 className="w-2.5 h-2.5" />
+                Verified
+              </Badge>
+            }
+            inputPropsClassName="bg-white dark:bg-neutral-900 pr-22 text-ellipsis overflow-hidden whitespace-nowrap"
+          />
+        </div>
+
+        <div className="min-w-0">
+          <TextField
+            name="phone"
+            type="text"
+            control={control}
+            label="Contact Number"
+            placeholder="Enter contact number"
+            identifier="salon-phone-field"
+            rules={{ required: "Contact number is required" }}
+            maxLength={FIELD_LIMITS.PHONE}
+            inputPropsClassName="bg-white dark:bg-neutral-900"
+            pattern={VALIDATE_PATTERN.number}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface LocationSectionProps {
   control: Control<SalonProfileForm>;
   setValue: UseFormSetValue<SalonProfileForm>;
@@ -156,62 +211,14 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
+    <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
 
-        <div className="flex items-center gap-2 mb-5 relative z-10">
-          <Phone className="w-4 h-4 text-primary" />
-          <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Contact & Authentication</span>
-          <div className="flex-1 h-px bg-border/50" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-          <div className="min-w-0">
-            <TextField
-              name="email"
-              type="email"
-              control={control}
-              label="Registered Email Address"
-              placeholder="salon@example.com"
-              identifier="salon-email-field"
-              disabled
-              maxLength={FIELD_LIMITS.EMAIL}
-              endAdornment={
-                <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 py-0.5 px-2 rounded-full text-[9px] font-bold gap-1 backdrop-blur-xs shrink-0 select-none">
-                  <CheckCircle2 className="w-2.5 h-2.5" />
-                  Verified
-                </Badge>
-              }
-              inputPropsClassName="bg-white dark:bg-neutral-900 pr-22 text-ellipsis overflow-hidden whitespace-nowrap"
-            />
-          </div>
-
-          <div className="min-w-0">
-            <TextField
-              name="phone"
-              type="text"
-              control={control}
-              label="Contact Number"
-              placeholder="Enter contact number"
-              identifier="salon-phone-field"
-              rules={{ required: "Contact number is required" }}
-              maxLength={FIELD_LIMITS.PHONE}
-              inputPropsClassName="bg-white dark:bg-neutral-900"
-              pattern={VALIDATE_PATTERN.number}
-            />
-          </div>
-        </div>
+      <div className="flex items-center gap-2 mb-5 relative z-10">
+        <MapPin className="w-4 h-4 text-primary" />
+        <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Salon Geolocation</span>
+        <div className="flex-1 h-px bg-border/50" />
       </div>
-
-      <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
-
-        <div className="flex items-center gap-2 mb-5 relative z-10">
-          <MapPin className="w-4 h-4 text-primary" />
-          <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Salon Geolocation</span>
-          <div className="flex-1 h-px bg-border/50" />
-        </div>
 
         <div ref={searchRef} className="relative mb-6 z-10">
           <label className="text-sm font-semibold text-foreground block mb-1.5">Search Address</label>
@@ -228,7 +235,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
                 setShowSuggestions(true);
               }}
               onFocus={() => setShowSuggestions(true)}
-              className="flex-1 px-3 text-sm bg-transparent border-none outline-none h-full"
+              className="capitalize flex-1 px-3 text-sm bg-transparent border-none outline-none h-full"
             />
             {searchLoading && (
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground mr-3" />
@@ -280,7 +287,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="Enter street address"
               identifier="salon-street-field"
               maxLength={FIELD_LIMITS.ADDRESS}
-              inputPropsClassName="bg-white dark:bg-neutral-900"
+              inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
             />
           </div>
 
@@ -294,7 +301,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               identifier="salon-city-field"
               maxLength={FIELD_LIMITS.CITY_STATE}
               pattern={VALIDATE_PATTERN.alphabet}
-              inputPropsClassName="bg-white dark:bg-neutral-900"
+              inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
             />
           </div>
 
@@ -308,7 +315,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               identifier="salon-state-field"
               maxLength={FIELD_LIMITS.CITY_STATE}
               pattern={VALIDATE_PATTERN.alphabet}
-              inputPropsClassName="bg-white dark:bg-neutral-900"
+              inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
             />
           </div>
 
@@ -322,7 +329,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               identifier="salon-pincode-field"
               pattern={VALIDATE_PATTERN.number}
               maxLength={FIELD_LIMITS.PINCODE}
-              inputPropsClassName="bg-white dark:bg-neutral-900"
+              inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
             />
           </div>
 
@@ -340,6 +347,5 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
           </div>
         </div>
       </div>
-    </div>
   );
 };

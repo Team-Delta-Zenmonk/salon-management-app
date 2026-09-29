@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import dayjs from "dayjs";
-import { Loader2, ClipboardList } from "lucide-react";
+import { Loader2, ClipboardList, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import {
@@ -19,6 +19,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../../../../components/ui/pagination";
+import { Button } from "../../../../components/ui/button";
 
 import type { InventoryTransaction } from "../../../../features/inventory/inventory-log.slice";
 import { EllipsisCell } from "@/components/ellipse-cell";
@@ -42,9 +43,9 @@ const rowVariants: Variants = {
 const TransactionTableRow: React.FC<{
   item: InventoryTransaction;
   onRowClick?: (item: InventoryTransaction) => void;
-}> = ({ item, onRowClick }) => {
-  const [nameTooltipOpen, setNameTooltipOpen] = useState(false);
-  const [variantTooltipOpen, setVariantTooltipOpen] = useState(false);
+  loadingLogUuid?: string | null;
+}> = ({ item, onRowClick, loadingLogUuid }) => {
+  const isRowLoading = loadingLogUuid === item.uuid;
 
   const variantText = (item.item?.variant_name && item.item?.unit)
     ? `${item.item.variant_name} ${item.item.unit}`
@@ -52,8 +53,7 @@ const TransactionTableRow: React.FC<{
 
   return (
     <TableRow
-      className={`group ${onRowClick ? "cursor-pointer" : "cursor-default"} border-b border-border/30 odd:bg-transparent even:bg-muted/[0.06] dark:even:bg-muted/[0.03] hover:bg-muted/20 dark:hover:bg-muted/15 transition-colors duration-150`}
-      onClick={() => onRowClick?.(item)}
+      className="border-b border-border/30 odd:bg-transparent even:bg-muted/[0.06] dark:even:bg-muted/[0.03] hover:bg-muted/20 dark:hover:bg-muted/15 transition-colors duration-150"
     >
       <TableCell className="w-[220px] p-4 border-b border-border/30">
         <EllipsisCell
@@ -102,6 +102,25 @@ const TransactionTableRow: React.FC<{
       }`}>
         ₹{Number.parseFloat(item.bill_amount || "0").toLocaleString(undefined, { minimumFractionDigits: 0 })}
       </TableCell>
+      <TableCell className="text-center w-[100px] p-4 border-b border-border/30">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 px-3 rounded-full text-xs font-semibold gap-1.5 border-border/60 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all cursor-pointer w-[76px] justify-center flex items-center shrink-0"
+          onClick={() => onRowClick?.(item)}
+          disabled={isRowLoading}
+          title="View Log Details"
+        >
+          {isRowLoading ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-primary shrink-0" />
+          ) : (
+            <>
+              <Eye className="w-3.5 h-3.5 shrink-0" />
+              <span>View</span>
+            </>
+          )}
+        </Button>
+      </TableCell>
     </TableRow>
   );
 };
@@ -113,6 +132,7 @@ interface TransactionsTableProps {
   limit: number;
   onPageChange: (event: unknown, newPage: number) => void;
   loading: boolean;
+  loadingLogUuid?: string | null;
   onRowClick?: (item: InventoryTransaction) => void;
   isMobile: boolean;
   hasMore: boolean;
@@ -126,6 +146,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
   limit,
   onPageChange,
   loading,
+  loadingLogUuid,
   onRowClick,
   isMobile,
   hasMore,
@@ -134,7 +155,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
   const displayData = !isMobile ? data.slice((page - 1) * limit, page * limit) : data;
   const totalPages = Math.ceil(total / limit);
 
-  if (loading && displayData.length === 0) {
+  if (loading && (displayData.length === 0 || page === 1)) {
     if (!isMobile) {
       return (
         <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md overflow-hidden animate-pulse min-h-[200px]">
@@ -150,6 +171,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
                 <TableHead className="w-[100px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Damaged Qty</TableHead>
                 <TableHead className="w-[100px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Returned Qty</TableHead>
                 <TableHead className="w-[120px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Bill Amount</TableHead>
+                <TableHead className="w-[100px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -164,6 +186,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
                   <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[40px] mx-auto" /></TableCell>
                   <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[40px] mx-auto" /></TableCell>
                   <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[60px] mx-auto" /></TableCell>
+                  <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[50px] mx-auto" /></TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -195,7 +218,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
     <div>
       {!isMobile && (
         <>
-          <div className="rounded-2xl border border-border/50 bg-card/45 backdrop-blur-md overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 mb-6 min-h-[200px]">
+          <div className={`rounded-2xl border border-border/50 bg-card/45 backdrop-blur-md overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 mb-6 ${displayData.length === 0 ? "min-h-[200px]" : ""}`}>
             <Table>
               <TableHeader className="bg-muted/40 border-b border-border/50">
                 <TableRow className="hover:bg-transparent border-b border-border/50">
@@ -208,15 +231,16 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
                   <TableHead className="w-[100px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Damaged Qty</TableHead>
                   <TableHead className="w-[100px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Returned Qty</TableHead>
                   <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Bill Amount</TableHead>
+                  <TableHead className="w-[100px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {displayData.map((item) => (
-                  <TransactionTableRow key={item.uuid} item={item} onRowClick={onRowClick} />
+                  <TransactionTableRow key={item.uuid} item={item} onRowClick={onRowClick} loadingLogUuid={loadingLogUuid} />
                 ))}
                 {displayData.length === 0 && (
                   <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={9} className="h-[280px] text-center">
+                    <TableCell colSpan={10} className="h-[200px] text-center">
                       <div className="flex flex-col items-center justify-center space-y-3">
                         <ClipboardList className="h-9 w-9 text-muted-foreground/40" />
                         <p className="text-sm font-semibold text-muted-foreground">No logs or transactions found.</p>
@@ -270,7 +294,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
             endMessage={
               !hasMore && displayData.length > 0 ? (
                 <div className="text-center py-6">
-                  <span className="text-sm text-muted-foreground font-semibold">✨ All transaction logs loaded</span>
+                  <span className="text-sm text-muted-foreground font-semibold">All transaction logs loaded</span>
                 </div>
               ) : null
             }
@@ -283,7 +307,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
             >
               {displayData.map((item) => (
                 <motion.div variants={rowVariants} key={item.uuid}>
-                  <TransactionCard item={item} onRowClick={onRowClick} />
+                  <TransactionCard item={item} onRowClick={onRowClick} loadingLogUuid={loadingLogUuid} />
                 </motion.div>
               ))}
               {displayData.length === 0 && (

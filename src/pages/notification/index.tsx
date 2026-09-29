@@ -131,11 +131,7 @@ export default function NotificationPage() {
                   key={`notification-skeleton-${i}`}
                   className="p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 animate-pulse"
                 >
-                  <div className="w-2.5 shrink-0 pt-2 flex items-center justify-center">
-                    <div className="w-2.5 h-2.5 rounded-full bg-muted/80" />
-                  </div>
-
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-muted/80 shrink-0" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-muted/80 shrink-0" />
 
                   <div className="flex-1 min-w-0 space-y-2 pt-1">
                     <div className="h-4 bg-muted/80 rounded-md w-1/3" />
@@ -189,26 +185,22 @@ export default function NotificationPage() {
                   key={item.uuid}
                   onClick={() => handleActionClick(item)}
                   className={cn(
-                    "p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 transition-colors cursor-pointer group relative",
-                    "hover:bg-muted/40",
-                    !item.is_read && "bg-primary/[0.04]"
+                    "p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 transition-colors cursor-pointer group relative border-l-4 border-l-transparent",
+                    !item.is_read
+                      ? "bg-primary/10 border-l-primary hover:bg-primary/15"
+                      : "hover:bg-muted/40"
                   )}
                 >
-                  <div className="w-2.5 shrink-0 flex items-center justify-center pt-2">
-                    {!item.is_read && (
-                      <span className="w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-primary/20 shrink-0" />
-                    )}
-                  </div>
 
                   <div
                     className={cn(
-                      "w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 border shadow-xs transition-transform group-hover:scale-105",
+                      "w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center shrink-0 border shadow-xs transition-transform group-hover:scale-105",
                       meta.bgClass,
                       meta.colorClass,
                       meta.borderClass
                     )}
                   >
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
 
                   <div className="flex-1 min-w-0 pr-2">

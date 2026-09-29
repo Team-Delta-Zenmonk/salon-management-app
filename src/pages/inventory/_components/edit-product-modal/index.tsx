@@ -35,7 +35,7 @@ const ITEM_TYPES = [
 ];
 
 const UNITS = ["ml", "l", "g", "kg", "pieces", "box", "bottle", "tube"].map((u) => ({
-  label: u,
+  label: u.charAt(0).toUpperCase() + u.slice(1),
   value: u,
 }));
 
@@ -147,6 +147,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                 label="Item Name"
                 maxLength={FIELD_LIMITS.ITEM_NAME}
                 disabled={loading}
+                inputPropsClassName="capitalize"
               />
 
               <TextField
@@ -157,6 +158,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                 label="Brand"
                 maxLength={FIELD_LIMITS.NAME}
                 disabled={loading}
+                inputPropsClassName="capitalize"
               />
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -182,10 +184,11 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                       .filter((cat) => cat && cat.uuid)
                       .map((cat) => {
                         const name = cat.name || "";
-                        const formattedName = name ? name.charAt(0).toUpperCase() + name.slice(1) : "Unnamed";
+                        const formattedName = name ? name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "Unnamed";
                         return { label: formattedName, value: cat.uuid };
                       })}
                     disabled={loading}
+                    triggerClassName="capitalize"
                   />
                 </div>
               </div>
@@ -209,6 +212,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     label="Variant / Size"
                     maxLength={FIELD_LIMITS.CODE}
                     disabled={loading}
+                    inputPropsClassName="capitalize"
                   />
                 </div>
                 <div className="flex-1">
@@ -220,6 +224,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                     label="Unit"
                     options={UNITS}
                     disabled={loading}
+                    triggerClassName="capitalize"
                   />
                 </div>
               </div>

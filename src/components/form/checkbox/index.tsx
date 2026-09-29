@@ -93,7 +93,7 @@ const CheckboxGroup = <T extends FieldValues>({
                       <EllipsisCell
                         value={label}
                         maxChars={20}
-                        className="text-sm font-medium leading-none cursor-pointer"
+                        className="text-sm font-medium leading-none cursor-pointer capitalize"
                       />
                     </Label>
                   </div>

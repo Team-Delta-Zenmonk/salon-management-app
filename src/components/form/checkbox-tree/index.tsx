@@ -142,7 +142,7 @@ const CheckboxTree = <T extends FieldValues>({
                   node.disabled && "cursor-not-allowed"
                 )}
               >
-                <EllipsisCell value={node.label} className="min-w-0 w-full" />
+                <EllipsisCell value={node.label} className="min-w-0 w-full capitalize" />
               </Label>
             </div>
             
@@ -228,7 +228,7 @@ const CheckboxTree = <T extends FieldValues>({
               node.disabled && "cursor-not-allowed"
             )}
           >
-            <EllipsisCell value={node.label} className="min-w-0 w-full" />
+            <EllipsisCell value={node.label} className="min-w-0 w-full capitalize" />
           </Label>
         </div>
       </div>

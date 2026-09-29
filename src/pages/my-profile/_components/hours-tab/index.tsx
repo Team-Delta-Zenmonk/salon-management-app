@@ -40,28 +40,31 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
         <div className="flex-1 h-px bg-border/50" />
       </div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-3">
         {DAY_KEYS.map((dayKey) => {
           const dayValue = businessHours[dayKey];
           const isOpen = !!dayValue;
           const label = DAY_LABELS[dayKey];
 
           return (
-            <div key={dayKey} className="border-b border-border/50 last:border-0 py-2">
+            <div 
+              key={dayKey} 
+              className="bg-background/40 border border-border/40 rounded-xl p-3.5 hover:border-primary/20 transition-all flex flex-col justify-between"
+            >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <div
-                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                    className={`w-2 h-2 rounded-full shrink-0 ${
                       isOpen
-                        ? "bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]"
+                        ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
                         : "bg-muted-foreground/30"
                     }`}
                   />
-                  <span className={`text-xs font-semibold ${isOpen ? "text-foreground" : "text-muted-foreground"}`}>
+                  <span className={`text-xs font-bold ${isOpen ? "text-foreground" : "text-muted-foreground"}`}>
                     {label}
                   </span>
                   {!isOpen && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-muted/60 text-muted-foreground border border-border/50 shrink-0">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold bg-muted/60 text-muted-foreground border border-border/50 shrink-0">
                       Closed
                     </span>
                   )}
@@ -75,7 +78,7 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
               </div>
 
               {isOpen && (
-                <div className="mt-2 pl-3.5 grid grid-cols-2 gap-2">
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2.5 border-t border-border/40">
                   <div className="space-y-1">
                     <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Opens</span>
                     <TimePicker

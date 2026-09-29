@@ -40,11 +40,13 @@ export default function StaffServiceManagementPage() {
       initial="hidden"
       animate="show"
       variants={containerVariants}
-      className="flex flex-col w-full max-w-[1600px] mx-auto pb-10 px-4 md:px-8 pt-4"
+      className="flex flex-col w-full max-w-[1600px] mx-auto pb-6 px-4 md:px-8 pt-0"
     >
       <motion.div
-        variants={itemVariants}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 shrink-0 gap-4"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 shrink-0 gap-4 mb-8"
       >
         <div className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">

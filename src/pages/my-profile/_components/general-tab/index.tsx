@@ -380,7 +380,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
               rules={{ required: "Salon name is required" }}
               maxLength={FIELD_LIMITS.NAME}
               pattern={VALIDATE_PATTERN.alphabet}
-              inputPropsClassName="bg-white dark:bg-neutral-900"
+              inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
             />
           </div>
 
@@ -395,7 +395,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
               rules={{ required: "Owner name is required" }}
               maxLength={FIELD_LIMITS.NAME}
               pattern={VALIDATE_PATTERN.alphabet}
-              inputPropsClassName="bg-white dark:bg-neutral-900"
+              inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
             />
           </div>
 
@@ -425,7 +425,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             rows={3}
             maxLength={FIELD_LIMITS.DESCRIPTION}
             pattern={VALIDATE_PATTERN.alphabet}
-            inputPropsClassName="bg-white dark:bg-neutral-900"
+            inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
           />
         </div>
       </div>

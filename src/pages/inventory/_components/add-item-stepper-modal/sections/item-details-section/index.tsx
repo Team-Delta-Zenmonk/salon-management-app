@@ -29,7 +29,7 @@ const ITEM_TYPES = [
 ];
 
 const UNITS = ["ml", "l", "g", "kg", "pieces", "box", "bottle", "tube"].map((u) => ({
-  label: u,
+  label: u.charAt(0).toUpperCase() + u.slice(1),
   value: u,
 }));
 
@@ -121,6 +121,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 maxLength={FIELD_LIMITS.ITEM_NAME}
                 disabled={loading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
+                inputPropsClassName="capitalize"
               />
 
               <TextField
@@ -133,6 +134,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 maxLength={FIELD_LIMITS.NAME}
                 disabled={loading}
                 pattern={VALIDATE_PATTERN.alphabetWithSpecial}
+                inputPropsClassName="capitalize"
               />
             </div>
 
@@ -167,6 +169,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 placeholder="e.g., 500ml / Large"
                 maxLength={FIELD_LIMITS.CODE}
                 disabled={loading}
+                inputPropsClassName="capitalize"
               />
 
               <Select
@@ -177,6 +180,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 label="Unit"
                 options={UNITS}
                 disabled={loading}
+                triggerClassName="capitalize"
               />
             </div>
 

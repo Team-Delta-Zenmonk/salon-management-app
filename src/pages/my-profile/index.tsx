@@ -13,9 +13,10 @@ import { Badge } from "../../components/ui/badge";
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "../../components/ui/carousel";
 import { cn } from "../../lib/utils";
+import { ImagePlus } from "lucide-react";
 
 import { GeneralInfoSection, BrandingSection } from "./_components/general-tab/index";
-import { LocationSection } from "./_components/location-tab/index";
+import { LocationSection, ContactSection } from "./_components/location-tab/index";
 import { HoursSection } from "./_components/hours-tab/index";
 import PaymentPolicyCard from "./_components/payment-policy-card/index";
 import { UnsavedChangesBanner } from "../../components/unsaved-changes-banner";
@@ -213,7 +214,7 @@ const MyProfile = () => {
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 pb-6 shrink-0 gap-4 border-b border-border/20 bg-background/50 backdrop-blur-sm z-10"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 shrink-0 gap-4 bg-background/50 backdrop-blur-sm z-10"
         >
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -225,7 +226,9 @@ const MyProfile = () => {
           </div>
         </motion.div>
 
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-24">
+        <div className={`flex-1 overflow-y-auto px-4 md:px-8 pt-6 ${
+          !isDirty ? "" : "pb-28"
+        }`}>
           <div className="w-full max-w-[1600px] mx-auto space-y-8">
 
             {loading && !salon ? (
@@ -295,13 +298,30 @@ const MyProfile = () => {
                       )}
                     </Carousel>
                   ) : (
-                    <div className="absolute inset-0 bg-gradient-to-tr from-neutral-900 to-neutral-950" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-card to-background flex items-center justify-center p-4">
+                      <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+                      <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-card/80 border border-border/60 text-muted-foreground text-[11px] sm:text-xs backdrop-blur-md z-10 shadow-xs max-w-[92%] -translate-y-4 sm:-translate-y-6">
+                        <ImagePlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
+                        <span className="truncate hidden sm:inline">No cover photos added yet • Upload photos in Branding below</span>
+                        <span className="truncate sm:hidden">No cover photos • Add in Branding</span>
+                      </div>
+                    </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
 
-                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 sm:p-6 md:p-8 z-10 gap-4">
-                    <div className="flex items-center gap-3 sm:gap-4 md:gap-5 text-left min-w-0 flex-1">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl border border-white/20 shrink-0 bg-background overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
+                  <div className={cn(
+                    "absolute inset-0 pointer-events-none",
+                    activePhotos.length > 0
+                      ? "bg-gradient-to-t from-black/90 via-black/40 to-transparent"
+                      : "bg-gradient-to-t from-card via-card/50 to-transparent"
+                  )} />
+
+                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-3.5 sm:p-6 md:p-8 z-10 gap-3 sm:gap-4">
+                    <div className="flex items-center gap-2.5 sm:gap-4 md:gap-5 text-left min-w-0 flex-1">
+                      <div className={cn(
+                        "w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl border shrink-0 bg-background overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300",
+                        activePhotos.length > 0 ? "border-white/20" : "border-border/60"
+                      )}>
                         <img
                           src={activeLogo?.url || "/management-icon.png"}
                           className="object-cover w-full h-full"
@@ -312,15 +332,24 @@ const MyProfile = () => {
                       <div className="space-y-1 sm:space-y-1.5 min-w-0 flex-1">
                         <EllipsisCell
                           value={activeName || "Your Salon"}
-                          className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white drop-shadow-md capitalize block min-w-0"
+                          className={cn(
+                            "text-lg sm:text-xl md:text-2xl font-black tracking-tight capitalize block min-w-0",
+                            activePhotos.length > 0 ? "text-white drop-shadow-md" : "text-foreground"
+                          )}
                         />
                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                           {activeType && (
-                            <Badge variant="secondary" className="bg-white/15 text-white border-white/10 backdrop-blur-sm text-[9px] sm:text-[10px] font-bold py-0.5 px-2 sm:px-2.5 rounded-full capitalize">
+                            <Badge
+                              variant="secondary"
+                              className={cn(
+                                "text-[9px] sm:text-[10px] font-bold py-0.5 px-2 sm:px-2.5 rounded-full capitalize",
+                                activePhotos.length > 0 ? "bg-white/15 text-white border-white/10 backdrop-blur-sm" : "bg-muted/80 text-foreground border-border/40"
+                              )}
+                            >
                               {activeType}
                             </Badge>
                           )}
-                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 py-0.5 px-2 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold gap-1.5 backdrop-blur-sm">
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 py-0.5 px-2 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold gap-1.5 backdrop-blur-sm">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Operational
                           </Badge>
@@ -328,8 +357,14 @@ const MyProfile = () => {
                       </div>
                     </div>
 
-                    <div className="hidden md:flex flex-col items-end gap-1 text-right text-white/95 drop-shadow-md shrink-0 mb-1">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-white/60">Operational Schedule</span>
+                    <div className={cn(
+                      "hidden md:flex flex-col items-end gap-1 text-right shrink-0 mb-1",
+                      activePhotos.length > 0 ? "text-white/95 drop-shadow-md" : "text-foreground"
+                    )}>
+                      <span className={cn(
+                        "text-[10px] uppercase font-bold tracking-wider",
+                        activePhotos.length > 0 ? "text-white/60" : "text-muted-foreground"
+                      )}>Operational Schedule</span>
                       <span className="text-sm font-bold">
                         Open {openDaysCount} days a week
                       </span>
@@ -337,7 +372,7 @@ const MyProfile = () => {
                   </div>
                 </motion.div>
 
-                <motion.div variants={itemVariants} className="w-full">
+                <motion.div variants={itemVariants} className="w-full space-y-8">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                     <div className="lg:col-span-7 space-y-8">
@@ -351,13 +386,9 @@ const MyProfile = () => {
                     </div>
 
                     <div className="lg:col-span-5 space-y-8 min-w-0 w-full">
-                      <BrandingSection
-                        control={control}
-                        setValue={setValue}
-                        isSaving={isSaving}
-                      />
+                      <ContactSection control={control} />
 
-                      <HoursSection
+                      <BrandingSection
                         control={control}
                         setValue={setValue}
                         isSaving={isSaving}
@@ -367,6 +398,12 @@ const MyProfile = () => {
                     </div>
 
                   </div>
+
+                  <HoursSection
+                    control={control}
+                    setValue={setValue}
+                    isSaving={isSaving}
+                  />
                 </motion.div>
               </motion.div>
             )}

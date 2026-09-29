@@ -6,10 +6,19 @@ import type { Variants } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../../components/ui/table";
 
 import type { InventoryItem } from "../../../../features/inventory/inventory-item.slice";
 import { DecreaseStockModal } from "../decrease-stock-modal";
 import { EditProductModal } from "../edit-product-modal";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -22,8 +31,8 @@ const containerVariants: Variants = {
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 15 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 26 } },
+  hidden: { opacity: 0,y:8 },
+  show: { opacity: 1, y:0, transition: { type: "spring", stiffness: 400, damping: 30 } },
 };
 
 const StockProgressBar = ({
@@ -35,10 +44,10 @@ const StockProgressBar = ({
 }) => {
   const isOut = current <= 0;
   const isLow = !isOut && min && min > 0 ? current <= min : false;
-  const colorClass = isOut 
-    ? "bg-destructive/80" 
-    : isLow 
-      ? "bg-amber-500/80" 
+  const colorClass = isOut
+    ? "bg-destructive/80"
+    : isLow
+      ? "bg-amber-500/80"
       : "bg-emerald-500/80";
   const max = min && min > 0 ? min * 2 : Math.max(current, 10);
   const percentage = Math.max(0, Math.min(100, (current / max) * 100));
@@ -53,14 +62,14 @@ const StockProgressBar = ({
   );
 };
 
-import { EllipsisCell } from "@/components/ellipse-cell";
-
 interface StockTableProps {
   data: InventoryItem[];
   loading: boolean;
   onSuccess: () => void;
   hasMore: boolean;
   fetchMore: () => void;
+  page?: number;
+  isMobile?: boolean;
 }
 
 const getStockStatus = (item: InventoryItem) => {
@@ -78,9 +87,6 @@ const StockCard: React.FC<{
   onDecreaseClick: (e: React.MouseEvent, item: InventoryItem) => void;
   onEditClick: (e: React.MouseEvent, item: InventoryItem) => void;
 }> = ({ item, onDecreaseClick, onEditClick }) => {
-  const [nameTooltipOpen, setNameTooltipOpen] = useState(false);
-  const [brandTooltipOpen, setBrandTooltipOpen] = useState(false);
-  const [categoryTooltipOpen, setCategoryTooltipOpen] = useState(false);
 
   const brandLabel = item.brand || "";
   const categoryLabel = item.category?.name || "";
@@ -104,23 +110,19 @@ const StockCard: React.FC<{
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex flex-col min-w-0 w-full">
-              <EllipsisCell value={item.name || "-"} maxChars={20} className="text-sm font-semibold text-foreground/90" />
-
-              {brandLabel && (
-                <EllipsisCell value=""/>
-              )}
+              <EllipsisCell value={item.name || "-"} maxChars={20} className="text-sm font-semibold text-foreground/90 capitalize block min-w-0" />
             </div>
-            
+
             <div className="flex items-center gap-1.5 flex-wrap w-full mt-2.5">
               <Badge className={`h-6 py-0 px-2 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 inline-flex items-center justify-center leading-none shrink-0 w-24 overflow-hidden ${status.color}`}>
                 <EllipsisCell value={status.label} className="w-full text-center block" />
               </Badge>
 
               {categoryLabel && (
-                <Badge variant="secondary" className="h-6 py-0 px-2 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 bg-secondary/40 text-secondary-foreground shrink-0 inline-flex items-center justify-center leading-none w-28 overflow-hidden">
+                <Badge variant="secondary" className="h-6 py-0 px-2 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 bg-secondary/40 text-secondary-foreground shrink-0 inline-flex items-center justify-center leading-none w-24 overflow-hidden">
                   <EllipsisCell value={categoryLabel} className="w-full text-center block" />
                 </Badge>
-              )}  
+              )}
               {variantLabel && (
                 <Badge variant="outline" className="h-6 py-0 px-2 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-muted/20 border-border/50 text-muted-foreground/80 shrink-0 inline-flex items-center justify-center leading-none w-24 overflow-hidden">
                   <EllipsisCell value={variantLabel} className="w-full text-center block" />
@@ -129,7 +131,7 @@ const StockCard: React.FC<{
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-2 mt-5">
           <div className="flex justify-between items-baseline">
             <div className="flex flex-col">
@@ -137,11 +139,11 @@ const StockCard: React.FC<{
               <div className="flex items-baseline gap-1 mt-0.5">
                 <span className={`text-2xl font-extrabold tracking-tight ${
                   status.label === "Out of Stock" 
-                    ? "text-destructive" 
-                    : status.label === "Low Stock" 
-                      ? "text-amber-500" 
+                    ? "text-destructive"
+                    : status.label === "Low Stock"
+                      ? "text-amber-500"
                       : "text-emerald-500"
-                }`}>
+                  }`}>
                   {item.current_stock}
                 </span>
               </div>
@@ -151,7 +153,7 @@ const StockCard: React.FC<{
               <span className="text-sm font-semibold text-foreground/80 mt-1">{item.min_stock_level || 0}</span>
             </div>
           </div>
-          
+
           <StockProgressBar current={item.current_stock} min={item.min_stock_level} />
         </div>
       </div>
@@ -163,7 +165,7 @@ const StockCard: React.FC<{
             ₹{Number(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 0 })}
           </span>
         </div>
-        
+
         <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100 transition-opacity">
           <Button
             variant="ghost"
@@ -189,12 +191,109 @@ const StockCard: React.FC<{
   );
 };
 
+const StockTableRow: React.FC<{
+  item: InventoryItem;
+  onDecreaseClick: (e: React.MouseEvent, item: InventoryItem) => void;
+  onEditClick: (e: React.MouseEvent, item: InventoryItem) => void;
+}> = ({ item, onDecreaseClick, onEditClick }) => {
+  const brandLabel = item.brand || "";
+  const categoryLabel = item.category?.name || "-";
+  const variantLabel = [item.variant_name, item.unit].filter(Boolean).join(" ") || "-";
+  const status = getStockStatus(item);
+
+  return (
+    <TableRow className="border-b border-border/30 odd:bg-transparent even:bg-muted/[0.06] dark:even:bg-muted/[0.03] hover:bg-muted/20 dark:hover:bg-muted/15 transition-colors duration-150">
+      <TableCell className="p-4 border-b border-border/30">
+        <div className="flex items-center gap-3 min-w-0">
+          <Avatar className="w-9 h-9 rounded-xl border border-border/50 shrink-0 shadow-sm">
+            <AvatarImage src={item.logo || ""} alt={item.name} />
+            <AvatarFallback className="rounded-xl font-bold bg-primary/5 text-primary text-xs">
+              {item.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col min-w-0">
+            <EllipsisCell
+              value={item.name || "-"}
+              maxChars={18}
+              className="font-bold text-foreground capitalize block"
+            />
+            {brandLabel && (
+              <span className="text-[11px] text-muted-foreground capitalize truncate">
+                {brandLabel}
+              </span>
+            )}
+          </div>
+        </div>
+      </TableCell>
+      <TableCell className="text-center p-4 border-b border-border/30">
+        <Badge variant="secondary" className="h-6 py-0 px-2.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 bg-secondary/40 text-secondary-foreground inline-flex items-center justify-center">
+          <EllipsisCell value={categoryLabel} maxChars={12} />
+        </Badge>
+      </TableCell>
+      <TableCell className="text-center p-4 border-b border-border/30">
+        <span className="text-xs font-medium text-foreground/80">
+          {variantLabel}
+        </span>
+      </TableCell>
+      <TableCell className="text-center p-4 border-b border-border/30">
+        <div className="flex flex-col items-center gap-1 w-28 mx-auto">
+          <span className={`text-sm font-extrabold tracking-tight ${
+            status.label === "Out of Stock" 
+              ? "text-destructive"
+              : status.label === "Low Stock"
+                ? "text-amber-500"
+                : "text-emerald-500"
+            }`}>
+            {item.current_stock}
+          </span>
+          <StockProgressBar current={item.current_stock} min={item.min_stock_level} />
+        </div>
+      </TableCell>
+      <TableCell className="text-center p-4 border-b border-border/30 text-xs font-semibold text-foreground/80">
+        {item.min_stock_level || 0}
+      </TableCell>
+      <TableCell className="text-center p-4 border-b border-border/30 text-sm font-extrabold text-foreground">
+        ₹{Number(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 0 })}
+      </TableCell>
+      <TableCell className="text-center p-4 border-b border-border/30">
+        <Badge className={`h-6 py-0 px-2.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border-0 inline-flex items-center justify-center ${status.color}`}>
+          {status.label}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-center p-4 border-b border-border/30">
+        <div className="flex items-center justify-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => onDecreaseClick(e, item)}
+            title="Decrease Stock"
+            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors cursor-pointer"
+          >
+            <MinusCircleIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => onEditClick(e, item)}
+            title="Edit Product"
+            className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary text-muted-foreground transition-colors cursor-pointer"
+          >
+            <Edit2Icon className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
+
 export const StockTable: React.FC<StockTableProps> = ({
   data,
   loading,
   onSuccess,
   hasMore,
   fetchMore,
+  page,
+  isMobile = false,
 }) => {
   const [decreaseModalOpen, setDecreaseModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
@@ -213,7 +312,41 @@ export const StockTable: React.FC<StockTableProps> = ({
     setEditModalOpen(true);
   };
 
-  if (loading && data.length === 0) {
+  if (loading && (data.length === 0 || page === 1 || page === undefined)) {
+    if (!isMobile) {
+      return (
+        <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md overflow-hidden animate-pulse min-h-[200px]">
+          <Table>
+            <TableHeader className="bg-muted/40 border-b border-border/50">
+              <TableRow>
+                <TableHead className="w-[220px] p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Product Name</TableHead>
+                <TableHead className="w-[120px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Category</TableHead>
+                <TableHead className="w-[120px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Variant</TableHead>
+                <TableHead className="w-[140px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Current Stock</TableHead>
+                <TableHead className="w-[100px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Min Stock</TableHead>
+                <TableHead className="w-[120px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Unit Price</TableHead>
+                <TableHead className="w-[120px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Status</TableHead>
+                <TableHead className="w-[100px] text-center p-4 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <TableRow key={i}>
+                  <TableCell className="p-4"><div className="h-4 bg-foreground/10 rounded w-[160px]" /></TableCell>
+                  <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[60px] mx-auto" /></TableCell>
+                  <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[60px] mx-auto" /></TableCell>
+                  <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[80px] mx-auto" /></TableCell>
+                  <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[40px] mx-auto" /></TableCell>
+                  <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[60px] mx-auto" /></TableCell>
+                  <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[60px] mx-auto" /></TableCell>
+                  <TableCell className="p-4 text-center"><div className="h-4 bg-foreground/10 rounded w-[50px] mx-auto" /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      );
+    }
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -234,7 +367,7 @@ export const StockTable: React.FC<StockTableProps> = ({
                 <div className="h-6 bg-foreground/10 rounded-md w-20" />
               </div>
             </div>
-            
+
             <div className="space-y-2 mt-4">
               <div className="flex justify-between">
                 <div className="h-3 bg-foreground/10 rounded w-16" />
@@ -258,54 +391,95 @@ export const StockTable: React.FC<StockTableProps> = ({
 
   return (
     <div>
-      <InfiniteScroll
-        dataLength={data.length}
-        next={fetchMore}
-        hasMore={hasMore}
-        loader={
-          <div className="flex justify-center py-6">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        }
-        endMessage={
-          !hasMore && data.length > 0 ? (
-            <div className="text-center py-6">
-              <span className="text-sm text-muted-foreground font-medium">
-                ✨ All products loaded successfully
-              </span>
-            </div>
-          ) : null
-        }
-      >
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {data.map((item) => (
-            <StockCard
-              key={item.uuid}
-              item={item}
-              onDecreaseClick={handleDecreaseClick}
-              onEditClick={handleEditClick}
-            />
-          ))}
+      {!isMobile && (
+        <div className={`rounded-2xl border border-border/50 bg-card/45 backdrop-blur-md overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 mb-6 ${data.length === 0 ? "min-h-[200px]" : ""}`}>
+          <Table>
+            <TableHeader className="bg-muted/40 border-b border-border/50">
+              <TableRow className="hover:bg-transparent border-b border-border/50">
+                <TableHead className="w-[220px] font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Product Name</TableHead>
+                <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Category</TableHead>
+                <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Variant</TableHead>
+                <TableHead className="w-[140px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Current Stock</TableHead>
+                <TableHead className="w-[100px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Min Stock</TableHead>
+                <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Unit Price</TableHead>
+                <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Status</TableHead>
+                <TableHead className="w-[100px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((item) => (
+                <StockTableRow
+                  key={item.uuid}
+                  item={item}
+                  onDecreaseClick={handleDecreaseClick}
+                  onEditClick={handleEditClick}
+                />
+              ))}
+              {data.length === 0 && (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={8} className="h-[200px] text-center">
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <Package className="h-9 w-9 text-muted-foreground/40" />
+                      <p className="text-sm font-semibold text-muted-foreground">No products found in inventory.</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
-          {data.length === 0 && (
-            <div className="col-span-full bg-card/40 border border-dashed border-border/50 rounded-2xl p-12 flex flex-col items-center justify-center mt-2">
-              <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
-                <Package className="w-8 h-8 text-primary/40" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-1">No products found</h3>
-              <p className="text-muted-foreground text-sm text-center max-w-sm">
-                We couldn't find any products in your inventory. Try adjusting your search filters or add a new stock entry.
-              </p>
+      {isMobile && (
+        <InfiniteScroll
+          dataLength={data.length}
+          next={fetchMore}
+          hasMore={hasMore}
+          loader={
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
-          )}
-        </motion.div>
-      </InfiniteScroll>
-      
+          }
+          endMessage={
+            !hasMore && data.length > 0 ? (
+              <div className="text-center py-6">
+                <span className="text-sm text-muted-foreground font-medium">
+                  All products loaded successfully
+                </span>
+              </div>
+            ) : null
+          }
+        >
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {data.map((item) => (
+              <StockCard
+                key={item.uuid}
+                item={item}
+                onDecreaseClick={handleDecreaseClick}
+                onEditClick={handleEditClick}
+              />
+            ))}
+
+            {data.length === 0 && (
+              <div className="col-span-full bg-card/40 border border-dashed border-border/50 rounded-2xl p-12 flex flex-col items-center justify-center mt-2">
+                <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
+                  <Package className="w-8 h-8 text-primary/40" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">No products found</h3>
+                <p className="text-muted-foreground text-sm text-center max-w-sm">
+                  We couldn't find any products in your inventory. Try adjusting your search filters or add a new stock entry.
+                </p>
+              </div>
+            )}
+          </motion.div>
+        </InfiniteScroll>
+      )}
+
       <DecreaseStockModal
         open={decreaseModalOpen}
         onClose={() => setDecreaseModalOpen(false)}

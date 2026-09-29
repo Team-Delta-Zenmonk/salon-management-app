@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
-import { ClipboardPlus, Package, AlertTriangle, XCircle, Coins, ClipboardList, Loader2 } from "lucide-react";
+import { ClipboardPlus, Package, AlertTriangle, XCircle, Coins, ClipboardList, ChevronDown } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useDebounce } from "use-debounce";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -21,6 +21,72 @@ import type { InventoryItem } from "../../features/inventory/inventory-item.slic
 import EllipsisCell from "@/components/ellipse-cell";
 
 const PAGE_LIMIT = 10;
+
+interface MetricCardProps {
+  label: string;
+  icon: React.ElementType;
+  value: React.ReactNode;
+  isLoading?: boolean;
+  accentBg: string;
+  borderHover: string;
+  iconColor: string;
+  isText?: boolean;
+}
+
+const MetricCard: React.FC<MetricCardProps> = ({
+  label,
+  icon: Icon,
+  value,
+  isLoading,
+  accentBg,
+  borderHover,
+  iconColor,
+  isText,
+}) => {
+  if (isLoading) {
+    return (
+      <div className="relative overflow-hidden p-3 sm:p-4 bg-card/60 backdrop-blur-md flex flex-col justify-between rounded-2xl border border-border/50 shadow-sm animate-pulse w-[150px] min-h-[88px] sm:w-auto sm:min-h-0 shrink-0 snap-start mb-1">
+        <div className="flex items-center justify-between gap-1">
+          <div className="h-3 w-16 bg-muted/80 rounded" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-muted/80 rounded-lg shrink-0" />
+        </div>
+        <div className="h-5 sm:h-6 w-20 bg-muted/80 rounded mt-2" />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`group relative overflow-hidden p-3 sm:p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between rounded-2xl border border-border/50 shadow-sm hover:shadow-md ${borderHover} transition-all duration-300 w-[150px] min-h-[88px] sm:w-auto sm:min-h-0 shrink-0 snap-start mb-1`}
+    >
+      <div
+        className={`absolute -right-4 -top-4 w-16 h-16 ${accentBg} rounded-full blur-xl transition-colors pointer-events-none`}
+      />
+      <div className="flex items-center justify-between relative z-10 gap-1">
+        <span className="font-semibold text-[9px] sm:text-[10px] text-muted-foreground/80 uppercase tracking-wider truncate">
+          {label}
+        </span>
+        <div
+          className={`w-7 h-7 sm:w-8 sm:h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 ${iconColor} shrink-0`}
+        >
+          <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        </div>
+      </div>
+      <div className="relative z-10">
+        {isText ? (
+          <EllipsisCell
+            value={value as string}
+            className="text-[10px] sm:text-[11px] font-bold text-foreground uppercase tracking-wide leading-snug"
+          />
+        ) : (
+          <p className="text-lg sm:text-xl font-bold tracking-tight text-foreground truncate">
+            {value}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const getSortParams = (sortValue: string) => {
   const sortMap: Record<string, { sort_by: string; sort_order?: "ASC" | "DESC" }> = {
@@ -74,8 +140,10 @@ export default function Inventory() {
   const [categoryUuid, setCategoryUuid] = useState<string>("");
   const [itemType, setItemType] = useState<string>("");
 
+  const [loadingLogUuid, setLoadingLogUuid] = useState<string | null>(null);
   const [allStockItems, setAllStockItems] = useState<InventoryItem[]>([]);
   const [allStockLoading, setAllStockLoading] = useState(false);
+  const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
   const categories = useAppSelector((state) => state.itemsCategory.data) ?? [];
 
@@ -213,10 +281,13 @@ export default function Inventory() {
 
   const handleTransactionRowClick = async (item: InventoryTransaction) => {
     try {
+      setLoadingLogUuid(item.uuid);
       const freshData = await dispatch(getInventoryLogAction(item.uuid)).unwrap();
       setSelectedTransactionItem(freshData.data || freshData);
     } catch {
       setSelectedTransactionItem(item);
+    } finally {
+      setLoadingLogUuid(null);
     }
     setIsLogTransactionOpen(true);
   };
@@ -256,6 +327,55 @@ export default function Inventory() {
     return `Updated ${name}`;
   };
 
+  const metricCardsConfig = [
+    {
+      label: "Total Products",
+      icon: Package,
+      value: totalProducts,
+      isLoading: allStockLoading,
+      accentBg: "bg-primary/5 group-hover:bg-primary/10",
+      borderHover: "hover:border-primary/20",
+      iconColor: "text-primary",
+    },
+    {
+      label: "Low Stock",
+      icon: AlertTriangle,
+      value: lowStockCount,
+      isLoading: allStockLoading,
+      accentBg: "bg-amber-500/5 group-hover:bg-amber-500/10",
+      borderHover: "hover:border-amber-500/20",
+      iconColor: "text-amber-500",
+    },
+    {
+      label: "Out of Stock",
+      icon: XCircle,
+      value: outOfStockCount,
+      isLoading: allStockLoading,
+      accentBg: "bg-destructive/5 group-hover:bg-destructive/10",
+      borderHover: "hover:border-destructive/20",
+      iconColor: "text-destructive",
+    },
+    {
+      label: "Stock Value",
+      icon: Coins,
+      value: `₹${inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+      isLoading: allStockLoading,
+      accentBg: "bg-emerald-500/5 group-hover:bg-emerald-500/10",
+      borderHover: "hover:border-emerald-500/20",
+      iconColor: "text-emerald-500",
+    },
+    {
+      label: "Latest Action",
+      icon: ClipboardList,
+      value: getLatestActivityText(),
+      isLoading: transactionLoading,
+      accentBg: "bg-primary/5 group-hover:bg-primary/10",
+      borderHover: "hover:border-primary/20",
+      iconColor: "text-primary",
+      isText: true,
+    },
+  ];
+
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full bg-background">
       <motion.div
@@ -289,110 +409,39 @@ export default function Inventory() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 shrink-0"
+          className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-4 shrink-0"
         >
-          <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300">
-            <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors pointer-events-none" />
-            <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-                Total Products
-              </span>
-              <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-primary">
-                <Package className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-1 relative z-10">
-              <p className="text-xl font-bold tracking-tight text-foreground">
-                {allStockLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                ) : (
-                  totalProducts
-                )}
-              </p>
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-amber-500/20 transition-all duration-300">
-            <div className="absolute -right-4 -top-4 w-16 h-16 bg-amber-500/5 rounded-full blur-xl group-hover:bg-amber-500/10 transition-colors pointer-events-none" />
-            <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-                Low Stock
-              </span>
-              <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-amber-500">
-                <AlertTriangle className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-1 relative z-10">
-              <p className="text-xl font-bold tracking-tight text-foreground">
-                {allStockLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                ) : (
-                  lowStockCount
-                )}
-              </p>
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-destructive/20 transition-all duration-300">
-            <div className="absolute -right-4 -top-4 w-16 h-16 bg-destructive/5 rounded-full blur-xl group-hover:bg-destructive/10 transition-colors pointer-events-none" />
-            <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-                Out of Stock
-              </span>
-              <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-destructive">
-                <XCircle className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-1 relative z-10">
-              <p className="text-xl font-bold tracking-tight text-foreground">
-                {allStockLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                ) : (
-                  outOfStockCount
-                )}
-              </p>
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-emerald-500/20 transition-all duration-300">
-            <div className="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
-            <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-                Stock Value
-              </span>
-              <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-emerald-500">
-                <Coins className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-1 relative z-10">
-              <p className="text-xl font-bold tracking-tight text-foreground truncate">
-                {allStockLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                ) : (
-                  `₹${inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-                )}
-              </p>
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden p-4 bg-card/60 backdrop-blur-md text-card-foreground flex flex-col justify-between gap-2 rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:border-primary/20 col-span-2 sm:col-span-1 transition-all duration-300">
-            <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors pointer-events-none" />
-            <div className="flex items-center justify-between relative z-10">
-              <span className="font-semibold text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-                Latest Action
-              </span>
-              <div className="w-8 h-8 bg-background/50 rounded-lg flex items-center justify-center border border-border/50 text-primary">
-                <ClipboardList className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-1 relative z-10">
-              <EllipsisCell
-                value={getLatestActivityText()}
-                className="text-[11px] font-bold text-foreground uppercase tracking-wide leading-snug"
-              />
-            </div>
-          </div>
+          {metricCardsConfig.map((card) => (
+            <MetricCard key={card.label} {...card} />
+          ))}
         </motion.div>
+
+        <div className="sm:hidden flex flex-col gap-4 text-xs">
+          <div className="space-y-1">
+            <div className="border border-border/60 rounded-2xl bg-card/60 overflow-hidden shadow-sm">
+              <button
+                type="button"
+                onClick={() => setIsStatsExpanded(!isStatsExpanded)}
+                className="w-full px-3 py-2.5 flex items-center justify-between text-muted-foreground hover:bg-card/80 transition-colors"
+              >
+                <div className="flex items-center gap-1.5 truncate">
+                  <span className="font-bold text-foreground">Overview:</span>
+                  <span>{totalProducts} Items</span> • <span className="text-amber-600 font-semibold">{lowStockCount} Low</span> • <span className="text-emerald-600 font-semibold">₹{inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-foreground shrink-0 transition-transform duration-200 ${isStatsExpanded ? "rotate-180" : ""}`} />
+              </button>
+              {isStatsExpanded && (
+                <div className="p-3 border-t border-border/50 grid grid-cols-2 gap-2 text-xs bg-background/50">
+                  <div>Total Products: <span className="font-bold">{totalProducts}</span></div>
+                  <div>Low Stock: <span className="font-bold text-amber-600">{lowStockCount}</span></div>
+                  <div>Out of Stock: <span className="font-bold text-destructive">{outOfStockCount}</span></div>
+                  <div>Stock Value: <span className="font-bold text-emerald-600">₹{inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></div>
+                  <div className="col-span-2 text-muted-foreground truncate">Latest: {getLatestActivityText()}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-4 pb-4 border-b border-border/60 shadow-[0_3px_5px_-2px_rgba(0,0,0,0.05)] mb-2">
           <InventoryFilters
@@ -465,6 +514,8 @@ export default function Inventory() {
                 onSuccess={handleTransactionLogged}
                 hasMore={stockHasMore}
                 fetchMore={fetchMoreStock}
+                page={stockPage}
+                isMobile={isMobile}
               />
             </div>
           )}
@@ -478,6 +529,7 @@ export default function Inventory() {
                 limit={PAGE_LIMIT}
                 onPageChange={handleTransactionPageChange}
                 loading={transactionLoading}
+                loadingLogUuid={loadingLogUuid}
                 onRowClick={handleTransactionRowClick}
                 isMobile={isMobile}
                 hasMore={transactionHasMore}

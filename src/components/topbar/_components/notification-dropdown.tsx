@@ -118,23 +118,22 @@ export const NotificationDropdown: React.FC = () => {
                   key={item.uuid}
                   onClick={() => handleNotificationClick(item)}
                   className={cn(
-                    "p-3.5 flex items-start gap-3 transition-colors cursor-pointer group relative hover:bg-muted/40",
-                    !item.is_read && "bg-primary/5"
+                    "p-3.5 flex items-start gap-3 transition-colors cursor-pointer group relative border-l-4 border-l-transparent",
+                    !item.is_read
+                      ? "bg-primary/10 border-l-primary hover:bg-primary/15"
+                      : "hover:bg-muted/40"
                   )}
                 >
-                  {!item.is_read && (
-                    <span className="absolute left-1.5 top-5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                  )}
 
                   <div
                     className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border mt-0.5",
+                      "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 border mt-0.5",
                       meta.bgClass,
                       meta.colorClass,
                       meta.borderClass
                     )}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
 
                   <div className="flex-1 min-w-0 pr-1">

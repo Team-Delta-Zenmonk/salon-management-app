@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from "react-hook-form";
-import { Store, CreditCard, Wallet, ShieldAlert } from "lucide-react";
+import { Store } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,6 @@ const POLICY_OPTIONS = [
     value: "pay_at_venue",
     title: "Pay at Venue (No upfront payment)",
     description: "Customers can book instantly without a card and pay after their service at the salon.",
-    icon: Wallet,
     badgeText: "Lowest Friction",
     badgeVariant: "secondary" as const,
   },
@@ -25,7 +24,6 @@ const POLICY_OPTIONS = [
     value: "partial_deposit",
     title: "Require Partial Deposit",
     description: "Customers pay a percentage upfront to secure their booking. Rest is paid at the salon.",
-    icon: ShieldAlert,
     badgeText: "Balanced Protection",
     badgeVariant: "outline" as const,
   },
@@ -33,7 +31,6 @@ const POLICY_OPTIONS = [
     value: "full_upfront",
     title: "Require Full Payment Upfront",
     description: "Customers pay 100% online during checkout to secure their slot.",
-    icon: CreditCard,
     badgeText: "Max Security",
     badgeVariant: "default" as const,
   },
@@ -82,7 +79,6 @@ export default function PaymentPolicyCard({ isSaving }: Readonly<PaymentPolicyCa
                 <div className="grid gap-3">
                   {POLICY_OPTIONS.map((option) => {
                     const isSelected = selectedValues.includes(option.value);
-                    const Icon = option.icon;
 
                     return (
                       <div
@@ -107,7 +103,6 @@ export default function PaymentPolicyCard({ isSaving }: Readonly<PaymentPolicyCa
                             <Label
                               className="font-bold text-sm text-foreground cursor-pointer flex items-center gap-2"
                             >
-                              <Icon className={cn("w-4 h-4", isSelected ? "text-primary" : "text-muted-foreground")} />
                               {option.title}
                             </Label>
                             <Badge variant={option.badgeVariant} className="text-[10px] py-0 px-2 rounded-full">

@@ -216,7 +216,9 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       .map((ss) => {
         const lastName = ss.staff.last_name ? ` ${ss.staff.last_name}` : "";
         return {
-          label: `${ss.staff.first_name}${lastName}`,
+          label: (`${ss.staff.first_name}${lastName}`).split(" ")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" "),
           value: String(ss.staff_id),
         };
       });

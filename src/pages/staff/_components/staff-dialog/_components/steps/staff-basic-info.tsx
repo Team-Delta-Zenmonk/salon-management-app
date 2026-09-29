@@ -21,6 +21,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           pattern={VALIDATE_PATTERN.alphabet}
           maxLength={FIELD_LIMITS.NAME}
           placeholder="First name"
+          inputPropsClassName="capitalize"
         />
 
         <TextField
@@ -33,6 +34,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           pattern={VALIDATE_PATTERN.alphabet}
           maxLength={FIELD_LIMITS.NAME}
           placeholder="Last name"
+          inputPropsClassName="capitalize"
         />
       </div>
 
@@ -97,6 +99,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           options={GenderOptions}
           disabled={disabled}
           label="Gender"
+          triggerClassName="capitalize"
         />
       </div>
     </div>

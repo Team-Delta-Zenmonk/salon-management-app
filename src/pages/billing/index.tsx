@@ -166,88 +166,94 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 flex flex-col justify-between h-full">
-      <div className="rounded-xl bg-muted/60 border border-border/80 p-3 sm:p-3.5 space-y-1.5 text-xs shrink-0">
-        <div className="flex justify-between items-center text-muted-foreground">
-          <span>Target Plan:</span>
-          <span className="font-semibold text-foreground capitalize">
-            {plan} ({plan === "yearly" ? "365 days" : "30 days"})
-          </span>
-        </div>
-        <div className="flex justify-between items-center text-muted-foreground">
-          <span>Base amount:</span>
-          <span className="font-mono text-foreground">
-            ₹{plan === "yearly" ? "21,178" : "2,117"}
-          </span>
-        </div>
-        <div className="flex justify-between items-center text-muted-foreground">
-          <span>GST (18%):</span>
-          <span className="font-mono text-foreground">
-            ₹{plan === "yearly" ? "3,812" : "382"}
-          </span>
-        </div>
-        <div className="pt-1.5 border-t border-border flex justify-between items-baseline">
-          <span className="font-bold text-foreground text-xs sm:text-sm">Total Due:</span>
-          <span className="text-lg sm:text-xl font-extrabold text-primary font-mono">
-            ₹{amount.toLocaleString("en-IN")}
-          </span>
-        </div>
-      </div>
-
-      <div className="py-1 min-h-[140px]">
-        <PaymentElement
-          options={{
-            layout: {
-              type: "accordion",
-              defaultCollapsed: false,
-              radios: "always",
-              spacedAccordionItems: false,
-            },
-          }}
-        />
-      </div>
-
-      {errorMsg && (
-        <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive shrink-0">
-          <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
-
-      <div className="space-y-2 shrink-0 pt-1">
-        <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isPaying}
-            className="w-full sm:flex-1 text-xs py-2 h-9 cursor-pointer"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={!stripe || !elements || isPaying}
-            className="w-full sm:flex-1 text-xs font-bold gap-2 py-2 h-9 shadow-md shadow-primary/25 cursor-pointer"
-          >
-            {isPaying ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Pay ₹{amount.toLocaleString("en-IN")}
-              </>
-            )}
-          </Button>
+    <form id="checkout-payment-form" onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 min-h-0">
+        <div className="rounded-xl bg-muted/60 border border-border/80 p-3.5 space-y-1.5 text-xs">
+          <div className="flex justify-between items-center text-muted-foreground">
+            <span>Target Plan:</span>
+            <span className="font-semibold text-foreground capitalize">
+              {plan} ({plan === "yearly" ? "365 days" : "30 days"})
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-muted-foreground">
+            <span>Base amount:</span>
+            <span className="font-mono text-foreground">
+              ₹{plan === "yearly" ? "21,178" : "2,117"}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-muted-foreground">
+            <span>GST (18%):</span>
+            <span className="font-mono text-foreground">
+              ₹{plan === "yearly" ? "3,812" : "382"}
+            </span>
+          </div>
+          <div className="pt-1.5 border-t border-border flex justify-between items-baseline">
+            <span className="font-bold text-foreground text-xs sm:text-sm">Total Due:</span>
+            <span className="text-lg sm:text-xl font-extrabold text-primary font-mono">
+              ₹{amount.toLocaleString("en-IN")}
+            </span>
+          </div>
+          <div className="pt-2 mt-1 border-t border-border/50 text-[11px] text-muted-foreground flex items-center gap-1.5 bg-primary/5 -mx-3.5 -mb-3.5 p-2.5 rounded-b-xl">
+            <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span>Purchasing this plan extends your subscription by <strong>{plan === "yearly" ? "365 days" : "30 days"}</strong> from your current expiry date.</span>
+          </div>
         </div>
 
-        <p className="text-center text-[10px] text-muted-foreground">
-          Secured by{" "}
-          <span className="font-semibold text-foreground">Stripe</span> • 256-bit encryption • Tax invoice generated automatically
-        </p>
+        <div className="py-1">
+          <PaymentElement
+            options={{
+              layout: {
+                type: "accordion",
+                defaultCollapsed: false,
+                radios: "always",
+                spacedAccordionItems: false,
+              },
+            }}
+          />
+        </div>
+
+        {errorMsg && (
+          <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive shrink-0">
+            <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
+        <div className="space-y-2 shrink-0 pt-1">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isPaying}
+              className="w-full sm:flex-1 text-xs py-2 h-9 cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!stripe || !elements || isPaying}
+              className="w-full sm:flex-1 text-xs font-bold gap-2 py-2 h-9 shadow-md shadow-primary/25 cursor-pointer"
+            >
+              {isPaying ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Pay ₹{amount.toLocaleString("en-IN")}
+                </>
+              )}
+            </Button>
+          </div>
+
+          <p className="text-center text-[10px] text-muted-foreground">
+            Secured by{" "}
+            <span className="font-semibold text-foreground">Stripe</span> • 256-bit encryption • Tax invoice generated automatically
+          </p>
+        </div>
       </div>
     </form>
   );
@@ -423,10 +429,10 @@ export default function PlanAndBillingPage() {
               </span>
               <span
                 className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider shrink-0 ${currentStatus === "active"
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                    : currentStatus === "trial"
-                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                      : "bg-destructive/10 text-destructive border border-destructive/20"
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                  : currentStatus === "trial"
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                    : "bg-destructive/10 text-destructive border border-destructive/20"
                   }`}
               >
                 {currentStatus === "active"
@@ -440,7 +446,7 @@ export default function PlanAndBillingPage() {
             <div className="space-y-1 min-w-0 max-w-full">
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2 min-w-0">
                 <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
-                <EllipsisCell value={salon?.name || "Your Salon"} maxChars={50} className={"capitalize truncate"}/>
+                <EllipsisCell value={salon?.name || "Your Salon"} maxChars={50} className={"capitalize truncate"} />
               </h2>
               <p className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
                 <Clock className="w-3.5 h-3.5 shrink-0" />
@@ -579,188 +585,194 @@ export default function PlanAndBillingPage() {
             ))}
           </>
         ) : (
-          reduxPlans.map((plan) => {
-            const isCurrentPlan = currentPlan === plan.id;
-            const isYearlyPlan = plan.id === "yearly";
+          <>
+            {reduxPlans.map((plan) => {
+              const isCurrentPlan = currentPlan === plan.id;
+              const isYearlyPlan = plan.id === "yearly";
 
-            const featuresMap: Record<string, string[]> = {
-              monthly: [
-                "Unlimited bookings",
-                "Branded storefront",
-                "Walk-in POS & receipts",
-                "Staff commissions & tips",
-                "Inventory depletion",
-              ],
-              yearly: [
-                "Everything in Monthly Plan",
-                "Save ₹4,998/year (2 months free)",
-                "Priority live chat & VIP support",
+              const featuresMap: Record<string, string[]> = {
+                monthly: [
+                  "Unlimited bookings",
+                  "Branded storefront",
+                  "Walk-in POS & receipts",
+                  "Staff commissions & tips",
+                  "Inventory depletion",
+                ],
+                yearly: [
+                  "Everything in Monthly Plan",
+                  "Save ₹4,998/year (2 months free)",
+                  "Priority live chat & VIP support",
+                  "Unlimited staff seats",
+                  "Full POS, inventory & daily reports",
+                ],
+              };
+
+              const features = featuresMap[plan.id] || [
+                "Full platform access",
                 "Unlimited staff seats",
-                "Full POS, inventory & daily reports",
-              ],
-            };
+                "POS, Inventory & Analytics",
+              ];
 
-            const features = featuresMap[plan.id] || [
-              "Full platform access",
-              "Unlimited staff seats",
-              "POS, Inventory & Analytics",
-            ];
-
-            return (
-              <motion.div
-                key={plan.id}
-                variants={itemVariants}
-                className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all flex-1 min-w-[260px] max-w-full overflow-visible ${
-                  isYearlyPlan
-                    ? "border-2 border-primary shadow-xl shadow-primary/10"
-                    : "border border-border/80 hover:border-primary/40"
-                } ${
-                  isCurrentPlan && currentStatus === "active"
-                    ? "border-primary ring-2 ring-primary"
-                    : isCurrentPlan && currentStatus === "trial"
-                      ? "border-amber-500 ring-2 ring-amber-500/40"
-                      : ""
-                }`}
-              >
-                {plan.badge && (
-                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
-                    {plan.badge}
-                  </div>
-                )}
-                {isCurrentPlan && currentStatus === "active" && (
-                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
-                    <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground truncate max-w-full">
-                      Current Plan
-                    </span>
-                  </div>
-                )}
-                {isCurrentPlan && currentStatus === "trial" && (
-                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
-                    <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
-                      Selected Plan • Trial Active
-                    </span>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  <div>
-                    <span className={`text-xs font-bold uppercase tracking-wider ${isYearlyPlan ? "text-primary" : "text-muted-foreground"}`}>
-                      {isYearlyPlan ? "Annual Commitment" : "Pay As You Go"}
-                    </span>
-                    <h4 className="text-xl font-bold text-foreground mt-1 capitalize">{plan.name}</h4>
-                    <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">
-                      {plan.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-2 pb-3 border-b border-border/50">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
-                        {plan.formatted_price}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {plan.billing_cycle}
+              return (
+                <motion.div
+                  key={plan.id}
+                  variants={itemVariants}
+                  className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all flex-1 min-w-[260px] max-w-full overflow-visible ${isYearlyPlan
+                      ? "border-2 border-primary shadow-xl shadow-primary/10"
+                      : "border border-border/80 hover:border-primary/40"
+                    } ${isCurrentPlan && currentStatus === "active"
+                      ? "border-primary ring-2 ring-primary"
+                      : isCurrentPlan && currentStatus === "trial"
+                        ? "border-amber-500 ring-2 ring-amber-500/40"
+                        : ""
+                    }`}
+                >
+                  {plan.badge && (
+                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
+                      {plan.badge}
+                    </div>
+                  )}
+                  {isCurrentPlan && currentStatus === "active" && (
+                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
+                      <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground truncate max-w-full">
+                        Current Plan
                       </span>
                     </div>
-                    {isYearlyPlan ? (
-                      <p className="text-[10px] text-primary font-semibold mt-0.5">
-                        = ₹{Math.round(plan.amount / 12).toLocaleString()}/mo • 2 Months Free
+                  )}
+                  {isCurrentPlan && currentStatus === "trial" && (
+                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
+                      <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
+                        Selected Plan • Trial Active
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="space-y-4">
+                    <div>
+                      <span className={`text-xs font-bold uppercase tracking-wider ${isYearlyPlan ? "text-primary" : "text-muted-foreground"}`}>
+                        {isYearlyPlan ? "Annual Commitment" : "Pay As You Go"}
+                      </span>
+                      <h4 className="text-xl font-bold text-foreground mt-1 capitalize">{plan.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">
+                        {plan.description}
                       </p>
+                    </div>
+
+                    <div className="pt-2 pb-3 border-b border-border/50">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
+                          {plan.formatted_price}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {plan.billing_cycle}
+                        </span>
+                      </div>
+                      {isYearlyPlan ? (
+                        <p className="text-[10px] text-primary font-semibold mt-0.5">
+                          = ₹{Math.round(plan.amount / 12).toLocaleString()}/mo • 2 Months Free
+                        </p>
+                      ) : (
+                        <p className="text-[10px] text-muted-foreground mt-0.5">Billed monthly   • Cancel anytime</p>
+                      )}
+                    </div>
+
+                    <ul className="space-y-2 text-xs text-muted-foreground">
+                      {features.map((f) => (
+                        <li key={f} className="flex items-center gap-2">
+                          <Check className={`w-3.5 h-3.5 shrink-0 ${isYearlyPlan ? "text-primary" : "text-emerald-500"}`} />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="pt-6 space-y-2">
+                    {plan.id === "trial" ? (
+                      <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-80">
+                        {currentStatus === "trial" ? "Trial Active (14 Days)" : "Trial Concluded"}
+                      </Button>
+                    ) : !isYearlyPlan && isActiveYearly ? (
+                      <div className="w-full text-center">
+                        <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-60 cursor-not-allowed">
+                          Not Available During Yearly Plan
+                        </Button>
+                        <p className="text-[10px] text-muted-foreground mt-1.5">
+                          Available after{" "}
+                          {expiresAt?.toLocaleDateString("en-IN", { dateStyle: "medium" })}
+                        </p>
+                      </div>
                     ) : (
-                      <p className="text-[10px] text-muted-foreground mt-0.5">Billed monthly   • Cancel anytime</p>
+                      <>
+                        <Button
+                          variant={isYearlyPlan || isCurrentPlan ? "default" : "outline"}
+                          size="default"
+                          onClick={() => openCheckout(plan.id as typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY)}
+                          disabled={loadingPlan !== null}
+                          className={`w-full text-xs font-bold cursor-pointer ${isYearlyPlan ? "shadow-md shadow-primary/25" : ""
+                            }`}
+                        >
+                          {loadingPlan === plan.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : isCurrentPlan && currentStatus === "active" ? (
+                            `Renew ${plan.name}`
+                          ) : isCurrentPlan && currentStatus === "trial" ? (
+                            `Pay & Activate ${plan.name}`
+                          ) : (
+                            `Choose ${plan.name}`
+                          )}
+                        </Button>
+                        {isCurrentPlan && currentStatus === "active" && (
+                          <p className="text-[10px] text-muted-foreground text-center mt-1">
+                            Extends current active plan by {plan.id === "yearly" ? "365 days" : "30 days"}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
-
-                  <ul className="space-y-2 text-xs text-muted-foreground">
-                    {features.map((f) => (
-                      <li key={f} className="flex items-center gap-2">
-                        <Check className={`w-3.5 h-3.5 shrink-0 ${isYearlyPlan ? "text-primary" : "text-emerald-500"}`} />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="pt-6 space-y-2">
-                  {plan.id === "trial" ? (
-                    <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-80">
-                      {currentStatus === "trial" ? "Trial Active (14 Days)" : "Trial Concluded"}
-                    </Button>
-                  ) : !isYearlyPlan && isActiveYearly ? (
-                    <div className="w-full text-center">
-                      <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-60 cursor-not-allowed">
-                        Not Available During Yearly Plan
-                      </Button>
-                      <p className="text-[10px] text-muted-foreground mt-1.5">
-                        Available after{" "}
-                        {expiresAt?.toLocaleDateString("en-IN", { dateStyle: "medium" })}
-                      </p>
-                    </div>
-                  ) : (
-                    <Button
-                      variant={isYearlyPlan || isCurrentPlan ? "default" : "outline"}
-                      size="default"
-                      onClick={() => openCheckout(plan.id as typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY)}
-                      disabled={loadingPlan !== null}
-                      className={`w-full text-xs font-bold cursor-pointer ${
-                        isYearlyPlan ? "shadow-md shadow-primary/25" : ""
-                      }`}
-                    >
-                      {loadingPlan === plan.id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : isCurrentPlan && currentStatus === "active" ? (
-                        `Renew ${plan.name}`
-                      ) : isCurrentPlan && currentStatus === "trial" ? (
-                        `Pay & Activate ${plan.name}`
-                      ) : (
-                        `Choose ${plan.name}`
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </motion.div>
-            );
-          })
-        )}
-        <motion.div
-          variants={itemVariants}
-          className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-primary/40 transition-all flex-1 min-w-[260px] max-w-full"
-        >
-          <div className="space-y-4">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Multi-Location</span>
-              <h4 className="text-xl font-bold text-foreground mt-1">Enterprise</h4>
-              <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">
-                Tailored for salon chains, multi-branch groups & franchises.
-              </p>
-            </div>
-            <div className="pt-2 pb-3 border-b border-border/50">
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">Custom</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Custom SLA & volume pricing</p>
-            </div>
-            <ul className="space-y-2 text-xs text-muted-foreground">
-              {["Unlimited branches & chairs", "Multi-branch command center", "Custom domain (yourbrand.com)", "Dedicated account manager", "99.98% Enterprise Uptime SLA"].map((f) => (
-                <li key={f} className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="pt-6">
-            <Button
-              variant="outline"
-              size="default"
-              onClick={() => setIsEnterpriseModalOpen(true)}
-              className="w-full text-xs font-bold gap-1.5"
+                </motion.div>
+              );
+            })}
+            <motion.div
+              variants={itemVariants}
+              className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-primary/40 transition-all flex-1 min-w-[260px] max-w-full"
             >
-              <PhoneCall className="w-3.5 h-3.5" />
-              Contact Us / VIP Demo
-            </Button>
-          </div>
-        </motion.div>
+              <div className="space-y-4">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Multi-Location</span>
+                  <h4 className="text-xl font-bold text-foreground mt-1">Enterprise</h4>
+                  <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">
+                    Tailored for salon chains, multi-branch groups & franchises.
+                  </p>
+                </div>
+                <div className="pt-2 pb-3 border-b border-border/50">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">Custom</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Custom SLA & volume pricing</p>
+                </div>
+                <ul className="space-y-2 text-xs text-muted-foreground">
+                  {["Unlimited branches & chairs", "Multi-branch command center", "Custom domain (yourbrand.com)", "Dedicated account manager", "99.98% Enterprise Uptime SLA"].map((f) => (
+                    <li key={f} className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="pt-6">
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={() => setIsEnterpriseModalOpen(true)}
+                  className="w-full text-xs font-bold gap-1.5"
+                >
+                  <PhoneCall className="w-3.5 h-3.5" />
+                  Contact Us / VIP Demo
+                </Button>
+              </div>
+            </motion.div>
+          </>
+        )}
       </motion.div>
 
       <div className="space-y-4 pt-6 border-t border-border/70 max-w-full min-w-0">
@@ -789,7 +801,57 @@ export default function PlanAndBillingPage() {
           </Button>
         </div>
 
-        {invoices.length === 0 ? (
+        {isLoadingInvoices ? (
+          <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
+            {/* Mobile View Skeleton */}
+            <div className="block sm:hidden divide-y divide-border/60">
+              {[1, 2, 3].map((i) => (
+                <div key={`invoice-skeleton-mobile-${i}`} className="p-4 space-y-3 animate-pulse">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 w-28 bg-muted rounded-md" />
+                    <div className="h-5 w-16 bg-muted/80 rounded-full" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="h-3.5 w-32 bg-muted/60 rounded-md" />
+                    <div className="h-4 w-20 bg-muted/80 rounded-md" />
+                  </div>
+                  <div className="flex items-center justify-between pt-1 border-t border-border/40">
+                    <div className="h-3 w-24 bg-muted/40 rounded-md" />
+                    <div className="h-3 w-28 bg-muted/40 rounded-md" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop View Skeleton */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th className="py-3 px-4">Invoice #</th>
+                    <th className="py-3 px-4">Date</th>
+                    <th className="py-3 px-4">Plan</th>
+                    <th className="py-3 px-4">Stripe ID</th>
+                    <th className="py-3 px-4">Amount</th>
+                    <th className="py-3 px-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {[1, 2, 3].map((i) => (
+                    <tr key={`invoice-skeleton-row-${i}`} className="animate-pulse">
+                      <td className="py-4 px-4"><div className="h-4 w-28 bg-muted rounded-md" /></td>
+                      <td className="py-4 px-4"><div className="h-4 w-24 bg-muted/70 rounded-md" /></td>
+                      <td className="py-4 px-4"><div className="h-4 w-32 bg-muted/70 rounded-md" /></td>
+                      <td className="py-4 px-4"><div className="h-3.5 w-36 bg-muted/50 rounded-md" /></td>
+                      <td className="py-4 px-4"><div className="h-4 w-20 bg-muted/80 rounded-md" /></td>
+                      <td className="py-4 px-4"><div className="h-5 w-16 bg-muted rounded-full" /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : invoices.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 p-6 sm:p-8 text-center space-y-2">
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
               <FileText className="w-5 h-5" />
@@ -902,31 +964,91 @@ export default function PlanAndBillingPage() {
         )}
       </div>
 
-      <Dialog open={!!clientSecret && !!checkoutPlan} onOpenChange={closeCheckout}>
+      <Dialog open={!!checkoutPlan || !!loadingPlan || isActivating} onOpenChange={closeCheckout}>
         <DialogContent className="w-[95vw] sm:max-w-xl max-h-[92vh] flex flex-col p-0 border border-border/80 rounded-2xl overflow-hidden">
-          <div className="bg-primary/10 border-b border-primary/20 p-4 sm:p-5 shrink-0">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-md shadow-primary/30 shrink-0">
-                  <CreditCard className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
+          <div className="bg-primary/10 border-b border-primary/20 p-4 sm:p-5 pr-12 sm:pr-14 shrink-0">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-md shadow-primary/30 shrink-0">
+                <CreditCard className="w-5 h-5" />
+              </div>
+              <div className="min-w-0 space-y-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
                   <DialogTitle className="text-base sm:text-lg font-bold text-foreground truncate">
                     Subscribe to {appName}
                   </DialogTitle>
-                  <DialogDescription className="text-xs text-muted-foreground">
-                    Secure checkout powered by Stripe
-                  </DialogDescription>
+                  {(checkoutPlan || loadingPlan) && (
+                    <Badge variant="outline" className="font-mono text-xs uppercase bg-background text-primary border-primary/30 shrink-0 h-auto pt-1.5 px-2.5 leading-none inline-flex items-center justify-center">
+                      {checkoutPlan || loadingPlan} Plan
+                    </Badge>
+                  )}
                 </div>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Secure checkout powered by Stripe
+                </DialogDescription>
               </div>
-              <Badge variant="outline" className="font-mono text-xs capitalize bg-background shrink-0">
-                {checkoutPlan} Plan
-              </Badge>
             </div>
           </div>
 
-          <div className="p-4 sm:p-6 flex-1 overflow-y-auto min-h-0">
-            {clientSecret && checkoutPlan && (
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+            {isActivating ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center space-y-4">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary animate-pulse">
+                  <Loader2 className="w-7 h-7 animate-spin" />
+                </div>
+                <div className="space-y-1 max-w-sm">
+                  <h3 className="text-base font-bold text-foreground">
+                    Payment Successful! Activating Subscription...
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    We've confirmed your payment with Stripe. Finalizing your account activation now...
+                  </p>
+                </div>
+              </div>
+            ) : loadingPlan || !clientSecret || !checkoutPlan ? (
+              <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 animate-pulse min-h-0">
+                  <div className="rounded-xl bg-muted/60 border border-border/80 p-4 space-y-2.5">
+                    <div className="flex justify-between items-center">
+                      <div className="h-3.5 w-20 bg-muted/80 rounded" />
+                      <div className="h-3.5 w-24 bg-muted/80 rounded" />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="h-3.5 w-24 bg-muted/60 rounded" />
+                      <div className="h-3.5 w-16 bg-muted/60 rounded" />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="h-3.5 w-20 bg-muted/60 rounded" />
+                      <div className="h-3.5 w-14 bg-muted/60 rounded" />
+                    </div>
+                    <div className="pt-2 border-t border-border/60 flex justify-between items-center">
+                      <div className="h-4 w-24 bg-muted/80 rounded" />
+                      <div className="h-6 w-24 bg-muted/80 rounded" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <div className="h-3.5 w-36 bg-muted/80 rounded" />
+                    <div className="h-12 w-full bg-muted/70 rounded-xl" />
+                    <div className="h-12 w-full bg-muted/50 rounded-xl" />
+                    <div className="h-12 w-full bg-muted/30 rounded-xl" />
+                  </div>
+                </div>
+                <div className="p-4 sm:px-6 sm:py-3.5 border-t border-border/70 bg-card shrink-0 space-y-2">
+                  <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+                    <Button type="button" variant="outline" onClick={closeCheckout} className="w-full sm:flex-1 text-xs py-2 h-9">
+                      Cancel
+                    </Button>
+                    <Button disabled className="w-full sm:flex-1 text-xs font-bold gap-2 py-2 h-9">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Preparing Checkout...
+                    </Button>
+                  </div>
+                  <p className="text-center text-[10px] text-muted-foreground">
+                    Secured by <span className="font-semibold text-foreground">Stripe</span> • 256-bit encryption • Tax invoice generated automatically
+                  </p>
+                </div>
+              </div>
+            ) : (
               <Elements stripe={stripePromise} options={stripeOptions}>
                 <CheckoutForm
                   plan={checkoutPlan}
