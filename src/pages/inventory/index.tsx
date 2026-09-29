@@ -377,12 +377,12 @@ export default function Inventory() {
   ];
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full bg-background">
+    <div className="w-full max-w-full overflow-x-hidden pb-16 min-w-0">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 pb-6 shrink-0 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 shrink-0 gap-4"
       >
         <div className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -404,7 +404,7 @@ export default function Inventory() {
         </div>
       </motion.div>
 
-      <div className="w-full px-4 md:px-8 pb-8 space-y-6">
+      <div className="w-full space-y-6 min-w-0">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

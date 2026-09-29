@@ -92,13 +92,13 @@ export default function Appearance() {
   };
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-0 w-full ">
+    <div className="w-full max-w-full overflow-x-hidden pb-16 min-w-0">
       
       <motion.div 
         initial={{ opacity: 0, y: -15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 pb-4 shrink-0 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 shrink-0 gap-4"
       >
         <div className="flex flex-col gap-1">
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -120,7 +120,7 @@ export default function Appearance() {
         </Button>
       </motion.div>
 
-      <div className="flex-1 px-4 md:px-8 pt-2 pb-12">
+      <div className="w-full pt-2 min-w-0">
         <div className="max-w-[1600px] mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
             

@@ -33,7 +33,7 @@ const Layout = () => {
       <main className="flex flex-col flex-1 h-screen min-w-0">
         <Topbar onMenuClick={handleToggleSidebar} />
         <div className="flex-1 min-h-0 overflow-y-auto">
-          <div className="w-full mx-auto py-6 flex flex-col h-full px-4 sm:px-6 lg:px-8">
+          <div className="w-full mx-auto py-4 sm:py-6 flex flex-col min-h-full px-4 sm:px-6 lg:px-8">
             <Outlet />
           </div>
         </div>

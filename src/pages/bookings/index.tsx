@@ -192,12 +192,12 @@ export default function BookingPage() {
   }, [mappedBookings, receiptBooking]);
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full bg-background">
+    <div className="w-full max-w-full overflow-x-hidden pb-16 min-w-0">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 md:px-8 pb-4 sm:pb-6 shrink-0 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 sm:pb-6 shrink-0 gap-4"
       >
         <div className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Bookings</h1>
@@ -224,7 +224,7 @@ export default function BookingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="px-4 md:px-8 pb-5 shrink-0 flex flex-wrap items-center justify-start gap-3 sm:gap-4"
+        className="pb-5 shrink-0 flex flex-wrap items-center justify-start gap-3 sm:gap-4"
       >
         {/* Desktop & Tablet inline selects */}
         <div className="hidden sm:flex flex-wrap items-center gap-3">
@@ -315,7 +315,7 @@ export default function BookingPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="w-full px-4 md:px-8 flex-1 flex flex-col"
+        className="w-full flex-1 flex flex-col min-w-0"
       >
         {viewMode === "calendar" ? (
           <CustomScheduler

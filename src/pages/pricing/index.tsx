@@ -40,7 +40,7 @@ export default function StaffServiceManagementPage() {
       initial="hidden"
       animate="show"
       variants={containerVariants}
-      className="flex flex-col w-full max-w-[1600px] mx-auto pb-6 px-4 md:px-8 pt-0"
+      className="w-full max-w-full overflow-x-hidden pb-16 pt-0 min-w-0"
     >
       <motion.div
         initial={{ opacity: 0, y: -20 }}

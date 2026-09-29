@@ -151,7 +151,7 @@ export default function PredefinedCategoriesSection() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="shrink-0 px-4 md:px-8 pb-8 flex flex-col gap-5"
+        className="shrink-0 pb-8 flex flex-col gap-5"
       >
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
@@ -159,7 +159,7 @@ export default function PredefinedCategoriesSection() {
           </h2>
         </div>
 
-        <div className="relative -mx-4 px-4 md:-mx-8 md:px-8">
+        <div className="relative -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="absolute inset-y-0 left-0 w-8 md:w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
           <div className="absolute inset-y-0 right-0 w-8 md:w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 

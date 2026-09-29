@@ -72,7 +72,7 @@ const SearchCategories = ({ searchQuery }: SearchCategoriesProps) => {
   const hasMore = data.length < total;
 
   return (
-    <div className="w-full px-4 md:px-8 pb-8 space-y-4">
+    <div className="w-full pb-8 space-y-4 min-w-0">
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md flex items-center justify-between pt-4 pb-3.5 border-b border-border/60 shadow-[0_3px_5px_-2px_rgba(0,0,0,0.05)]">
         <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
           All Categories
