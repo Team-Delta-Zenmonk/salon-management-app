@@ -32,7 +32,7 @@ import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { RootState } from "@/store/store";
 import { getSalonProfileAction } from "@/features/auth/profile/get-salon-profile/getSalonProfile.action";
-import { fetchSubscriptionPlans } from "@/features/subscription/plans.slice";
+import { fetchSubscriptionPlans } from "@/features/subscription/fetch-subscription-plans.action";
 import {
   createSubscriptionIntent,
   getSubscriptionInvoices,
@@ -119,13 +119,14 @@ const getStripeAppearance = (isDark: boolean) => ({
 
 interface CheckoutFormProps {
   plan: typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY;
+  planDuration: number;
   amount: number;
   salonName: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: CheckoutFormProps) {
+function CheckoutForm({ plan, planDuration, amount, salonName, onSuccess, onCancel }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [isPaying, setIsPaying] = useState(false);
@@ -173,7 +174,7 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
           <div className="flex justify-between items-center text-muted-foreground">
             <span>Target Plan:</span>
             <span className="font-semibold text-foreground capitalize">
-              {plan} ({plan === "yearly" ? "365 days" : "30 days"})
+              {plan} ({planDuration} days)
             </span>
           </div>
           <div className="flex justify-between items-center text-muted-foreground">
@@ -196,7 +197,7 @@ function CheckoutForm({ plan, amount, salonName, onSuccess, onCancel }: Checkout
           </div>
           <div className="pt-2 mt-1 border-t border-border/50 text-[11px] text-muted-foreground flex items-center gap-1.5 bg-primary/5 -mx-3.5 -mb-3.5 p-2.5 rounded-b-xl">
             <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
-            <span>Purchasing this plan extends your subscription by <strong>{plan === "yearly" ? "365 days" : "30 days"}</strong> from your current expiry date.</span>
+            <span>Purchasing this plan extends your subscription by <strong>{planDuration} days</strong> from your current expiry date.</span>
           </div>
         </div>
 
@@ -280,6 +281,9 @@ export default function PlanAndBillingPage() {
 
   const [invoices, setInvoices] = useState<SubscriptionInvoice[]>([]);
   const [isLoadingInvoices, setIsLoadingInvoices] = useState(false);
+
+  const trialPlan = reduxPlans.find((p) => p.id === "trial");
+  const trialDurationDays = trialPlan?.duration_days ?? 14;
 
   const currentStatus = salon?.subscription_status || SUBSCRIPTION_STATUS.TRIAL;
   const currentPlan = salon?.subscription_plan || SUBSCRIPTION_PLAN.YEARLY;
@@ -416,7 +420,7 @@ export default function PlanAndBillingPage() {
           Plan & Billing Management
         </h1>
         <p className="text-muted-foreground text-sm mt-1 max-w-2xl">
-          Manage your {appName} subscription, monitor your 14-day trial, and upgrade anytime.
+          Manage your {appName} subscription, monitor your {trialDurationDays}-day trial, and upgrade anytime.
         </p>
       </motion.div>
 
@@ -432,7 +436,7 @@ export default function PlanAndBillingPage() {
                   ? "Yearly Plan (Best Value)"
                   : currentPlan === "monthly"
                     ? "Monthly Plan"
-                    : "14-Day Free Trial"}
+                    : `${trialDurationDays}-Day Free Trial`}
               </span>
               <span
                 className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider shrink-0 ${currentStatus === "active"
@@ -445,7 +449,7 @@ export default function PlanAndBillingPage() {
                 {currentStatus === "active"
                   ? "Active"
                   : currentStatus === "trial"
-                    ? "14-Day Free Trial"
+                    ? `${trialDurationDays}-Day Free Trial`
                     : "Expired"}
               </span>
             </div>
@@ -514,7 +518,7 @@ export default function PlanAndBillingPage() {
               </div>
               <div className="text-xs space-y-0.5">
                 <p className="font-bold text-foreground text-sm">
-                  You are exploring the 14-Day Free Trial of the {currentPlan === "yearly" ? "Yearly Plan (Save ~20%)" : "Monthly Plan"}
+                  You are exploring the {trialDurationDays}-Day Free Trial of the {currentPlan === "yearly" ? "Yearly Plan (Save ~20%)" : "Monthly Plan"}
                 </p>
                 <p className="text-muted-foreground">
                   {daysLeft !== null && daysLeft > 0 ? (
@@ -625,8 +629,8 @@ export default function PlanAndBillingPage() {
                   key={plan.id}
                   variants={itemVariants}
                   className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all flex-1 min-w-[260px] max-w-full overflow-visible ${isYearlyPlan
-                      ? "border-2 border-primary shadow-xl shadow-primary/10"
-                      : "border border-border/80 hover:border-primary/40"
+                    ? "border-2 border-primary shadow-xl shadow-primary/10"
+                    : "border border-border/80 hover:border-primary/40"
                     } ${isCurrentPlan && currentStatus === "active"
                       ? "border-primary ring-2 ring-primary"
                       : isCurrentPlan && currentStatus === "trial"
@@ -650,9 +654,14 @@ export default function PlanAndBillingPage() {
                   <div className="space-y-4">
                     <div>
                       <span className={`text-xs font-bold uppercase tracking-wider ${isYearlyPlan ? "text-primary" : "text-muted-foreground"}`}>
-                        {isYearlyPlan ? "Annual Commitment" : "Pay As You Go"}
+                        {isYearlyPlan ? "Annual Commitment" : plan.id === "trial" ? "Trial Period" : "Pay As You Go"}
                       </span>
-                      <h4 className="text-xl font-bold text-foreground mt-1 capitalize">{plan.name}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <h4 className="text-xl font-bold text-foreground capitalize">{plan.name}</h4>
+                        <Badge className="text-[10px] font-mono font-semibold bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
+                          {plan.duration_days ?? 0} days
+                        </Badge>
+                      </div>
                       <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">
                         {plan.description}
                       </p>
@@ -669,10 +678,12 @@ export default function PlanAndBillingPage() {
                       </div>
                       {isYearlyPlan ? (
                         <p className="text-[10px] text-primary font-semibold mt-0.5">
-                          = ₹{Math.round(plan.amount / 12).toLocaleString()}/mo • 2 Months Free
+                          = ₹{Math.round(plan.amount / 12).toLocaleString()}/mo • {plan.duration_days ?? "?"} days duration
                         </p>
+                      ) : plan.id === "trial" ? (
+                        <p className="text-[10px] text-muted-foreground mt-0.5">Free for {plan.duration_days ?? "?"} days</p>
                       ) : (
-                        <p className="text-[10px] text-muted-foreground mt-0.5">Billed monthly   • Cancel anytime</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">Duration: {plan.duration_days ?? "?"} days • Cancel anytime</p>
                       )}
                     </div>
 
@@ -689,7 +700,7 @@ export default function PlanAndBillingPage() {
                   <div className="pt-6 space-y-2">
                     {plan.id === "trial" ? (
                       <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-80">
-                        {currentStatus === "trial" ? "Trial Active (14 Days)" : "Trial Concluded"}
+                        {currentStatus === "trial" ? `Trial Active (${plan.duration_days ?? 14} Days)` : "Trial Concluded"}
                       </Button>
                     ) : !isYearlyPlan && isActiveYearly ? (
                       <div className="w-full text-center">
@@ -723,7 +734,7 @@ export default function PlanAndBillingPage() {
                         </Button>
                         {isCurrentPlan && currentStatus === "active" && (
                           <p className="text-[10px] text-muted-foreground text-center mt-1">
-                            Extends current active plan by {plan.id === "yearly" ? "365 days" : "30 days"}
+                            Extends current active plan by {plan.duration_days ?? 0} days
                           </p>
                         )}
                       </>
@@ -919,7 +930,7 @@ export default function PlanAndBillingPage() {
                         {new Date(inv.created_at).toLocaleDateString(undefined, { dateStyle: "medium" })}
                       </td>
                       <td className="py-3.5 px-4 font-medium capitalize">
-                        {inv.plan} ({inv.plan === "yearly" ? "365 days" : "30 days"})
+                        {inv.plan} ({trialDurationDays ?? (0)} days)
                       </td>
                       <td className="py-3.5 px-4 font-mono text-muted-foreground text-[10px]">
                         {inv.stripe_payment_intent_id
@@ -1047,6 +1058,7 @@ export default function PlanAndBillingPage() {
                 <CheckoutForm
                   plan={checkoutPlan}
                   amount={intentAmount}
+                  planDuration={trialDurationDays ?? 0}
                   salonName={salon?.name || "Your Salon"}
                   onSuccess={handlePaymentSuccess}
                   onCancel={closeCheckout}

@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import { axiosInstance } from "../../config/axios";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { SubscriptionPlan } from "@/common/enums/subscription-plan.enum";
+import { fetchSubscriptionPlans } from "./fetch-subscription-plans.action";
 
 export interface BackendPlan {
   id: SubscriptionPlan;
@@ -10,6 +10,7 @@ export interface BackendPlan {
   currency: string;
   billing_cycle: string;
   description: string;
+  duration_days: number;
 }
 
 export interface PlansState {
@@ -24,17 +25,7 @@ const initialState: PlansState = {
   error: null,
 };
 
-export const fetchSubscriptionPlans = createAsyncThunk<BackendPlan[], void, { rejectValue: string }>(
-  "subscription/fetchSubscriptionPlans",
-  async (_, thunkAPI) => {
-    try {
-      const res = await axiosInstance.get<{ plans: BackendPlan[] }>("/admin/plans");
-      return res.data.plans;
-    } catch (err: any) {
-      return thunkAPI.rejectWithValue(err.response?.data?.message || "Failed to fetch plans");
-    }
-  }
-);
+export { fetchSubscriptionPlans };
 
 export const plansSlice = createSlice({
   name: "plans",
