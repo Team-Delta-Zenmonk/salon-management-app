@@ -293,7 +293,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
             }
             endMessage={
               !hasMore && displayData.length > 0 ? (
-                <div className="text-center py-6">
+                <div className="text-center pt-6">
                   <span className="text-sm text-muted-foreground font-semibold">All transaction logs loaded</span>
                 </div>
               ) : null

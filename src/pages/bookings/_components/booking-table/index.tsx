@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
-import { Eye, ChevronLeft, ChevronRight, Calendar, User, Scissors } from "lucide-react";
+import { Eye, Calendar, User, Scissors, Loader2 } from "lucide-react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import type { Booking } from "../../types/booking.type";
 import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
 import {
@@ -18,11 +19,10 @@ import EllipsisCell from "@/components/ellipse-cell";
 interface BookingTableProps {
   bookings: Booking[];
   onViewReceipt: (booking: Booking) => void;
-  total?: number;
-  page?: number;
-  limit?: number;
-  onPageChange?: (newPage: number) => void;
+  hasMore?: boolean;
+  fetchMoreBookings?: () => void;
   loading?: boolean;
+  updatingBookingUuid?: string | null;
 }
 
 const getPaymentDetails = (booking: Booking) => {
@@ -91,292 +91,271 @@ const getStatusBadge = (status: string) => {
 export default function BookingTable({
   bookings,
   onViewReceipt,
-  total = 0,
-  page = 1,
-  limit = 12,
-  onPageChange,
+  hasMore = false,
+  fetchMoreBookings = () => {},
   loading = false,
+  updatingBookingUuid,
 }: Readonly<BookingTableProps>) {
-  const totalPages = Math.ceil(total / limit) || 1;
-
   return (
     <div className="w-full space-y-4">
-      {/* Mobile Card Layout (visible on small screens) */}
-      <div className="flex flex-col gap-3.5 md:hidden">
-        {loading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="p-4 rounded-2xl border border-border/50 bg-card/60 space-y-3 animate-pulse">
-              <div className="h-5 w-1/2 bg-muted/40 rounded-md" />
-              <div className="h-4 w-3/4 bg-muted/30 rounded-md" />
-              <div className="h-8 w-full bg-muted/30 rounded-md" />
-            </div>
-          ))
-        ) : bookings.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl border border-border/50 bg-card/60 text-muted-foreground text-sm">
-            No bookings found matching your criteria.
+      <InfiniteScroll
+        dataLength={bookings.length}
+        next={fetchMoreBookings}
+        hasMore={hasMore}
+        loader={
+          <div className="flex items-center justify-center py-6 text-primary gap-2">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span className="text-xs font-semibold text-muted-foreground">Loading more bookings…</span>
           </div>
-        ) : (
-          bookings.map((booking) => {
-            const { total, paid, label, percentage, variant } = getPaymentDetails(booking);
-
-            return (
-              <div
-                key={booking.uuid}
-                className="p-4 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md shadow-sm space-y-3.5"
-              >
-                {/* Header: Customer & Type Badge */}
-                <div className="flex items-start justify-between gap-2 border-b border-border/50 pb-3">
-                  <div className="min-w-0 flex-1">
-                    <EllipsisCell value={booking.customer_name} className="font-bold text-foreground text-base capitalize" />
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                      <Calendar className="w-3.5 h-3.5 shrink-0" />
-                      <span>
-                        {dayjs(booking.start_time).format("MMM D, YYYY")} • {dayjs(booking.start_time).format("h:mm A")}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="shrink-0">
-                    {booking.is_walk_in ? (
-                      <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0.5 px-2 font-bold gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                        Walk-in
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0.5 px-2 font-bold gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        Online
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                {/* Details Grid: Service & Staff */}
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="space-y-1 min-w-0">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 block">
-                      Service
-                    </span>
-                    <div className="flex items-center gap-1.5 font-medium text-foreground">
-                      <Scissors className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <EllipsisCell value={booking.service_name || "-"} className="font-medium text-foreground text-xs capitalize" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 min-w-0">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 block">
-                      Staff Assigned
-                    </span>
-                    <div className="flex items-center gap-1.5 font-medium text-foreground">
-                      <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <EllipsisCell value={booking.staff_name || "-"} className="font-medium text-foreground text-xs capitalize" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Badges: Status & Payment Mode */}
-                <div className="flex items-center justify-between gap-2 pt-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {getStatusBadge(booking.status)}
-                    <Badge variant={variant} className="font-semibold text-xs py-0.5">
-                      {label}
-                    </Badge>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    onClick={() => onViewReceipt(booking)}
-                    className="h-8 px-2.5 rounded-xl border-border/50 gap-1.5 font-semibold text-xs shrink-0"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    Receipt
-                  </Button>
-                </div>
-
-                {/* Amount Progress */}
-                <div className="pt-2 border-t border-border/50 space-y-1.5">
-                  <div className="flex justify-between items-center text-xs font-semibold text-foreground">
-                    <span className="text-muted-foreground font-medium">Payment Progress</span>
-                    <span>₹{paid.toFixed(2)} / ₹{total.toFixed(2)} ({percentage}%)</span>
-                  </div>
-                  <div className="w-full bg-muted/60 rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all duration-500",
-                        percentage === 100 ? "bg-emerald-500" : percentage > 0 ? "bg-amber-500" : "bg-neutral-400"
-                      )}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
+        }
+      >
+        <div className="flex flex-col gap-3.5 md:hidden">
+          {loading && bookings.length === 0 ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4 rounded-2xl border border-border/50 bg-card/60 space-y-3 animate-pulse">
+                <div className="h-5 w-1/2 bg-muted/40 rounded-md" />
+                <div className="h-4 w-3/4 bg-muted/30 rounded-md" />
+                <div className="h-8 w-full bg-muted/30 rounded-md" />
               </div>
-            );
-          })
-        )}
-      </div>
+            ))
+          ) : bookings.length === 0 ? (
+            <div className="p-8 text-center rounded-2xl border border-border/50 bg-card/60 text-muted-foreground text-sm">
+              No bookings found matching your criteria.
+            </div>
+          ) : (
+            bookings.map((booking) => {
+              const { total, paid, label, percentage, variant } = getPaymentDetails(booking);
 
-      {/* Desktop Table Layout (visible on medium & large screens) */}
-      <div className="hidden md:block rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md overflow-x-auto shadow-sm">
-        <Table className="min-w-full">
-          <TableHeader className="bg-muted/40">
-            <TableRow className="border-border/50 hover:bg-transparent">
-              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Client</TableHead>
-              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Booking Type</TableHead>
-              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Service</TableHead>
-              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Staff Assigned</TableHead>
-              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Status</TableHead>
-              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Payment Mode</TableHead>
-              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5 w-[200px]">Amount Details</TableHead>
-              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Appointment Date</TableHead>
-              <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5 text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="border-border/50">
-                  <TableCell colSpan={9} className="py-4">
-                    <div className="h-6 w-full bg-muted/30 animate-pulse rounded-md" />
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : bookings.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={9} className="text-center py-12 text-muted-foreground text-sm">
-                  No bookings found matching your criteria.
-                </TableCell>
-              </TableRow>
-            ) : (
-              bookings.map((booking) => {
-                const { total, paid, label, percentage, variant } = getPaymentDetails(booking);
-
-                return (
-                  <TableRow
-                    key={booking.uuid}
-                    className="border-border/50 hover:bg-muted/30 transition-colors"
-                  >
-                    <TableCell className="font-semibold text-foreground text-sm max-w-[160px]">
-                      <EllipsisCell value={booking.customer_name} className="font-semibold text-foreground text-sm capitalize" />
-                    </TableCell>
-
-                    <TableCell>
+              return (
+                <div
+                  key={booking.uuid}
+                  className="p-4 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md shadow-sm space-y-3.5 mb-1"
+                >
+                  <div className="flex items-start justify-between gap-2 border-b border-border/50 pb-3">
+                    <div className="min-w-0 flex-1">
+                      <EllipsisCell value={booking.customer_name} className="font-bold text-foreground text-base capitalize" />
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                        <Calendar className="w-3.5 h-3.5 shrink-0" />
+                        <span>
+                          {dayjs(booking.start_time).format("MMM D, YYYY")} • {dayjs(booking.start_time).format("h:mm A")}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
                       {booking.is_walk_in ? (
-                        <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0 px-2 font-bold gap-1">
+                        <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0.5 px-2 font-bold gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                           Walk-in
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0 px-2 font-bold gap-1">
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0.5 px-2 font-bold gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                           Online
                         </Badge>
                       )}
-                    </TableCell>
+                    </div>
+                  </div>
 
-                    <TableCell className="text-muted-foreground text-sm max-w-[180px]">
-                      <EllipsisCell value={booking.service_name || "-"} className="text-muted-foreground text-sm capitalize" />
-                    </TableCell>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="space-y-1 min-w-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 block">
+                        Service
+                      </span>
+                      <div className="flex items-center gap-1.5 font-medium text-foreground">
+                        <Scissors className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <EllipsisCell value={booking.service_name || "-"} className="font-medium text-foreground text-xs capitalize" />
+                      </div>
+                    </div>
 
-                    <TableCell className="text-foreground text-sm font-medium max-w-[140px]">
-                      <EllipsisCell value={booking.staff_name || "-"} className="text-foreground text-sm font-medium capitalize" />
-                    </TableCell>
+                    <div className="space-y-1 min-w-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 block">
+                        Staff Assigned
+                      </span>
+                      <div className="flex items-center gap-1.5 font-medium text-foreground">
+                        <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <EllipsisCell value={booking.staff_name || "-"} className="font-medium text-foreground text-xs capitalize" />
+                      </div>
+                    </div>
+                  </div>
 
-                    <TableCell>
-                      {getStatusBadge(booking.status)}
-                    </TableCell>
-
-                    <TableCell>
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5">
+                        {getStatusBadge(booking.status)}
+                        {booking.uuid === updatingBookingUuid && (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                        )}
+                      </div>
                       <Badge variant={variant} className="font-semibold text-xs py-0.5">
                         {label}
                       </Badge>
-                    </TableCell>
+                    </div>
 
-                    <TableCell>
-                      <div className="flex flex-col gap-1.5 w-full max-w-[170px]">
-                        <div className="flex justify-between items-center text-xs font-semibold text-foreground">
-                          <span>₹{paid.toFixed(2)} / ₹{total.toFixed(2)}</span>
-                          <span className={cn(
-                            "text-[11px] font-bold",
-                            percentage === 100 ? "text-emerald-500" : percentage > 0 ? "text-amber-500" : "text-muted-foreground"
-                          )}>
-                            {percentage}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-muted/60 rounded-full h-1.5 overflow-hidden">
-                          <div
-                            className={cn(
-                              "h-full rounded-full transition-all duration-500",
-                              percentage === 100 ? "bg-emerald-500" : percentage > 0 ? "bg-amber-500" : "bg-neutral-400"
-                            )}
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    </TableCell>
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      onClick={() => onViewReceipt(booking)}
+                      className="h-8 px-2.5 rounded-xl border-border/50 gap-1.5 font-semibold text-xs shrink-0"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      Receipt
+                    </Button>
+                  </div>
 
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-xs text-foreground">
-                          {dayjs(booking.start_time).format("MMM D, YYYY")}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">
-                          {dayjs(booking.start_time).format("h:mm A")}
-                        </span>
-                      </div>
-                    </TableCell>
+                  <div className="pt-2 border-t border-border/50 space-y-1.5">
+                    <div className="flex justify-between items-center text-xs font-semibold text-foreground">
+                      <span className="text-muted-foreground font-medium">Payment Progress</span>
+                      <span>₹{paid.toFixed(2)} / ₹{total.toFixed(2)} ({percentage}%)</span>
+                    </div>
+                    <div className="w-full bg-muted/60 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all duration-500",
+                          percentage === 100 ? "bg-emerald-500" : percentage > 0 ? "bg-amber-500" : "bg-neutral-400"
+                        )}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
 
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => onViewReceipt(booking)}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
-                        title="View Receipt & Payment Details"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
+        <div className="hidden md:block rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md overflow-x-auto shadow-sm">
+          <Table className="min-w-full">
+            <TableHeader className="bg-muted/40">
+              <TableRow className="border-border/50 hover:bg-transparent">
+                <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Client</TableHead>
+                <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Booking Type</TableHead>
+                <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Service</TableHead>
+                <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Staff Assigned</TableHead>
+                <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Status</TableHead>
+                <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Payment Mode</TableHead>
+                <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5 w-[200px]">Amount Details</TableHead>
+                <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5">Appointment Date</TableHead>
+                <TableHead className="text-xs uppercase font-bold text-muted-foreground py-3.5 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading && bookings.length === 0 ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i} className="border-border/50">
+                    <TableCell colSpan={9} className="py-4">
+                      <div className="h-6 w-full bg-muted/30 animate-pulse rounded-md" />
                     </TableCell>
                   </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                ))
+              ) : bookings.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-12 text-muted-foreground text-sm">
+                    No bookings found matching your criteria.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                bookings.map((booking) => {
+                  const { total, paid, label, percentage, variant } = getPaymentDetails(booking);
 
-      {total > 0 && onPageChange && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 pt-2 text-xs text-muted-foreground text-center sm:text-left">
-          <span>
-            Showing <strong className="text-foreground">{bookings.length}</strong> of{" "}
-            <strong className="text-foreground">{total}</strong> bookings
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="xs"
-              disabled={page <= 1 || loading}
-              onClick={() => onPageChange(page - 1)}
-              className="h-8 px-2.5 rounded-lg border-border/50"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Previous
-            </Button>
-            <span className="font-bold text-foreground px-2">
-              {page} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="xs"
-              disabled={page >= totalPages || loading}
-              onClick={() => onPageChange(page + 1)}
-              className="h-8 px-2.5 rounded-lg border-border/50"
-            >
-              Next
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
+                  return (
+                    <TableRow
+                      key={booking.uuid}
+                      className="border-border/50 hover:bg-muted/30 transition-colors"
+                    >
+                      <TableCell className="font-semibold text-foreground text-sm max-w-[160px]">
+                        <EllipsisCell value={booking.customer_name} className="font-semibold text-foreground text-sm capitalize" />
+                      </TableCell>
+
+                      <TableCell>
+                        {booking.is_walk_in ? (
+                          <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0 px-2 font-bold gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            Walk-in
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0 px-2 font-bold gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            Online
+                          </Badge>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-muted-foreground text-sm max-w-[180px]">
+                        <EllipsisCell value={booking.service_name || "-"} className="text-muted-foreground text-sm capitalize" />
+                      </TableCell>
+
+                      <TableCell className="text-foreground text-sm font-medium max-w-[140px]">
+                        <EllipsisCell value={booking.staff_name || "-"} className="text-foreground text-sm font-medium capitalize" />
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          {getStatusBadge(booking.status)}
+                          {booking.uuid === updatingBookingUuid && (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                          )}
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge variant={variant} className="font-semibold text-xs py-0.5">
+                          {label}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex flex-col gap-1.5 w-full max-w-[170px]">
+                          <div className="flex justify-between items-center text-xs font-semibold text-foreground">
+                            <span>₹{paid.toFixed(2)} / ₹{total.toFixed(2)}</span>
+                            <span className={cn(
+                              "text-[11px] font-bold",
+                              percentage === 100 ? "text-emerald-500" : percentage > 0 ? "text-amber-500" : "text-muted-foreground"
+                            )}>
+                              {percentage}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-muted/60 rounded-full h-1.5 overflow-hidden">
+                            <div
+                              className={cn(
+                                "h-full rounded-full transition-all duration-500",
+                                percentage === 100 ? "bg-emerald-500" : percentage > 0 ? "bg-amber-500" : "bg-neutral-400"
+                              )}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-xs text-foreground">
+                            {dayjs(booking.start_time).format("MMM D, YYYY")}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">
+                            {dayjs(booking.start_time).format("h:mm A")}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => onViewReceipt(booking)}
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+                          title="View Receipt & Payment Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </div>
-      )}
+      </InfiniteScroll>
     </div>
   );
 }

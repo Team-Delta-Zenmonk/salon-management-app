@@ -23,7 +23,7 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
 
   const drawerContent = (
     <div className="flex flex-col h-full bg-card">
-      <div className={cn("border-b border-border h-[72px] flex items-center shrink-0", desktopCollapsed ? "justify-center px-0" : "px-4")}>
+      <div className={cn("border-b border-border h-[72px] flex items-center shrink-0", desktopCollapsed ? "justify-center px-0" : "pl-4 pr-10")}>
         <div className={cn("flex items-center", desktopCollapsed ? "justify-center" : "space-x-3 w-full")}>
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 overflow-hidden shrink-0 shadow-xs border border-border/50">
             <img

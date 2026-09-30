@@ -151,7 +151,7 @@ export default function PredefinedCategoriesSection() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="shrink-0 pb-8 flex flex-col gap-5"
+        className="shrink-0 flex flex-col gap-5"
       >
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">

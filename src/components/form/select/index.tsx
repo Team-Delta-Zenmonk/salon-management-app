@@ -23,6 +23,7 @@ const Select = <T extends FieldValues>({
   disabled = false,
   rules,
   triggerClassName,
+  onChange: customOnChange,
 }: CustomSelectProps<T>) => {
   const generatedId = useId();
   const selectId = identifier || generatedId;
@@ -56,7 +57,10 @@ const Select = <T extends FieldValues>({
 
             <ShadcnSelect
               value={value != null && value !== "" ? String(value) : ""}
-              onValueChange={onChange}
+              onValueChange={(val) => {
+                onChange(val);
+                if (customOnChange) customOnChange(val);
+              }}
               disabled={disabled}
             >
               <SelectTrigger
@@ -74,12 +78,6 @@ const Select = <T extends FieldValues>({
               >
                 <div className="flex-1 text-left flex items-center gap-1.5 line-clamp-1 pr-2 w-1">
                   <EllipsisCell value={String(value ? (options?.find((o) => String(o.value) === String(value))?.label || value) : placeholder)} />
-                  {/* {value ? (
-                    options?.find((o) => String(o.value) === String(value))
-                      ?.label || value
-                  ) : (
-                    <span className="text-muted-foreground">{placeholder}</span>
-                  )} */}
                 </div>
                 {value && (
                   <div
@@ -89,6 +87,7 @@ const Select = <T extends FieldValues>({
                       e.preventDefault();
                       e.stopPropagation();
                       onChange("");
+                      if (customOnChange) customOnChange("");
                     }}
                     className="mr-1 flex items-center justify-center rounded-full p-0.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                   >
@@ -103,6 +102,7 @@ const Select = <T extends FieldValues>({
                       key={option.value}
                       value={option.value}
                       data-test-id={`li-${identifier}-${option.label}`}
+                      className={"capitalize"}
                     >
                       {option.label}
                     </SelectItem>

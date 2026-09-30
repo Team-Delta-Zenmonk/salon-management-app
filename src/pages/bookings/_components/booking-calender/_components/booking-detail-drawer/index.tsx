@@ -312,14 +312,16 @@ export default function BookingDetailsDialog({
                   )}
                 </div>
 
-                {!isCancelled && !isCompleted && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15, duration: 0.2 }}
-                    className="shrink-0 px-4 sm:px-5 py-4 border-t bg-muted/10 space-y-2.5"
-                  >
-                    <div className="grid gap-2 grid-cols-2">
+                {!isCancelled && !isCompleted && (() => {
+                  const isFutureBooking = booking ? new Date(booking.start_time).getTime() > Date.now() : false;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15, duration: 0.2 }}
+                      className="shrink-0 px-4 sm:px-5 py-4 border-t bg-muted/10 space-y-2.5"
+                    >
+                      <div className="grid gap-2 grid-cols-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -332,10 +334,12 @@ export default function BookingDetailsDialog({
                         <Button
                           size="sm"
                           onClick={handleComplete}
-                          className="w-full rounded-xl gap-2 h-10 font-semibold"
+                          disabled={isFutureBooking}
+                          title={isFutureBooking ? "Cannot complete booking before its start time" : undefined}
+                          className="w-full rounded-xl gap-2 h-10 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          Mark Complete
+                          {isFutureBooking ? "Not Started Yet" : "Mark Complete"}
                         </Button>
                       </div>
 
@@ -366,7 +370,8 @@ export default function BookingDetailsDialog({
                         </Button>
                       </div>
                     </motion.div>
-                  )}
+                  );
+                })()}
                 </motion.div>
               )}
           </AnimatePresence>

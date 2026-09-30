@@ -92,7 +92,7 @@ export default function Appearance() {
   };
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden pb-16 min-w-0">
+    <div className="w-full max-w-full overflow-x-hidden min-w-0">
       
       <motion.div 
         initial={{ opacity: 0, y: -15 }}
@@ -120,7 +120,7 @@ export default function Appearance() {
         </Button>
       </motion.div>
 
-      <div className="w-full pt-2 min-w-0">
+      <div className={`w-full pb-8 px-1 min-w-0 ${!isDirty ? "" : "pb-28"}`}>
         <div className="max-w-[1600px] mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
             

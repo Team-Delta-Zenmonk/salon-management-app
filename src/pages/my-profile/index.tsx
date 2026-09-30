@@ -208,13 +208,13 @@ const MyProfile = () => {
 
   return (
     <FormProvider {...methods}>
-      <div className="w-full max-w-full overflow-x-hidden pb-16 min-w-0">
+      <div className="w-full max-w-full overflow-x-hidden min-w-0">
 
         <motion.div
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center shrink-0 gap-4 bg-background/50 backdrop-blur-sm z-10 pb-4"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center shrink-0 gap-4 bg-background/50 backdrop-blur-sm z-10 pb-2 sm:pb-4"
         >
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -226,7 +226,7 @@ const MyProfile = () => {
           </div>
         </motion.div>
 
-        <div className={`w-full pt-6 min-w-0 ${!isDirty ? "" : "pb-28"}`}>
+        <div className={`w-full pt-1 sm:pt-6 min-w-0 ${!isDirty ? "" : "pb-28"}`}>
           <div className="w-full max-w-[1600px] mx-auto space-y-8">
 
             {loading && !salon ? (

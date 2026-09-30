@@ -154,7 +154,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   const hasMore = data.length < total;
 
   return (
-    <div className="w-full pb-8 space-y-6 min-w-0">
+    <div className="w-full space-y-6 min-w-0">
       <FormProvider {...methods}>
         <div
           className={cn(

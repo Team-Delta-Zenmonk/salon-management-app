@@ -53,7 +53,7 @@ export default function NotificationPage() {
   };
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden pb-16 min-w-0">
+    <div className="w-full max-w-full overflow-x-hidden min-w-0">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -82,7 +82,7 @@ export default function NotificationPage() {
         )}
       </motion.div>
 
-      <div className="w-full max-w-[1400px] space-y-6 min-w-0">
+      <div className="w-full space-y-6 min-w-0">
 
         <div className="flex items-center gap-2">
           <button

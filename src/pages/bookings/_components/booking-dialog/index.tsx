@@ -96,7 +96,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     },
   });
 
-  const { handleSubmit, reset, control } = methods;
+  const { handleSubmit, reset, control, setValue } = methods;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -157,6 +157,13 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         if (currentServiceInStaff !== Number(svc.service_id)) {
           fetchStaffForRow(idx, svc.service_id);
         }
+      } else {
+        setStaffMap((prev) => {
+          if (!prev[idx]) return prev;
+          const updated = { ...prev };
+          delete updated[idx];
+          return updated;
+        });
       }
     });
   }, [watchedServices?.map((s) => s.service_id).join(",")]);
@@ -210,7 +217,6 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     return rowData.data
       .filter((ss) => {
         if (!ss.staff || !ss.staff.end_date) return true;
-        // Check if end_date is in future
         return dayjs(ss.staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
       })
       .map((ss) => {
@@ -446,6 +452,9 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                       showRemoveButton={fields.length > 1}
                       onRemove={() => handleRemoveService(index)}
                       watchedServiceId={watchedServices?.[index]?.service_id}
+                      onServiceChange={() => {
+                        setValue(`services.${index}.staff_id`, "" as any);
+                      }}
                     />
                   ))}
                 </div>

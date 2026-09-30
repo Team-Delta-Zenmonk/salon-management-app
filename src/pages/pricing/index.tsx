@@ -40,13 +40,13 @@ export default function StaffServiceManagementPage() {
       initial="hidden"
       animate="show"
       variants={containerVariants}
-      className="w-full max-w-full overflow-x-hidden pb-16 pt-0 min-w-0"
+      className="w-full max-w-full overflow-x-hidden pt-0 min-w-0"
     >
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 shrink-0 gap-4 mb-8"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 shrink-0 gap-4 mb-2 xl:mb-8"
       >
         <div className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -93,7 +93,7 @@ export default function StaffServiceManagementPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="w-full flex-1 min-h-0 sm:min-h-[600px] flex flex-col">
+      <motion.div variants={itemVariants} className="w-full flex-1 min-h-0 sm:min-h-[600px] flex flex-col pb-1">
         {viewMode === "service" ? <ServiceView /> : <StaffView />}
       </motion.div>
     </motion.div>

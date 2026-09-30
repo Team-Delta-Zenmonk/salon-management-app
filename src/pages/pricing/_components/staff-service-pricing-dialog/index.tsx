@@ -92,8 +92,6 @@ export default function StaffServicePricingDialog({
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex flex-col items-start gap-1">
             Edit Pricing
             <EllipsisCell value={`${staff_name} &bull; ${service_name}`} maxChars={30} className="text-xs text-muted-foreground font-normal mt-1.5" />
-              {/* {staff_name} &bull; {service_name}
-            </span> */}
           </DialogTitle>
         </DialogHeader>
 

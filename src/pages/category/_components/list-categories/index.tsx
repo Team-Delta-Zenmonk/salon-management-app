@@ -87,7 +87,7 @@ export default function ListCategories({
         }
         endMessage={
           categories.length > 0 ? (
-            <div className="text-center py-6 text-muted-foreground">
+            <div className="text-center xl:py-6 text-muted-foreground">
               <p className="text-sm font-medium">No more categories to load</p>
             </div>
           ) : null

@@ -148,7 +148,7 @@ export default function Dashboard() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="w-full max-w-full overflow-x-hidden pb-16 min-w-0"
+      className="w-full max-w-full overflow-x-hidden min-w-0"
     >
       <DashboardHeader
         salonName={salon?.name}

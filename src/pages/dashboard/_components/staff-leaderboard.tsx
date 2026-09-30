@@ -9,7 +9,7 @@ export const StaffLeaderboard = () => {
   return (
     <motion.div
       variants={itemVariants}
-      className="lg:col-span-2 p-6 md:p-8 bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between"
+      className="lg:col-span-2 p-6 md:p-8 mb-1 bg-card/60 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between"
     >
       <div>
         <h3 className="text-lg font-bold text-foreground">Top Performing Staff</h3>

@@ -26,6 +26,7 @@ import {
   X,
   AlertTriangle,
   RefreshCw,
+  CheckCircle2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -355,32 +356,34 @@ export default function PlanAndBillingPage() {
   };
 
   const appName = APP_NAME;
+  const [isVerifyingModalOpen, setIsVerifyingModalOpen] = useState(false);
 
   const handlePaymentSuccess = async () => {
     setIsActivating(true);
+    setIsVerifyingModalOpen(true);
+    setClientSecret(null);
+    setCheckoutPlan(null);
+
     let attempts = 0;
     const poll = async () => {
       try {
         const updatedSalon = await dispatch(getSalonProfileAction(salon!.uuid)).unwrap();
+        const updatedInvoices = await getSubscriptionInvoices();
+        setInvoices(updatedInvoices);
+
         if (updatedSalon?.subscription_status === "active") {
           callSnack(`Subscription activated! Welcome to ${appName} Pro 🎉`, "success");
           setIsActivating(false);
-          setClientSecret(null);
-          setCheckoutPlan(null);
-          fetchInvoices();
           return;
         }
       } catch {
       }
       attempts++;
-      if (attempts < 10) {
-        setTimeout(poll, 1500);
+      if (attempts < 15) {
+        setTimeout(poll, 2000);
       } else {
         setIsActivating(false);
-        callSnack("Payment received! Your subscription will activate shortly.", "success");
-        setClientSecret(null);
-        setCheckoutPlan(null);
-        fetchInvoices();
+        callSnack("Payment received! Your subscription will activate shortly once verified.", "info");
       }
     };
     poll();
@@ -399,8 +402,12 @@ export default function PlanAndBillingPage() {
   };
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden space-y-6 sm:space-y-8 pb-16 min-w-0">
-      <div>
+    <div className="w-full max-w-full overflow-x-hidden space-y-6 sm:space-y-8 min-w-0">
+      <motion.div
+        initial={{ opacity: 0, y: -15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary mb-1">
           <CreditCard className="w-4 h-4" />
           <span>SaaS Platform & Entitlements</span>
@@ -411,7 +418,7 @@ export default function PlanAndBillingPage() {
         <p className="text-muted-foreground text-sm mt-1 max-w-2xl">
           Manage your {appName} subscription, monitor your 14-day trial, and upgrade anytime.
         </p>
-      </div>
+      </motion.div>
 
       <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/40 p-4 sm:p-6 md:p-8 shadow-xs">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
@@ -627,16 +634,9 @@ export default function PlanAndBillingPage() {
                         : ""
                     }`}
                 >
-                  {plan.badge && (
-                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
-                      {plan.badge}
-                    </div>
-                  )}
                   {isCurrentPlan && currentStatus === "active" && (
-                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
-                      <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-primary text-primary-foreground truncate max-w-full">
-                        Current Plan
-                      </span>
+                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
+                      Current Plan
                     </div>
                   )}
                   {isCurrentPlan && currentStatus === "trial" && (
@@ -803,7 +803,6 @@ export default function PlanAndBillingPage() {
 
         {isLoadingInvoices ? (
           <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
-            {/* Mobile View Skeleton */}
             <div className="block sm:hidden divide-y divide-border/60">
               {[1, 2, 3].map((i) => (
                 <div key={`invoice-skeleton-mobile-${i}`} className="p-4 space-y-3 animate-pulse">
@@ -822,8 +821,6 @@ export default function PlanAndBillingPage() {
                 </div>
               ))}
             </div>
-
-            {/* Desktop View Skeleton */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
@@ -863,7 +860,6 @@ export default function PlanAndBillingPage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
-            {/* Mobile View: Card Stack */}
             <div className="block sm:hidden divide-y divide-border/60">
               {invoices.map((inv) => (
                 <div key={inv.uuid} className="p-4 space-y-2.5 text-xs">
@@ -901,8 +897,6 @@ export default function PlanAndBillingPage() {
                 </div>
               ))}
             </div>
-
-            {/* Desktop View: Full Table */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
@@ -1082,6 +1076,49 @@ export default function PlanAndBillingPage() {
           <Button onClick={() => setIsEnterpriseModalOpen(false)} className="w-full mt-2">
             Got it
           </Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isVerifyingModalOpen} onOpenChange={setIsVerifyingModalOpen}>
+        <DialogContent className="sm:max-w-[440px] rounded-2xl p-6 border-border/80 shadow-2xl text-center space-y-4">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Payment Verification In Progress</DialogTitle>
+            <DialogDescription>Your payment was successful and is being verified with Stripe.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center space-y-3 pt-2">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="relative flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-inner"
+            >
+              <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+            </motion.div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-extrabold text-foreground">Payment Successful! 🎉</h3>
+              <p className="text-xs text-primary font-semibold uppercase tracking-wider">Verifying transaction status</p>
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-muted/40 border border-border/60 p-4 text-xs text-muted-foreground space-y-2 text-left">
+            <div className="flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <span>We have received your payment via Stripe and are currently verifying the webhook confirmation.</span>
+            </div>
+            <div className="flex items-start gap-2 pt-1 border-t border-border/40">
+              <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+              <span>This usually takes a few moments. Your subscription features will be active as soon as verification completes!</span>
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <Button
+              onClick={() => setIsVerifyingModalOpen(false)}
+              className="w-full rounded-xl font-bold h-10 shadow-md cursor-pointer"
+            >
+              Understand & Continue
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

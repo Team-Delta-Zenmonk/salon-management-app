@@ -1,9 +1,8 @@
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
 import { callSnack } from "../../../../components/snackbar";
-import CheckboxGroup from "../../../../components/form/checkbox";
 import { listStaffAction } from "../../../../features/staff/list-staff/list-staff.action";
 import { listServiceStaff } from "../../../../features/service/list-staff/list-staff.service";
 import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
@@ -16,8 +15,18 @@ import {
   DialogFooter,
 } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
-import { Loader2 } from "lucide-react";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../../../components/ui/avatar";
+import { Loader2, UserCheck, Users } from "lucide-react";
 import type { Staff } from "../../../../features/staff/staff.slice";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import { motion, AnimatePresence } from "framer-motion";
+
+dayjs.extend(customParseFormat);
 
 interface AssignStaffDialogProps {
   open: boolean;
@@ -45,6 +54,89 @@ interface AssignedStaffService {
   service_id?: number;
 }
 
+const getFullName = (staff: Staff) =>
+  `${staff.first_name} ${staff.last_name || ""}`.trim();
+
+const getInitials = (staff: Staff) =>
+  `${staff.first_name?.charAt(0) ?? ""}${staff.last_name?.charAt(0) ?? ""}`.toUpperCase() || "S";
+
+const isStaffActive = (staff: Staff) =>
+  !staff.end_date || dayjs(staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
+
+function StaffRow({
+  staff,
+  selected,
+  onToggle,
+}: {
+  staff: Staff;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  const active = isStaffActive(staff);
+
+  return (
+    <motion.button
+      type="button"
+      layout
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      onClick={onToggle}
+      className={`w-full text-left flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer group
+        ${selected
+          ? "bg-primary/8 border-primary/30 shadow-sm shadow-primary/10"
+          : "bg-card/60 border-border/40 hover:border-primary/20 hover:bg-muted/40"
+        }`}
+    >
+      <div className="relative shrink-0">
+        <Avatar className={`w-10 h-10 rounded-xl ring-2 transition-all duration-200 ${selected ? "ring-primary/30" : "ring-border/30 group-hover:ring-primary/20"}`}>
+          <AvatarImage
+            src={staff.photos?.url || undefined}
+            alt={getFullName(staff)}
+            className="object-cover"
+          />
+          <AvatarFallback className="bg-primary/8 text-primary font-bold text-sm rounded-xl">
+            {getInitials(staff)}
+          </AvatarFallback>
+        </Avatar>
+        <span
+          className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-card ${active ? "bg-emerald-500" : "bg-destructive/70"}`}
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-semibold leading-tight truncate capitalize transition-colors duration-200 ${selected ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
+          {getFullName(staff)}
+        </p>
+        <p className="text-[11px] text-muted-foreground truncate capitalize mt-0.5">
+          {staff.title || "Staff Member"}
+        </p>
+      </div>
+      <div
+        className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200
+          ${selected ? "bg-primary border-primary" : "border-border/60 group-hover:border-primary/40"}`}
+      >
+        <AnimatePresence>
+          {selected && (
+            <motion.svg
+              key="check"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              viewBox="0 0 12 9"
+              className="w-3 h-3 fill-none stroke-primary-foreground stroke-2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="1 4.5 4.5 8 11 1" />
+            </motion.svg>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.button>
+  );
+}
+
 export default function AssignStaffDialog({
   open,
   onClose,
@@ -58,7 +150,8 @@ export default function AssignStaffDialog({
     defaultValues: { staff_ids: [] },
   });
 
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, setValue, control } = methods;
+  const selectedIds = useWatch({ control, name: "staff_ids" }) ?? [];
 
   const { data: allStaff } = useAppSelector((state: RootState) => state.staff);
   const { data: allServices } = useAppSelector((state: RootState) => state.service);
@@ -115,26 +208,22 @@ export default function AssignStaffDialog({
 
   useEffect(() => {
     if (!allStaff.length) return;
-
-    reset({
-      staff_ids: Array.from(assignedStaffMap.keys()),
-    });
+    reset({ staff_ids: Array.from(assignedStaffMap.keys()) });
   }, [assignedStaffMap, allStaff, reset]);
 
-  const staffOptions = useMemo(() => {
-    return allStaff.map((staff: Staff) => {
-      const firstName = staff.first_name ? staff.first_name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "";
-      const lastName = staff.last_name ? staff.last_name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "";
-      return {
-        label: `${firstName} ${lastName}`.trim(),
-        value: staff.uuid,
-      };
-    });
-  }, [allStaff]);
+  const toggleStaff = (uuid: string) => {
+    const current = selectedIds;
+    if (current.includes(uuid)) {
+      setValue("staff_ids", current.filter((id) => id !== uuid), { shouldDirty: true });
+    } else {
+      setValue("staff_ids", [...current, uuid], { shouldDirty: true });
+    }
+  };
+
+  const selectedCount = selectedIds.length;
 
   const onSubmit = async (values: FormValues) => {
     setSaving(true);
-
     try {
       const selectedStaffUuids = values.staff_ids;
 
@@ -185,7 +274,6 @@ export default function AssignStaffDialog({
       if (toAssign.length > 0) {
         await assignStaffToService({ staff_services: toAssign });
       }
-
       if (toUnassign.length > 0) {
         await unassignStaffFromService({ staff_services: toUnassign, cascade: true });
       }
@@ -205,74 +293,108 @@ export default function AssignStaffDialog({
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          if (saving) return;
-          onClose();
-        }
+        if (!isOpen && !saving) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-[450px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
-        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
-          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
-            Assign Staff
-          </DialogTitle>
+      <DialogContent className="sm:max-w-[480px] p-0 gap-0 overflow-hidden border border-border/60 shadow-2xl rounded-2xl">
+        <DialogHeader className="px-6 py-5 border-b border-border/60 bg-muted/20 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Users className="w-4.5 h-4.5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-base font-bold tracking-tight text-foreground flex flex-row gap-2">
+                Assign Staff
+                {!loading && allStaff.length > 0 && (
+                  <div className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-colors duration-200 ${selectedCount > 0 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    {selectedCount} / {allStaff.length}
+                  </div>
+                )}
+              </DialogTitle>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Select who can perform this service
+              </p>
+            </div>
+          </div>
         </DialogHeader>
 
         <FormProvider {...methods}>
-          <div className="flex flex-col py-5 px-6 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar min-h-[200px]">
+          <div className="flex flex-col min-h-0" style={{ maxHeight: "calc(100vh - 240px)" }}>
             {loading ? (
-              <div className="flex justify-center items-center py-12 flex-1">
-                <Loader2 className="h-8 w-8 animate-spin text-primary/60" />
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <Loader2 className="h-7 w-7 animate-spin text-primary/50" />
+                <p className="text-sm text-muted-foreground">Loading staff…</p>
               </div>
             ) : allStaff.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+              <div className="flex flex-col items-center justify-center py-14 px-6 text-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-muted-foreground/40" />
+                </div>
                 <div className="space-y-1">
-                  <p className="text-base font-semibold text-foreground">No staff members found</p>
-                  <p className="text-xs text-muted-foreground max-w-[280px] leading-relaxed">
-                    You haven't added any staff members yet. Add staff to assign them to this service.
+                  <p className="text-sm font-semibold text-foreground">No staff members found</p>
+                  <p className="text-xs text-muted-foreground max-w-[260px] leading-relaxed">
+                    Add staff members first, then assign them to services.
                   </p>
                 </div>
               </div>
             ) : (
-              <form id="assign-staff-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                <p className="text-sm text-muted-foreground">
-                  Select staff members to assign to this service:
-                </p>
-
-                <div className="mt-2 border border-border/50 rounded-2xl p-4 bg-muted/5 max-h-[300px] overflow-y-auto custom-scrollbar">
-                  <CheckboxGroup
-                    name="staff_ids"
-                    control={methods.control}
-                    identifier="assign-staff"
-                    options={staffOptions}
-                    optionGap={2}
-                  />
+              <form
+                id="assign-staff-form"
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex-1 overflow-y-auto"
+              >
+                <div className="px-4 py-3 space-y-2">
+                  {allStaff.map((staff) => (
+                    <StaffRow
+                      key={staff.uuid}
+                      staff={staff}
+                      selected={selectedIds.includes(staff.uuid)}
+                      onToggle={() => toggleStaff(staff.uuid)}
+                    />
+                  ))}
                 </div>
               </form>
             )}
           </div>
 
-          <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={saving}
-              className="rounded-full px-6"
-            >
-              Cancel
-            </Button>
-            {allStaff.length > 0 && (
+          <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 shrink-0 gap-3 sm:gap-3 flex-row justify-between items-center">
+            <p className="text-xs text-muted-foreground hidden sm:block">
+              {selectedCount === 0
+                ? "No staff selected"
+                : `${selectedCount} staff member${selectedCount !== 1 ? "s" : ""} selected`}
+            </p>
+
+            <div className="flex items-center gap-3 ml-auto">
               <Button
-                type="submit"
-                form="assign-staff-form"
-                disabled={saving || loading}
-                className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={saving}
+                className="rounded-full px-6"
               >
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save
+                Cancel
               </Button>
-            )}
+              {allStaff.length > 0 && (
+                <Button
+                  type="submit"
+                  form="assign-staff-form"
+                  disabled={saving || loading}
+                  className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving…
+                    </>
+                  ) : (
+                    <>
+                      <UserCheck className="mr-1.5 h-4 w-4" />
+                      Save
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </DialogFooter>
         </FormProvider>
       </DialogContent>

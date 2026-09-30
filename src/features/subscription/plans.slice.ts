@@ -9,7 +9,6 @@ export interface BackendPlan {
   formatted_price: string;
   currency: string;
   billing_cycle: string;
-  badge?: string;
   description: string;
 }
 

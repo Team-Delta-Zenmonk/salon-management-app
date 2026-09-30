@@ -11,4 +11,5 @@ export type CustomSelectProps<T extends FieldValues> = {
   disabled?: boolean;
   rules?: any;
   triggerClassName?: string;
+  onChange?: (value: string | null) => void;
 };

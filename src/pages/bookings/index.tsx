@@ -32,7 +32,7 @@ export default function BookingPage() {
   const dispatch = useAppDispatch();
   const { data: staff } = useAppSelector((state) => state.staff);
   const { data: services } = useAppSelector((state) => state.service);
-  const { data: bookings, total, page, limit, loading } = useAppSelector((state) => state.booking);
+  const { data: bookings, total, page, limit, loading, updatingBookingUuid } = useAppSelector((state) => state.booking);
 
   const [viewMode, setViewMode] = useState<"calendar" | "table">("calendar");
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -66,6 +66,10 @@ export default function BookingPage() {
     dispatch(listStaffAction({ page: 1, limit: 100 }));
     dispatch(listServicesAction({ page: 1, limit: 100 }));
   }, [dispatch]);
+
+  useEffect(() => {
+    setStatePage(1);
+  }, [startDateStr, endDateStr, selectedPayment, selectedStaff, selectedService, viewMode]);
 
   useEffect(() => {
     dispatch(
@@ -192,12 +196,12 @@ export default function BookingPage() {
   }, [mappedBookings, receiptBooking]);
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden pb-16 min-w-0">
+    <div className="w-full max-w-full overflow-x-hidden min-w-0">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 sm:pb-6 shrink-0 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-2.5 sm:pb-6 shrink-0 gap-4"
       >
         <div className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Bookings</h1>
@@ -206,7 +210,6 @@ export default function BookingPage() {
           </p>
         </div>
         <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end shrink-0">
-          {/* Mobile filter button */}
           <div className="block sm:hidden">
             <BookingFilterDialog
               control={control}
@@ -224,9 +227,8 @@ export default function BookingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="pb-5 shrink-0 flex flex-wrap items-center justify-start gap-3 sm:gap-4"
+        className="xl:pb-5 shrink-0 flex flex-wrap items-center justify-start gap-3 sm:gap-4"
       >
-        {/* Desktop & Tablet inline selects */}
         <div className="hidden sm:flex flex-wrap items-center gap-3">
           <div className="w-[175px] min-w-[150px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/50 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
             <Select
@@ -325,22 +327,25 @@ export default function BookingPage() {
             updateBookingStatus={(uuid, status) => dispatch(updateBookingAction({ uuid, body: { status } }))}
             getStatusColor={getStatusColor}
             onEventClick={handleEventClick}
+            updatingBookingUuid={updatingBookingUuid}
           />
         ) : (
           <BookingTable
             bookings={filteredBookings}
             onViewReceipt={(b) => setReceiptBooking(b)}
-            total={total}
-            page={statePage}
-            limit={limit}
-            onPageChange={(p) => setStatePage(p)}
+            hasMore={bookings.length < total}
+            fetchMoreBookings={() => {
+              if (!loading && bookings.length < total) {
+                setStatePage((prev) => prev + 1);
+              }
+            }}
             loading={loading}
+            updatingBookingUuid={updatingBookingUuid}
           />
         )}
       </motion.div>
 
-      {/* Explicit bottom spacer element */}
-      <div className="h-16 sm:h-20 w-full shrink-0" />
+      <div className="h-8 w-full shrink-0" />
 
       <BookingDetailsDialog
         open={isDrawerOpen}

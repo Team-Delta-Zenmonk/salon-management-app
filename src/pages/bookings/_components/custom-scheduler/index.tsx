@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays } from "date-fns";
+import {
+  format,
+  addMonths, subMonths,
+  addWeeks, subWeeks, startOfWeek, endOfWeek,
+  addDays, subDays,
+} from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +22,7 @@ interface CustomSchedulerProps {
   onEventClick: (booking: Booking) => void;
   currentDate?: Date;
   onDateChange?: (date: Date) => void;
+  updatingBookingUuid?: string | null;
 }
 
 type ViewType = "month" | "week" | "day";
@@ -27,6 +33,7 @@ export default function CustomScheduler({
   onEventClick,
   currentDate: controlledDate,
   onDateChange,
+  updatingBookingUuid,
 }: Readonly<CustomSchedulerProps>) {
   const [internalDate, setInternalDate] = useState(new Date());
   const currentDate = controlledDate ?? internalDate;
@@ -76,9 +83,25 @@ export default function CustomScheduler({
             <div className="flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-primary/10 text-primary shrink-0">
               <CalendarIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </div>
-            <h2 className="text-sm sm:text-lg md:text-xl text-foreground flex items-baseline gap-1 min-w-0">
-              <EllipsisCell value={format(currentDate, "MMMM")} className="font-bold text-foreground min-w-0 flex-1" />
-              <span className="font-medium text-muted-foreground text-xs sm:text-base shrink-0">{format(currentDate, "yyyy")}</span>
+            <h2 className="text-sm sm:text-base md:text-lg text-foreground flex items-baseline gap-1.5 min-w-0">
+              {view === "month" && (
+                <>
+                  <EllipsisCell value={format(currentDate, "MMMM")} className="font-bold text-foreground min-w-0 flex-1" />
+                  <span className="font-medium text-muted-foreground text-xs sm:text-base shrink-0">{format(currentDate, "yyyy")}</span>
+                </>
+              )}
+              {view === "week" && (
+                <EllipsisCell
+                  value={`${format(startOfWeek(currentDate), "MMM d")} – ${format(endOfWeek(currentDate), "MMM d, yyyy")}`}
+                  className="font-bold text-foreground min-w-0 flex-1"
+                />
+              )}
+              {view === "day" && (
+                <>
+                  <EllipsisCell value={format(currentDate, "EEEE, MMMM d")} className="font-bold text-foreground min-w-0 flex-1" />
+                  <span className="font-medium text-muted-foreground text-xs sm:text-base shrink-0">{format(currentDate, "yyyy")}</span>
+                </>
+              )}
             </h2>
           </div>
 
@@ -138,7 +161,7 @@ export default function CustomScheduler({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden relative bg-card min-h-[450px]">
+      <div className="flex-1 relative bg-card min-h-[450px]">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={`${view}-${currentDate.getTime()}`}
@@ -151,7 +174,7 @@ export default function CustomScheduler({
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 },
             }}
-            className="absolute inset-0"
+            className={view === "day" ? "w-full h-full flex flex-col xl:absolute xl:inset-0" : "absolute inset-0"}
           >
             {view === "month" && (
               <MonthView
@@ -159,6 +182,7 @@ export default function CustomScheduler({
                 bookings={bookings}
                 getStatusColor={getStatusColor}
                 onEventClick={onEventClick}
+                updatingBookingUuid={updatingBookingUuid}
               />
             )}
             {view === "week" && (
@@ -167,6 +191,7 @@ export default function CustomScheduler({
                 bookings={bookings}
                 getStatusColor={getStatusColor}
                 onEventClick={onEventClick}
+                updatingBookingUuid={updatingBookingUuid}
               />
             )}
             {view === "day" && (
@@ -175,6 +200,7 @@ export default function CustomScheduler({
                 bookings={bookings}
                 getStatusColor={getStatusColor}
                 onEventClick={onEventClick}
+                updatingBookingUuid={updatingBookingUuid}
               />
             )}
           </motion.div>

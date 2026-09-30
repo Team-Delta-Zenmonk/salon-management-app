@@ -169,7 +169,7 @@ export default function ListServices({
         scrollableTarget="servicesScrollableDiv"
         endMessage={
           filteredServices.length > 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm flex items-center justify-center gap-2">
+            <div className="text-center pt-8 text-muted-foreground text-sm flex items-center justify-center gap-2">
               <div className="w-12 h-px bg-border/50"></div>
               End of services
               <div className="w-12 h-px bg-border/50"></div>
@@ -178,7 +178,7 @@ export default function ListServices({
         }
       >
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
           initial="hidden"
           animate="show"
           variants={{

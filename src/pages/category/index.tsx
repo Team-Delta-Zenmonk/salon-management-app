@@ -9,7 +9,7 @@ export default function Categories() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden pb-16 min-w-0">
+    <div className="w-full max-w-full overflow-x-hidden min-w-0">
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

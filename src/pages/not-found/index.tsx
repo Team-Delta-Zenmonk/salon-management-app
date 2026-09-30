@@ -17,7 +17,6 @@ export const NotFoundPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 sm:p-6 antialiased font-sans">
       <div className="w-full max-w-lg text-center space-y-6">
-        {/* Salon Management Branding */}
         <div className="flex items-center justify-center gap-2 mb-2">
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
             <Scissors className="text-primary-foreground w-5 h-5" />
@@ -26,8 +25,6 @@ export const NotFoundPage: React.FC = () => {
             Salon Management
           </span>
         </div>
-
-        {/* 404 Main Card */}
         <div className="rounded-2xl border border-border bg-card p-8 shadow-sm relative overflow-hidden">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary mb-6 shadow-xs">
             <SearchX className="h-10 w-10" />
@@ -65,7 +62,6 @@ export const NotFoundPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               variant="outline"

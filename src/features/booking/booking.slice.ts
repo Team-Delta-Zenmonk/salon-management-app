@@ -63,6 +63,7 @@ export interface BookingState {
   page: number;
   limit: number;
   loading: boolean;
+  updatingBookingUuid: string | null;
 }
 
 const initialState: BookingState = {
@@ -71,6 +72,7 @@ const initialState: BookingState = {
   page: 1,
   limit: 12,
   loading: false,
+  updatingBookingUuid: null,
 };
 
 export const bookingSlice = createSlice({
@@ -83,6 +85,7 @@ export const bookingSlice = createSlice({
       state.page = 1;
       state.limit = 12;
       state.loading = false;
+      state.updatingBookingUuid = null;
     },
   },
   extraReducers: (builder) => {
@@ -90,16 +93,24 @@ export const bookingSlice = createSlice({
       state.loading = true;
     });
     builder.addCase(listBookingsAction.fulfilled, (state, action) => {
-      if (Array.isArray(action.payload)) {
-        state.data = action.payload;
-      } else if (action.payload && action.payload.data) {
-        const { data, pagination } = action.payload;
-        state.data = data;
-        if (pagination) {
-          state.total = pagination.total || 0;
-          state.page = pagination.page || 1;
-          state.limit = pagination.limit || 12;
-        }
+      const isArray = Array.isArray(action.payload);
+      const fetchedData = isArray ? action.payload : action.payload?.data || [];
+      const pagination = isArray ? null : action.payload?.pagination;
+
+      const newPage = pagination?.page || action.meta.arg.page || 1;
+
+      if (newPage > 1) {
+        const existingUuids = new Set(state.data.map((b) => b.uuid));
+        const newItems = fetchedData.filter((b: Booking) => !existingUuids.has(b.uuid));
+        state.data = [...state.data, ...newItems];
+      } else {
+        state.data = fetchedData;
+      }
+
+      if (pagination) {
+        state.total = pagination.total || 0;
+        state.page = pagination.page || 1;
+        state.limit = pagination.limit || 12;
       }
       state.loading = false;
     });
@@ -118,12 +129,19 @@ export const bookingSlice = createSlice({
       }
     });
 
+    builder.addCase(updateBookingAction.pending, (state, action) => {
+      state.updatingBookingUuid = action.meta.arg.uuid;
+    });
     builder.addCase(updateBookingAction.fulfilled, (state, action) => {
+      state.updatingBookingUuid = null;
       const updated = action.payload.data || action.payload;
       const index = state.data.findIndex((b) => b.uuid === updated.uuid);
       if (index !== -1) {
         state.data[index] = updated;
       }
+    });
+    builder.addCase(updateBookingAction.rejected, (state) => {
+      state.updatingBookingUuid = null;
     });
 
     builder.addCase(deleteBookingAction.fulfilled, (state, action) => {

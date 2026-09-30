@@ -14,6 +14,7 @@ interface BookingServiceRowProps {
   showRemoveButton: boolean;
   onRemove: () => void;
   watchedServiceId?: string | number;
+  onServiceChange?: () => void;
 }
 
 const formatPrice = (price: number) => `₹${Math.round(price).toLocaleString("en-IN")}`;
@@ -28,6 +29,7 @@ export default function BookingServiceRow({
   showRemoveButton,
   onRemove,
   watchedServiceId,
+  onServiceChange,
 }: Readonly<BookingServiceRowProps>) {
   return (
     <div className="rounded-xl border border-border/50 p-3.5 sm:p-4 relative bg-muted/5 transition-colors hover:bg-muted/10">
@@ -40,6 +42,7 @@ export default function BookingServiceRow({
             options={serviceOptions}
             translate={false}
             control={control as any}
+            onChange={onServiceChange}
           />
         </div>
 

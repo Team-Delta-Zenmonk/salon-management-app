@@ -134,8 +134,6 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Confirm Logout Dialog */}
           <Dialog open={showLogoutDialog} onOpenChange={(open) => !isLoggingOut && setShowLogoutDialog(open)}>
             <DialogContent className="sm:max-w-[400px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
               <DialogHeader className="px-6 py-5 border-b bg-muted/20">

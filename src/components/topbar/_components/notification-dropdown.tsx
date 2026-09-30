@@ -67,7 +67,6 @@ export const NotificationDropdown: React.FC = () => {
         sideOffset={8}
         className="w-[360px] sm:w-[410px] p-0 overflow-hidden rounded-xl border border-border shadow-2xl bg-popover z-50 text-foreground"
       >
-        {/* Header matching image 1 */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50 bg-muted/15">
           <div className="flex items-center gap-2">
             <h4 className="font-bold text-base tracking-tight text-foreground">

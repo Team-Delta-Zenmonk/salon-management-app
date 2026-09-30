@@ -185,7 +185,6 @@ const TimePicker = <T extends FieldValues>({
 
                     return (
                       <div className="flex items-center gap-4 select-none">
-                        {/* Hours Wheel Spinner */}
                         <div className="flex flex-col items-center">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground pb-1.5">
                             Hour
@@ -215,8 +214,6 @@ const TimePicker = <T extends FieldValues>({
                         </div>
 
                         <span className="text-xl font-bold text-muted-foreground pt-4">:</span>
-
-                        {/* Minutes Wheel Spinner */}
                         <div className="flex flex-col items-center">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground pb-1.5">
                             Minute
@@ -244,8 +241,6 @@ const TimePicker = <T extends FieldValues>({
                             </button>
                           </div>
                         </div>
-
-                        {/* AM / PM Toggle */}
                         <div className="flex flex-col items-center pt-5 gap-1.5">
                           {(["AM", "PM"] as const).map((period) => (
                             <button

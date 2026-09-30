@@ -323,7 +323,7 @@ export default function ListStaff({
         }
         endMessage={
           staffs.length > 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm flex items-center justify-center gap-2">
+            <div className="text-center pt-8 text-muted-foreground text-sm flex items-center justify-center gap-2">
               <div className="w-12 h-px bg-border/50"></div>
               End of list
               <div className="w-12 h-px bg-border/50"></div>
@@ -332,7 +332,7 @@ export default function ListStaff({
         }
       >
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6 pb-20 p-1"
+          className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6 p-1"
           initial="hidden"
           animate="show"
           variants={{

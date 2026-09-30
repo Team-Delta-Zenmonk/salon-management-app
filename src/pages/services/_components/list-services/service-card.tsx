@@ -101,7 +101,6 @@ export function ServiceCard({
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
       <div>
-        {/* Top Header: Avatar + Title & Description */}
         <div className="flex items-start gap-3.5 relative z-10 w-full">
           <div className="relative shrink-0 mt-0.5">
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -137,7 +136,6 @@ export function ServiceCard({
           </div>
         </div>
 
-        {/* Action Row & Badges (New Line) */}
         <div className="flex flex-wrap items-center justify-between gap-2.5 mt-4 pt-3 border-t border-border/30 relative z-10">
           <div className="flex flex-wrap gap-1.5 items-center">
             <Badge
