@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { BOOKING_STATUS } from "@/common/enums/booking-status.enum";
 import type { Booking, BookingStatus } from "../../../../types/booking.type";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import EllipsisCell from "@/components/ellipse-cell";
 
 interface DayViewProps {
   currentDate: Date;
@@ -69,17 +69,15 @@ function BookingCard({
     <button
       type="button"
       onClick={() => onEventClick(booking)}
-      className={`w-full text-left flex flex-col gap-1.5 p-3 rounded-xl bg-card border border-border/40 hover:shadow-md hover:border-border/60 transition-all group ${
-        isCancelled ? "opacity-60" : ""
-      }`}
+      className={`w-full text-left flex flex-col gap-1.5 p-3 rounded-xl bg-card border border-border/40 hover:shadow-md hover:border-border/60 transition-all group ${isCancelled ? "opacity-60" : ""
+        }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
           <span
-            className={`text-xs font-bold text-foreground capitalize truncate ${
-              isCancelled ? "line-through" : ""
-            }`}
+            className={`text-xs font-bold text-foreground capitalize truncate ${isCancelled ? "line-through" : ""
+              }`}
           >
             {booking.customer_name}
           </span>
@@ -104,21 +102,21 @@ function BookingCard({
       {booking.service_name && booking.service_name !== "Unknown Service" && (
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Scissors className="w-3 h-3 shrink-0" />
-          <span className="text-[11px] truncate capitalize">{booking.service_name}</span>
+          <EllipsisCell value={booking.service_name} maxChars={20} className="text-[11px] capitalize" />
         </div>
       )}
 
       {booking.staff_name && booking.staff_name !== "Unknown" && (
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <User className="w-3 h-3 shrink-0" />
-          <span className="text-[11px] truncate capitalize">{booking.staff_name}</span>
+          <EllipsisCell value={booking.staff_name} maxChars={20} className="text-[11px] capitalize" />
         </div>
       )}
 
       {booking.total_price != null && (
         <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-border/30">
           <span className="text-[10px] text-muted-foreground">Total</span>
-          <span className="text-xs font-bold text-foreground">₹{booking.total_price}</span>
+          <EllipsisCell value={`₹${booking.total_price}`} maxChars={20} className="text-xs font-bold text-foreground" />
         </div>
       )}
     </button>
@@ -172,13 +170,11 @@ export default function DayView({
           return (
             <div
               key={col.id}
-              className={`flex flex-col shrink-0 sm:shrink sm:flex-1 min-h-0 overflow-hidden ${
-                hasBookings ? "h-[250px] sm:h-auto" : "h-auto"
-              } ${
-                idx < COLUMNS.length - 1
+              className={`flex flex-col shrink-0 sm:shrink sm:flex-1 min-h-0 overflow-hidden ${hasBookings ? "h-[250px] sm:h-auto" : "h-auto"
+                } ${idx < COLUMNS.length - 1
                   ? "border-b sm:border-b-0 sm:border-r border-border/30"
                   : ""
-              }`}
+                }`}
             >
               <div
                 className={`flex items-center gap-2 px-3 py-2.5 border-b border-border/30 ${col.headerBg} shrink-0`}

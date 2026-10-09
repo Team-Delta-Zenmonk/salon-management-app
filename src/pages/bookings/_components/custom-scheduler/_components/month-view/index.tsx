@@ -13,7 +13,7 @@ import { CalendarX2, Clock, User, X, ChevronDown } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BOOKING_STATUS } from "@/common/enums/booking-status.enum";
 import type { Booking, BookingStatus } from "../../../../types/booking.type";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import EllipsisCell from "@/components/ellipse-cell";
 
 interface MonthViewProps {
   currentDate: Date;
@@ -83,9 +83,8 @@ export default function MonthView({
         {WEEKDAYS.map((d, i) => (
           <div
             key={d}
-            className={`py-2 text-center text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider ${
-              i === 0 || i === 6 ? "text-muted-foreground/60" : "text-muted-foreground"
-            }`}
+            className={`py-2 text-center text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider ${i === 0 || i === 6 ? "text-muted-foreground/60" : "text-muted-foreground"
+              }`}
           >
             <span className="sm:hidden">{d.slice(0, 2)}</span>
             <span className="hidden sm:inline">{d}</span>
@@ -100,9 +99,8 @@ export default function MonthView({
         {weeks.map((week, wi) => (
           <div
             key={wi}
-            className={`grid grid-cols-7 min-h-0 ${
-              wi < weeks.length - 1 ? "border-b border-border/40" : ""
-            }`}
+            className={`grid grid-cols-7 min-h-0 ${wi < weeks.length - 1 ? "border-b border-border/40" : ""
+              }`}
           >
             {week.map((day, di) => {
               const inMonth = isSameMonth(day, currentDate);
@@ -127,10 +125,9 @@ export default function MonthView({
                     relative flex flex-col justify-between min-h-0 overflow-hidden
                     p-1 sm:p-2 cursor-pointer transition-colors select-none
                     border-r border-border/40 last:border-r-0
-                    ${
-                      !inMonth
-                        ? "bg-muted/20 opacity-40"
-                        : isWeekend
+                    ${!inMonth
+                      ? "bg-muted/20 opacity-40"
+                      : isWeekend
                         ? "bg-muted/10"
                         : "bg-card hover:bg-muted/20"
                     }
@@ -143,10 +140,9 @@ export default function MonthView({
                         inline-flex items-center justify-center
                         w-5 h-5 sm:w-6 sm:h-6 rounded-full shrink-0
                         text-[10px] sm:text-xs font-bold transition-colors
-                        ${
-                          isToday
-                            ? "bg-primary text-primary-foreground shadow-sm font-extrabold"
-                            : inMonth
+                        ${isToday
+                          ? "bg-primary text-primary-foreground shadow-sm font-extrabold"
+                          : inMonth
                             ? "text-foreground"
                             : "text-muted-foreground"
                         }
@@ -241,8 +237,8 @@ export default function MonthView({
                     const isCancelled = b.status === BOOKING_STATUS.CANCELLED;
                     const duration = b.end_time
                       ? Math.round(
-                          (new Date(b.end_time).getTime() - new Date(b.start_time).getTime()) / 60000
-                        )
+                        (new Date(b.end_time).getTime() - new Date(b.start_time).getTime()) / 60000
+                      )
                       : null;
 
                     return (
@@ -259,9 +255,8 @@ export default function MonthView({
                         <div className="flex flex-col items-center shrink-0 gap-0.5 min-w-[36px]">
                           <Clock className="w-3.5 h-3.5 opacity-80" />
                           <span
-                            className={`text-xs font-bold tabular-nums leading-tight ${
-                              isCancelled ? "line-through opacity-70" : ""
-                            }`}
+                            className={`text-xs font-bold tabular-nums leading-tight ${isCancelled ? "line-through opacity-70" : ""
+                              }`}
                           >
                             {format(new Date(b.start_time), "h:mm a")}
                           </span>
@@ -272,22 +267,17 @@ export default function MonthView({
 
                         <div className="flex-1 min-w-0">
                           <div
-                            className={`text-xs sm:text-sm font-bold flex items-center gap-1.5 ${
-                              isCancelled ? "line-through opacity-70" : ""
-                            }`}
+                            className={`text-xs sm:text-sm font-bold flex items-center gap-1.5 ${isCancelled ? "line-through opacity-70" : ""
+                              }`}
                           >
                             <User className="w-3.5 h-3.5 shrink-0 opacity-80" />
-                            <span className="truncate capitalize">{b.customer_name}</span>
+                            <EllipsisCell value={b.customer_name} maxChars={20} />
                           </div>
                           {b.service_name && (
-                            <span className="text-xs opacity-80 block truncate capitalize mt-0.5">
-                              {b.service_name}
-                            </span>
+                            <EllipsisCell value={b.service_name} maxChars={20} className="text-xs opacity-80 block capitalize mt-0.5" />
                           )}
                           {b.staff_name && b.staff_name !== "Unknown" && (
-                            <span className="text-[11px] opacity-70 block truncate capitalize">
-                              {b.staff_name}
-                            </span>
+                            <EllipsisCell value={b.service_name} maxChars={20} className="text-[11px] opacity-70 block capitalize" />
                           )}
                         </div>
 

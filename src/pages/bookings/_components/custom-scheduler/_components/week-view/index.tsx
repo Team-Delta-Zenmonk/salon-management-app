@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Clock, CalendarX2 } from "lucide-react";
 import { BOOKING_STATUS } from "@/common/enums/booking-status.enum";
 import type { Booking, BookingStatus } from "../../../../types/booking.type";
 import BookingListModal from "../booking-list-modal";
+import EllipsisCell from "@/components/ellipse-cell";
 
 interface WeekViewProps {
   currentDate: Date;
@@ -78,19 +79,17 @@ export default function WeekView({
                 key={day.toString()}
                 type="button"
                 onClick={() => setActiveDayIndex(i)}
-                className={`flex flex-col items-center px-2.5 py-1.5 rounded-lg shrink-0 text-xs transition-all ${
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow"
-                    : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
-                }`}
+                className={`flex flex-col items-center px-2.5 py-1.5 rounded-lg shrink-0 text-xs transition-all ${isActive
+                  ? "bg-primary text-primary-foreground shadow"
+                  : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                  }`}
               >
                 <span className="font-bold text-[10px] uppercase tracking-wide">{format(day, "EEE")}</span>
                 <span className="font-black text-sm">{format(day, "d")}</span>
                 {count > 0 ? (
                   <span
-                    className={`text-[9px] font-extrabold px-1 rounded-full leading-tight ${
-                      isActive ? "bg-white/25 text-white" : "bg-primary/20 text-primary"
-                    }`}
+                    className={`text-[9px] font-extrabold px-1 rounded-full leading-tight ${isActive ? "bg-white/25 text-white" : "bg-primary/20 text-primary"
+                      }`}
                   >
                     {count}
                   </span>
@@ -130,30 +129,18 @@ export default function WeekView({
                       <div className="flex flex-col items-center shrink-0 gap-0.5 min-w-[40px]">
                         <Clock className="w-3.5 h-3.5 opacity-70" />
                         <span
-                          className={`text-xs font-bold tabular-nums ${
-                            isCancelled ? "line-through opacity-70" : ""
-                          }`}
+                          className={`text-xs font-bold tabular-nums ${isCancelled ? "line-through opacity-70" : ""
+                            }`}
                         >
                           {format(new Date(b.start_time), "h:mm a")}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span
-                          className={`text-xs font-bold capitalize block truncate ${
-                            isCancelled ? "line-through opacity-70" : ""
-                          }`}
-                        >
-                          {b.customer_name}
-                        </span>
-                        {b.service_name && (
-                          <span className="text-[11px] opacity-80 truncate block capitalize">
-                            {b.service_name}
-                          </span>
+                        <EllipsisCell value={b.customer_name} maxChars={20} className={`text-xs font-bold capitalize block ${isCancelled ? "line-through opacity-70" : ""}`} />
+                        {b.service_name && (<EllipsisCell value={b.service_name} maxChars={20} className="text-[11px] opacity-80 block capitalize" />
                         )}
                         {b.staff_name && b.staff_name !== "Unknown" && (
-                          <span className="text-[10px] opacity-65 truncate block capitalize">
-                            {b.staff_name}
-                          </span>
+                          <EllipsisCell value={b.staff_name} maxChars={20} className="text-[10px] opacity-65 block capitalize" />
                         )}
                       </div>
                       <div className="shrink-0 flex flex-col items-end gap-1">
@@ -186,18 +173,16 @@ export default function WeekView({
                   className="py-2.5 text-center border-r border-border/30 last:border-r-0"
                 >
                   <p
-                    className={`text-[10px] font-semibold uppercase tracking-wider ${
-                      isToday ? "text-primary" : "text-muted-foreground"
-                    }`}
+                    className={`text-[10px] font-semibold uppercase tracking-wider ${isToday ? "text-primary" : "text-muted-foreground"
+                      }`}
                   >
                     {format(day, "EEE")}
                   </p>
                   <span
-                    className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold mt-0.5 ${
-                      isToday
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-foreground"
-                    }`}
+                    className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold mt-0.5 ${isToday
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-foreground"
+                      }`}
                   >
                     {format(day, "d")}
                   </span>
@@ -214,9 +199,8 @@ export default function WeekView({
               return (
                 <div
                   key={day.toString()}
-                  className={`border-r border-border/25 last:border-r-0 p-2 flex flex-col gap-1.5 min-h-[300px] ${
-                    isToday ? "bg-primary/[0.03]" : ""
-                  }`}
+                  className={`border-r border-border/25 last:border-r-0 p-2 flex flex-col gap-1.5 min-h-[300px] ${isToday ? "bg-primary/[0.03]" : ""
+                    }`}
                 >
                   {cellBookings.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full opacity-20 py-10">
@@ -240,9 +224,8 @@ export default function WeekView({
                           >
                             <div className="flex items-center justify-between min-w-0">
                               <span
-                                className={`text-[9px] font-black tabular-nums ${
-                                  isCancelled ? "line-through opacity-70" : ""
-                                }`}
+                                className={`text-[9px] font-black tabular-nums ${isCancelled ? "line-through opacity-70" : ""
+                                  }`}
                               >
                                 {format(new Date(b.start_time), "h:mm a")}
                               </span>
@@ -252,17 +235,10 @@ export default function WeekView({
                                 </span>
                               )}
                             </div>
-                            <span
-                              className={`text-[10px] font-bold truncate leading-tight capitalize ${
-                                isCancelled ? "line-through opacity-60" : ""
-                              }`}
-                            >
-                              {b.customer_name}
-                            </span>
+                            <EllipsisCell value={b.customer_name} maxChars={20} className={`text-[10px] font-bold leading-tight capitalize ${isCancelled ? "line-through opacity-60" : ""
+                              }`} />
                             {b.service_name && (
-                              <span className="text-[9px] opacity-75 truncate block capitalize leading-tight">
-                                {b.service_name}
-                              </span>
+                              <EllipsisCell value={b.service_name} maxChars={20} className="text-[9px] opacity-75 block capitalize leading-tight" />
                             )}
                           </button>
                         );

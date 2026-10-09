@@ -247,6 +247,7 @@ export default function BookingDetailsDialog({
                               <EllipsisCell
                                 value={bs.service?.name || "Unknown Service"}
                                 className="font-semibold text-sm text-foreground leading-tight capitalize"
+                                maxChars={20}
                               />
                             </div>
                             <span className="text-sm font-bold shrink-0 px-2 py-0.5 rounded-lg bg-muted/60 text-foreground border border-border/50">
@@ -256,7 +257,11 @@ export default function BookingDetailsDialog({
                           <div className="flex items-center gap-3 flex-wrap">
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded-md">
                               <UserCheck className="h-3 w-3" />
-                              <span className="capitalize">{`${bs.staff?.first_name || "Unknown"} ${bs.staff?.last_name || ""}`.trim()}</span>
+                              <EllipsisCell
+                                value={`${bs.staff?.first_name || "Unknown"} ${bs.staff?.last_name || ""}`.trim()}
+                                className="capitalize"
+                                maxChars={20}
+                              />
                             </div>
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded-md">
                               <Timer className="h-3 w-3" />
