@@ -25,6 +25,7 @@ import type { Staff } from "../../../../features/staff/staff.slice";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { motion, AnimatePresence } from "framer-motion";
+import { EllipsisCell } from "@/components/ellipse-cell";
 
 dayjs.extend(customParseFormat);
 
@@ -105,10 +106,10 @@ function StaffRow({
       </div>
       <div className="flex-1 min-w-0">
         <p className={`text-sm font-semibold leading-tight truncate capitalize transition-colors duration-200 ${selected ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
-          {getFullName(staff)}
+          <EllipsisCell value={getFullName(staff)} maxLines={1} maxChars={20} />
         </p>
         <p className="text-[11px] text-muted-foreground truncate capitalize mt-0.5">
-          {staff.title || "Staff Member"}
+          <EllipsisCell value={staff.title || "Staff Member"} maxLines={1} maxChars={20} />
         </p>
       </div>
       <div
