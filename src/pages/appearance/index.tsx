@@ -9,6 +9,7 @@ import { Sparkles } from "lucide-react";
 import ThemeColorCard from "./_components/theme-color-card";
 import PreferencesCard from "./_components/preferences-card";
 import LivePreviewPanel from "./_components/live-preview-panel";
+import { StorefrontThemesSection } from "./_components/storefront-themes-section";
 import { UnsavedChangesBanner } from "../../components/unsaved-changes-banner";
 
 const containerVariants: Variants = {
@@ -162,6 +163,8 @@ export default function Appearance() {
             </div>
 
           </div>
+
+          <StorefrontThemesSection />
         </div>
       </div>
 
