@@ -15,6 +15,8 @@ import type { RootState } from "../../../../store/store";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { createServiceService } from "../../../../features/service/create-service/create-service.service";
 import { updateServiceAction } from "../../../../features/service/update-service/update-service.action";
+import { listServiceStaff } from "../../../../features/service/list-staff/list-staff.service";
+import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
 import {
@@ -46,6 +48,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   const [isLoading, setIsLoading] = useState(false);
 
   const categories = useAppSelector((state: RootState) => state.category.data) ?? [];
+  const salonUUID = useAppSelector((state: RootState) => state.auth.salon?.uuid ?? "");
 
   const isCreatingSubService = mode === "create" && Boolean(parentService);
   const isEditingSubService = mode === "update" && Boolean(service?.parent_id);
@@ -103,7 +106,28 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
       const payload = buildPayload(data, logoUrl || undefined);
 
       if (mode === "create") {
-        await createServiceService(payload);
+        const createdService = await createServiceService(payload);
+
+        if (isCreatingSubService && parentService?.uuid && salonUUID) {
+          const parentStaff = await listServiceStaff(parentService.uuid, salonUUID);
+          const staffList = Array.isArray(parentStaff) ? parentStaff : (parentStaff?.data ?? parentStaff?.rows ?? []);
+          const subServiceUuid = createdService?.uuid || createdService?.data?.uuid;
+
+          const staff_services = staffList
+            .map((item: any) => ({
+              service_uuid: subServiceUuid,
+              staff_uuid: item.staff?.uuid || item.staff_uuid,
+              price_type: payload.price_type,
+              price: payload.price,
+              duration: payload.duration,
+            }))
+            .filter((item: any) => item.staff_uuid);
+
+          if (staff_services.length > 0) {
+            await assignStaffToService({ staff_services });
+          }
+        }
+
         callSnack(
           isCreatingSubService ? "Sub-service created successfully" : "Service created successfully",
           "success"
