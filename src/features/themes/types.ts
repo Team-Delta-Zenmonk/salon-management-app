@@ -9,6 +9,7 @@ export interface StorefrontTheme {
   is_purchased: boolean;
   is_current: boolean;
   preview_image?: string;
+  preview_url?: string;
   description?: string;
 }
 

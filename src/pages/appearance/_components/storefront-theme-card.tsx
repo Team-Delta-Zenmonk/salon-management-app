@@ -10,6 +10,8 @@ import {
   Check,
 } from "lucide-react";
 import type { StorefrontTheme } from "@/features/themes/types";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { getStorefrontThemePreviewSrc } from "@/utils/theme-preview";
 
 interface StorefrontThemeCardProps {
   theme: StorefrontTheme;
@@ -32,6 +34,9 @@ export const StorefrontThemeCard: React.FC<StorefrontThemeCardProps> = ({
   const isFree = theme.is_free || priceNumber === 0;
   const formattedPrice = isFree ? "Free" : `₹${priceNumber.toLocaleString("en-IN")}`;
 
+  const isMobile = useMediaQuery("(max-width: 639px)");
+  const previewSrc = getStorefrontThemePreviewSrc(theme, isMobile);
+
   return (
     <div
       className={`group relative flex flex-col rounded-2xl border transition-all duration-300 overflow-hidden bg-card/60 backdrop-blur-sm ${
@@ -40,17 +45,12 @@ export const StorefrontThemeCard: React.FC<StorefrontThemeCardProps> = ({
           : "border-border/70 hover:border-border hover:shadow-md hover:bg-card"
       }`}
     >
-      {/* Visual Thumbnail Area */}
       <div className="relative w-full aspect-[16/10] bg-muted/40 overflow-hidden select-none border-b border-border/50">
-        {theme.preview_image ? (
+        {previewSrc ? (
           <img
-            src={theme.preview_image}
+            src={previewSrc}
             alt={theme.name}
             className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src =
-                "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80";
-            }}
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-muted/60 via-muted/30 to-background/50 p-4 text-center">
