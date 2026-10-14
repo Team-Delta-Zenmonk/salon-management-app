@@ -1,7 +1,7 @@
 const THEME_CODE_TO_FILE: Record<string, string> = {
   crimsonShear: "atelierSolstice.png",
   obsidianFlame: "obsidianFlame.png",
-  softRosePearl: "softRosePearl.png",
+  lightGothic: "lightGothic.png",
 };
 
 export const getStorefrontThemePreviewSrc = (
