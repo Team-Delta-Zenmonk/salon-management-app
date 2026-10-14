@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "../../../components/ui/button";
 import { itemVariants } from "../utils/dashboard.constants";
-import type { RevenueChartPoint } from "../../../features/booking/get-revenue-analytics/get-revenue-analytics.service";
+import type { RevenueChartPoint } from "../utils/dashboard-view.model";
 
 interface CustomTooltipProps {
   active?: boolean;
