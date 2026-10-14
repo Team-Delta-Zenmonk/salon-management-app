@@ -42,7 +42,7 @@ export const ServiceDistribution = ({
         </p>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center min-h-[220px]">
+      <div className="flex-1 flex flex-col justify-start min-h-[220px]">
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (
@@ -123,7 +123,7 @@ export const ServiceDistribution = ({
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center text-center py-6 gap-2">
+          <div className="my-auto flex flex-col items-center justify-center text-center py-6 gap-2">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-1">
               <Scissors className="w-6 h-6" />
             </div>

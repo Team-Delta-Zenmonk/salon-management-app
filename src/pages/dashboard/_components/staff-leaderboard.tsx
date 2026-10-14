@@ -61,7 +61,7 @@ export const StaffLeaderboard = ({
         </p>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center min-h-[220px]">
+      <div className="flex-1 flex flex-col justify-start min-h-[220px]">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
@@ -136,7 +136,7 @@ export const StaffLeaderboard = ({
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center text-center py-6 gap-2">
+          <div className="my-auto flex flex-col items-center justify-center text-center py-6 gap-2">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-1">
               <Users className="w-6 h-6" />
             </div>
