@@ -26,7 +26,7 @@ export const StatsGrid = ({
   const rangeLabel = timeRange === "7d" ? "Last 7 Days" : "Last 30 Days";
 
   const getClientBadge = () => {
-    if (uniqueClients === 0) return { text: undefined, color: undefined };
+    if (uniqueClients === 0) return { text: "No Clients", color: "bg-muted/70 text-muted-foreground border border-border/40" };
     if (walkInClients > 0 && onlineClients === 0) {
       return { text: "Walk-in", color: "bg-primary/10 text-primary border border-primary/20" };
     }
@@ -36,19 +36,7 @@ export const StatsGrid = ({
     return { text: "Online", color: "bg-primary/10 text-primary border border-primary/20" };
   };
 
-  const getClientSubtitle = () => {
-    if (uniqueClients === 0) return "Ready for first client";
-    if (walkInClients > 0 && onlineClients > 0) {
-      return `${walkInClients} walk-in • ${onlineClients} online`;
-    }
-    if (walkInClients > 0 && onlineClients === 0) {
-      return `${walkInClients} walk-in customer${walkInClients !== 1 ? "s" : ""}`;
-    }
-    return `${uniqueClients} customer${uniqueClients !== 1 ? "s" : ""}`;
-  };
-
   const clientBadge = getClientBadge();
-  const clientSubtitle = getClientSubtitle();
 
   const stats = [
     {
@@ -59,21 +47,16 @@ export const StatsGrid = ({
         totalRevenue > 0
           ? "bg-primary/10 text-primary border border-primary/20"
           : "bg-muted/70 text-muted-foreground border border-border/40",
-      subtitle:
-        completedBookings > 0
-          ? `From ${completedBookings} completed appointment${completedBookings !== 1 ? "s" : ""}`
-          : "No completed bookings",
       icon: CreditCard,
     },
     {
       title: `Bookings (${rangeLabel})`,
       value: completedBookings.toString(),
-      badge: undefined,
-      badgeColor: undefined,
-      subtitle:
+      badge: completedBookings > 0 ? "Completed" : "No Bookings",
+      badgeColor:
         completedBookings > 0
-          ? `${completedBookings} completed appointment${completedBookings !== 1 ? "s" : ""}`
-          : "No completed bookings",
+          ? "bg-primary/10 text-primary border border-primary/20"
+          : "bg-muted/70 text-muted-foreground border border-border/40",
       icon: CalendarClock,
     },
     {
@@ -81,7 +64,6 @@ export const StatsGrid = ({
       value: uniqueClients.toString(),
       badge: clientBadge.text,
       badgeColor: clientBadge.color,
-      subtitle: clientSubtitle,
       icon: Users,
     },
     {
@@ -89,7 +71,6 @@ export const StatsGrid = ({
       value: `₹${avgTicketSize.toLocaleString()}`,
       badge: "Per Booking",
       badgeColor: "bg-primary/10 text-primary border border-primary/20",
-      subtitle: completedBookings > 0 ? "Average spent per client" : "Calculated from bookings",
       icon: TrendingUp,
     },
   ];
@@ -109,7 +90,6 @@ export const StatsGrid = ({
             <div className="space-y-2 mt-1">
               <div className="w-24 h-3 rounded bg-muted/60 animate-pulse" />
               <div className="w-20 h-7 rounded bg-muted/60 animate-pulse" />
-              <div className="w-28 h-2.5 rounded bg-muted/40 animate-pulse" />
             </div>
           </div>
         ))}
@@ -145,7 +125,6 @@ export const StatsGrid = ({
             <div className="relative z-10 mt-1 min-w-0">
               <p className="font-semibold text-xs text-muted-foreground/80 mb-0.5 truncate">{stat.title}</p>
               <p className="text-2xl font-bold tracking-tight text-foreground truncate">{stat.value}</p>
-              <p className="text-[11px] text-muted-foreground mt-1 truncate">{stat.subtitle}</p>
             </div>
           </motion.div>
         );
