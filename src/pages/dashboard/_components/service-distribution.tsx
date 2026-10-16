@@ -69,7 +69,7 @@ export const ServiceDistribution = ({
                     </span>
                     <EllipsisCell
                       value={service.name}
-                      className="font-semibold text-foreground group-hover:text-primary transition-colors truncate"
+                      className="font-semibold text-foreground group-hover:text-primary transition-colors capitalize" maxChars={30}
                     />
                   </div>
                   <div className="flex items-center gap-2 shrink-0 text-xs">
@@ -114,7 +114,7 @@ export const ServiceDistribution = ({
                     <Scissors className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <div className="min-w-0 flex flex-col">
-                    <EllipsisCell value={service.name} className="text-xs font-semibold text-foreground truncate" />
+                    <EllipsisCell value={service.name} className="text-xs font-semibold text-foreground capitalize" maxChars={30} />
                     <span className="text-[10px] text-muted-foreground">{service.duration} mins</span>
                   </div>
                 </div>

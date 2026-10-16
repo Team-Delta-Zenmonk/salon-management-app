@@ -57,7 +57,7 @@ export const DashboardHeader = ({
         <p className="text-muted-foreground/80 text-sm flex flex-wrap items-center gap-x-1 gap-y-0.5">
           <span>Welcome back,</span>
           <span className="inline-flex items-center font-medium text-foreground">
-            <EllipsisCell value={salonName || "Owner"} maxChars={20} className="align-middle" />
+            <EllipsisCell value={salonName || "Owner"} maxChars={20} className="align-middle capitalize" />
             <span>!</span>
           </span>
           <span>Here's a quick overview of your salon today.</span>
