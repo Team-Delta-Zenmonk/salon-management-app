@@ -130,7 +130,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
 
       if (mode === "create") {
         await createStaffService(payload);
-        await dispatch(listStaffAction({ page: 1, limit: 1000 }));
+        await dispatch(listStaffAction({ page: 1, limit: 10 }));
         callSnack("Staff created successfully", "success");
       } else {
         await dispatch(updateStaffAction({ uuid: staff!.uuid, body: payload })).unwrap();

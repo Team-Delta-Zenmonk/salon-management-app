@@ -166,7 +166,8 @@ export default function ListServices({
             <Loader2 className="w-8 h-8 animate-spin text-primary/60" />
           </div>
         }
-        scrollableTarget="servicesScrollableDiv"
+        scrollableTarget="main-content-scroll"
+        scrollThreshold={0.8}
         endMessage={
           filteredServices.length > 0 ? (
             <div className="text-center pt-8 text-muted-foreground text-sm flex items-center justify-center gap-2">

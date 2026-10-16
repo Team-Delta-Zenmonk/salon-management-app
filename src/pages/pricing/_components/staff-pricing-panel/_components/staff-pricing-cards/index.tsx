@@ -10,6 +10,7 @@ import { unassignStaffFromService } from "../../../../../../features/staff-servi
 import StaffServicePricingDialog from "../../../staff-service-pricing-dialog";
 import AssignStaffDialog from "../../../../../services/_components/assign-staff-dialog";
 import { Edit2, Trash2, User, UserPlus, Plus, Loader2 } from "lucide-react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { Button } from "../../../../../../components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../../../../../components/ui/avatar";
 import type { Staff } from "../../../../../../features/staff/staff.slice";
@@ -35,6 +36,10 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
 
   const [serviceStaffsMap, setServiceStaffsMap] = useState<Record<string, StaffPricingType[]>>({});
   const [initialLoading, setInitialLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pageMap, setPageMap] = useState<Record<string, number>>({});
+  const [hasMoreMap, setHasMoreMap] = useState<Record<string, boolean>>({});
+  const pageSize = 12;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogContext, setDialogContext] = useState<DialogContext | null>(null);
@@ -48,29 +53,95 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     }
 
     setInitialLoading(true);
-    setServiceStaffsMap({});
+    const initialStaffsMap: Record<string, StaffPricingType[]> = {};
+    const initialPageMap: Record<string, number> = {};
+    const initialHasMoreMap: Record<string, boolean> = {};
 
     await Promise.allSettled(
       servicesToShow.map(async (svc) => {
         try {
-          const res = await listServiceStaff(svc.uuid, salonUUID);
-          const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
-          setServiceStaffsMap((p) => ({ ...p, [svc.uuid]: rows }));
+          const res = await listServiceStaff(svc.uuid, salonUUID, { page: 1, limit: pageSize });
+          const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
+          const total = typeof res?.total === "number" ? res.total : rows.length;
+          initialStaffsMap[svc.uuid] = rows;
+          initialPageMap[svc.uuid] = 1;
+          initialHasMoreMap[svc.uuid] = rows.length === pageSize && rows.length < total;
         } catch {
-          setServiceStaffsMap((p) => ({ ...p, [svc.uuid]: [] }));
+          initialStaffsMap[svc.uuid] = [];
+          initialPageMap[svc.uuid] = 1;
+          initialHasMoreMap[svc.uuid] = false;
         }
       }),
     );
 
+    setServiceStaffsMap(initialStaffsMap);
+    setPageMap(initialPageMap);
+    setHasMoreMap(initialHasMoreMap);
     setInitialLoading(false);
-  }, [servicesToShow, salonUUID]);
+  }, [servicesToShow, salonUUID, pageSize]);
+
+  const hasAnyMore = useMemo(() => {
+    return servicesToShow.some((svc) => hasMoreMap[svc.uuid]);
+  }, [servicesToShow, hasMoreMap]);
+
+  const totalLoadedStaffCount = useMemo(() => {
+    return Object.values(serviceStaffsMap).reduce((acc, list) => acc + (list?.length || 0), 0);
+  }, [serviceStaffsMap]);
+
+  const fetchMoreServiceStaffs = useCallback(async () => {
+    if (loadingMore || !hasAnyMore || !salonUUID) return;
+    try {
+      setLoadingMore(true);
+      const servicesToFetch = servicesToShow.filter((svc) => hasMoreMap[svc.uuid]);
+
+      await Promise.allSettled(
+        servicesToFetch.map(async (svc) => {
+          const currentPage = pageMap[svc.uuid] || 1;
+          const nextPage = currentPage + 1;
+          try {
+            const res = await listServiceStaff(svc.uuid, salonUUID, { page: nextPage, limit: pageSize });
+            const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
+            const total = typeof res?.total === "number" ? res.total : rows.length;
+
+            setServiceStaffsMap((prev) => {
+              const currentList = prev[svc.uuid] || [];
+              const existingUuids = new Set(currentList.map((s) => s.uuid));
+              const newRows = rows.filter((r: StaffPricingType) => !existingUuids.has(r.uuid));
+              return { ...prev, [svc.uuid]: [...currentList, ...newRows] };
+            });
+            setPageMap((prev) => ({ ...prev, [svc.uuid]: nextPage }));
+            setHasMoreMap((prev) => ({
+              ...prev,
+              [svc.uuid]: rows.length === pageSize && ((serviceStaffsMap[svc.uuid]?.length || 0) + rows.length) < total,
+            }));
+          } catch {
+            setHasMoreMap((prev) => ({ ...prev, [svc.uuid]: false }));
+          }
+        }),
+      );
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasAnyMore, salonUUID, servicesToShow, hasMoreMap, pageMap, pageSize, serviceStaffsMap]);
 
   useEffect(() => {
     loadServiceStaffs();
   }, [loadServiceStaffs]);
 
-  const handleOpenEdit = async (staff_uuid: string, service: ServiceType, current?: StaffPricingType) => {
-    const staff = staffs.find((s: Staff) => s.uuid === staff_uuid);
+  useEffect(() => {
+    if (!hasAnyMore || initialLoading || loadingMore) return;
+    const el = document.getElementById("service-staff-panel-scroll");
+    if (!el) return;
+    const timer = setTimeout(() => {
+      if (el.scrollHeight <= el.clientHeight) {
+        fetchMoreServiceStaffs();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [totalLoadedStaffCount, hasAnyMore, initialLoading, loadingMore, fetchMoreServiceStaffs]);
+
+  const handleOpenEdit = async (staff_uuid: string, service: ServiceType, current?: StaffPricingType, fallbackStaff?: Staff) => {
+    const staff = staffs.find((s: Staff) => s.uuid === staff_uuid) || fallbackStaff;
     if (!staff) return;
 
     setDialogContext({
@@ -188,112 +259,129 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
           </Button>
         </div>
       ) : (
-        <div className="flex flex-col gap-8">
-          {servicesToShow.map((service) => {
-            const assignedRows = serviceStaffsMap[service.uuid] ?? [];
-            if (assignedRows.length === 0) return null;
-
-            const assignedStaffs = assignedRows
-              .map((row) => {
-                const staff =
-                  staffs.find((s) => s.id === row.staff_id) || staffs.find((s) => s.uuid === row.staff_uuid);
-                return { staff, staffServiceRow: row };
-              })
-              .filter((item): item is { staff: Staff; staffServiceRow: StaffPricingType } => Boolean(item.staff));
-
-            if (assignedStaffs.length === 0) return null;
-
-            const showHeader = servicesToShow.length > 1 || (selectedService.children?.length ?? 0) > 0;
-
-            return (
-              <div key={service.uuid} className="flex flex-col gap-4">
-                {showHeader && (
-                  <div className="flex items-center gap-3 min-w-0">
-                    <EllipsisCell
-                      value={service.name}
-                      className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize shrink-0 max-w-[300px]"
-                    />
-                    <div className="h-px bg-border/55 flex-1" />
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-                  {assignedStaffs.map(({ staff, staffServiceRow }) => {
-                    const staff_name = `${staff.first_name} ${staff.last_name || ""}`.trim();
-
-                    return (
-                      <div
-                        key={staff.uuid}
-                        className="group relative border border-border/50 rounded-2xl p-4 flex flex-col justify-between bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-                        <div className="flex items-center justify-between w-full min-w-0 gap-3 relative z-10">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <Avatar className="w-10 h-10 sm:w-11 sm:h-11 bg-muted border border-border/50 text-muted-foreground transition-transform duration-200 group-hover:scale-105 shrink-0">
-                              {staff.photos?.url ? (
-                                 <AvatarImage src={staff.photos.url} alt={staff_name} />
-                              ) : (
-                                 <AvatarFallback className="bg-transparent"><User className="h-5 w-5"/></AvatarFallback>
-                              )}
-                            </Avatar>
-                            <EllipsisCell
-                              value={staff_name}
-                              className="font-bold text-sm sm:text-base text-foreground capitalize block min-w-0"
-                            />
-                          </div>
-
-                          <div className="flex items-center gap-1 shrink-0 relative z-10">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleOpenEdit(staff.uuid, service, staffServiceRow)}
-                              className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-purple-500/10 hover:text-purple-600 text-muted-foreground transition-all"
-                              title="Edit Custom Pricing"
-                            >
-                              <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleRemove(service.uuid, staffServiceRow.uuid!)}
-                              className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
-                              title="Unassign Staff"
-                            >
-                              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/40 w-full relative z-10">
-                          <span
-                            className={clsx(
-                              "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold whitespace-nowrap border shrink-0",
-                              staffServiceRow.price_type === "fixed"
-                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10"
-                                : staffServiceRow.price_type === "from"
-                                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/10"
-                                  : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/10",
-                            )}
-                          >
-                            {staffServiceRow.price_type}
-                          </span>
-                          <span className="text-xs sm:text-sm text-foreground/90 font-bold whitespace-nowrap shrink-0">
-                            ₹{staffServiceRow.price ?? "-"}
-                          </span>
-                          <span className="text-xs text-muted-foreground/50 select-none shrink-0">•</span>
-                          <span className="text-xs text-muted-foreground font-semibold whitespace-nowrap shrink-0">
-                            {staffServiceRow.duration ?? "-"} min
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+        <InfiniteScroll
+          dataLength={totalLoadedStaffCount}
+          next={fetchMoreServiceStaffs}
+          hasMore={hasAnyMore}
+          scrollableTarget="service-staff-panel-scroll"
+          scrollThreshold={0.8}
+          loader={
+            loadingMore ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
               </div>
-            );
-          })}
-        </div>
+            ) : null
+          }
+        >
+          <div className="flex flex-col gap-8 pb-4">
+            {servicesToShow.map((service) => {
+              const assignedRows = serviceStaffsMap[service.uuid] ?? [];
+              if (assignedRows.length === 0) return null;
+
+              const assignedStaffs = assignedRows
+                .map((row: any) => {
+                  const staff =
+                    staffs.find((s) => s.id === row.staff_id) ||
+                    staffs.find((s) => s.uuid === row.staff_uuid) ||
+                    row.staff;
+                  return { staff, staffServiceRow: row };
+                })
+                .filter((item): item is { staff: Staff; staffServiceRow: StaffPricingType } => Boolean(item.staff));
+
+              if (assignedStaffs.length === 0) return null;
+
+              const showHeader = servicesToShow.length > 1 || (selectedService.children?.length ?? 0) > 0;
+
+              return (
+                <div key={service.uuid} className="flex flex-col gap-4">
+                  {showHeader && (
+                    <div className="flex items-center gap-3 min-w-0">
+                      <EllipsisCell
+                        value={service.name}
+                        className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize shrink-0 max-w-[300px]"
+                      />
+                      <div className="h-px bg-border/55 flex-1" />
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+                    {assignedStaffs.map(({ staff, staffServiceRow }) => {
+                      const staff_name = `${staff.first_name} ${staff.last_name || ""}`.trim();
+
+                      return (
+                        <div
+                          key={staff.uuid}
+                          className="group relative border border-border/50 rounded-2xl p-4 flex flex-col justify-between bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 overflow-hidden"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                          <div className="flex items-center justify-between w-full min-w-0 gap-3 relative z-10">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <Avatar className="w-10 h-10 sm:w-11 sm:h-11 bg-muted border border-border/50 text-muted-foreground transition-transform duration-200 group-hover:scale-105 shrink-0">
+                                {staff.photos?.url ? (
+                                   <AvatarImage src={staff.photos.url} alt={staff_name} />
+                                ) : (
+                                   <AvatarFallback className="bg-transparent"><User className="h-5 w-5"/></AvatarFallback>
+                                )}
+                              </Avatar>
+                              <EllipsisCell
+                                value={staff_name}
+                                className="font-bold text-sm sm:text-base text-foreground capitalize block min-w-0"
+                              />
+                            </div>
+
+                            <div className="flex items-center gap-1 shrink-0 relative z-10">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleOpenEdit(staff.uuid, service, staffServiceRow, staff)}
+                                className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-purple-500/10 hover:text-purple-600 text-muted-foreground transition-all"
+                                title="Edit Custom Pricing"
+                              >
+                                <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemove(service.uuid, staffServiceRow.uuid!)}
+                                className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
+                                title="Unassign Staff"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/40 w-full relative z-10">
+                            <span
+                              className={clsx(
+                                "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold whitespace-nowrap border shrink-0",
+                                staffServiceRow.price_type === "fixed"
+                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10"
+                                  : staffServiceRow.price_type === "from"
+                                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/10"
+                                    : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/10",
+                              )}
+                            >
+                              {staffServiceRow.price_type}
+                            </span>
+                            <span className="text-xs sm:text-sm text-foreground/90 font-bold whitespace-nowrap shrink-0">
+                              ₹{staffServiceRow.price ?? "-"}
+                            </span>
+                            <span className="text-xs text-muted-foreground/50 select-none shrink-0">•</span>
+                            <span className="text-xs text-muted-foreground font-semibold whitespace-nowrap shrink-0">
+                              {staffServiceRow.duration ?? "-"} min
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </InfiniteScroll>
       )}
 
       {dialogContext && (

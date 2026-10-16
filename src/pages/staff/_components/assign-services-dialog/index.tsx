@@ -18,6 +18,7 @@ import {
 import { Button } from "../../../../components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { Service } from "../../../../features/service/service.slice";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 interface AssignedStaffService {
   uuid: string;
@@ -59,11 +60,15 @@ export default function AssignServicesDialog({
 
     setLoading(true);
 
-    dispatch(listServicesAction({ page: 1, limit: 1000 }));
+    dispatch(listServicesAction({ page: 1, limit: 10 }));
 
     listStaffServices(staff.uuid)
       .then((res) => {
-        setAssignedStaffServices(res || []);
+        const rows = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
+        setAssignedStaffServices(rows);
+      })
+      .catch(() => {
+        setAssignedStaffServices([]);
       })
       .finally(() => {
         setLoading(false);
@@ -75,8 +80,9 @@ export default function AssignServicesDialog({
   }, [services]);
 
   const assignedServiceMap = useMemo(() => {
+    const list = Array.isArray(assignedStaffServices) ? assignedStaffServices : [];
     return new Map(
-      assignedStaffServices
+      list
         .map((ss) => {
           const serviceUuid = serviceIdToUuidMap.get(ss.service_id);
           return serviceUuid ? [serviceUuid, ss] : null;
@@ -92,6 +98,26 @@ export default function AssignServicesDialog({
       service_uuids: Array.from(assignedServiceMap.keys()),
     });
   }, [assignedServiceMap, services, reset]);
+
+  const serviceState = useAppSelector((state: RootState) => state.service);
+  const serviceHasMore = Boolean(serviceState?.hasMore);
+  const serviceLoadingMore = Boolean(serviceState?.loading && !loading);
+  const servicePage = serviceState?.page ?? 1;
+  const serviceLimit = serviceState?.limit ?? 10;
+
+  const fetchMoreServices = async () => {
+    if (loading || serviceLoadingMore || !serviceHasMore) return;
+    try {
+      await dispatch(
+        listServicesAction({
+          page: servicePage + 1,
+          limit: serviceLimit,
+        }),
+      ).unwrap();
+    } catch (e) {
+      console.error("Failed to load more services:", e);
+    }
+  };
 
   const serviceOptions = useMemo(() => {
     const rootServices = services.filter((s) => s.parent_id === null);
@@ -201,13 +227,28 @@ export default function AssignServicesDialog({
                   Select sub-services to assign to this staff member:
                 </p>
 
-                <div className="mt-2 border border-border/50 rounded-2xl p-4 bg-muted/5 max-h-[300px] overflow-y-auto custom-scrollbar">
-                  <CheckboxTree
-                    name="service_uuids"
-                    control={methods.control}
-                    identifier="assign-services"
-                    options={serviceOptions}
-                  />
+                <div
+                  id="assign-services-scroll"
+                  className="mt-2 border border-border/50 rounded-2xl p-4 bg-muted/5 max-h-[300px] overflow-y-auto custom-scrollbar"
+                >
+                  <InfiniteScroll
+                    dataLength={services.length}
+                    next={fetchMoreServices}
+                    hasMore={serviceHasMore}
+                    scrollableTarget="assign-services-scroll"
+                    loader={
+                      <div className="flex justify-center py-3">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
+                      </div>
+                    }
+                  >
+                    <CheckboxTree
+                      name="service_uuids"
+                      control={methods.control}
+                      identifier="assign-services"
+                      options={serviceOptions}
+                    />
+                  </InfiniteScroll>
                 </div>
               </form>
             )}

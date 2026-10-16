@@ -392,42 +392,64 @@ export const StockTable: React.FC<StockTableProps> = ({
   return (
     <div>
       {!isMobile && (
-        <div className={`rounded-2xl border border-border/50 bg-card/45 backdrop-blur-md overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 mb-6 ${data.length === 0 ? "min-h-[200px]" : ""}`}>
-          <Table>
-            <TableHeader className="bg-muted/40 border-b border-border/50">
-              <TableRow className="hover:bg-transparent border-b border-border/50">
-                <TableHead className="w-[220px] font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Product Name</TableHead>
-                <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Category</TableHead>
-                <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Variant</TableHead>
-                <TableHead className="w-[140px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Current Stock</TableHead>
-                <TableHead className="w-[100px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Min Stock</TableHead>
-                <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Unit Price</TableHead>
-                <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Status</TableHead>
-                <TableHead className="w-[100px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((item) => (
-                <StockTableRow
-                  key={item.uuid}
-                  item={item}
-                  onDecreaseClick={handleDecreaseClick}
-                  onEditClick={handleEditClick}
-                />
-              ))}
-              {data.length === 0 && (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={8} className="h-[200px] text-center">
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <Package className="h-9 w-9 text-muted-foreground/40" />
-                      <p className="text-sm font-semibold text-muted-foreground">No products found in inventory.</p>
-                    </div>
-                  </TableCell>
+        <InfiniteScroll
+          dataLength={data.length}
+          next={fetchMore}
+          hasMore={hasMore}
+          scrollableTarget="main-content-scroll"
+          scrollThreshold={0.8}
+          loader={
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          }
+          endMessage={
+            !hasMore && data.length > 0 ? (
+              <div className="text-center py-6">
+                <span className="text-sm text-muted-foreground font-medium">
+                  All products loaded successfully
+                </span>
+              </div>
+            ) : null
+          }
+        >
+          <div className={`rounded-2xl border border-border/50 bg-card/45 backdrop-blur-md overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 mb-6 ${data.length === 0 ? "min-h-[200px]" : ""}`}>
+            <Table>
+              <TableHeader className="bg-muted/40 border-b border-border/50">
+                <TableRow className="hover:bg-transparent border-b border-border/50">
+                  <TableHead className="w-[220px] font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Product Name</TableHead>
+                  <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Category</TableHead>
+                  <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Variant</TableHead>
+                  <TableHead className="w-[140px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Current Stock</TableHead>
+                  <TableHead className="w-[100px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Min Stock</TableHead>
+                  <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Unit Price</TableHead>
+                  <TableHead className="w-[120px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Status</TableHead>
+                  <TableHead className="w-[100px] text-center font-bold text-[10px] tracking-wider text-muted-foreground uppercase p-4 border-b border-border/50">Actions</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {data.map((item) => (
+                  <StockTableRow
+                    key={item.uuid}
+                    item={item}
+                    onDecreaseClick={handleDecreaseClick}
+                    onEditClick={handleEditClick}
+                  />
+                ))}
+                {data.length === 0 && (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={8} className="h-[200px] text-center">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <Package className="h-9 w-9 text-muted-foreground/40" />
+                        <p className="text-sm font-semibold text-muted-foreground">No products found in inventory.</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </InfiniteScroll>
       )}
 
       {isMobile && (
@@ -435,6 +457,8 @@ export const StockTable: React.FC<StockTableProps> = ({
           dataLength={data.length}
           next={fetchMore}
           hasMore={hasMore}
+          scrollableTarget="main-content-scroll"
+          scrollThreshold={0.8}
           loader={
             <div className="flex justify-center py-6">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />

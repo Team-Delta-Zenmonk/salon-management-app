@@ -136,7 +136,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: true, data: prev[rowIndex]?.data ?? [] } }));
 
       try {
-        const data = await listServiceStaff(service.uuid, salon.uuid);
+        const res = await listServiceStaff(service.uuid, salon.uuid);
+        const data = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
         setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: false, data } }));
       } catch (err) {
         console.error("Failed to fetch staff for row", rowIndex, err);
@@ -213,8 +214,9 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
   const getStaffOptions = (rowIndex: number) => {
     const rowData = staffMap[rowIndex];
-    if (!rowData?.data) return [];
-    return rowData.data
+    const staffList = Array.isArray(rowData?.data) ? rowData.data : [];
+    if (!staffList.length) return [];
+    return staffList
       .filter((ss) => {
         if (!ss.staff || !ss.staff.end_date) return true;
         return dayjs(ss.staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
@@ -234,7 +236,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     if (!serviceId) return undefined;
     const serviceObj = services.find((s) => s.id === Number(serviceId));
     if (staffId != null && staffId !== "") {
-      const ss = staffMap[rowIndex]?.data?.find((item) => item.staff_id === Number(staffId));
+      const staffList = Array.isArray(staffMap[rowIndex]?.data) ? staffMap[rowIndex].data : [];
+      const ss = staffList.find((item) => item.staff_id === Number(staffId));
       if (ss) {
         return { duration: Number(ss.duration) || 0, price: Number(ss.price) || 0 };
       }

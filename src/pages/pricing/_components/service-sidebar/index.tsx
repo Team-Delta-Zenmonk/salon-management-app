@@ -1,10 +1,14 @@
 import clsx from "clsx";
 import type { ServiceType } from "../../types/staff-service.types";
-import { Layers } from "lucide-react";
-import { useEffect } from "react";
+import { Layers, Loader2 } from "lucide-react";
+import { useEffect, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
 import { EllipsisCell } from "@/components/ellipse-cell";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import type { RootState } from "../../../../store/store";
+import { listServicesAction } from "../../../../features/service/list-services/list-service.action";
 
 interface ServiceSideBarProps {
   services: ServiceType[];
@@ -21,42 +25,97 @@ export default function ServiceSidebar({
   onSelectService,
   isLoading,
 }: Readonly<ServiceSideBarProps>) {
+  const dispatch = useAppDispatch();
+  const serviceState = useAppSelector((state: RootState) => state.service);
+  const hasMore = Boolean(serviceState?.hasMore);
+  const loading = Boolean(serviceState?.loading);
+  const page = serviceState?.page ?? 1;
+  const limit = serviceState?.limit ?? 10;
+
   useEffect(() => {
     if (services.length > 0 && !selectedServiceUuid) {
       onSelectService(services[0].uuid);
     }
   }, [services, selectedServiceUuid, onSelectService]);
 
-  return (
-    <div className="h-full flex flex-col">
-      <div className="px-5 pt-5 pb-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
-          Services
-        </h2>
-        <p className="text-xs text-muted-foreground mt-1">
-          Select a main service to manage its assigned staff.
-        </p>
-      </div>
+  const fetchMoreServices = useCallback(async () => {
+    if (loading || !hasMore) return;
+    try {
+      await dispatch(
+        listServicesAction({
+          page: page + 1,
+          limit: limit,
+        }),
+      ).unwrap();
+    } catch (e) {
+      console.error("Failed to load more services:", e);
+    }
+  }, [dispatch, loading, hasMore, page, limit]);
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-5 custom-scrollbar">
-        <div className="flex flex-col gap-2 mt-1">
-          {isLoading ? (
-            <div className="flex flex-col gap-2.5 pt-1">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3.5 p-3.5 rounded-xl border border-border/40 bg-card/40 animate-pulse"
-                >
-                  <div className="w-10 h-10 rounded-full bg-foreground/10 shrink-0" />
-                  <div className="flex-1 space-y-2 py-0.5">
-                    <div className="h-3.5 bg-foreground/10 rounded w-2/3" />
-                    <div className="h-3 bg-foreground/10 rounded w-1/2" />
-                  </div>
+  useEffect(() => {
+    if (!hasMore || loading) return;
+    const el = document.getElementById("service-sidebar-scroll");
+    if (!el) return;
+    const timer = setTimeout(() => {
+      if (el.scrollHeight <= el.clientHeight) {
+        fetchMoreServices();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [services.length, hasMore, loading, fetchMoreServices]);
+
+  return (
+    <div id="service-sidebar-scroll" className="h-full flex flex-col min-h-0 overflow-y-auto px-4 pb-5 custom-scrollbar">
+      {isLoading ? (
+        <div>
+          <div className="pt-5 pb-3 px-1">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+              Services
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Select a main service to manage its assigned staff.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2.5 pt-1">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3.5 p-3.5 rounded-xl border border-border/40 bg-card/40 animate-pulse"
+              >
+                <div className="w-10 h-10 rounded-full bg-foreground/10 shrink-0" />
+                <div className="flex-1 space-y-2 py-0.5">
+                  <div className="h-3.5 bg-foreground/10 rounded w-2/3" />
+                  <div className="h-3 bg-foreground/10 rounded w-1/2" />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <InfiniteScroll
+          dataLength={services.length}
+          next={fetchMoreServices}
+          hasMore={hasMore}
+          scrollableTarget="service-sidebar-scroll"
+          scrollThreshold={0.8}
+          style={{ overflow: "visible" }}
+          loader={
+            loading ? (
+              <div className="flex justify-center py-3">
+                <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
+              </div>
+            ) : null
+          }
+        >
+          <div className="pt-5 pb-3 px-1">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+              Services
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Select a main service to manage its assigned staff.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 mt-1">
               {services.map((s, idx) => {
                 const isSelected = selectedServiceUuid === s.uuid;
 
@@ -117,10 +176,9 @@ export default function ServiceSidebar({
                   No services available.
                 </div>
               )}
-            </>
-          )}
-        </div>
-      </div>
+            </div>
+          </InfiniteScroll>
+        )}
     </div>
   );
 }

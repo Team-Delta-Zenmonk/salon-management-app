@@ -17,6 +17,7 @@ export interface CategoriesState {
   total: number;
   page: number;
   limit: number;
+  hasMore: boolean;
   selectedCategory: Category | null;
 }
 
@@ -25,6 +26,7 @@ const initialState: CategoriesState = {
   total: 0,
   page: 1,
   limit: 10,
+  hasMore: false,
   selectedCategory: null,
 };
 
@@ -39,6 +41,7 @@ export const categoriesSlice = createSlice({
       state.data = [];
       state.total = 0;
       state.page = 1;
+      state.hasMore = false;
     },
   },
   extraReducers: (builder) => {
@@ -47,12 +50,15 @@ export const categoriesSlice = createSlice({
       if (page === 1) {
         state.data = data;
       } else {
-        state.data = [...state.data, ...data];
+        const existingUuids = new Set(state.data.map((c) => c.uuid));
+        const newCategories = (data || []).filter((c: Category) => !existingUuids.has(c.uuid));
+        state.data = [...state.data, ...newCategories];
       }
 
       state.total = total;
       state.page = page;
       state.limit = limit;
+      state.hasMore = (data?.length || 0) === limit && state.data.length < total;
     });
 
     builder.addCase(updateCategoryAction.fulfilled, (state, { payload }) => {

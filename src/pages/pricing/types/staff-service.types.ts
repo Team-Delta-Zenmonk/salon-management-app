@@ -20,4 +20,5 @@ export type StaffPricingType = {
   price_type?: PriceType;
   price?: number;
   duration?: number;
+  service?: any;
 };

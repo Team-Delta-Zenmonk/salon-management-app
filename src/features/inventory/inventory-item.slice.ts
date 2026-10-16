@@ -24,6 +24,7 @@ export interface InventoryItemState {
   total: number;
   page: number;
   limit: number;
+  hasMore: boolean;
 }
 
 const initialState: InventoryItemState = {
@@ -31,6 +32,7 @@ const initialState: InventoryItemState = {
   total: 0,
   page: 1,
   limit: 10,
+  hasMore: false,
 };
 
 export const inventoryItemSlice = createSlice({
@@ -52,6 +54,7 @@ export const inventoryItemSlice = createSlice({
       state.total = total;
       state.page = page;
       state.limit = limit;
+      state.hasMore = (data?.length || 0) === limit && state.data.length < total;
     });
   },
 });

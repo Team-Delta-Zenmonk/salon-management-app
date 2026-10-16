@@ -10,6 +10,7 @@ import StaffServicePricingDialog from "../staff-service-pricing-dialog";
 import type { StaffPricingType } from "../../types/staff-service.types";
 import clsx from "clsx";
 import { Plus, Edit2, Trash2, Scissors, User, Loader2 } from "lucide-react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { Button } from "../../../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
 import type { Staff } from "../../../../features/staff/staff.slice";
@@ -37,6 +38,10 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
 
   const [assignedServices, setAssignedServices] = useState<StaffPricingType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const limit = 12;
 
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
 
@@ -47,9 +52,13 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
     if (!selectedStaffUuid) return;
     try {
       setLoading(true);
-      const res = await listStaffServices(selectedStaffUuid);
-      const rows = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
+      setPage(1);
+      const res = await listStaffServices(selectedStaffUuid, { page: 1, limit });
+      const rows = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
+      const total = typeof res?.total === "number" ? res.total : rows.length;
+
       setAssignedServices(rows);
+      setHasMore(rows.length === limit && rows.length < total);
     } catch {
       callSnack("Failed to load staff services", "error");
     } finally {
@@ -57,19 +66,55 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
     }
   }, [selectedStaffUuid]);
 
+  const fetchMoreAssignedServices = useCallback(async () => {
+    if (!selectedStaffUuid || loadingMore || !hasMore) return;
+    try {
+      setLoadingMore(true);
+      const nextPage = page + 1;
+      const res = await listStaffServices(selectedStaffUuid, { page: nextPage, limit });
+      const rows = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
+      const total = typeof res?.total === "number" ? res.total : rows.length;
+
+      setAssignedServices((prev) => {
+        const existingUuids = new Set(prev.map((s) => s.uuid));
+        const newRows = rows.filter((r: StaffPricingType) => !existingUuids.has(r.uuid));
+        const combined = [...prev, ...newRows];
+        setHasMore(rows.length === limit && combined.length < total);
+        return combined;
+      });
+      setPage(nextPage);
+    } catch {
+      callSnack("Failed to load more services", "error");
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [selectedStaffUuid, loadingMore, hasMore, page]);
+
   useEffect(() => {
     loadAssignedServices();
   }, [loadAssignedServices]);
 
+  useEffect(() => {
+    if (!hasMore || loading || loadingMore) return;
+    const el = document.getElementById("staff-services-panel-scroll");
+    if (!el) return;
+    const timer = setTimeout(() => {
+      if (el.scrollHeight <= el.clientHeight) {
+        fetchMoreAssignedServices();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [assignedServices.length, hasMore, loading, loadingMore, fetchMoreAssignedServices]);
+
   const groupedServices = useMemo(() => {
-    if (!allServices.length || !assignedServices.length) return [];
+    if (!assignedServices.length) return [];
 
     const serviceIdMap = new Map<number, Service>(allServices.map((s: Service) => [s.id, s]));
 
     const groups = new Map<number, { parent: Service; services: (Service & { pricing: StaffPricingType })[] }>();
 
     assignedServices.forEach((pricingRow) => {
-      const service = serviceIdMap.get(pricingRow.service_id);
+      const service = serviceIdMap.get(pricingRow.service_id) || pricingRow.service;
       if (!service) return;
 
       const hasChildren = allServices.some((s: Service) => s.parent_id && String(s.parent_id) === String(service.id));
@@ -78,18 +123,19 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
       }
 
       const parentId = service.parent_id ? Number(service.parent_id) : service.id;
-      const parentService = serviceIdMap.get(parentId);
+      const parentService = serviceIdMap.get(parentId) || (service.parent_id ? null : service);
 
-      if (!parentService) return;
+      const groupKey = parentId;
+      const effectiveParent = parentService || service;
 
-      if (!groups.has(parentId)) {
-        groups.set(parentId, { parent: parentService, services: [] });
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, { parent: effectiveParent, services: [] });
       }
 
-      groups.get(parentId)!.services.push({ ...service, pricing: pricingRow });
+      groups.get(groupKey)!.services.push({ ...service, pricing: pricingRow });
     });
 
-    return Array.from(groups.values()).sort((a, b) => a.parent.name.localeCompare(b.parent.name));
+    return Array.from(groups.values()).sort((a, b) => (a.parent.name || "").localeCompare(b.parent.name || ""));
   }, [allServices, assignedServices]);
 
   const handleOpenEdit = (serviceRow: Service & { pricing: StaffPricingType }) => {
@@ -144,7 +190,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
 
   if (!selectedStaffUuid || !selectedStaff) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[450px] p-8 text-center bg-card">
+      <div className="flex flex-col items-center justify-center h-full min-h-0 p-8 text-center bg-transparent">
         <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/50">
           <User className="text-muted-foreground w-8 h-8" />
         </div>
@@ -210,89 +256,104 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
           </Button>
         </div>
       ) : (
-        <div className="flex flex-col gap-8">
-          {groupedServices.map((group) => (
-            <div key={group.parent.id} className="flex flex-col gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <EllipsisCell
-                  value={group.parent.name}
-                  className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize shrink-0 max-w-[300px]"
-                />
-                <div className="h-px bg-border/55 flex-1" />
+        <InfiniteScroll
+          dataLength={assignedServices.length}
+          next={fetchMoreAssignedServices}
+          hasMore={hasMore}
+          scrollableTarget="staff-services-panel-scroll"
+          scrollThreshold={0.8}
+          loader={
+            loadingMore ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
               </div>
+            ) : null
+          }
+        >
+          <div className="flex flex-col gap-8 pb-4">
+            {groupedServices.map((group) => (
+              <div key={group.parent.id} className="flex flex-col gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <EllipsisCell
+                    value={group.parent.name}
+                    className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize shrink-0 max-w-[300px]"
+                  />
+                  <div className="h-px bg-border/55 flex-1" />
+                </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-                {group.services.map((svc) => (
-                  <div
-                    key={svc.uuid}
-                    className="group relative border border-border/50 rounded-2xl p-4 flex flex-col justify-between bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+                  {group.services.map((svc) => (
+                    <div
+                      key={svc.uuid}
+                      className="group relative border border-border/50 rounded-2xl p-4 flex flex-col justify-between bg-card/60 backdrop-blur-md hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-                    <div className="flex items-center justify-between w-full min-w-0 gap-3 relative z-10">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <Avatar className="w-10 h-10 sm:w-11 sm:h-11 bg-muted border border-border/50 text-muted-foreground transition-transform duration-200 group-hover:scale-105 shrink-0">
-                          {svc.logo ? (
-                              <AvatarImage src={svc.logo} alt={svc.name} />
-                          ) : (
-                              <AvatarFallback className="bg-transparent"><Scissors className="h-5 w-5"/></AvatarFallback>
+                      <div className="flex items-center justify-between w-full min-w-0 gap-3 relative z-10">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Avatar className="w-10 h-10 sm:w-11 sm:h-11 bg-muted border border-border/50 text-muted-foreground transition-transform duration-200 group-hover:scale-105 shrink-0">
+                            {svc.logo ? (
+                                <AvatarImage src={svc.logo} alt={svc.name} />
+                            ) : (
+                                <AvatarFallback className="bg-transparent"><Scissors className="h-5 w-5"/></AvatarFallback>
+                            )}
+                          </Avatar>
+                          <EllipsisCell
+                            value={svc.name}
+                            className="font-bold text-sm sm:text-base text-foreground capitalize block min-w-0"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0 relative z-10">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenEdit(svc)}
+                            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-purple-500/10 hover:text-purple-600 text-muted-foreground transition-all"
+                            title="Edit Custom Pricing"
+                          >
+                            <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => svc.pricing.uuid && handleRemove(svc.pricing.uuid)}
+                            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
+                            title="Unassign Service"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/40 w-full relative z-10">
+                        <span
+                          className={clsx(
+                            "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold whitespace-nowrap border shrink-0",
+                            svc.pricing.price_type === "fixed"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10"
+                              : svc.pricing.price_type === "from"
+                                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/10"
+                                : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/10",
                           )}
-                        </Avatar>
-                        <EllipsisCell
-                          value={svc.name}
-                          className="font-bold text-sm sm:text-base text-foreground capitalize block min-w-0"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-1 shrink-0 relative z-10">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenEdit(svc)}
-                          className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-purple-500/10 hover:text-purple-600 text-muted-foreground transition-all"
-                          title="Edit Custom Pricing"
                         >
-                          <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => svc.pricing.uuid && handleRemove(svc.pricing.uuid)}
-                          className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
-                          title="Unassign Service"
-                        >
-                          <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        </Button>
+                          {svc.pricing.price_type}
+                        </span>
+                        <span className="text-xs sm:text-sm text-foreground/90 font-bold whitespace-nowrap shrink-0">
+                          ₹{svc.pricing.price ?? "-"}
+                        </span>
+                        <span className="text-xs text-muted-foreground/50 select-none shrink-0">•</span>
+                        <span className="text-xs text-muted-foreground font-semibold whitespace-nowrap shrink-0">
+                          {svc.pricing.duration ?? "-"} min
+                        </span>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/40 w-full relative z-10">
-                      <span
-                        className={clsx(
-                          "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold whitespace-nowrap border shrink-0",
-                          svc.pricing.price_type === "fixed"
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10"
-                            : svc.pricing.price_type === "from"
-                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/10"
-                              : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/10",
-                        )}
-                      >
-                        {svc.pricing.price_type}
-                      </span>
-                      <span className="text-xs sm:text-sm text-foreground/90 font-bold whitespace-nowrap shrink-0">
-                        ₹{svc.pricing.price ?? "-"}
-                      </span>
-                      <span className="text-xs text-muted-foreground/50 select-none shrink-0">•</span>
-                      <span className="text-xs text-muted-foreground font-semibold whitespace-nowrap shrink-0">
-                        {svc.pricing.duration ?? "-"} min
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </InfiniteScroll>
       )}
 
       {selectedStaff && assignDialogOpen && (

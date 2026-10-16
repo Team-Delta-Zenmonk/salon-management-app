@@ -15,9 +15,9 @@ export default function Services() {
   const refreshServices = useCallback(
     async (cb?: () => void) => {
       if (selectedCategoryUuid === ALL_CATEGORIES_VALUE) {
-        await dispatch(listServicesAction({}));
+        await dispatch(listServicesAction({ page: 1, limit: 10 }));
       } else {
-        await dispatch(listServicesAction({ category_uuid: selectedCategoryUuid }));
+        await dispatch(listServicesAction({ category_uuid: selectedCategoryUuid, page: 1, limit: 10 }));
       }
       cb?.();
     },

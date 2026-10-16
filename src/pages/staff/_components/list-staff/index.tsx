@@ -291,7 +291,7 @@ export default function ListStaff({
       await dispatch(
         listStaffAction({
           page: 1,
-          limit: 1000,
+          limit: 10,
           search: searchQuery.trim() || undefined,
         }),
       ).unwrap();
@@ -316,6 +316,8 @@ export default function ListStaff({
         dataLength={staffs.length}
         next={fetchMoreStaff}
         hasMore={hasMore}
+        scrollableTarget="main-content-scroll"
+        scrollThreshold={0.8}
         loader={
           <div className="flex justify-center py-8">
             <Loader2 className="w-8 h-8 animate-spin text-primary/60" />
@@ -411,7 +413,7 @@ export default function ListStaff({
             await dispatch(
               listStaffAction({
                 page: 1,
-                limit: 1000,
+                limit: 10,
                 search: searchQuery.trim() || undefined,
               }),
             ).unwrap();

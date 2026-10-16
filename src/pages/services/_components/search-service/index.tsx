@@ -75,31 +75,6 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   }, [selectedCategoryUuid, methods]);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      try {
-        if (selectedCategoryUuid === ALL_CATEGORIES_VALUE) {
-          await dispatch(listServicesAction({ page: 1, limit: 10 })).unwrap();
-        } else {
-          await dispatch(
-            listServicesAction({
-              category_uuid: selectedCategoryUuid,
-              page: 1,
-              limit: 10,
-            })
-          ).unwrap();
-        }
-      } catch {
-        callSnack("Failed to fetch services", "error");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInitialData();
-  }, [dispatch, selectedCategoryUuid]);
-
-  useEffect(() => {
     const trimmedSearch = searchQuery.trim();
 
     const fetchFilteredData = async () => {
@@ -118,7 +93,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
 
         await dispatch(listServicesAction(params)).unwrap();
       } catch {
-        callSnack("Internal Server Error", "error");
+        callSnack("Failed to fetch services", "error");
       } finally {
         setIsLoading(false);
       }
@@ -133,7 +108,11 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
     }
   }, [watchedCategoryUuid, selectedCategoryUuid, onCategoryChange]);
 
+  const hasMore = Boolean(serviceState?.hasMore);
+  const isFetchingMore = Boolean(serviceState?.loading);
+
   const fetchMoreServices = useCallback(async () => {
+    if (isFetchingMore || !hasMore) return;
     try {
       const params: ListServicesParams = {
         page: page + 1,
@@ -149,9 +128,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
     } catch {
       callSnack("Failed to load more services", "error");
     }
-  }, [dispatch, page, limit, searchQuery, watchedCategoryUuid]);
-
-  const hasMore = data.length < total;
+  }, [dispatch, page, limit, searchQuery, watchedCategoryUuid, isFetchingMore, hasMore]);
 
   return (
     <div className="w-full space-y-6 min-w-0">

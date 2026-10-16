@@ -27,8 +27,8 @@ export default function StaffServiceManagementPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("staff");
 
   useEffect(() => {
-    dispatch(listServicesAction({ page: 1, limit: 1000 }));
-    dispatch(listStaffAction({ page: 1, limit: 1000 }));
+    dispatch(listServicesAction({ page: 1, limit: 10 }));
+    dispatch(listStaffAction({ page: 1, limit: 10 }));
   }, [dispatch]);
 
   const handleViewChange = (newMode: ViewMode) => {
@@ -40,7 +40,7 @@ export default function StaffServiceManagementPage() {
       initial="hidden"
       animate="show"
       variants={containerVariants}
-      className="w-full max-w-full overflow-x-hidden pt-0 min-w-0"
+      className="w-full max-w-full flex-1 flex flex-col min-h-0 pt-0 min-w-0"
     >
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -93,7 +93,7 @@ export default function StaffServiceManagementPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="w-full flex-1 min-h-0 sm:min-h-[600px] flex flex-col pb-1">
+      <motion.div variants={itemVariants} className="w-full flex-1 min-h-0 flex flex-col pb-1">
         {viewMode === "service" ? <ServiceView /> : <StaffView />}
       </motion.div>
     </motion.div>

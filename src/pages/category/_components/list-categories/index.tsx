@@ -80,6 +80,8 @@ export default function ListCategories({
         dataLength={categories.length}
         next={fetchMoreCategories}
         hasMore={hasMore}
+        scrollableTarget="main-content-scroll"
+        scrollThreshold={0.8}
         loader={
           <div className="flex justify-center py-6">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

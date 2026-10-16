@@ -1,11 +1,14 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import clsx from "clsx";
-import { useAppSelector } from "../../../../store/hooks";
+import { useAppSelector, useAppDispatch } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
 import { motion } from "framer-motion";
 import type { Staff } from "../../../../features/staff/staff.slice";
 import { EllipsisCell } from "@/components/ellipse-cell";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { Loader2 } from "lucide-react";
+import { listStaffAction } from "../../../../features/staff/list-staff/list-staff.action";
 
 interface StaffSidebarProps {
   selectedStaffUuid: string | null;
@@ -13,8 +16,13 @@ interface StaffSidebarProps {
 }
 
 export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Readonly<StaffSidebarProps>) {
+  const dispatch = useAppDispatch();
   const staffState = useAppSelector((state: RootState) => state.staff);
   const staffs = useMemo(() => staffState?.data ?? [], [staffState?.data]);
+  const hasMore = Boolean(staffState?.hasMore);
+  const loading = Boolean(staffState?.loading);
+  const page = staffState?.page ?? 1;
+  const limit = staffState?.limit ?? 10;
 
   useEffect(() => {
     if (staffs.length > 0 && !selectedStaffUuid) {
@@ -22,20 +30,44 @@ export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Reado
     }
   }, [staffs, selectedStaffUuid, onSelectStaff]);
 
-  return (
-    <div className="h-full flex flex-col">
-      <div className="px-5 pt-5 pb-3">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
-          Staff Members
-        </h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          Select a staff member to view and manage their services.
-        </p>
-      </div>
+  const fetchMoreStaff = useCallback(async () => {
+    if (loading || !hasMore) return;
+    try {
+      await dispatch(
+        listStaffAction({
+          page: page + 1,
+          limit: limit,
+        }),
+      ).unwrap();
+    } catch (e) {
+      console.error("Failed to load more staff:", e);
+    }
+  }, [dispatch, loading, hasMore, page, limit]);
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-5 custom-scrollbar">
-        <div className="flex flex-col gap-2">
-          {staffState?.isInitialLoading || (staffState?.loading && staffs.length === 0) ? (
+  useEffect(() => {
+    if (!hasMore || loading) return;
+    const el = document.getElementById("staff-sidebar-scroll");
+    if (!el) return;
+    const timer = setTimeout(() => {
+      if (el.scrollHeight <= el.clientHeight) {
+        fetchMoreStaff();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [staffs.length, hasMore, loading, fetchMoreStaff]);
+
+  return (
+    <div id="staff-sidebar-scroll" className="h-full flex flex-col min-h-0 overflow-y-auto px-4 pb-5 custom-scrollbar">
+      {staffState?.isInitialLoading || (staffState?.loading && staffs.length === 0) ? (
+          <div>
+            <div className="pt-5 pb-3 px-1">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                Staff Members
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Select a staff member to view and manage their services.
+              </p>
+            </div>
             <div className="flex flex-col gap-2.5 pt-1">
               {[1, 2, 3, 4].map((i) => (
                 <div
@@ -50,8 +82,32 @@ export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Reado
                 </div>
               ))}
             </div>
-          ) : (
-            <>
+          </div>
+        ) : (
+          <InfiniteScroll
+            dataLength={staffs.length}
+            next={fetchMoreStaff}
+            hasMore={hasMore}
+            scrollableTarget="staff-sidebar-scroll"
+            scrollThreshold={0.8}
+            style={{ overflow: "visible" }}
+            loader={
+              loading ? (
+                <div className="flex justify-center py-3">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
+                </div>
+              ) : null
+            }
+          >
+            <div className="pt-5 pb-3 px-1">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                Staff Members
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Select a staff member to view and manage their services.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
               {staffs.map((staff: Staff, idx: number) => {
                 const isSelected = selectedStaffUuid === staff.uuid;
                 const staffName = `${staff.first_name} ${staff.last_name || ""}`.trim();
@@ -107,10 +163,9 @@ export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Reado
                   No staff available.
                 </div>
               )}
-            </>
-          )}
-        </div>
-      </div>
+            </div>
+          </InfiniteScroll>
+        )}
     </div>
   );
 }

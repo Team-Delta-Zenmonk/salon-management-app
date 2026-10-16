@@ -32,6 +32,7 @@ export type ServicesState = {
   total: number;
   page: number;
   limit: number;
+  hasMore: boolean;
   loading: boolean;
   isInitialLoading: boolean;
 };
@@ -41,6 +42,7 @@ const initialState: ServicesState = {
   total: 0,
   page: 1,
   limit: 10,
+  hasMore: false,
   loading: false,
   isInitialLoading: true,
 };
@@ -53,11 +55,13 @@ export const serviceSlice = createSlice({
       state.data = [];
       state.total = 0;
       state.page = 1;
+      state.hasMore = false;
     },
     resetServices(state) {
       state.data = [];
       state.total = 0;
       state.page = 1;
+      state.hasMore = false;
     },
   },
   extraReducers: (builder) => {
@@ -74,12 +78,15 @@ export const serviceSlice = createSlice({
       if (page === 1) {
         state.data = data;
       } else {
-        state.data = [...state.data, ...data];
+        const existingUuids = new Set(state.data.map((s) => s.uuid));
+        const newServices = (data || []).filter((s: Service) => !existingUuids.has(s.uuid));
+        state.data = [...state.data, ...newServices];
       }
 
       state.total = total;
       state.page = page;
       state.limit = limit;
+      state.hasMore = (data?.length || 0) === limit && state.data.length < total;
       state.loading = false;
       state.isInitialLoading = false;
     });

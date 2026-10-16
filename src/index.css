@@ -44,7 +44,11 @@
   --sidebar-accent: #f6f6f3;
   --sidebar-accent-foreground: #211922;
   --sidebar-border: #dadad3;
-  --sidebar-ring: #435ee5;
+  --pricing-container-height: calc(100vh - 200px);
+  --pricing-container-min-height: 0px;
+  --pricing-container-max-height: calc(100vh - 200px);
+  --pricing-sidebar-width: 360px;
+  --pricing-mobile-card-height: 340px;
 }
 
 html,

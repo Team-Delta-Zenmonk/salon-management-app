@@ -16,7 +16,6 @@ import { fetchItemCategoriesAction } from "../../features/inventory/list-invento
 import type { InventoryTransaction } from "../../features/inventory/inventory-log.slice";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { motion } from "framer-motion";
-import { listInventoryItemsService } from "../../features/inventory/list-inventory-items/list-inventory-items.service";
 import type { InventoryItem } from "../../features/inventory/inventory-item.slice";
 import EllipsisCell from "@/components/ellipse-cell";
 
@@ -113,11 +112,13 @@ export default function Inventory() {
     data: stockData,
     total: stockTotal,
     page: stockPage,
+    hasMore: stockHasMoreFromState,
   } = useAppSelector((state) => state.inventoryItem);
   const {
     data: transactionData,
     total: transactionTotal,
     page: transactionPage,
+    hasMore: transactionHasMoreFromState,
   } = useAppSelector((state) => state.inventoryLog);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -141,29 +142,9 @@ export default function Inventory() {
   const [itemType, setItemType] = useState<string>("");
 
   const [loadingLogUuid, setLoadingLogUuid] = useState<string | null>(null);
-  const [allStockItems, setAllStockItems] = useState<InventoryItem[]>([]);
-  const [allStockLoading, setAllStockLoading] = useState(false);
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
   const categories = useAppSelector((state) => state.itemsCategory.data) ?? [];
-
-  const fetchAllStockItems = async () => {
-    setAllStockLoading(true);
-    try {
-      const res = await listInventoryItemsService({ limit: 1000 });
-      if (res && res.data) {
-        setAllStockItems(res.data);
-      }
-    } catch (e) {
-      console.error("Failed to fetch all items for stats", e);
-    } finally {
-      setAllStockLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllStockItems();
-  }, [stockData]);
 
   useEffect(() => {
     if (categories.length === 0) {
@@ -260,7 +241,6 @@ export default function Inventory() {
         dispatch(listInventoryLogsAction({ page: 1, limit: PAGE_LIMIT, search: debouncedSearch, ...getSortParams(sortBy) })).unwrap(),
         dispatch(listInventoryItemsAction({ page: 1, limit: PAGE_LIMIT, search: debouncedSearch, ...getSortParams(sortBy), category_id: categoryUuid || undefined, item_type: itemType || undefined })).unwrap(),
       ]);
-      fetchAllStockItems();
     } catch (e) {
       console.error(e);
     } finally {
@@ -273,7 +253,6 @@ export default function Inventory() {
     setStockLoading(true);
     try {
       await dispatch(listInventoryItemsAction({ page: 1, limit: PAGE_LIMIT })).unwrap();
-      fetchAllStockItems();
     } finally {
       setStockLoading(false);
     }
@@ -292,15 +271,15 @@ export default function Inventory() {
     setIsLogTransactionOpen(true);
   };
 
-  const stockHasMore = Number(stockTotal) > 0 && stockData.length < Number(stockTotal);
-  const transactionHasMore = Number(transactionTotal) > 0 && transactionData.length < Number(transactionTotal);
+  const stockHasMore = Boolean(stockHasMoreFromState);
+  const transactionHasMore = Boolean(transactionHasMoreFromState);
 
-  const totalProducts = allStockItems.length;
-  const lowStockCount = allStockItems.filter(
+  const totalProducts = stockTotal || stockData.length;
+  const lowStockCount = stockData.filter(
     (item) => item.current_stock > 0 && item.min_stock_level && item.current_stock <= item.min_stock_level
   ).length;
-  const outOfStockCount = allStockItems.filter((item) => item.current_stock <= 0).length;
-  const inventoryValue = allStockItems.reduce(
+  const outOfStockCount = stockData.filter((item) => item.current_stock <= 0).length;
+  const inventoryValue = stockData.reduce(
     (acc, item) => acc + (item.current_stock * parseFloat(item.unit_price || "0")),
     0
   );
@@ -332,7 +311,7 @@ export default function Inventory() {
       label: "Total Products",
       icon: Package,
       value: totalProducts,
-      isLoading: allStockLoading,
+      isLoading: stockLoading && stockData.length === 0,
       accentBg: "bg-primary/5 group-hover:bg-primary/10",
       borderHover: "hover:border-primary/20",
       iconColor: "text-primary",
@@ -341,7 +320,7 @@ export default function Inventory() {
       label: "Low Stock",
       icon: AlertTriangle,
       value: lowStockCount,
-      isLoading: allStockLoading,
+      isLoading: stockLoading && stockData.length === 0,
       accentBg: "bg-amber-500/5 group-hover:bg-amber-500/10",
       borderHover: "hover:border-amber-500/20",
       iconColor: "text-amber-500",
@@ -350,7 +329,7 @@ export default function Inventory() {
       label: "Out of Stock",
       icon: XCircle,
       value: outOfStockCount,
-      isLoading: allStockLoading,
+      isLoading: stockLoading && stockData.length === 0,
       accentBg: "bg-destructive/5 group-hover:bg-destructive/10",
       borderHover: "hover:border-destructive/20",
       iconColor: "text-destructive",
@@ -359,7 +338,7 @@ export default function Inventory() {
       label: "Stock Value",
       icon: Coins,
       value: `₹${inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
-      isLoading: allStockLoading,
+      isLoading: stockLoading && stockData.length === 0,
       accentBg: "bg-emerald-500/5 group-hover:bg-emerald-500/10",
       borderHover: "hover:border-emerald-500/20",
       iconColor: "text-emerald-500",

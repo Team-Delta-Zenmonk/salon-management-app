@@ -14,24 +14,12 @@ const SearchStaff = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const staffState = useSelector((state: RootState) => state.staff);
-  const data = staffState?.data;
+  const data = staffState?.data ?? [];
   const total = staffState?.total ?? 0;
   const page = staffState?.page ?? 1;
   const limit = staffState?.limit ?? 10;
-
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      try {
-        await dispatch(listStaffAction({ page: 1, limit: 1000 })).unwrap();
-      } catch {
-        callSnack("Failed to fetch staff", "error");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchInitialData();
-  }, [dispatch]);
+  const hasMore = Boolean(staffState?.hasMore);
+  const isFetchingMore = Boolean(staffState?.loading);
 
   useEffect(() => {
     const trimmedSearch = searchQuery.trim();
@@ -43,12 +31,12 @@ const SearchStaff = () => {
         await dispatch(
           listStaffAction({
             page: 1,
-            limit: 1000,
+            limit: 10,
             search: trimmedSearch || undefined,
           })
         ).unwrap();
       } catch {
-        callSnack("Failed to search staff", "error");
+        callSnack("Failed to fetch staff", "error");
       } finally {
         setIsLoading(false);
       }
@@ -57,6 +45,7 @@ const SearchStaff = () => {
   }, [searchQuery, dispatch]);
 
   const fetchMoreStaff = useCallback(async () => {
+    if (isFetchingMore || !hasMore) return;
     try {
       await dispatch(
         listStaffAction({
@@ -68,7 +57,7 @@ const SearchStaff = () => {
     } catch {
       callSnack("Failed to load more staff", "error");
     }
-  }, [dispatch, page, limit, searchQuery]);
+  }, [dispatch, page, limit, searchQuery, isFetchingMore, hasMore]);
 
   const sortedStaff = useMemo(() => {
     const result = [...(data ?? [])];
@@ -79,8 +68,6 @@ const SearchStaff = () => {
     });
     return result;
   }, [data]);
-
-  const hasMore = data.length < total;
 
   return (
     <div className="w-full space-y-6 min-w-0">
@@ -96,7 +83,7 @@ const SearchStaff = () => {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 pt-2" id="scrollableDiv">
+      <div className="flex-1 min-h-0 pt-2">
         {isLoading && data.length === 0 ? (
           <div className="w-full">
             <StaffListSkeleton />

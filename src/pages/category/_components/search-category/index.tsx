@@ -22,21 +22,6 @@ const SearchCategories = ({ searchQuery }: SearchCategoriesProps) => {
   const limit = categoryState?.limit ?? 10;
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      try {
-        await dispatch(listCategoriesAction({ page: 1, limit: 10 })).unwrap();
-      } catch {
-        callSnack("Failed to fetch categoreis", "error");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInitialData();
-  }, [dispatch]);
-
-  useEffect(() => {
     const trimmedSearch = searchQuery.trim();
 
     const fetchSearchResults = async () => {
@@ -51,7 +36,7 @@ const SearchCategories = ({ searchQuery }: SearchCategoriesProps) => {
           })
         ).unwrap();
       } catch {
-        callSnack("Failed to search categories", "error");
+        callSnack("Failed to fetch categories", "error");
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +44,10 @@ const SearchCategories = ({ searchQuery }: SearchCategoriesProps) => {
     fetchSearchResults();
   }, [searchQuery, dispatch]);
 
+  const hasMore = Boolean(categoryState?.hasMore);
+
   const fetchMoreCategories = useCallback(async () => {
+    if (!hasMore) return;
     await dispatch(
       listCategoriesAction({
         page: page + 1,
@@ -67,9 +55,7 @@ const SearchCategories = ({ searchQuery }: SearchCategoriesProps) => {
         search: searchQuery.trim() || undefined,
       })
     ).unwrap();
-  }, [dispatch, page, limit, searchQuery]);
-
-  const hasMore = data.length < total;
+  }, [dispatch, page, limit, searchQuery, hasMore]);
 
   return (
     <div className="w-full space-y-4 min-w-0">

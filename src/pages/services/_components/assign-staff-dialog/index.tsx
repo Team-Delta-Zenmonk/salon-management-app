@@ -23,6 +23,7 @@ import {
 import { Loader2, UserCheck, Users } from "lucide-react";
 import type { Staff } from "../../../../features/staff/staff.slice";
 import dayjs from "dayjs";
+import InfiniteScroll from "react-infinite-scroll-component";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { motion, AnimatePresence } from "framer-motion";
 import { EllipsisCell } from "@/components/ellipse-cell";
@@ -166,7 +167,7 @@ export default function AssignStaffDialog({
     setLoading(true);
     setAssignedStaffServices([]);
     reset({ staff_ids: [] });
-    dispatch(listStaffAction({ page: 1, limit: 1000 }));
+    dispatch(listStaffAction({ page: 1, limit: 10 }));
 
     const parentServiceObj = allServices.find((s) => s.uuid === serviceUuid);
     const childrenServices = parentServiceObj
@@ -211,6 +212,26 @@ export default function AssignStaffDialog({
     if (!allStaff.length) return;
     reset({ staff_ids: Array.from(assignedStaffMap.keys()) });
   }, [assignedStaffMap, allStaff, reset]);
+
+  const staffState = useAppSelector((state: RootState) => state.staff);
+  const staffHasMore = Boolean(staffState?.hasMore);
+  const staffLoadingMore = Boolean(staffState?.loading && !loading);
+  const staffPage = staffState?.page ?? 1;
+  const staffLimit = staffState?.limit ?? 10;
+
+  const fetchMoreStaff = async () => {
+    if (loading || staffLoadingMore || !staffHasMore) return;
+    try {
+      await dispatch(
+        listStaffAction({
+          page: staffPage + 1,
+          limit: staffLimit,
+        }),
+      ).unwrap();
+    } catch (e) {
+      console.error("Failed to load more staff:", e);
+    }
+  };
 
   const toggleStaff = (uuid: string) => {
     const current = selectedIds;
@@ -340,20 +361,32 @@ export default function AssignStaffDialog({
               </div>
             ) : (
               <form
-                id="assign-staff-form"
+                id="assign-staff-scroll"
                 onSubmit={handleSubmit(onSubmit)}
-                className="flex-1 overflow-y-auto"
+                className="flex-1 overflow-y-auto custom-scrollbar"
               >
-                <div className="px-4 py-3 space-y-2">
-                  {allStaff.map((staff) => (
-                    <StaffRow
-                      key={staff.uuid}
-                      staff={staff}
-                      selected={selectedIds.includes(staff.uuid)}
-                      onToggle={() => toggleStaff(staff.uuid)}
-                    />
-                  ))}
-                </div>
+                <InfiniteScroll
+                  dataLength={allStaff.length}
+                  next={fetchMoreStaff}
+                  hasMore={staffHasMore}
+                  scrollableTarget="assign-staff-scroll"
+                  loader={
+                    <div className="flex justify-center py-3">
+                      <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
+                    </div>
+                  }
+                >
+                  <div className="px-4 py-3 space-y-2">
+                    {allStaff.map((staff) => (
+                      <StaffRow
+                        key={staff.uuid}
+                        staff={staff}
+                        selected={selectedIds.includes(staff.uuid)}
+                        onToggle={() => toggleStaff(staff.uuid)}
+                      />
+                    ))}
+                  </div>
+                </InfiniteScroll>
               </form>
             )}
           </div>
@@ -378,7 +411,7 @@ export default function AssignStaffDialog({
               {allStaff.length > 0 && (
                 <Button
                   type="submit"
-                  form="assign-staff-form"
+                  form="assign-staff-scroll"
                   disabled={saving || loading}
                   className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
                 >
