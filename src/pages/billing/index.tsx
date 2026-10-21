@@ -45,6 +45,7 @@ import {
   type SubscriptionInvoice,
   type InvoicesPagination,
 } from "@/features/subscription/subscription.service";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { useDownloadInvoice } from "@/features/invoice/hooks/use-download-invoice";
 import { cn } from "@/lib/utils";
 import { SUBSCRIPTION_PLAN } from "@/common/enums/subscription-plan.enum";
@@ -305,6 +306,12 @@ export default function PlanAndBillingPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<InvoicesPagination | null>(null);
 
+  // Mobile Infinite Scroll State
+  const [mobileInvoices, setMobileInvoices] = useState<SubscriptionInvoice[]>([]);
+  const [mobilePage, setMobilePage] = useState(1);
+  const [mobileHasMore, setMobileHasMore] = useState(false);
+  const [isLoadingMoreMobile, setIsLoadingMoreMobile] = useState(false);
+
   const fetchRequestIdRef = useRef(0);
   const { downloadInvoice, isDownloading: isDownloadingInvoice, downloadingId } = useDownloadInvoice();
 
@@ -337,6 +344,9 @@ export default function PlanAndBillingPage() {
     setIsLoadingInvoices(true);
     // Clear invoices immediately so on slow 3G we never show stale invoices from another category
     setInvoices([]);
+    if (page === 1) {
+      setMobileInvoices([]);
+    }
 
     try {
       const res = await getInvoices({
@@ -361,12 +371,18 @@ export default function PlanAndBillingPage() {
       }
 
       setInvoices(fetchedInvoices);
+      if (page === 1) {
+        setMobileInvoices(fetchedInvoices);
+        setMobilePage(1);
+        setMobileHasMore(res.pagination ? res.pagination.page < res.pagination.totalPages : false);
+      }
       if (res.pagination) {
         setPagination(res.pagination);
       }
     } catch {
       if (requestId === fetchRequestIdRef.current) {
         setInvoices([]);
+        if (page === 1) setMobileInvoices([]);
       }
     } finally {
       if (requestId === fetchRequestIdRef.current) {
@@ -374,6 +390,38 @@ export default function PlanAndBillingPage() {
       }
     }
   }, [invoiceTypeFilter, currentPage, sortOrder]);
+
+  const fetchMoreMobileInvoices = async () => {
+    if (isLoadingMoreMobile || !mobileHasMore) return;
+    const nextPage = mobilePage + 1;
+    setIsLoadingMoreMobile(true);
+    try {
+      const res = await getInvoices({
+        type: invoiceTypeFilter,
+        page: nextPage,
+        limit: 10,
+        order: sortOrder,
+        sort: sortOrder,
+      });
+      let newInvoices = res.invoices || [];
+      if (sortOrder === "ASC") {
+        newInvoices = [...newInvoices].sort(
+          (a, b) => new Date(a.created_at || a.date || 0).getTime() - new Date(b.created_at || b.date || 0).getTime()
+        );
+      } else {
+        newInvoices = [...newInvoices].sort(
+          (a, b) => new Date(b.created_at || b.date || 0).getTime() - new Date(a.created_at || a.date || 0).getTime()
+        );
+      }
+      setMobileInvoices((prev) => [...prev, ...newInvoices]);
+      setMobilePage(nextPage);
+      setMobileHasMore(res.pagination ? nextPage < res.pagination.totalPages : false);
+    } catch (err) {
+      console.error("Failed to fetch more mobile invoices", err);
+    } finally {
+      setIsLoadingMoreMobile(false);
+    }
+  };
 
   const handleTabChange = (tab: "plans" | "invoices") => {
     const nextParams = new URLSearchParams(searchParams);
@@ -388,11 +436,15 @@ export default function PlanAndBillingPage() {
   const handleFilterChange = (filter: "ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING") => {
     setInvoiceTypeFilter(filter);
     setCurrentPage(1);
+    setMobilePage(1);
+    setMobileInvoices([]);
   };
 
   const handleSortChange = (order: "DESC" | "ASC") => {
     setSortOrder(order);
     setCurrentPage(1);
+    setMobilePage(1);
+    setMobileInvoices([]);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -560,20 +612,22 @@ export default function PlanAndBillingPage() {
                     ? "Monthly Plan"
                     : `${trialDurationDays}-Day Free Trial`}
               </span>
-              <span
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider shrink-0 ${currentStatus === "active"
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                  : currentStatus === "trial"
-                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                    : "bg-destructive/10 text-destructive border border-destructive/20"
-                  }`}
+              <Badge
+                variant="outline"
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider shrink-0 ${
+                  currentStatus === "active"
+                    ? "bg-primary/15 text-primary border-primary/25"
+                    : currentStatus === "trial"
+                    ? "bg-muted text-muted-foreground border-border/80"
+                    : "bg-destructive/10 text-destructive border-destructive/20"
+                }`}
               >
                 {currentStatus === "active"
                   ? "Active"
                   : currentStatus === "trial"
                     ? `${trialDurationDays}-Day Free Trial`
                     : "Expired"}
-              </span>
+              </Badge>
             </div>
 
             <div className="space-y-1 min-w-0 max-w-full">
@@ -1050,83 +1104,115 @@ export default function PlanAndBillingPage() {
             </div>
           ) : (
             <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
-              <div className="block sm:hidden divide-y divide-border/60">
-                {invoices.map((inv) => {
-                  const invoiceId = inv.uuid || inv.id || inv.invoice_number;
-                  const isPaid = inv.status?.toLowerCase() === "paid" || inv.payment_status?.toLowerCase() === "paid";
-                  const isFailed = inv.status?.toLowerCase() === "failed" || inv.payment_status?.toLowerCase() === "failed";
-                  const isDownloadingThis = isDownloadingInvoice && downloadingId === invoiceId;
-
-                  return (
-                    <div key={invoiceId} className="p-4 space-y-2.5 text-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono font-semibold text-primary">{inv.invoice_number}</span>
-                        {isPaid ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                            <Check className="w-3 h-3" />
-                            Paid
-                          </span>
-                        ) : isFailed ? (
-                          <span
-                            title={inv.payment_details?.failure_reason || "Payment declined"}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
-                          >
-                            <AlertTriangle className="w-3 h-3" />
-                            Failed
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                            Pending
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between text-muted-foreground gap-2">
-                        <span>
-                          Plan:{" "}
-                          <strong className="text-foreground capitalize">
-                            {inv.plan
-                              ? inv.plan
-                              : inv.invoice_type?.toUpperCase() === "THEME"
-                              ? "Storefront Theme"
-                              : inv.invoice_type?.toUpperCase() === "BOOKING"
-                              ? "Booking Service"
-                              : "Subscription Plan"}
-                          </strong>
-                        </span>
-                        <span className="font-bold text-foreground font-mono text-sm shrink-0">
-                          ₹{Number(inv.grand_total ?? inv.amount ?? 0).toLocaleString("en-IN")}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/50">
-                        <span>{new Date(inv.created_at || inv.date || Date.now()).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
-                        <span className="font-mono text-[10px]">
-                          {inv.stripe_payment_intent_id ? inv.stripe_payment_intent_id.slice(0, 16) + "…" : "Manual"}
-                        </span>
-                      </div>
-
-                      <div className="pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={isDownloadingThis}
-                          onClick={() => downloadInvoice(invoiceId, inv.invoice_url)}
-                          className="w-full text-xs gap-1.5 h-8 font-semibold cursor-pointer"
-                        >
-                          {isDownloadingThis ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <Download className="w-3.5 h-3.5" />
-                          )}
-                          Download Invoice PDF
-                        </Button>
-                      </div>
+              {/* Mobile Card View with Infinite Scroll */}
+              <div className="block sm:hidden w-full max-w-full">
+                <InfiniteScroll
+                  dataLength={mobileInvoices.length}
+                  next={fetchMoreMobileInvoices}
+                  hasMore={mobileHasMore}
+                  scrollableTarget="main-content-scroll"
+                  scrollThreshold={0.8}
+                  style={{ overflow: "visible" }}
+                  loader={
+                    <div className="flex items-center justify-center py-4 text-primary gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-xs font-semibold text-muted-foreground">Loading more invoices…</span>
                     </div>
-                  );
-                })}
+                  }
+                  endMessage={
+                    !mobileHasMore && mobileInvoices.length > 5 ? (
+                      <div className="text-center py-3">
+                        <span className="text-xs text-muted-foreground font-medium">All invoices loaded</span>
+                      </div>
+                    ) : null
+                  }
+                >
+                  <div className="divide-y divide-border/60">
+                    {mobileInvoices.map((inv) => {
+                      const invoiceId = inv.uuid || inv.id || inv.invoice_number;
+                      const isPaid = inv.status?.toLowerCase() === "paid" || inv.payment_status?.toLowerCase() === "paid";
+                      const isFailed = inv.status?.toLowerCase() === "failed" || inv.payment_status?.toLowerCase() === "failed";
+                      const isDownloadingThis = isDownloadingInvoice && downloadingId === invoiceId;
+
+                      return (
+                        <div key={invoiceId} className="p-4 space-y-2.5 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono font-semibold text-primary">{inv.invoice_number}</span>
+                            {isPaid ? (
+                              <Badge
+                                variant="outline"
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border-primary/25"
+                              >
+                                <Check className="w-3 h-3 text-primary" />
+                                Paid
+                              </Badge>
+                            ) : isFailed ? (
+                              <Badge
+                                variant="outline"
+                                title={inv.payment_details?.failure_reason || "Payment declined"}
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-destructive/10 text-destructive border-destructive/25"
+                              >
+                                <AlertTriangle className="w-3 h-3 text-destructive" />
+                                Failed
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-muted text-muted-foreground border-border/80"
+                              >
+                                Pending
+                              </Badge>
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-between text-muted-foreground gap-2">
+                            <span>
+                              Plan:{" "}
+                              <strong className="text-foreground capitalize">
+                                {inv.plan ||
+                                  (inv.invoice_type?.toUpperCase() === "THEME"
+                                    ? "Storefront Theme"
+                                    : inv.invoice_type?.toUpperCase() === "BOOKING"
+                                    ? "Booking Service"
+                                    : "Subscription Plan")}
+                              </strong>
+                            </span>
+                            <span className="font-bold text-foreground font-mono text-sm shrink-0">
+                              ₹{Number(inv.grand_total ?? inv.amount ?? 0).toLocaleString("en-IN")}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/50">
+                            <span>{new Date(inv.created_at || inv.date || Date.now()).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
+                            <span className="font-mono text-[10px]">
+                              {inv.stripe_payment_intent_id ? inv.stripe_payment_intent_id.slice(0, 16) + "…" : "Manual"}
+                            </span>
+                          </div>
+
+                          <div className="pt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={isDownloadingThis}
+                              onClick={() => downloadInvoice(invoiceId, inv.invoice_url)}
+                              className="w-full text-xs gap-1.5 h-8 font-semibold cursor-pointer"
+                            >
+                              {isDownloadingThis ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Download className="w-3.5 h-3.5" />
+                              )}
+                              Download Invoice PDF
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </InfiniteScroll>
               </div>
 
+              {/* Desktop Table */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
@@ -1173,22 +1259,29 @@ export default function PlanAndBillingPage() {
                           </td>
                           <td className="py-3.5 px-4">
                             {isPaid ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                <Check className="w-3 h-3" />
-                                Paid
-                              </span>
-                            ) : isFailed ? (
-                              <span
-                                title={inv.payment_details?.failure_reason || "Payment declined"}
-                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 cursor-help"
+                              <Badge
+                                variant="outline"
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border-primary/25"
                               >
-                                <AlertTriangle className="w-3 h-3" />
+                                <Check className="w-3 h-3 text-primary" />
+                                Paid
+                              </Badge>
+                            ) : isFailed ? (
+                              <Badge
+                                variant="outline"
+                                title={inv.payment_details?.failure_reason || "Payment declined"}
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-destructive/10 text-destructive border-destructive/25 cursor-help"
+                              >
+                                <AlertTriangle className="w-3 h-3 text-destructive" />
                                 Failed
-                              </span>
+                              </Badge>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                              <Badge
+                                variant="outline"
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-muted text-muted-foreground border-border/80"
+                              >
                                 Pending
-                              </span>
+                              </Badge>
                             )}
                           </td>
                           <td className="py-3.5 px-4 text-right">
@@ -1214,9 +1307,9 @@ export default function PlanAndBillingPage() {
                 </table>
               </div>
 
-              {/* Pagination Controls */}
+              {/* Desktop Pagination Controls */}
               {pagination && pagination.totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-border/70 bg-muted/20 text-xs text-muted-foreground">
+                <div className="hidden sm:flex flex-row items-center justify-between gap-3 p-4 border-t border-border/70 bg-muted/20 text-xs text-muted-foreground">
                   <div>
                     Showing page <strong className="text-foreground">{pagination.page}</strong> of{" "}
                     <strong className="text-foreground">{pagination.totalPages}</strong> ({pagination.total} invoices)
