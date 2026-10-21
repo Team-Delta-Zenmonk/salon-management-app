@@ -11,23 +11,48 @@ export interface SubscriptionInvoice {
   id: number;
   uuid: string;
   invoice_number: string;
-  plan: SubscriptionPlan;
-  billing_cycle: SubscriptionBillingCycle;
+  invoice_type?: "ALL" | "BOOKING" | "SUBSCRIPTION" | "THEME" | string;
+  plan?: SubscriptionPlan | string;
+  billing_cycle?: SubscriptionBillingCycle;
   amount: number | string;
-  currency: string;
-  status: SubscriptionInvoiceStatus;
-  payment_method: SubscriptionPaymentMethod;
+  grand_total?: number | string;
+  currency?: string;
+  status: SubscriptionInvoiceStatus | string;
+  payment_status?: string;
+  payment_method?: SubscriptionPaymentMethod;
   payment_details?: {
     card_last4?: string;
     card_brand?: string;
     upi_id?: string;
     [key: string]: any;
   } | null;
-  transaction_id: string;
+  transaction_id?: string;
   stripe_payment_intent_id?: string | null;
-  billing_period_start: string;
-  billing_period_end: string;
+  billing_period_start?: string;
+  billing_period_end?: string;
+  date?: string;
   created_at: string;
+  invoice_url?: string;
+}
+
+export interface InvoicesPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface GetInvoicesParams {
+  type?: "ALL" | "BOOKING" | "SUBSCRIPTION" | "THEME";
+  page?: number;
+  limit?: number;
+  order?: "ASC" | "DESC";
+  sort?: "ASC" | "DESC";
+}
+
+export interface GetInvoicesResponse {
+  invoices: SubscriptionInvoice[];
+  pagination?: InvoicesPagination;
 }
 
 export interface SubscriptionIntentResponse {
@@ -73,10 +98,19 @@ export const upgradeSalonSubscription = async (
   return res.data;
 };
 
-export const getSubscriptionInvoices = async (): Promise<SubscriptionInvoice[]> => {
-  const res = await axiosInstance.get<{ invoices: SubscriptionInvoice[] }>(
-    "/salons/subscription/invoices",
-    { withCredentials: true }
-  );
-  return res.data?.invoices || [];
+export const getInvoices = async (
+  params?: GetInvoicesParams
+): Promise<GetInvoicesResponse> => {
+  const res = await axiosInstance.get<GetInvoicesResponse>("/invoices", {
+    params,
+    withCredentials: true,
+  });
+  return res.data || { invoices: [] };
+};
+
+export const getSubscriptionInvoices = async (
+  params?: GetInvoicesParams
+): Promise<SubscriptionInvoice[]> => {
+  const res = await getInvoices(params || { type: "SUBSCRIPTION" });
+  return res.invoices || [];
 };

@@ -67,7 +67,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
   const handleDownloadInvoice = () => {
     if (booking?.uuid) {
-      downloadInvoice(booking.uuid);
+      downloadInvoice((booking as any)?.invoice?.uuid || booking.uuid, (booking as any)?.invoice?.invoice_url);
     }
   };
 

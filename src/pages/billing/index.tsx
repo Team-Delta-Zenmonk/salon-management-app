@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { APP_NAME } from "@/constants/app";
 import {
   loadStripe,
@@ -27,6 +28,10 @@ import {
   AlertTriangle,
   RefreshCw,
   CheckCircle2,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -35,15 +40,26 @@ import { getSalonProfileAction } from "@/features/auth/profile/get-salon-profile
 import { fetchSubscriptionPlans } from "@/features/subscription/fetch-subscription-plans.action";
 import {
   createSubscriptionIntent,
+  getInvoices,
   getSubscriptionInvoices,
   type SubscriptionInvoice,
+  type InvoicesPagination,
 } from "@/features/subscription/subscription.service";
+import { useDownloadInvoice } from "@/features/invoice/hooks/use-download-invoice";
+import { cn } from "@/lib/utils";
 import { SUBSCRIPTION_PLAN } from "@/common/enums/subscription-plan.enum";
 import { SUBSCRIPTION_STATUS } from "@/common/enums/subscription-status.enum";
 import { callSnack } from "@/components/snackbar";
 import { getStorefrontUrl } from "@/lib/domain";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -279,8 +295,18 @@ export default function PlanAndBillingPage() {
   const [isEnterpriseModalOpen, setIsEnterpriseModalOpen] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTab = searchParams.get("tab") === "invoices" ? "invoices" : "plans";
+
   const [invoices, setInvoices] = useState<SubscriptionInvoice[]>([]);
   const [isLoadingInvoices, setIsLoadingInvoices] = useState(false);
+  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<"ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING">("ALL");
+  const [sortOrder, setSortOrder] = useState<"DESC" | "ASC">("DESC");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<InvoicesPagination | null>(null);
+
+  const fetchRequestIdRef = useRef(0);
+  const { downloadInvoice, isDownloading: isDownloadingInvoice, downloadingId } = useDownloadInvoice();
 
   const trialPlan = reduxPlans.find((p) => p.id === "trial");
   const trialDurationDays = trialPlan?.duration_days ?? 14;
@@ -302,20 +328,84 @@ export default function PlanAndBillingPage() {
 
   const storefrontUrl = salon?.slug ? getStorefrontUrl(salon.slug) : null;
 
-  const fetchInvoices = useCallback(async () => {
+  const fetchInvoices = useCallback(async (
+    type: "ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING" = invoiceTypeFilter,
+    page: number = currentPage,
+    order: "DESC" | "ASC" = sortOrder
+  ) => {
+    const requestId = ++fetchRequestIdRef.current;
+    setIsLoadingInvoices(true);
+    // Clear invoices immediately so on slow 3G we never show stale invoices from another category
+    setInvoices([]);
+
     try {
-      setIsLoadingInvoices(true);
-      setInvoices(await getSubscriptionInvoices());
+      const res = await getInvoices({
+        type: type,
+        page: page,
+        limit: 10,
+        order: order,
+        sort: order,
+      });
+
+      if (requestId !== fetchRequestIdRef.current) return;
+
+      let fetchedInvoices = res.invoices || [];
+      if (order === "ASC") {
+        fetchedInvoices = [...fetchedInvoices].sort(
+          (a, b) => new Date(a.created_at || a.date || 0).getTime() - new Date(b.created_at || b.date || 0).getTime()
+        );
+      } else {
+        fetchedInvoices = [...fetchedInvoices].sort(
+          (a, b) => new Date(b.created_at || b.date || 0).getTime() - new Date(a.created_at || a.date || 0).getTime()
+        );
+      }
+
+      setInvoices(fetchedInvoices);
+      if (res.pagination) {
+        setPagination(res.pagination);
+      }
     } catch {
+      if (requestId === fetchRequestIdRef.current) {
+        setInvoices([]);
+      }
     } finally {
-      setIsLoadingInvoices(false);
+      if (requestId === fetchRequestIdRef.current) {
+        setIsLoadingInvoices(false);
+      }
     }
-  }, []);
+  }, [invoiceTypeFilter, currentPage, sortOrder]);
+
+  const handleTabChange = (tab: "plans" | "invoices") => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (tab === "invoices") {
+      nextParams.set("tab", "invoices");
+    } else {
+      nextParams.delete("tab");
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const handleFilterChange = (filter: "ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING") => {
+    setInvoiceTypeFilter(filter);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (order: "DESC" | "ASC") => {
+    setSortOrder(order);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
 
   useEffect(() => {
-    fetchInvoices();
+    fetchInvoices(invoiceTypeFilter, currentPage, sortOrder);
+  }, [invoiceTypeFilter, currentPage, sortOrder]);
+
+  useEffect(() => {
     dispatch(fetchSubscriptionPlans());
-  }, [fetchInvoices, dispatch]);
+  }, [dispatch]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -420,11 +510,43 @@ export default function PlanAndBillingPage() {
           Plan & Billing Management
         </h1>
         <p className="text-muted-foreground text-sm mt-1 max-w-2xl">
-          Manage your {appName} subscription, monitor your {trialDurationDays}-day trial, and upgrade anytime.
+          Manage your {appName} subscription, monitor your {trialDurationDays}-day trial, and access GST receipts.
         </p>
       </motion.div>
 
-      <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/40 p-4 sm:p-6 md:p-8 shadow-xs">
+      {/* Navigation Tabs */}
+      <div className="flex items-center gap-2 border-b border-border/70 pb-px">
+        <button
+          type="button"
+          onClick={() => handleTabChange("plans")}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-all cursor-pointer",
+            currentTab === "plans"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>Subscription Plans</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("invoices")}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-all cursor-pointer",
+            currentTab === "invoices"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <FileText className="w-4 h-4" />
+          <span>Invoices & Receipts</span>
+        </button>
+      </div>
+
+      {currentTab === "plans" ? (
+        <div className="space-y-6 sm:space-y-8">
+          <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/40 p-4 sm:p-6 md:p-8 shadow-xs">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-3 min-w-0 max-w-full">
@@ -785,189 +907,348 @@ export default function PlanAndBillingPage() {
           </>
         )}
       </motion.div>
-
-      <div className="space-y-4 pt-6 border-t border-border/70 max-w-full min-w-0">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-bold text-foreground">Billing Receipts & Invoices</h3>
-            <p className="text-xs text-muted-foreground">
-              GST receipts and verified Stripe payment records.
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchInvoices}
-            disabled={isLoadingInvoices}
-            className="text-xs gap-1.5 self-start sm:self-auto"
-          >
-            {isLoadingInvoices ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <>
-                <RefreshCw className="w-3.5 h-3.5" />
-                Refresh
-              </>
-            )}
-          </Button>
         </div>
+      ) : (
+        <div className="space-y-4 max-w-full min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Billing Receipts & Invoices</h3>
+              <p className="text-xs text-muted-foreground">
+                GST receipts and verified Stripe records for subscription plans and storefront themes.
+              </p>
+            </div>
 
-        {isLoadingInvoices ? (
-          <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
-            <div className="block sm:hidden divide-y divide-border/60">
-              {[1, 2, 3].map((i) => (
-                <div key={`invoice-skeleton-mobile-${i}`} className="p-4 space-y-3 animate-pulse">
-                  <div className="flex items-center justify-between">
-                    <div className="h-4 w-28 bg-muted rounded-md" />
-                    <div className="h-5 w-16 bg-muted/80 rounded-full" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="h-3.5 w-32 bg-muted/60 rounded-md" />
-                    <div className="h-4 w-20 bg-muted/80 rounded-md" />
-                  </div>
-                  <div className="flex items-center justify-between pt-1 border-t border-border/40">
-                    <div className="h-3 w-24 bg-muted/40 rounded-md" />
-                    <div className="h-3 w-28 bg-muted/40 rounded-md" />
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
+              <div className="w-[185px]">
+                <Select
+                  value={invoiceTypeFilter}
+                  onValueChange={(val) => handleFilterChange(val as "ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING")}
+                >
+                  <SelectTrigger className="h-9 text-xs bg-card border-border/80 rounded-xl cursor-pointer">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <SelectValue placeholder="All Invoices">
+                        {invoiceTypeFilter === "ALL"
+                          ? "All Invoices"
+                          : invoiceTypeFilter === "SUBSCRIPTION"
+                          ? "Subscription Plans"
+                          : invoiceTypeFilter === "THEME"
+                          ? "Storefront Themes"
+                          : "Booking Invoices"}
+                      </SelectValue>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent align="start" className="z-50 min-w-[185px] bg-card border border-border/80 shadow-md rounded-xl p-1">
+                    <SelectItem value="ALL" className="text-xs cursor-pointer rounded-lg">All Invoices</SelectItem>
+                    <SelectItem value="SUBSCRIPTION" className="text-xs cursor-pointer rounded-lg">Subscription Plans</SelectItem>
+                    <SelectItem value="THEME" className="text-xs cursor-pointer rounded-lg">Storefront Themes</SelectItem>
+                    <SelectItem value="BOOKING" className="text-xs cursor-pointer rounded-lg">Booking Invoices</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="w-[155px]">
+                <Select
+                  value={sortOrder}
+                  onValueChange={(val) => handleSortChange(val as "DESC" | "ASC")}
+                >
+                  <SelectTrigger className="h-9 text-xs bg-card border-border/80 rounded-xl cursor-pointer">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <SelectValue placeholder="Newest First">
+                        {sortOrder === "DESC" ? "Newest First" : "Oldest First"}
+                      </SelectValue>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent align="start" className="z-50 min-w-[155px] bg-card border border-border/80 shadow-md rounded-xl p-1">
+                    <SelectItem value="DESC" className="text-xs cursor-pointer rounded-lg">Newest First (Desc)</SelectItem>
+                    <SelectItem value="ASC" className="text-xs cursor-pointer rounded-lg">Oldest First (Asc)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchInvoices(invoiceTypeFilter, currentPage, sortOrder)}
+                disabled={isLoadingInvoices}
+                className="text-xs gap-1.5 h-9 px-3 rounded-xl cursor-pointer"
+              >
+                {isLoadingInvoices ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Refresh
+                  </>
+                )}
+              </Button>
             </div>
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-3 px-4">Invoice #</th>
-                    <th className="py-3 px-4">Date</th>
-                    <th className="py-3 px-4">Plan</th>
-                    <th className="py-3 px-4">Stripe ID</th>
-                    <th className="py-3 px-4">Amount</th>
-                    <th className="py-3 px-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60">
-                  {[1, 2, 3].map((i) => (
-                    <tr key={`invoice-skeleton-row-${i}`} className="animate-pulse">
-                      <td className="py-4 px-4"><div className="h-4 w-28 bg-muted rounded-md" /></td>
-                      <td className="py-4 px-4"><div className="h-4 w-24 bg-muted/70 rounded-md" /></td>
-                      <td className="py-4 px-4"><div className="h-4 w-32 bg-muted/70 rounded-md" /></td>
-                      <td className="py-4 px-4"><div className="h-3.5 w-36 bg-muted/50 rounded-md" /></td>
-                      <td className="py-4 px-4"><div className="h-4 w-20 bg-muted/80 rounded-md" /></td>
-                      <td className="py-4 px-4"><div className="h-5 w-16 bg-muted rounded-full" /></td>
+          </div>
+
+          {isLoadingInvoices ? (
+            <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
+              <div className="block sm:hidden divide-y divide-border/60">
+                {[1, 2, 3].map((i) => (
+                  <div key={`invoice-skeleton-mobile-${i}`} className="p-4 space-y-3 animate-pulse">
+                    <div className="flex items-center justify-between">
+                      <div className="h-4 w-28 bg-muted rounded-md" />
+                      <div className="h-5 w-16 bg-muted/80 rounded-full" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="h-3.5 w-32 bg-muted/60 rounded-md" />
+                      <div className="h-4 w-20 bg-muted/80 rounded-md" />
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-border/40">
+                      <div className="h-3 w-24 bg-muted/40 rounded-md" />
+                      <div className="h-3 w-28 bg-muted/40 rounded-md" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-3 px-4">Invoice #</th>
+                      <th className="py-3 px-4">Date</th>
+                      <th className="py-3 px-4">Type / Item</th>
+                      <th className="py-3 px-4">Stripe ID</th>
+                      <th className="py-3 px-4">Amount</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 text-right">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {[1, 2, 3].map((i) => (
+                      <tr key={`invoice-skeleton-row-${i}`} className="animate-pulse">
+                        <td className="py-4 px-4"><div className="h-4 w-28 bg-muted rounded-md" /></td>
+                        <td className="py-4 px-4"><div className="h-4 w-24 bg-muted/70 rounded-md" /></td>
+                        <td className="py-4 px-4"><div className="h-4 w-32 bg-muted/70 rounded-md" /></td>
+                        <td className="py-4 px-4"><div className="h-3.5 w-36 bg-muted/50 rounded-md" /></td>
+                        <td className="py-4 px-4"><div className="h-4 w-20 bg-muted/80 rounded-md" /></td>
+                        <td className="py-4 px-4"><div className="h-5 w-16 bg-muted rounded-full" /></td>
+                        <td className="py-4 px-4 text-right"><div className="h-8 w-16 bg-muted/60 rounded-md ml-auto" /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        ) : invoices.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 p-6 sm:p-8 text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
-              <FileText className="w-5 h-5" />
+          ) : invoices.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border/80 bg-muted/20 p-8 sm:p-12 text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
+                <FileText className="w-6 h-6" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">
+                {invoiceTypeFilter === "ALL" ? "No paid invoices yet" : `No ${invoiceTypeFilter.toLowerCase()} invoices`}
+              </p>
+              <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                {invoiceTypeFilter === "ALL"
+                  ? "Your GST receipts and Stripe transaction records will appear here after your first payment."
+                  : `There are currently no ${invoiceTypeFilter.toLowerCase()} invoices recorded.`}
+              </p>
             </div>
-            <p className="text-sm font-semibold text-foreground">No paid invoices yet</p>
-            <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              Your GST receipts and Stripe transaction records will appear here after your first payment.
-            </p>
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
-            <div className="block sm:hidden divide-y divide-border/60">
-              {invoices.map((inv) => (
-                <div key={inv.uuid} className="p-4 space-y-2.5 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-semibold text-primary">{inv.invoice_number}</span>
-                    {inv.status === "paid" ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                        <Check className="w-3 h-3" />
-                        Paid
-                      </span>
-                    ) : inv.status === "failed" ? (
-                      <span
-                        title={inv.payment_details?.failure_reason || "Payment declined"}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
-                      >
-                        <AlertTriangle className="w-3 h-3" />
-                        Failed
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        Pending
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between text-muted-foreground">
-                    <span>Plan: <strong className="text-foreground capitalize">{inv.plan}</strong></span>
-                    <span className="font-bold text-foreground font-mono text-sm">₹{Number(inv.amount).toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/50">
-                    <span>{new Date(inv.created_at).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
-                    <span className="font-mono text-[10px]">
-                      {inv.stripe_payment_intent_id ? inv.stripe_payment_intent_id.slice(0, 16) + "…" : "Manual"}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-3 px-4">Invoice #</th>
-                    <th className="py-3 px-4">Date</th>
-                    <th className="py-3 px-4">Plan</th>
-                    <th className="py-3 px-4">Stripe ID</th>
-                    <th className="py-3 px-4">Amount</th>
-                    <th className="py-3 px-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60 text-foreground">
-                  {invoices.map((inv) => (
-                    <tr key={inv.uuid} className="hover:bg-muted/30 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-semibold text-primary">
-                        {inv.invoice_number}
-                      </td>
-                      <td className="py-3.5 px-4 text-muted-foreground">
-                        {new Date(inv.created_at).toLocaleDateString(undefined, { dateStyle: "medium" })}
-                      </td>
-                      <td className="py-3.5 px-4 font-medium capitalize">
-                        {inv.plan} ({trialDurationDays ?? (0)} days)
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-muted-foreground text-[10px]">
-                        {inv.stripe_payment_intent_id
-                          ? inv.stripe_payment_intent_id.slice(0, 24) + "…"
-                          : "Manual"}
-                      </td>
-                      <td className="py-3.5 px-4 font-bold font-mono">
-                        ₹{Number(inv.amount).toLocaleString("en-IN")}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        {inv.status === "paid" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          ) : (
+            <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
+              <div className="block sm:hidden divide-y divide-border/60">
+                {invoices.map((inv) => {
+                  const invoiceId = inv.uuid || inv.id || inv.invoice_number;
+                  const isPaid = inv.status?.toLowerCase() === "paid" || inv.payment_status?.toLowerCase() === "paid";
+                  const isFailed = inv.status?.toLowerCase() === "failed" || inv.payment_status?.toLowerCase() === "failed";
+                  const isDownloadingThis = isDownloadingInvoice && downloadingId === invoiceId;
+
+                  return (
+                    <div key={invoiceId} className="p-4 space-y-2.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-semibold text-primary">{inv.invoice_number}</span>
+                        {isPaid ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                             <Check className="w-3 h-3" />
                             Paid
                           </span>
-                        ) : inv.status === "failed" ? (
+                        ) : isFailed ? (
                           <span
                             title={inv.payment_details?.failure_reason || "Payment declined"}
-                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 cursor-help"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
                           >
                             <AlertTriangle className="w-3 h-3" />
                             Failed
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                             Pending
                           </span>
                         )}
-                      </td>
+                      </div>
+
+                      <div className="flex items-center justify-between text-muted-foreground gap-2">
+                        <span>
+                          Plan:{" "}
+                          <strong className="text-foreground capitalize">
+                            {inv.plan
+                              ? inv.plan
+                              : inv.invoice_type?.toUpperCase() === "THEME"
+                              ? "Storefront Theme"
+                              : inv.invoice_type?.toUpperCase() === "BOOKING"
+                              ? "Booking Service"
+                              : "Subscription Plan"}
+                          </strong>
+                        </span>
+                        <span className="font-bold text-foreground font-mono text-sm shrink-0">
+                          ₹{Number(inv.grand_total ?? inv.amount ?? 0).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/50">
+                        <span>{new Date(inv.created_at || inv.date || Date.now()).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
+                        <span className="font-mono text-[10px]">
+                          {inv.stripe_payment_intent_id ? inv.stripe_payment_intent_id.slice(0, 16) + "…" : "Manual"}
+                        </span>
+                      </div>
+
+                      <div className="pt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={isDownloadingThis}
+                          onClick={() => downloadInvoice(invoiceId, inv.invoice_url)}
+                          className="w-full text-xs gap-1.5 h-8 font-semibold cursor-pointer"
+                        >
+                          {isDownloadingThis ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Download className="w-3.5 h-3.5" />
+                          )}
+                          Download Invoice PDF
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-3 px-4">Invoice #</th>
+                      <th className="py-3 px-4">Date</th>
+                      <th className="py-3 px-4">Plan</th>
+                      <th className="py-3 px-4">Stripe ID</th>
+                      <th className="py-3 px-4">Amount</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 text-right">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-border/60 text-foreground">
+                    {invoices.map((inv) => {
+                      const invoiceId = inv.uuid || inv.id || inv.invoice_number;
+                      const isPaid = inv.status?.toLowerCase() === "paid" || inv.payment_status?.toLowerCase() === "paid";
+                      const isFailed = inv.status?.toLowerCase() === "failed" || inv.payment_status?.toLowerCase() === "failed";
+                      const isDownloadingThis = isDownloadingInvoice && downloadingId === invoiceId;
+
+                      return (
+                        <tr key={invoiceId} className="hover:bg-muted/30 transition-colors">
+                          <td className="py-3.5 px-4 font-mono font-semibold text-primary">
+                            {inv.invoice_number}
+                          </td>
+                          <td className="py-3.5 px-4 text-muted-foreground whitespace-nowrap">
+                            {new Date(inv.created_at || inv.date || Date.now()).toLocaleDateString(undefined, { dateStyle: "medium" })}
+                          </td>
+                          <td className="py-3.5 px-4 font-medium capitalize">
+                            {inv.plan ||
+                              (inv.invoice_type?.toUpperCase() === "THEME"
+                                ? "Storefront Theme"
+                                : inv.invoice_type?.toUpperCase() === "BOOKING"
+                                ? "Booking Service"
+                                : "Subscription Plan")}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-muted-foreground text-[10px]">
+                            {inv.stripe_payment_intent_id
+                              ? inv.stripe_payment_intent_id.slice(0, 24) + "…"
+                              : "Manual"}
+                          </td>
+                          <td className="py-3.5 px-4 font-bold font-mono whitespace-nowrap">
+                            ₹{Number(inv.grand_total ?? inv.amount ?? 0).toLocaleString("en-IN")}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            {isPaid ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                <Check className="w-3 h-3" />
+                                Paid
+                              </span>
+                            ) : isFailed ? (
+                              <span
+                                title={inv.payment_details?.failure_reason || "Payment declined"}
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 cursor-help"
+                              >
+                                <AlertTriangle className="w-3 h-3" />
+                                Failed
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                Pending
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={isDownloadingThis}
+                              onClick={() => downloadInvoice(invoiceId, inv.invoice_url)}
+                              className="text-xs gap-1.5 h-8 px-2.5 font-semibold cursor-pointer"
+                            >
+                              {isDownloadingThis ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Download className="w-3.5 h-3.5" />
+                              )}
+                              <span>PDF</span>
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination Controls */}
+              {pagination && pagination.totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-border/70 bg-muted/20 text-xs text-muted-foreground">
+                  <div>
+                    Showing page <strong className="text-foreground">{pagination.page}</strong> of{" "}
+                    <strong className="text-foreground">{pagination.totalPages}</strong> ({pagination.total} invoices)
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage <= 1 || isLoadingInvoices}
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      className="h-8 px-2.5 gap-1 text-xs cursor-pointer"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                      <span>Previous</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage >= pagination.totalPages || isLoadingInvoices}
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      className="h-8 px-2.5 gap-1 text-xs cursor-pointer"
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <Dialog open={!!checkoutPlan || !!loadingPlan || isActivating} onOpenChange={closeCheckout}>
         <DialogContent className="w-[95vw] sm:max-w-xl max-h-[92vh] flex flex-col p-0 border border-border/80 rounded-2xl overflow-hidden">

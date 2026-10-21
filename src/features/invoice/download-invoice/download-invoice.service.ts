@@ -4,7 +4,7 @@ export interface DownloadInvoiceResponse {
   url: string | null;
 }
 
-export const downloadInvoiceService = async (bookingId: number | string): Promise<DownloadInvoiceResponse> => {
-  const response = await axiosInstance.get<DownloadInvoiceResponse>(`/invoices/booking/${bookingId}/download`);
+export const downloadInvoiceService = async (invoiceOrBookingId: number | string): Promise<DownloadInvoiceResponse> => {
+  const response = await axiosInstance.get<DownloadInvoiceResponse>(`/invoices/${invoiceOrBookingId}/download`);
   return response.data;
 };
