@@ -1,5 +1,5 @@
 import { APP_NAME } from "@/constants/app";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FormProvider, useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,8 +10,9 @@ import AddressStep from "./_components/onboarding-steps/address-step";
 import { callSnack } from "../../components/snackbar";
 import { SalonOnboardingSchema, type SalonOnboardingForm } from "./schema/salon-onboarding.schema";
 import { updateSalon } from "../../features/salon-onboarding/update-salon/update-salon.service";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { completeOnboarding } from "../../features/auth/auth.slice";
+import { getSalonProfileAction } from "../../features/auth/profile/get-salon-profile/getSalonProfile.action";
 import { Button } from "../../components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import OnboardingSuccessDialog from "./_components/onboarding-success-dialog";
@@ -55,11 +56,13 @@ export default function SalonOnboarding() {
   const [activeStep, setActiveStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFetchingData, setIsFetchingData] = useState<boolean>(true);
   const [successModalOpen, setSuccessModalOpen] = useState<boolean>(false);
   const [confirmedSlug, setConfirmedSlug] = useState<string>("");
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
+  const { salon } = useAppSelector((state) => state.auth);
 
   const intendedPlan: "monthly" | "yearly" | undefined =
     location.state?.plan === "yearly" || location.state?.plan === "monthly"
@@ -87,7 +90,78 @@ export default function SalonOnboarding() {
     },
   });
 
-  const { trigger, getValues } = methods;
+  const { trigger, getValues, reset } = methods;
+
+  useEffect(() => {
+    const fetchExistingData = async () => {
+      try {
+        let salonData = salon;
+        if (salon?.uuid) {
+          const res = await dispatch(getSalonProfileAction(salon.uuid)).unwrap();
+          if (res) {
+            salonData = res;
+          }
+        }
+
+        if (salonData) {
+          const logoObj = salonData.logo
+            ? {
+                url: salonData.logo,
+                secure_url: salonData.logo,
+                public_id: "logo",
+                resource_type: "image",
+                filename: "Current Logo",
+              }
+            : null;
+
+          const photosArr = Array.isArray(salonData.photos)
+            ? salonData.photos.map((p: any, idx: number) =>
+                typeof p === "string"
+                  ? {
+                      url: p,
+                      secure_url: p,
+                      public_id: `photo-${idx}`,
+                      resource_type: "image",
+                      filename: `Photo ${idx + 1}`,
+                    }
+                  : {
+                      ...p,
+                      url: p.secure_url || p.url,
+                      secure_url: p.secure_url || p.url,
+                      filename: p.filename || p.public_id || `Photo ${idx + 1}`,
+                      public_id: p.public_id || `photo-${idx}`,
+                      resource_type: p.resource_type || "image",
+                    }
+              )
+            : [];
+
+          reset({
+            owner: {
+              owner_name: salonData.owner_name || salonData.name || "",
+            },
+            salon: {
+              slug: salonData.slug || "",
+              type: salonData.type || "",
+              logo: logoObj as any,
+              photos: photosArr as any,
+            },
+            address: {
+              address: salonData.address || "",
+              map_link: salonData.map_link || "",
+              latitude: salonData.latitude ? String(salonData.latitude) : undefined,
+              longitude: salonData.longitude ? String(salonData.longitude) : undefined,
+            },
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load onboarding data:", err);
+      } finally {
+        setIsFetchingData(false);
+      }
+    };
+
+    fetchExistingData();
+  }, [salon?.uuid, dispatch, reset]);
 
   const handleNext = async () => {
     let fieldsToValidate: (FieldPath<SalonOnboardingForm>)[] = [];
@@ -223,7 +297,7 @@ export default function SalonOnboarding() {
           </div>
 
           <div className="w-full max-w-3xl my-auto py-2">
-            <div className="bg-card dark:bg-neutral-900 border border-border/50 rounded-2xl shadow-xl shadow-foreground/5 overflow-hidden flex flex-col md:flex-row h-[80vh] sm:h-[580px] max-h-[80vh] sm:max-h-[580px]">
+            <div className="bg-card dark:bg-neutral-900 border border-border/50 rounded-2xl shadow-xl shadow-foreground/5 overflow-hidden flex flex-col md:flex-row min-h-[480px] h-auto md:h-[580px] max-h-[calc(100dvh-3rem)]">
               
               <div className="flex md:hidden items-start justify-between px-6 pt-5 pb-3 border-b border-border/50 bg-muted/10 shrink-0">
                 {STEPS.map((step, i) => {
@@ -311,21 +385,28 @@ export default function SalonOnboarding() {
               </div>
 
               <div className="px-6 py-4 flex-1 overflow-y-auto min-h-0">
-                <AnimatePresence mode="wait" custom={direction}>
-                  <motion.div
-                    key={activeStep}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    {activeStep === 0 && <OwnerStep />}
-                    {activeStep === 1 && <SalonStep />}
-                    {activeStep === 2 && <AddressStep />}
-                  </motion.div>
-                </AnimatePresence>
+                {isFetchingData ? (
+                  <div className="h-full flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
+                    <Loader2 className="w-7 h-7 animate-spin text-primary" />
+                    <span className="text-xs font-medium">Loading your salon details...</span>
+                  </div>
+                ) : (
+                  <AnimatePresence mode="wait" custom={direction}>
+                    <motion.div
+                      key={activeStep}
+                      custom={direction}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      {activeStep === 0 && <OwnerStep />}
+                      {activeStep === 1 && <SalonStep />}
+                      {activeStep === 2 && <AddressStep />}
+                    </motion.div>
+                  </AnimatePresence>
+                )}
               </div>
 
               <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-muted/20 shrink-0">

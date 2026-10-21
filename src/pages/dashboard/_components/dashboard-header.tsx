@@ -125,7 +125,7 @@ export const DashboardHeader = ({
                 onClick={onStripeConnect}
                 disabled={isConnecting}
               >
-                {isConnecting ? "Redirecting..." : "Connect Stripe"}
+                {isConnecting ? "Redirecting..." : "Connect Account"}
               </Button>
             </div>
           ) : (

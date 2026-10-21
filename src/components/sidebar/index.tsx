@@ -1,7 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { navigationItems } from "../../layouts/navigation";
-import SidebarNavList from "./_components/sidebar-nav-list";
+import { AccordionNavList } from "./_components/accordion-nav-list";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
@@ -23,9 +22,9 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
 
   const drawerContent = (
     <div className="flex flex-col h-full bg-card">
-      <div className={cn("border-b border-border h-[72px] flex items-center shrink-0", desktopCollapsed ? "justify-center px-0" : "pl-4 pr-10")}>
+      <div className={cn("border-b border-border h-[72px] flex items-center shrink-0", desktopCollapsed ? "justify-center px-0" : "pl-4 pr-6")}>
         <div className={cn("flex items-center", desktopCollapsed ? "justify-center" : "space-x-3 w-full")}>
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 overflow-hidden shrink-0 shadow-xs border border-border/50">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 overflow-hidden shrink-0 shadow-xs border border-border/50">
             <img
               src={salon?.logo || "/management-icon.png"}
               alt={salon?.name || "Salon Logo"}
@@ -36,15 +35,18 @@ const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSi
             <div className="min-w-0 flex-1">
               <EllipsisCell
                 value={salon?.name || APP_NAME}
-                maxChars={20}
-                className="text-base font-semibold text-foreground capitalize"
+                maxChars={18}
+                className="text-sm font-bold text-foreground capitalize block"
               />
+              <span className="text-[10px] text-muted-foreground block leading-none mt-1">
+                Workspace Console
+              </span>
             </div>
           )}
         </div>
       </div>
       <div className={cn("flex-1 overflow-y-auto", desktopCollapsed ? "px-2 py-3" : "p-3")}>
-        <SidebarNavList items={navigationItems} isDesktop={isDesktop} desktopCollapsed={desktopCollapsed} onItemClick={onToggleSidebar} />
+        <AccordionNavList isDesktop={isDesktop} desktopCollapsed={desktopCollapsed} onItemClick={onToggleSidebar} />
       </div>
     </div>
   );

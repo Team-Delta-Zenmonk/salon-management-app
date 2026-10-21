@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { User, Layers } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 import { useAppDispatch } from "../../store/hooks";
 import { listServicesAction } from "../../features/service/list-services/list-service.action";
 import { listStaffAction } from "../../features/staff/list-staff/list-staff.action";
@@ -24,7 +25,10 @@ const itemVariants: Variants = {
 
 export default function StaffServiceManagementPage() {
   const dispatch = useAppDispatch();
-  const [viewMode, setViewMode] = useState<ViewMode>("staff");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentView = searchParams.get("view");
+  const viewMode: ViewMode = currentView === "service" ? "service" : "staff";
 
   useEffect(() => {
     dispatch(listServicesAction({ page: 1, limit: 10 }));
@@ -32,7 +36,11 @@ export default function StaffServiceManagementPage() {
   }, [dispatch]);
 
   const handleViewChange = (newMode: ViewMode) => {
-    setViewMode(newMode);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("view", newMode);
+      return next;
+    });
   };
 
   return (

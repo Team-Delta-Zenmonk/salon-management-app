@@ -21,7 +21,7 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex h-screen h-[100dvh] max-h-[100dvh] bg-background text-foreground overflow-hidden">
       <Sidebar
         drawerWidth={drawerWidth}
         mobileOpen={mobileOpen}
@@ -30,7 +30,7 @@ const Layout = () => {
         isDesktop={isDesktop}
       />
 
-      <main className="flex flex-col flex-1 h-screen min-w-0">
+      <main className="flex flex-col flex-1 h-full min-h-0 min-w-0 overflow-hidden">
         <Topbar onMenuClick={handleToggleSidebar} />
         <div id="main-content-scroll" className="flex-1 min-h-0 overflow-y-auto">
           <div className="w-full mx-auto py-3.5 sm:py-6 lg:py-8 flex flex-col min-h-full pl-4 pr-[calc(1rem-6px)] sm:pl-6 sm:pr-[calc(1.5rem-6px)] lg:pl-8 lg:pr-[calc(2rem-6px)]">

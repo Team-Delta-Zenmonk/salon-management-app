@@ -41,9 +41,9 @@ const CustomDrawer = ({
     <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <SheetContent
         side="left"
-        style={{ maxWidth: widthStyle, width: "100%" }}
+        style={{ maxWidth: `min(${widthStyle}, calc(100vw - 2rem))`, width: "100%" }}
         className={cn(
-          "p-0 border-r-border",
+          "p-0 border-r-border overflow-hidden",
           !showOn.xs && "hidden md:block",
           !showOn.md && "md:hidden"
         )}

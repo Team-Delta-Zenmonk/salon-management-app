@@ -107,7 +107,7 @@ export default function Dashboard() {
         window.location.href = res.message.url;
       }
     } catch (error) {
-      console.error("Failed to connect stripe:", error);
+      console.error("Failed to connect account:", error);
     } finally {
       setIsConnecting(false);
     }
