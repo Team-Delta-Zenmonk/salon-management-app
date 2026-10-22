@@ -10,19 +10,26 @@ interface UseNotificationSocketOptions {
   salonId?: number | null;
   enabled: boolean;
   onNotificationReceived?: (notification: NotificationItem) => void;
+  onThemePurchased?: (data: unknown) => void;
 }
 
 export function useNotificationSocket({
   salonId,
   enabled,
   onNotificationReceived,
+  onThemePurchased,
 }: UseNotificationSocketOptions) {
   const socketRef = useRef<Socket | null>(null);
   const onNotificationReceivedRef = useRef(onNotificationReceived);
+  const onThemePurchasedRef = useRef(onThemePurchased);
 
   useEffect(() => {
     onNotificationReceivedRef.current = onNotificationReceived;
   }, [onNotificationReceived]);
+
+  useEffect(() => {
+    onThemePurchasedRef.current = onThemePurchased;
+  }, [onThemePurchased]);
 
   useEffect(() => {
     if (!enabled || !salonId) {
@@ -75,11 +82,22 @@ export function useNotificationSocket({
       }
     );
 
+    socket.on(
+      NOTIFICATION_SOCKET_EVENTS.THEME_PURCHASED,
+      (themeData: unknown) => {
+        if (import.meta.env.DEV) {
+          console.log("[NotificationSocket] THEME_PURCHASED received:", themeData);
+        }
+        onThemePurchasedRef.current?.(themeData);
+      }
+    );
+
     return () => {
       socket.off(NOTIFICATION_SOCKET_EVENTS.CONNECT);
       socket.off(NOTIFICATION_SOCKET_EVENTS.CONNECTED);
       socket.off(NOTIFICATION_SOCKET_EVENTS.CONNECT_ERROR);
       socket.off(NOTIFICATION_SOCKET_EVENTS.NOTIFICATION_RECEIVED);
+      socket.off(NOTIFICATION_SOCKET_EVENTS.THEME_PURCHASED);
       socket.disconnect();
       socketRef.current = null;
     };

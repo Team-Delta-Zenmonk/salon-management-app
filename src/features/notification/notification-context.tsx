@@ -33,6 +33,7 @@ interface NotificationContextValue {
   markAllAsRead: () => Promise<void>;
   deleteNotification: (uuid: string) => Promise<void>;
   requestPermission: () => Promise<boolean>;
+  onThemePurchasedEvent?: (callback: (data: unknown) => void) => () => void;
 }
 
 const NotificationContext = createContext<NotificationContextValue | undefined>(undefined);
@@ -90,10 +91,30 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     showBrowserNotification(newNotification);
   }, []);
 
+  const themePurchasedListenersRef = React.useRef<Set<(data: unknown) => void>>(new Set());
+
+  const onThemePurchasedEvent = useCallback((callback: (data: unknown) => void) => {
+    themePurchasedListenersRef.current.add(callback);
+    return () => {
+      themePurchasedListenersRef.current.delete(callback);
+    };
+  }, []);
+
+  const handleThemePurchased = useCallback((data: unknown) => {
+    themePurchasedListenersRef.current.forEach((cb) => {
+      try {
+        cb(data);
+      } catch (e) {
+        console.error("Error in themePurchased listener:", e);
+      }
+    });
+  }, []);
+
   useNotificationSocket({
     salonId: salon?.id,
     enabled: isAuthenticated,
     onNotificationReceived: handleNotificationReceived,
+    onThemePurchased: handleThemePurchased,
   });
 
   useEffect(() => {
@@ -189,6 +210,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       markAllAsRead,
       deleteNotification,
       requestPermission,
+      onThemePurchasedEvent,
     }),
     [
       notifications,
@@ -201,6 +223,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       markAllAsRead,
       deleteNotification,
       requestPermission,
+      onThemePurchasedEvent,
     ]
   );
 

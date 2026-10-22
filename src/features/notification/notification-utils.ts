@@ -85,6 +85,15 @@ export function getNotificationMetadata(type: NotificationType): NotificationMet
         dotClass: "bg-primary",
         targetRoute: () => "/dashboard",
       };
+    case "THEME_PURCHASED":
+      return {
+        icon: Sparkles,
+        colorClass: "text-primary",
+        bgClass: "bg-primary/10",
+        borderClass: "border-primary/20",
+        dotClass: "bg-primary",
+        targetRoute: () => "/appearance",
+      };
     default:
       return {
         icon: Bell,

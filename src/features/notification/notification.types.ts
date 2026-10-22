@@ -5,7 +5,8 @@ export type NotificationType =
   | "BOOKING_CANCELLED"
   | "BOOKING_COMPLETED"
   | "BOOKING_DELETED"
-  | "SALON_ONBOARDED";
+  | "SALON_ONBOARDED"
+  | "THEME_PURCHASED";
 
 export interface NotificationData {
   booking_uuid?: string;

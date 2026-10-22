@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Store, Sparkles, RefreshCw, AlertCircle, Loader2 } from "lucide-react";
+import { Store, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { callSnack } from "@/components/snackbar";
 import { useAppSelector } from "@/store/hooks";
 import type { RootState } from "@/store/store";
+import { useNotifications } from "@/features/notification/notification-context";
 import {
   getStorefrontThemesService,
   activateStorefrontThemeService,
@@ -17,15 +17,14 @@ import { ThemeCheckoutModal } from "./theme-checkout-modal";
 
 export const StorefrontThemesSection: React.FC = () => {
   const salon = useAppSelector((state: RootState) => state.auth.salon);
+  const { onThemePurchasedEvent, notifications } = useNotifications();
   const [themes, setThemes] = useState<StorefrontTheme[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Interaction states
   const [applyingCode, setApplyingCode] = useState<string | null>(null);
   const [previewTheme, setPreviewTheme] = useState<StorefrontTheme | null>(null);
 
-  // Purchase states
   const [purchasingTheme, setPurchasingTheme] = useState<StorefrontTheme | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isPreparingCheckout, setIsPreparingCheckout] = useState(false);
@@ -51,7 +50,53 @@ export const StorefrontThemesSection: React.FC = () => {
     fetchThemes();
   }, [fetchThemes]);
 
-  // Flow A: Apply an owned / free theme
+  useEffect(() => {
+    if (!onThemePurchasedEvent) return;
+    const unsubscribe = onThemePurchasedEvent((data: any) => {
+      const targetThemeId = data?.theme_id;
+      const targetThemeCode = data?.theme_code;
+
+      setThemes((prev) =>
+        prev.map((t) => {
+          const isMatch =
+            (targetThemeId && (t.id === targetThemeId || Number(t.id) === Number(targetThemeId))) ||
+            (targetThemeCode && t.code === targetThemeCode);
+          if (isMatch) {
+            return { ...t, is_purchased: true };
+          }
+          return t;
+        })
+      );
+
+      fetchThemes(true);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [onThemePurchasedEvent, fetchThemes]);
+
+  const latestNotification = notifications[0];
+  useEffect(() => {
+    if (latestNotification && latestNotification.type === "THEME_PURCHASED") {
+      const themeId = latestNotification.data?.theme_id;
+      const themeCode = latestNotification.data?.theme_code;
+
+      setThemes((prev) =>
+        prev.map((t) => {
+          const isMatch =
+            (themeId && (t.id === themeId || Number(t.id) === Number(themeId))) ||
+            (themeCode && t.code === themeCode);
+          if (isMatch) {
+            return { ...t, is_purchased: true };
+          }
+          return t;
+        })
+      );
+      fetchThemes(true);
+    }
+  }, [latestNotification, fetchThemes]);
+
   const handleApplyTheme = async (themeUuid: string) => {
     setApplyingCode(themeUuid);
     try {
@@ -66,9 +111,7 @@ export const StorefrontThemesSection: React.FC = () => {
     }
   };
 
-  // Flow B: Start purchase flow for a premium locked theme
   const handleStartPurchase = async (theme: StorefrontTheme) => {
-    // Guard: Prevent triggering payment flow if already purchased or current
     if (theme.is_purchased || theme.is_current) {
       callSnack("You already own this theme. You can activate it directly.", "info");
       return;
@@ -108,7 +151,6 @@ export const StorefrontThemesSection: React.FC = () => {
 
   return (
     <div className="w-full space-y-5 pt-8 border-t border-border/60">
-      {/* Section Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -136,7 +178,6 @@ export const StorefrontThemesSection: React.FC = () => {
         </Button>
       </div>
 
-      {/* Content State: Loading, Error, or Grid */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
           {[1, 2, 3].map((n) => (
@@ -198,7 +239,6 @@ export const StorefrontThemesSection: React.FC = () => {
         </div>
       )}
 
-      {/* Preview Modal */}
       <ThemePreviewModal
         theme={previewTheme}
         isOpen={!!previewTheme}
@@ -208,7 +248,6 @@ export const StorefrontThemesSection: React.FC = () => {
         isApplying={applyingCode === previewTheme?.code}
       />
 
-      {/* Stripe Payment Checkout Modal */}
       <ThemeCheckoutModal
         theme={purchasingTheme}
         clientSecret={clientSecret}
