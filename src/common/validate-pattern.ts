@@ -9,4 +9,5 @@ export const VALIDATE_PATTERN = {
   lowercase: /[a-z]/,
   specialChar: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
   alphabetWithSpecial: /^(?!.* {2})[A-Za-zÀ-ÖØ-öø-ÿĀ-žƀ-ƶǍ-ǰȀ-ȳẽẼṅṄǹǸẏẎ@#$%^&*()_+\-={}|\\:;"'<>,.?/!`~ ]*$/,
+  email: /^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/,
 };

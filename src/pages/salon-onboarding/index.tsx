@@ -1,6 +1,6 @@
 import { APP_NAME } from "@/constants/app";
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { FormProvider, useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Scissors, Loader2, Check, User, Store, MapPin, KeyRound, Sparkles, Navigation } from "lucide-react";
@@ -59,7 +59,6 @@ export default function SalonOnboarding() {
   const [isFetchingData, setIsFetchingData] = useState<boolean>(true);
   const [successModalOpen, setSuccessModalOpen] = useState<boolean>(false);
   const [confirmedSlug, setConfirmedSlug] = useState<string>("");
-  const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state) => state.auth);
@@ -71,8 +70,7 @@ export default function SalonOnboarding() {
 
   const methods = useForm<SalonOnboardingForm>({
     resolver: zodResolver(SalonOnboardingSchema),
-    mode: "onTouched",
-    reValidateMode: "onChange",
+    mode: "onChange",
     defaultValues: {
       owner: { owner_name: "" },
       salon: {

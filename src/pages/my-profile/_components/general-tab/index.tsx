@@ -6,6 +6,11 @@ import TextField from "../../../../components/form/textfield";
 import Select from "../../../../components/form/select";
 import { TypeOfSalon } from "../constants/salon.constants";
 import { uploadImages } from "../../../../features/upload-images/upload-images.service";
+import {
+  validateUploadFile,
+  validateUploadFiles,
+  extractUploadErrorMessage,
+} from "../../../../features/upload-images/upload-images.utils";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
 import { Store, Sparkles, X, Image as ImageIcon, Loader2 } from "lucide-react";
@@ -70,6 +75,13 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
       );
     }
 
+    const validation = validateUploadFiles(filesToUpload);
+    if (!validation.valid) {
+      callSnack(validation.error!, "error");
+      e.target.value = "";
+      return;
+    }
+
     setPhotosUploading(true);
     try {
       const uploadedData: CloudinaryFile[] = [];
@@ -82,8 +94,8 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
         });
       }
       setValue("photos", [...photos, ...uploadedData], { shouldDirty: true });
-    } catch {
-      callSnack("Photos upload failed", "error");
+    } catch (err: any) {
+      callSnack(extractUploadErrorMessage(err), "error");
     } finally {
       setPhotosUploading(false);
       e.target.value = "";
@@ -146,14 +158,23 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
+
+                const validation = validateUploadFile(file);
+                if (!validation.valid) {
+                  callSnack(validation.error!, "error");
+                  e.target.value = "";
+                  return;
+                }
+
                 setLogoUploading(true);
                 try {
                   const res = await uploadImages(file);
                   setValue("logo", res, { shouldDirty: true });
-                } catch {
-                  console.error("Logo upload failed");
+                } catch (err: any) {
+                  callSnack(extractUploadErrorMessage(err), "error");
                 } finally {
                   setLogoUploading(false);
+                  e.target.value = "";
                 }
               }}
             />
@@ -204,7 +225,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                     const updated = photos.filter((_, i) => i !== 0);
                     setValue("photos", updated, { shouldDirty: true });
                   }}
-                  className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-4 h-4 sm:w-7 sm:h-7 p-0 flex items-center justify-center rounded-full bg-black/75 hover:bg-destructive hover:scale-110 text-white opacity-100 sm:opacity-0 sm:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 cursor-pointer z-20 shadow-md"
+                  className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 p-0 flex items-center justify-center rounded-full bg-black/75 hover:bg-destructive hover:scale-110 text-white opacity-100 sm:opacity-0 sm:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 cursor-pointer z-20 shadow-md"
                   title="Delete photo"
                 >
                   <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />

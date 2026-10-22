@@ -63,7 +63,8 @@ export const StaffSchema = z.object({
     .string({ message: "Required" })
     .min(1, { message: "Required" })
     .max(FIELD_LIMITS.EMAIL, { message: `Max ${FIELD_LIMITS.EMAIL} characters` })
-    .email({ message: "Invalid email" }),
+    .email({ message: "Invalid Email" })
+    .regex(VALIDATE_PATTERN.email, { message: "Invalid Email" }),
   phone_number: z
     .string({ message: "Required" })
     .min(1, { message: "Required" })

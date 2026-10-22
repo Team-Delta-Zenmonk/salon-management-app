@@ -6,6 +6,7 @@ import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
 import { useAppDispatch } from "../../../../store/hooks";
 import { collectRemainingPaymentAction } from "../../../../features/booking/collect-remaning-payment/collect-remaining-payment.action";
 import { useDownloadInvoice } from "../../../../features/invoice/hooks/use-download-invoice";
+import { isBookingFullyPaid } from "../../utils/is-booking-fully-paid";
 import {
   Dialog,
   DialogContent,
@@ -89,6 +90,8 @@ export default function BookingReceiptDialog({
       setIsCollecting(false);
     }
   };
+
+  const isFullyPaid = isBookingFullyPaid(booking) || (remaining === 0 && total > 0);
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
@@ -177,20 +180,24 @@ export default function BookingReceiptDialog({
           </div>
         </div>
 
-        <DialogFooter className="pt-4 border-t border-border/50 gap-2.5 flex-col-reverse sm:flex-row sm:justify-between sm:items-center -mx-4 -mb-4 p-4 sm:mx-0 sm:mb-0 sm:p-0 bg-transparent rounded-none">
-          <Button
-            variant="outline"
-            onClick={handleDownloadInvoice}
-            disabled={isDownloadingInvoice}
-            className="rounded-xl text-xs font-semibold gap-2 border-primary/30 text-primary hover:bg-primary/10 w-full sm:w-auto"
-          >
-            {isDownloadingInvoice ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <FileText className="w-3.5 h-3.5" />
-            )}
-            Download Invoice
-          </Button>
+        <DialogFooter className="mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-border/50 gap-2.5 flex-col-reverse sm:flex-row sm:justify-between sm:items-center bg-transparent">
+          {isFullyPaid ? (
+            <Button
+              variant="outline"
+              onClick={handleDownloadInvoice}
+              disabled={isDownloadingInvoice}
+              className="rounded-xl text-xs font-semibold gap-2 border-primary/30 text-primary hover:bg-primary/10 w-full sm:w-auto"
+            >
+              {isDownloadingInvoice ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <FileText className="w-3.5 h-3.5" />
+              )}
+              Download Invoice
+            </Button>
+          ) : (
+            <div className="hidden sm:block" />
+          )}
 
           {remaining > 0 && booking.status !== BOOKING_STATUS.CANCELLED ? (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">

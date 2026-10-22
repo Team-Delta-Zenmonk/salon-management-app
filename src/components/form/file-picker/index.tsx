@@ -10,6 +10,10 @@ import { Button } from "@/components/ui/button";
 import type { FilePickerProps } from "./file-picker.type";
 import { callSnack } from "../../snackbar";
 import { ALLOWED_IMAGE_TYPES } from "../../../common/allowed-images.type";
+import {
+  validateUploadFile,
+  extractUploadErrorMessage,
+} from "../../../features/upload-images/upload-images.utils";
 
 const FilePicker = <T extends FieldValues>({
   label,
@@ -37,28 +41,25 @@ const FilePicker = <T extends FieldValues>({
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    const validation = validateUploadFile(file, {
+      maxSizeBytes,
+      allowedTypes: ALLOWED_IMAGE_TYPES,
+    });
+
+    if (!validation.valid) {
+      callSnack(validation.error!, "error");
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
     setLoading(true);
-
-    if (file.size > maxSizeBytes) {
-      callSnack("File is too large", "error");
-      setLoading(false);
-      if (inputRef.current) inputRef.current.value = "";
-      return;
-    }
-
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
-      callSnack("Invalid file type. Only images are allowed.", "error");
-      setLoading(false);
-      if (inputRef.current) inputRef.current.value = "";
-      return;
-    }
-
     try {
       const result = await uploadFn(file);
       onChange(result);
       onBlur();
-    } catch {
-      callSnack("Failed to upload file", "error");
+    } catch (err: any) {
+      callSnack(extractUploadErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -162,30 +163,46 @@ const FilePicker = <T extends FieldValues>({
               </div>
             </div>
 
-            {value?.url && (
-              <div className="relative group w-12 h-12 mt-2 rounded-xl overflow-hidden border border-border/50 shadow-sm bg-muted/20 shrink-0">
-                <img
-                  src={value.url}
-                  alt={value.filename || "Uploaded logo"}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                {!isDisabled && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearFile(onChange);
-                      onBlur();
-                    }}
-                    className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200"
-                  >
-                    <div className="p-1.5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow transition-colors">
-                      <X size={12} />
-                    </div>
-                  </button>
-                )}
-              </div>
-            )}
+            {value?.url && (() => {
+              const isPdf =
+                value.format === "pdf" ||
+                value.url?.toLowerCase().endsWith(".pdf") ||
+                value.filename?.toLowerCase().endsWith(".pdf");
+
+              return (
+                <div className="relative w-12 h-12 mt-2 shrink-0 group">
+                  <div className="w-full h-full rounded-xl overflow-hidden border border-border/50 shadow-xs bg-muted/20 flex items-center justify-center">
+                    {isPdf ? (
+                      <div className="flex flex-col items-center justify-center text-primary p-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-destructive">
+                          PDF
+                        </span>
+                      </div>
+                    ) : (
+                      <img
+                        src={value.url}
+                        alt={value.filename || "Uploaded file"}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    )}
+                  </div>
+                  {!isDisabled && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        clearFile(onChange);
+                        onBlur();
+                      }}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer z-10"
+                      title="Remove file"
+                    >
+                      <X size={11} strokeWidth={2.5} />
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
 
             {hasError && (
               <p

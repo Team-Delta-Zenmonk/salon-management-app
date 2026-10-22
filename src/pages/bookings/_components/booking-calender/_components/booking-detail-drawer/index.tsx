@@ -5,7 +5,6 @@ import {
   User,
   Mail,
   Phone,
-  Clock,
   Scissors,
   Pencil,
   Trash2,
@@ -31,6 +30,7 @@ import BookingDialog from "../../../booking-dialog";
 import BookingActionConfirmDialog from "../booking-action-confirm-dialog";
 import BookingReceiptDialog from "../../../booking-receipt-dialog";
 import { useDownloadInvoice } from "../../../../../../features/invoice/hooks/use-download-invoice";
+import { isBookingFullyPaid } from "../../../../utils/is-booking-fully-paid";
 
 type BookingDetailsDrawerProps = {
   open: boolean;
@@ -92,7 +92,6 @@ export default function BookingDetailsDialog({
     }
   };
 
-  const statusColor = booking ? getStatusColor(booking.status) : "#6b7280";
   const isCancelled = booking?.status === BOOKING_STATUS.CANCELLED;
   const isCompleted = booking?.status === BOOKING_STATUS.COMPLETED;
 
@@ -187,19 +186,21 @@ export default function BookingDetailsDialog({
                         <span>{timeInfo.date} • {timeInfo.startTime} – {timeInfo.endTime}</span>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={handleDownloadInvoice}
-                        disabled={isDownloadingInvoice}
-                        className="flex items-center gap-2 text-xs font-semibold px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-500 hover:bg-amber-500/20 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
-                      >
-                        {isDownloadingInvoice ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-                        ) : (
-                          <FileText className="h-3.5 w-3.5 shrink-0" />
-                        )}
-                        <span>Download Receipt</span>
-                      </button>
+                      {isBookingFullyPaid(booking) && (
+                        <button
+                          type="button"
+                          onClick={handleDownloadInvoice}
+                          disabled={isDownloadingInvoice}
+                          className="flex items-center gap-2 text-xs font-semibold px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-500 hover:bg-amber-500/20 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+                        >
+                          {isDownloadingInvoice ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                          ) : (
+                            <FileText className="h-3.5 w-3.5 shrink-0" />
+                          )}
+                          <span>Download Receipt</span>
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

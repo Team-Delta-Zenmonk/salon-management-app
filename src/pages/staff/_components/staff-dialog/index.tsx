@@ -70,7 +70,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
 
   const methods = useForm<StaffForm>({
     resolver: zodResolver(StaffSchema),
-    mode: "onSubmit",
+    mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: createStaffDefaultPayload(),
   });

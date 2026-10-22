@@ -8,6 +8,7 @@ export const SignUpSchema = z
     email: z
       .string({ message: "Required" })
       .email({ message: "Invalid Email" })
+      .regex(VALIDATE_PATTERN.email, { message: "Invalid Email" })
       .max(FIELD_LIMITS.EMAIL, { message: "Email Max Length Exceeded" }),
     password: z
       .string({ message: "Required" })

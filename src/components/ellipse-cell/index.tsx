@@ -24,7 +24,11 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
-  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; placement: "top" | "bottom" }>({
+    top: 0,
+    left: 0,
+    placement: "top",
+  });
 
   const isCharTruncated = Boolean(maxChars && value && value.length > maxChars);
   const displayValue = isCharTruncated ? `${value.slice(0, maxChars)}...` : (value || "");
@@ -55,14 +59,31 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   const touchStartPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const updatePosition = () => {
-    if (elementRef.current) {
-      const target = (elementRef.current.querySelector("input, textarea") as HTMLElement) || elementRef.current;
-      const rect = target.getBoundingClientRect();
-      setTooltipPos({
-        top: Math.max(10, rect.top - 36),
-        left: Math.max(20, Math.min(window.innerWidth - 20, rect.left + rect.width / 2)),
-      });
+    if (!elementRef.current) return;
+
+    const element = elementRef.current;
+    const inputTarget = element.querySelector("input, textarea") as HTMLElement | null;
+
+    let rect: DOMRect;
+    if (inputTarget) {
+      rect = inputTarget.getBoundingClientRect();
+    } else {
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const rangeRect = range.getBoundingClientRect();
+        rect = rangeRect.width > 0 ? rangeRect : element.getBoundingClientRect();
+      } catch {
+        rect = element.getBoundingClientRect();
+      }
     }
+
+    const placement: "top" | "bottom" = rect.top < 65 ? "bottom" : "top";
+    const top = placement === "top" ? rect.top - 8 : rect.bottom + 8;
+    const targetCenter = rect.left + rect.width / 2;
+    const left = Math.max(140, Math.min(window.innerWidth - 140, targetCenter));
+
+    setTooltipPos({ top, left, placement });
   };
 
   const checkCurrentlyOverflowing = (): boolean => {
@@ -175,7 +196,10 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
 
   const portalContent = showTooltip && Boolean(value) && typeof window !== "undefined" && (
     <div
-      className="fixed z-[99999] px-3 py-1.5 bg-neutral-900 text-white text-xs font-semibold rounded-lg shadow-2xl border border-neutral-700 pointer-events-none max-w-[280px] sm:max-w-xs break-words text-center -translate-x-1/2 animate-in fade-in-0 zoom-in-95"
+      className={cn(
+        "fixed z-[99999] px-3 py-1.5 bg-neutral-900 text-white text-xs font-semibold rounded-lg shadow-2xl border border-neutral-700 pointer-events-none max-w-[280px] sm:max-w-xs break-words text-center -translate-x-1/2 animate-in fade-in-0 zoom-in-95",
+        tooltipPos.placement === "top" ? "-translate-y-full" : "translate-y-0"
+      )}
       style={{
         top: `${tooltipPos.top}px`,
         left: `${tooltipPos.left}px`,

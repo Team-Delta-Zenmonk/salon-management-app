@@ -134,7 +134,13 @@ export default function PaymentPolicyCard({ isSaving }: Readonly<PaymentPolicyCa
                                         maxLength={FIELD_LIMITS.PERCENTAGE}
                                         disabled={isSaving}
                                         placeholder="20"
-                                        className="h-8 text-xs pr-7 font-bold text-foreground"
+                                        className={cn(
+                                          "h-8 text-xs pr-7 transition-colors",
+                                          depositField.value != null && depositField.value !== ""
+                                            ? "font-bold text-foreground"
+                                            : "font-normal text-muted-foreground",
+                                          "placeholder:font-normal placeholder:text-[#9CA3AF] dark:placeholder:text-[#6B7280]"
+                                        )}
                                         value={depositField.value ?? ""}
                                         onChange={(e) => {
                                           const raw = e.target.value.replace(/[^0-9]/g, "");

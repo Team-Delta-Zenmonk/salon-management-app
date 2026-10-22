@@ -134,10 +134,10 @@ const MyProfile = () => {
       logo: salon?.logo ? { url: salon.logo, filename: "Logo" } : null,
       photos: salon?.photos || [],
       business_hours: getMappedInitialHours(),
-      allowed_payment_policies: (salon as any)?.allowed_payment_policies?.length
-        ? (salon as any).allowed_payment_policies
+      allowed_payment_policies: salon?.allowed_payment_policies?.length
+        ? salon.allowed_payment_policies as ("pay_at_venue" | "partial_deposit" | "full_upfront")[]
         : ["pay_at_venue"],
-      deposit_percentage: (salon as any)?.deposit_percentage ?? null,
+      deposit_percentage: salon?.deposit_percentage ?? null,
     }
   });
 

@@ -48,6 +48,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           disabled={disabled}
           maxLength={FIELD_LIMITS.EMAIL}
           placeholder="Email address"
+          pattern={VALIDATE_PATTERN.noSpace}
         />
 
         <div className="flex flex-col gap-1.5 w-full">

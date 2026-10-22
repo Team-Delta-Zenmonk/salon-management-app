@@ -1,6 +1,7 @@
 import type { CloudinaryFile } from "../../common/cloudinary.schema";
 import { axiosInstance } from "../../config/axios";
 import axios from "axios";
+import { formatFileSize, extractUploadErrorMessage } from "./upload-images.utils";
 
 export interface PresignedUrlItem {
   filename?: string;
@@ -36,11 +37,18 @@ export const getPresignedUrls = async (
     folder: f.folder || folder,
   }));
 
-  const res = await axiosInstance.post("/salons/upload-images/presigned-url", {
-    files: formattedFiles,
-  });
-
-  return res.data?.data || [];
+  try {
+    const res = await axiosInstance.post("/salons/upload-images/presigned-url", {
+      files: formattedFiles,
+    });
+    return res.data?.data || [];
+  } catch (err: any) {
+    const backendMsg = err?.response?.data?.message || err?.response?.data?.error;
+    if (backendMsg && typeof backendMsg === "string") {
+      throw new Error(backendMsg);
+    }
+    throw err;
+  }
 };
 
 export const uploadImages = async (file: File): Promise<CloudinaryFile> => {
@@ -69,8 +77,8 @@ export const uploadMultipleFiles = async (
     }
 
     if (file.size > presigned.params.max_file_size) {
-      const maxMb = (presigned.params.max_file_size / (1024 * 1024)).toFixed(1);
-      throw new Error(`File '${file.name}' (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum allowed size of ${maxMb}MB.`);
+      const maxMb = formatFileSize(presigned.params.max_file_size);
+      throw new Error(`File Too Large. Maximum file size allowed is ${maxMb}.`);
     }
 
     const formData = new FormData();
@@ -82,21 +90,26 @@ export const uploadMultipleFiles = async (
     formData.append("allowed_formats", presigned.params.allowed_formats);
     formData.append("upload_preset", presigned.params.upload_preset);
 
-    const response = await axios.post(presigned.upload_url, formData);
-    const result = response.data;
+    try {
+      const response = await axios.post(presigned.upload_url, formData);
+      const result = response.data;
 
-    return {
-      url: result.secure_url,
-      public_id: result.public_id,
-      format: result.format,
-      resource_type: result.resource_type,
-      bytes: result.bytes,
-      type: result.type,
-      secure_url: result.secure_url,
-      asset_folder: result.asset_folder,
-      filename: file.name,
-    } as CloudinaryFile;
+      return {
+        url: result.secure_url,
+        public_id: result.public_id,
+        format: result.format,
+        resource_type: result.resource_type,
+        bytes: result.bytes,
+        type: result.type,
+        secure_url: result.secure_url,
+        asset_folder: result.asset_folder,
+        filename: file.name,
+      } as CloudinaryFile;
+    } catch (err: any) {
+      const errorMsg = extractUploadErrorMessage(err);
+      throw new Error(errorMsg);
+    }
   });
 
-  return await Promise.all(uploadPromises);
+  return Promise.all(uploadPromises);
 };

@@ -10,6 +10,10 @@ import { Button } from "@/components/ui/button";
 import { callSnack } from "../../snackbar";
 import type { FileMultiPickerProps } from "./multi-file-picke.type";
 import { uploadMultipleFiles } from "../../../features/upload-images/upload-images.service";
+import {
+  validateUploadFiles,
+  extractUploadErrorMessage,
+} from "../../../features/upload-images/upload-images.utils";
 
 const FileMultiPicker = <T extends FieldValues>({
   label,
@@ -55,15 +59,14 @@ const FileMultiPicker = <T extends FieldValues>({
       return;
     }
 
-    setLoading(true);
-
-    const tooBig = Array.from(files).some((file) => file.size > maxSizeBytes);
-    if (tooBig) {
-      callSnack("File is too large", "error");
-      setLoading(false);
+    const validation = validateUploadFiles(files, { maxSizeBytes });
+    if (!validation.valid) {
+      callSnack(validation.error!, "error");
       if (inputRef.current) inputRef.current.value = "";
       return;
     }
+
+    setLoading(true);
 
     try {
       const fileList = Array.from(files);
@@ -79,8 +82,8 @@ const FileMultiPicker = <T extends FieldValues>({
 
       onChange([...current, ...formattedUploadedData]);
       onBlur();
-    } catch {
-      callSnack("Failed to upload files", "error");
+    } catch (err: any) {
+      callSnack(extractUploadErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -206,23 +209,30 @@ const FileMultiPicker = <T extends FieldValues>({
             {arr.length > 0 && (
               <div className="flex flex-wrap gap-3 mt-2">
                 {arr.map((item: any, index: number) => {
-                  const isPdf = item.format === "pdf" || item.url?.toLowerCase().endsWith(".pdf") || item.filename?.toLowerCase().endsWith(".pdf");
+                  const isPdf =
+                    item.format === "pdf" ||
+                    item.url?.toLowerCase().endsWith(".pdf") ||
+                    item.filename?.toLowerCase().endsWith(".pdf");
                   return (
                     <div
                       key={`${item.url}-${index}`}
-                      className="relative group w-12 h-12 rounded-xl overflow-hidden border border-border/50 bg-muted/20 shadow-sm animate-in fade-in zoom-in-95 duration-200 shrink-0 flex items-center justify-center"
+                      className="relative w-12 h-12 shrink-0 group animate-in fade-in zoom-in-95 duration-200"
                     >
-                      {isPdf ? (
-                        <div className="flex flex-col items-center justify-center text-primary p-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-destructive">PDF</span>
-                        </div>
-                      ) : (
-                        <img
-                          src={item.url}
-                          alt={item.filename || "Uploaded file"}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      )}
+                      <div className="w-full h-full rounded-xl overflow-hidden border border-border/50 bg-muted/20 shadow-xs flex items-center justify-center">
+                        {isPdf ? (
+                          <div className="flex flex-col items-center justify-center text-primary p-1">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-destructive">
+                              PDF
+                            </span>
+                          </div>
+                        ) : (
+                          <img
+                            src={item.url}
+                            alt={item.filename || "Uploaded file"}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        )}
+                      </div>
                       {!isDisabled && (
                         <button
                           type="button"
@@ -231,11 +241,10 @@ const FileMultiPicker = <T extends FieldValues>({
                             removeOne(item.url, arr, onChange);
                             onBlur();
                           }}
-                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200"
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer z-10"
+                          title="Remove file"
                         >
-                          <div className="p-1.5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow transition-colors">
-                            <X size={12} />
-                          </div>
+                          <X size={11} strokeWidth={2.5} />
                         </button>
                       )}
                     </div>

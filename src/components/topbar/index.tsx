@@ -50,11 +50,11 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
             </button>
           )}
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex items-center">
             <EllipsisCell
               value={salon?.name || "Salon Management Service"}
               maxChars={25}
-              className="text-lg sm:text-xl font-bold tracking-tight text-foreground capitalize min-w-0 block"
+              className="text-lg sm:text-xl font-bold tracking-tight text-foreground capitalize min-w-0 max-w-full inline-block truncate"
             />
           </div>
         </div>

@@ -25,9 +25,12 @@ import { listServiceStaff } from "../../../../features/service/list-staff/list-s
 import { createBookingAction } from "../../../../features/booking/create-booking/create-booking.action";
 import { updateBookingAction } from "../../../../features/booking/update-booking/update-booking.action";
 import { useDownloadInvoice } from "../../../../features/invoice/hooks/use-download-invoice";
+import { isBookingFullyPaid } from "../../utils/is-booking-fully-paid";
 import dayjs from "dayjs";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import BookingServiceRow from "./_components/booking-service-row";
+
+type PaymentPreference = "pay_at_venue" | "partial_deposit" | "full_upfront";
 
 interface BookingDialogProps {
   open: boolean;
@@ -71,16 +74,31 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     }
   };
 
-  const depositPercentage = (salon as any)?.deposit_percentage ?? 20;
+  const currentPref = booking?.payment_preference || booking?.payment_policy;
+  const paymentPolicyOptions = useMemo(() => {
+    const policies = salon?.allowed_payment_policies?.length
+      ? [...salon.allowed_payment_policies]
+      : ["pay_at_venue"];
 
-  const paymentPolicyOptions = useMemo(
-    () => [
-      { label: "Pay at venue", value: "pay_at_venue" },
-      { label: "Already paid", value: "full_upfront" },
-      { label: `Paid ${depositPercentage}%`, value: "partial_deposit" },
-    ],
-    [depositPercentage]
-  );
+    if (mode === "update" && currentPref && !policies.includes(currentPref)) {
+      policies.push(currentPref);
+    }
+
+    return policies.map((policy) => {
+      if (policy === "partial_deposit") {
+        return {
+          label: salon?.deposit_percentage ? `Paid ${salon.deposit_percentage}%` : "Partial deposit",
+          value: policy,
+        };
+      }
+      if (policy === "full_upfront") {
+        return { label: "Already paid", value: policy };
+      }
+      return { label: "Pay at venue", value: policy };
+    });
+  }, [salon?.allowed_payment_policies, salon?.deposit_percentage, mode, currentPref]);
+
+  const defaultPolicy = (paymentPolicyOptions[0]?.value ?? "pay_at_venue") as PaymentPreference;
 
   const methods = useForm<BookingFormValues>({
     resolver: zodResolver(bookingSchema) as any,
@@ -91,7 +109,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       booking_date: "",
       booking_start_time: "",
       status: BOOKING_STATUS.CONFIRMED,
-      payment_preference: "pay_at_venue",
+      payment_preference: defaultPolicy,
       is_walk_in: false,
     },
   });
@@ -191,7 +209,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         booking_date: booking.booking_date ? dayjs(booking.booking_date).format("DD-MM-YYYY") : "",
         booking_start_time: `${hh}:${mm}`,
         status: booking.status,
-        payment_preference: booking.payment_preference || booking.payment_policy || "pay_at_venue",
+        payment_preference: (booking.payment_preference || booking.payment_policy || defaultPolicy) as PaymentPreference,
         is_walk_in: booking.is_walk_in ?? false,
       });
 
@@ -206,11 +224,11 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         booking_date: "",
         booking_start_time: "",
         status: BOOKING_STATUS.CONFIRMED,
-        payment_preference: "pay_at_venue",
+        payment_preference: defaultPolicy,
         is_walk_in: false,
       });
     }
-  }, [mode, booking, reset, open]);
+  }, [mode, booking, reset, open, defaultPolicy]);
 
   const getStaffOptions = (rowIndex: number) => {
     const rowData = staffMap[rowIndex];
@@ -314,7 +332,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
           sequence: i + 1,
         })),
         status: values.status,
-        payment_preference: values.payment_preference || "pay_at_venue",
+        payment_preference: values.payment_preference || defaultPolicy,
         is_walk_in: Boolean(values.is_walk_in),
       };
 
@@ -447,7 +465,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                     <BookingServiceRow
                       key={field.id}
                       index={index}
-                      control={control}
+                      control={control as any}
                       serviceOptions={getServiceOptionsForRow(index)}
                       staffOptions={getStaffOptions(index)}
                       staffLoading={isStaffLoading(index)}
@@ -532,7 +550,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
             </div>
 
             <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end items-center">
-              {mode === "update" && (booking?.id || booking?.uuid) && (
+              {mode === "update" && (booking?.id || booking?.uuid) && isBookingFullyPaid(booking) && (
                 <Button
                   type="button"
                   variant="outline"

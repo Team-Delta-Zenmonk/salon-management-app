@@ -16,7 +16,6 @@ import {
   Check,
   ShieldCheck,
   Globe,
-  ArrowRight,
   ExternalLink,
   CreditCard,
   Clock,
@@ -24,7 +23,6 @@ import {
   Building2,
   PhoneCall,
   FileText,
-  X,
   AlertTriangle,
   RefreshCw,
   CheckCircle2,
@@ -306,7 +304,6 @@ export default function PlanAndBillingPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<InvoicesPagination | null>(null);
 
-  // Mobile Infinite Scroll State
   const [mobileInvoices, setMobileInvoices] = useState<SubscriptionInvoice[]>([]);
   const [mobilePage, setMobilePage] = useState(1);
   const [mobileHasMore, setMobileHasMore] = useState(false);
@@ -342,7 +339,6 @@ export default function PlanAndBillingPage() {
   ) => {
     const requestId = ++fetchRequestIdRef.current;
     setIsLoadingInvoices(true);
-    // Clear invoices immediately so on slow 3G we never show stale invoices from another category
     setInvoices([]);
     if (page === 1) {
       setMobileInvoices([]);
@@ -522,7 +518,8 @@ export default function PlanAndBillingPage() {
           setIsActivating(false);
           return;
         }
-      } catch {
+      } catch (err) {
+        void err;
       }
       attempts++;
       if (attempts < 15) {
@@ -566,7 +563,6 @@ export default function PlanAndBillingPage() {
         </p>
       </motion.div>
 
-      {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-border/70 pb-px">
         <button
           type="button"
@@ -1104,7 +1100,6 @@ export default function PlanAndBillingPage() {
             </div>
           ) : (
             <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs max-w-full">
-              {/* Mobile Card View with Infinite Scroll */}
               <div className="block sm:hidden w-full max-w-full">
                 <InfiniteScroll
                   dataLength={mobileInvoices.length}
@@ -1189,22 +1184,24 @@ export default function PlanAndBillingPage() {
                             </span>
                           </div>
 
-                          <div className="pt-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={isDownloadingThis}
-                              onClick={() => downloadInvoice(invoiceId, inv.invoice_url)}
-                              className="w-full text-xs gap-1.5 h-8 font-semibold cursor-pointer"
-                            >
-                              {isDownloadingThis ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              ) : (
-                                <Download className="w-3.5 h-3.5" />
-                              )}
-                              Download Invoice PDF
-                            </Button>
-                          </div>
+                          {isPaid && (
+                            <div className="pt-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={isDownloadingThis}
+                                onClick={() => downloadInvoice(invoiceId, inv.invoice_url)}
+                                className="w-full text-xs gap-1.5 h-8 font-semibold cursor-pointer"
+                              >
+                                {isDownloadingThis ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Download className="w-3.5 h-3.5" />
+                                )}
+                                Download Invoice PDF
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -1212,7 +1209,6 @@ export default function PlanAndBillingPage() {
                 </InfiniteScroll>
               </div>
 
-              {/* Desktop Table */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase tracking-wider font-semibold">
@@ -1285,20 +1281,24 @@ export default function PlanAndBillingPage() {
                             )}
                           </td>
                           <td className="py-3.5 px-4 text-right">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={isDownloadingThis}
-                              onClick={() => downloadInvoice(invoiceId, inv.invoice_url)}
-                              className="text-xs gap-1.5 h-8 px-2.5 font-semibold cursor-pointer"
-                            >
-                              {isDownloadingThis ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              ) : (
-                                <Download className="w-3.5 h-3.5" />
-                              )}
-                              <span>PDF</span>
-                            </Button>
+                            {isPaid ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={isDownloadingThis}
+                                onClick={() => downloadInvoice(invoiceId, inv.invoice_url)}
+                                className="text-xs gap-1.5 h-8 px-2.5 font-semibold cursor-pointer"
+                              >
+                                {isDownloadingThis ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Download className="w-3.5 h-3.5" />
+                                )}
+                                <span>PDF</span>
+                              </Button>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">-</span>
+                            )}
                           </td>
                         </tr>
                       );
@@ -1307,7 +1307,6 @@ export default function PlanAndBillingPage() {
                 </table>
               </div>
 
-              {/* Desktop Pagination Controls */}
               {pagination && pagination.totalPages > 1 && (
                 <div className="hidden sm:flex flex-row items-center justify-between gap-3 p-4 border-t border-border/70 bg-muted/20 text-xs text-muted-foreground">
                   <div>
