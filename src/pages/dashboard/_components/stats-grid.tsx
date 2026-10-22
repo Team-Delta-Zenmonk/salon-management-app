@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
 import { CalendarClock, Users, CreditCard, TrendingUp } from "lucide-react";
 import { itemVariants } from "../utils/dashboard.constants";
+import {
+  formatCompactNumber,
+  formatIndianCurrency,
+} from "@/utils/format-number";
 
 interface StatsGridProps {
   loading: boolean;
@@ -18,59 +22,30 @@ export const StatsGrid = ({
   totalRevenue,
   completedBookings,
   uniqueClients,
-  walkInClients = 0,
-  onlineClients = 0,
   avgTicketSize,
   timeRange,
 }: StatsGridProps) => {
   const rangeLabel = timeRange === "7d" ? "Last 7 Days" : "Last 30 Days";
 
-  const getClientBadge = () => {
-    if (uniqueClients === 0) return { text: "No Clients", color: "bg-muted/70 text-muted-foreground border border-border/40" };
-    if (walkInClients > 0 && onlineClients === 0) {
-      return { text: "Walk-in", color: "bg-primary/10 text-primary border border-primary/20" };
-    }
-    if (walkInClients > 0 && onlineClients > 0) {
-      return { text: "Walk-in & Online", color: "bg-primary/10 text-primary border border-primary/20" };
-    }
-    return { text: "Online", color: "bg-primary/10 text-primary border border-primary/20" };
-  };
-
-  const clientBadge = getClientBadge();
-
   const stats = [
     {
       title: `Revenue (${rangeLabel})`,
-      value: `₹${totalRevenue.toLocaleString()}`,
-      badge: totalRevenue > 0 ? "Actual Earnings" : "No Earnings Yet",
-      badgeColor:
-        totalRevenue > 0
-          ? "bg-primary/10 text-primary border border-primary/20"
-          : "bg-muted/70 text-muted-foreground border border-border/40",
+      value: formatIndianCurrency(totalRevenue, true),
       icon: CreditCard,
     },
     {
       title: `Bookings (${rangeLabel})`,
-      value: completedBookings.toString(),
-      badge: completedBookings > 0 ? "Completed" : "No Bookings",
-      badgeColor:
-        completedBookings > 0
-          ? "bg-primary/10 text-primary border border-primary/20"
-          : "bg-muted/70 text-muted-foreground border border-border/40",
+      value: formatCompactNumber(completedBookings),
       icon: CalendarClock,
     },
     {
       title: "Customers",
-      value: uniqueClients.toString(),
-      badge: clientBadge.text,
-      badgeColor: clientBadge.color,
+      value: formatCompactNumber(uniqueClients),
       icon: Users,
     },
     {
       title: "Avg. Ticket Size",
-      value: `₹${avgTicketSize.toLocaleString()}`,
-      badge: "Per Booking",
-      badgeColor: "bg-primary/10 text-primary border border-primary/20",
+      value: formatIndianCurrency(avgTicketSize, true),
       icon: TrendingUp,
     },
   ];
@@ -85,7 +60,6 @@ export const StatsGrid = ({
           >
             <div className="flex items-start justify-between">
               <div className="w-10 h-10 rounded-xl bg-muted/60 animate-pulse" />
-              <div className="w-16 h-5 rounded-full bg-muted/60 animate-pulse" />
             </div>
             <div className="space-y-2 mt-1">
               <div className="w-24 h-3 rounded bg-muted/60 animate-pulse" />
@@ -113,13 +87,6 @@ export const StatsGrid = ({
               <div className="w-10 h-10 bg-background/50 rounded-xl flex items-center justify-center border border-border/50 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors shrink-0">
                 <Icon className="w-5 h-5 text-primary" />
               </div>
-              {stat.badge && (
-                <span
-                  className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full truncate ${stat.badgeColor}`}
-                >
-                  {stat.badge}
-                </span>
-              )}
             </div>
 
             <div className="relative z-10 mt-1 min-w-0">
