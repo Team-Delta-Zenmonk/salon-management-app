@@ -112,7 +112,6 @@ export default function BookingDetailsDialog({
     setIsDeleting(true);
     try {
       await dispatch(deleteBookingAction({ uuid: booking.uuid })).unwrap();
-      callSnack("Booking deleted successfully", "success");
       setDeleteConfirmOpen(false);
       onClose();
     } catch {

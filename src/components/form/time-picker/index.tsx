@@ -121,7 +121,7 @@ const TimePicker = <T extends FieldValues>({
                     "flex h-10 w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-sm shadow-sm transition-all outline-none items-center justify-between",
                     "focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 hover:border-input-border-hover",
                     "disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50 disabled:hover:border-input-border",
-                    hasError && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
+                    hasError && "border-input-border-error focus-visible:border-input-border-error focus-visible:ring-2 focus-visible:ring-input-ring-error",
                     !stringValue && "text-muted-foreground",
                     triggerClassName
                   )}
@@ -280,7 +280,7 @@ const TimePicker = <T extends FieldValues>({
                     "h-10 w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-sm shadow-sm transition-all outline-none",
                     "focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 hover:border-input-border-hover",
                     "disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50 disabled:hover:border-input-border",
-                    hasError && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
+                    hasError && "border-input-border-error focus-visible:border-input-border-error focus-visible:ring-2 focus-visible:ring-input-ring-error",
                     !stringValue && "text-muted-foreground",
                     triggerClassName
                   )}

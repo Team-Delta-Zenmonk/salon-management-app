@@ -135,7 +135,7 @@ export default function SalonOnboarding() {
 
           reset({
             owner: {
-              owner_name: salonData.owner_name || salonData.name || "",
+              owner_name: salonData.owner_name || "",
             },
             salon: {
               slug: salonData.slug || "",

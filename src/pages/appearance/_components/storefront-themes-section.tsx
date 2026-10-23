@@ -142,8 +142,6 @@ export const StorefrontThemesSection: React.FC = () => {
   };
 
   const handlePurchaseSuccess = async () => {
-    const purchasedName = purchasingTheme?.name || "Theme";
-    callSnack(`Theme "${purchasedName}" purchased successfully!.`, "success");
     setPurchasingTheme(null);
     setClientSecret(null);
     await fetchThemes(true);

@@ -5,6 +5,7 @@ const SnackbarProviderWrapper = ({ children }: Readonly<{ children: React.ReactN
   return (
     <SnackbarProvider 
       maxSnack={3} 
+      preventDuplicate
       hideIconVariant 
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >

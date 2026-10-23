@@ -77,11 +77,7 @@ const CheckboxGroup = <T extends FieldValues>({
                       onBlur={onBlur}
                       aria-invalid={hasError}
                       data-test-id={`${identifier}-${value}`}
-                      className={clsx(
-                        hasError &&
-                          "border-destructive aria-invalid:border-destructive aria-invalid:ring-destructive",
-                        inputPropsClassName,
-                      )}
+                      className={inputPropsClassName}
                     />
                     <Label
                       htmlFor={checkboxId}

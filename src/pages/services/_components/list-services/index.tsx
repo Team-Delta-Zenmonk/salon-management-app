@@ -59,11 +59,8 @@ export default function ListServices({
   const [refreshTriggers, setRefreshTriggers] = useState<Record<string, number>>({});
 
   const filteredServices = useMemo(() => {
-    const q = searchQuery.toLowerCase();
-    return services
-      .filter((s) => !s.parent_id)
-      .filter((s) => s.name.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q));
-  }, [services, searchQuery]);
+    return services.filter((s) => !s.parent_id);
+  }, [services]);
 
   const refreshServices = async (cb?: () => void) => {
     if (refreshServicesProp) {

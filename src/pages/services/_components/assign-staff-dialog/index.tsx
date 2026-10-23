@@ -173,7 +173,8 @@ export default function AssignStaffDialog({
     const childrenServices = parentServiceObj
       ? allServices.filter((s) => s.parent_id && String(s.parent_id) === String(parentServiceObj.id))
       : [];
-    const serviceUuidsToQuery = [serviceUuid, ...childrenServices.map((s) => s.uuid)];
+    const serviceUuidsToQuery =
+      childrenServices.length > 0 ? childrenServices.map((s) => s.uuid) : [serviceUuid];
 
     Promise.allSettled(serviceUuidsToQuery.map((uuid) => listServiceStaff(uuid, salonUUID)))
       .then((results) => {
@@ -253,15 +254,22 @@ export default function AssignStaffDialog({
       const childrenServices = parentServiceObj
         ? allServices.filter((s) => s.parent_id && String(s.parent_id) === String(parentServiceObj.id))
         : [];
-      const allServicesToAssign = [
-        { uuid: serviceUuid, price_type: service.price_type, price: service.price, duration: Number(service.duration) },
-        ...childrenServices.map((s) => ({
-          uuid: s.uuid,
-          price_type: s.price_type,
-          price: s.price ? Number(s.price) : undefined,
-          duration: s.duration ? Number(s.duration) : undefined,
-        })),
-      ];
+      const allServicesToAssign =
+        childrenServices.length > 0
+          ? childrenServices.map((s) => ({
+              uuid: s.uuid,
+              price_type: s.price_type,
+              price: s.price ? Number(s.price) : undefined,
+              duration: s.duration ? Number(s.duration) : undefined,
+            }))
+          : [
+              {
+                uuid: serviceUuid,
+                price_type: service.price_type,
+                price: service.price,
+                duration: Number(service.duration),
+              },
+            ];
 
       const toAssign: {
         service_uuid: string;

@@ -185,7 +185,6 @@ const FileMultiPicker = <T extends FieldValues>({
                   placeholder={placeholder || "Select files"}
                   className={clsx(
                     "cursor-pointer pr-10",
-                    hasError && "border-destructive focus-visible:ring-destructive",
                     !arr.length && "text-muted-foreground"
                   )}
                   aria-invalid={hasError}

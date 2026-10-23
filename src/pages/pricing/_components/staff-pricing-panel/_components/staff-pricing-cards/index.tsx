@@ -45,6 +45,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
   const [dialogContext, setDialogContext] = useState<DialogContext | null>(null);
 
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadServiceStaffs = useCallback(async () => {
     if (servicesToShow.length === 0 || !salonUUID) {
@@ -187,15 +188,26 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
   };
 
   const handleRemove = async (service_uuid: string, staffServiceUuid: string) => {
+    if (deletingId) return;
     try {
+      setDeletingId(staffServiceUuid);
+      setServiceStaffsMap((prev) => {
+        const currentRows = prev[service_uuid] || [];
+        return {
+          ...prev,
+          [service_uuid]: currentRows.filter((r) => r.uuid !== staffServiceUuid),
+        };
+      });
+
       await unassignStaffFromService({ staff_services: [staffServiceUuid], cascade: false });
-      const res = await listServiceStaff(service_uuid, salonUUID);
-      const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
-      setServiceStaffsMap((p) => ({ ...p, [service_uuid]: rows }));
+      await loadServiceStaffs();
       callSnack("Staff unassigned successfully", "success");
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } };
       callSnack(err?.response?.data?.message || "Failed to unassign staff", "error");
+      await loadServiceStaffs();
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -344,10 +356,15 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleRemove(service.uuid, staffServiceRow.uuid!)}
-                                className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
+                                disabled={deletingId === staffServiceRow.uuid}
+                                className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all disabled:opacity-50"
                                 title="Unassign Staff"
                               >
-                                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                {deletingId === staffServiceRow.uuid ? (
+                                  <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                )}
                               </Button>
                             </div>
                           </div>

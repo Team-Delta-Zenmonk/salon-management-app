@@ -69,8 +69,6 @@ const Select = <T extends FieldValues>({
                 onBlur={onBlur}
                 className={clsx(
                   "w-full shadow-sm",
-                  hasError &&
-                    "border-destructive focus:ring-destructive aria-invalid:border-destructive aria-invalid:ring-destructive",
                   triggerClassName,
                 )}
                 data-test-id={`select-${identifier}`}

@@ -47,6 +47,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
 
   const [pricingDialogOpen, setPricingDialogOpen] = useState(false);
   const [dialogContext, setDialogContext] = useState<DialogContext | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadAssignedServices = useCallback(async () => {
     if (!selectedStaffUuid) return;
@@ -178,13 +179,19 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
   };
 
   const handleRemove = async (staffServiceUuid: string) => {
+    if (deletingId) return;
     try {
-      await unassignStaffFromService({ staff_services: [staffServiceUuid], cascade: false });
+      setDeletingId(staffServiceUuid);
+      setAssignedServices((prev) => prev.filter((r) => r.uuid !== staffServiceUuid));
+      await unassignStaffFromService({ staff_services: [staffServiceUuid], cascade: true });
       await loadAssignedServices();
       callSnack("Service unassigned successfully", "success");
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } };
       callSnack(err?.response?.data?.message || "Failed to unassign service", "error");
+      await loadAssignedServices();
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -318,10 +325,15 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                             variant="ghost"
                             size="icon"
                             onClick={() => svc.pricing.uuid && handleRemove(svc.pricing.uuid)}
-                            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
+                            disabled={deletingId === svc.pricing.uuid}
+                            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all disabled:opacity-50"
                             title="Unassign Service"
                           >
-                            <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            {deletingId === svc.pricing.uuid ? (
+                              <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            )}
                           </Button>
                         </div>
                       </div>

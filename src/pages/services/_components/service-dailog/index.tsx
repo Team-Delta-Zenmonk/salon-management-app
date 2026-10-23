@@ -3,7 +3,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
-import { serviceSchema, type ServiceForm } from "../schema/service.schema";
+import { getServiceSchema, type ServiceForm } from "../schema/service.schema";
 import TextField from "../../../../components/form/textfield";
 import { uploadImages } from "../../../../features/upload-images/upload-images.service";
 import FilePicker from "../../../../components/form/file-picker";
@@ -55,7 +55,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   const shouldShowCategory = !(isCreatingSubService || isEditingSubService);
 
   const methods = useForm<ServiceForm>({
-    resolver: zodResolver(serviceSchema),
+    resolver: zodResolver(getServiceSchema(!shouldShowCategory)),
   });
 
   const { handleSubmit, control, reset, watch, setValue } = methods;
@@ -97,11 +97,6 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     try {
       setIsLoading(true);
       const logoUrl = data.logo?.url || (mode === "update" ? service?.logo : undefined);
-
-      if (mode === "create" && !isCreatingSubService && !data.category_id) {
-        callSnack("Category is required", "error");
-        return;
-      }
 
       const payload = buildPayload(data, logoUrl || undefined);
 

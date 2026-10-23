@@ -30,6 +30,8 @@
   --input-bg: #ffffff;
   --input-border: #d4d4db;
   --input-border-hover: #a3a3ab;
+  --input-border-error: #f87171;
+  --input-ring-error: rgba(239, 68, 68, 0.2);
   --ring: #435ee5;
   --chart-1: #e60023;
   --chart-2: #211922;
@@ -85,6 +87,8 @@ body {
   --color-input-bg: var(--input-bg);
   --color-input-border: var(--input-border);
   --color-input-border-hover: var(--input-border-hover);
+  --color-input-border-error: var(--input-border-error);
+  --color-input-ring-error: var(--input-ring-error);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
@@ -133,6 +137,8 @@ body {
   --input-bg: #09090b;
   --input-border: #2e2e33;
   --input-border-hover: #4a4a54;
+  --input-border-error: #ef4444;
+  --input-ring-error: rgba(239, 68, 68, 0.25);
   --ring: #435ee5;
   --chart-1: #e60023;
   --chart-2: #ffffff;

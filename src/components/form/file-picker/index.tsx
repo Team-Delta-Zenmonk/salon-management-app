@@ -152,7 +152,6 @@ const FilePicker = <T extends FieldValues>({
                 placeholder={placeholder || "Select a file"}
                 className={clsx(
                   "cursor-pointer pr-10",
-                  hasError && "border-destructive focus-visible:ring-destructive",
                   !value && "text-muted-foreground"
                 )}
                 aria-invalid={hasError}

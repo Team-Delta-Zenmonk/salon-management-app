@@ -4,6 +4,7 @@ export interface ListServiceStaffParams {
   page?: number;
   limit?: number;
   offset?: number;
+  include_parent?: boolean;
 }
 
 export const listServiceStaff = async (
@@ -17,6 +18,7 @@ export const listServiceStaff = async (
       ...(pagination?.page ? { page: pagination.page } : {}),
       ...(pagination?.limit ? { limit: pagination.limit } : {}),
       ...(pagination?.offset !== undefined ? { offset: pagination.offset } : {}),
+      ...(pagination?.include_parent !== undefined ? { include_parent: pagination.include_parent } : {}),
     },
   });
   return res.data;

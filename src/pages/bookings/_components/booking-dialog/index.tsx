@@ -338,7 +338,6 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
       if (mode === "create") {
         await dispatch(createBookingAction(payload as any)).unwrap();
-        callSnack("Booking created successfully", "success");
       } else {
         await dispatch(
           updateBookingAction({

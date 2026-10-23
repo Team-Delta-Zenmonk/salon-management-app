@@ -34,7 +34,7 @@ const OTPInput = <T extends FieldValues>({
                     index={index}
                     className={clsx(
                       "w-12 h-14 text-lg border-input-border",
-                      hasError && "border-destructive text-destructive"
+                      hasError && "border-input-border-error text-destructive"
                     )}
                     data-test-id={`input-${identifier}-${index}`}
                   />
