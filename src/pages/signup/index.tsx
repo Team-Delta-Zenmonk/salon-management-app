@@ -120,7 +120,7 @@ export default function SignUp() {
                 )}
               </div>
 
-              <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+              <div className="flex-1 overflow-y-auto px-1 space-y-4">
                 <form id="signup-form" onSubmit={onSubmit} className="space-y-4">
                   {[
                     {

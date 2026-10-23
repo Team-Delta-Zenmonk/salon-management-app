@@ -133,7 +133,7 @@ const getStripeAppearance = (isDark: boolean) => ({
 });
 
 interface CheckoutFormProps {
-  plan: typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY;
+  plan: string;
   planDuration: number;
   amount: number;
   salonName: string;
@@ -283,14 +283,10 @@ export default function PlanAndBillingPage() {
     (state: RootState) => state.plans
   );
 
-  const [checkoutPlan, setCheckoutPlan] = useState<
-    typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY | null
-  >(null);
+  const [checkoutPlan, setCheckoutPlan] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [intentAmount, setIntentAmount] = useState<number>(0);
-  const [loadingPlan, setLoadingPlan] = useState<
-    typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY | null
-  >(null);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [isEnterpriseModalOpen, setIsEnterpriseModalOpen] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
 
@@ -470,7 +466,7 @@ export default function PlanAndBillingPage() {
     expiresAt > now;
 
   const openCheckout = async (
-    plan: typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY
+    plan: string
   ) => {
     if (isActiveYearly && plan === SUBSCRIPTION_PLAN.MONTHLY) {
       callSnack(
@@ -889,7 +885,7 @@ export default function PlanAndBillingPage() {
                         <Button
                           variant={isYearlyPlan || isCurrentPlan ? "default" : "outline"}
                           size="default"
-                          onClick={() => openCheckout(plan.id as typeof SUBSCRIPTION_PLAN.MONTHLY | typeof SUBSCRIPTION_PLAN.YEARLY)}
+                          onClick={() => openCheckout(plan.id)}
                           disabled={loadingPlan !== null}
                           className={`w-full text-xs font-bold cursor-pointer ${isYearlyPlan ? "shadow-md shadow-primary/25" : ""
                             }`}

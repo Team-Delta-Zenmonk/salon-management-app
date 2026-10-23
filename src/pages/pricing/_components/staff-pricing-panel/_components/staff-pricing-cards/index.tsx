@@ -61,7 +61,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     await Promise.allSettled(
       servicesToShow.map(async (svc) => {
         try {
-          const res = await listServiceStaff(svc.uuid, salonUUID, { page: 1, limit: pageSize });
+          const res = await listServiceStaff(svc.uuid, salonUUID, { page: 1, limit: pageSize, include_parent: true });
           const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
           const total = typeof res?.total === "number" ? res.total : rows.length;
           initialStaffsMap[svc.uuid] = rows;
@@ -100,7 +100,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
           const currentPage = pageMap[svc.uuid] || 1;
           const nextPage = currentPage + 1;
           try {
-            const res = await listServiceStaff(svc.uuid, salonUUID, { page: nextPage, limit: pageSize });
+            const res = await listServiceStaff(svc.uuid, salonUUID, { page: nextPage, limit: pageSize, include_parent: true });
             const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
             const total = typeof res?.total === "number" ? res.total : rows.length;
 
@@ -173,7 +173,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
           },
         ],
       });
-      const res = await listServiceStaff(service_uuid, salonUUID);
+      const res = await listServiceStaff(service_uuid, salonUUID, { include_parent: true });
       const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
       setServiceStaffsMap((p) => ({ ...p, [service_uuid]: rows }));
 

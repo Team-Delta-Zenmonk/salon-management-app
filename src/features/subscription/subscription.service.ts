@@ -59,13 +59,13 @@ export interface SubscriptionIntentResponse {
   clientSecret: string;
   paymentIntentId: string;
   amount: number;
-  plan: SubscriptionPlan;
+  plan: SubscriptionPlan | string;
 }
 
 export interface UpgradeSubscriptionPayload {
-  plan: SubscriptionPlan;
-  billing_cycle?: SubscriptionBillingCycle;
-  payment_method?: SubscriptionPaymentMethod;
+  plan: SubscriptionPlan | string;
+  billing_cycle?: SubscriptionBillingCycle | string;
+  payment_method?: SubscriptionPaymentMethod | string;
   payment_details?: Record<string, any>;
   transaction_id?: string;
 }
@@ -77,7 +77,7 @@ export interface UpgradeSubscriptionResponse {
 }
 
 export const createSubscriptionIntent = async (
-  plan: SubscriptionPlan
+  plan: SubscriptionPlan | string
 ): Promise<SubscriptionIntentResponse> => {
   const res = await axiosInstance.post<SubscriptionIntentResponse>(
     "/salons/subscription/intent",

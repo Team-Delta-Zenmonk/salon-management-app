@@ -154,7 +154,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: true, data: prev[rowIndex]?.data ?? [] } }));
 
       try {
-        const res = await listServiceStaff(service.uuid, salon.uuid);
+        const res = await listServiceStaff(service.uuid, salon.uuid, { include_parent: true });
         const data = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
         setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: false, data } }));
       } catch (err) {
