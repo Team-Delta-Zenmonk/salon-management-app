@@ -1,4 +1,5 @@
 export const FIELD_LIMITS = {
+  SALON_NAME: 50,
   NAME: 255,
   EMAIL: 100,
   PHONE: 10,

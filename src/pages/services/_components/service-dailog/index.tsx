@@ -10,7 +10,7 @@ import FilePicker from "../../../../components/form/file-picker";
 import Select from "../../../../components/form/select";
 import { PriceTypeOptions } from "../../../../common/enums/price-type.enum";
 import { ServiceGenderOptions } from "../../../../common/enums/service-gender.enum";
-import { DiscountTypeOptions } from "../../../../common/enums/discount-type.enum";
+import { DISCOUNT_TYPE, DiscountTypeOptions } from "../../../../common/enums/discount-type.enum";
 import type { RootState } from "../../../../store/store";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { createServiceService } from "../../../../features/service/create-service/create-service.service";
@@ -48,7 +48,16 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   const [isLoading, setIsLoading] = useState(false);
 
   const categories = useAppSelector((state: RootState) => state.category.data) ?? [];
-  const salonUUID = useAppSelector((state: RootState) => state.auth.salon?.uuid ?? "");
+  const salon = useAppSelector((state: RootState) => state.auth.salon);
+  const salonUUID = salon?.uuid ?? "";
+
+  const salonType = salon?.type;
+  const isGenderLocked = salonType === "male" || salonType === "female";
+  const defaultGender = isGenderLocked ? salonType : undefined;
+
+  const genderOptions = isGenderLocked
+    ? [{ label: salonType === "female" ? "Female" : "Male", value: salonType }]
+    : ServiceGenderOptions;
 
   const isCreatingSubService = mode === "create" && Boolean(parentService);
   const isEditingSubService = mode === "update" && Boolean(service?.parent_id);
@@ -58,7 +67,15 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     resolver: zodResolver(getServiceSchema(!shouldShowCategory)),
   });
 
-  const { handleSubmit, control, reset, watch, setValue } = methods;
+  const { handleSubmit, control, reset, watch, setValue, clearErrors } = methods;
+
+  const discountType = watch("discount_type");
+
+  useEffect(() => {
+    if (!discountType) {
+      clearErrors(["discount", "discount_type"]);
+    }
+  }, [discountType, clearErrors]);
 
   const buildPayload = (data: ServiceForm, logoUrl?: string): CreateServicePayload => {
     const payload: CreateServicePayload = {
@@ -75,9 +92,13 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
     if (data.discount !== undefined && data.discount !== null && data.discount !== "") {
       payload.discount = Number(data.discount);
+    } else {
+      payload.discount = 0;
     }
     if (data.discount_type) {
-      payload.discount_type = data.discount_type;
+      payload.discount_type = data.discount_type as any;
+    } else {
+      payload.discount_type = null;
     }
 
     if (mode === "create") {
@@ -166,7 +187,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         description: "",
         logo: null,
         category_id: undefined,
-        gender: undefined,
+        gender: defaultGender ?? (parentService?.gender ?? undefined),
         price_type: undefined,
         duration: "",
         price: "",
@@ -181,17 +202,20 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         description: service.description ?? "",
         logo: null,
         category_id: service?.category?.uuid,
-        gender: service.gender,
+        gender: defaultGender ?? service.gender,
         price_type: service.price_type,
         duration: service.duration == null ? "" : String(service.duration),
         price: service.price == null ? "" : String(service.price),
-        discount: service.discount == null ? "" : String(service.discount),
+        discount:
+          service.discount == null || Number(service.discount) === 0
+            ? ""
+            : String(service.discount),
         discount_type: service.discount_type ?? undefined,
         is_active: service.is_active ?? false,
         is_popular: service.is_popular ?? false,
       });
     }
-  }, [open, mode, service, parentService, reset]);
+  }, [open, mode, service, parentService, reset, defaultGender]);
 
   return (
     <Dialog
@@ -273,8 +297,8 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   label="Gender"
                   placeholder="Gender"
                   identifier="service-gender"
-                  options={ServiceGenderOptions}
-                  disabled={isLoading}
+                  options={genderOptions}
+                  disabled={isLoading || isGenderLocked}
                 />
 
                 <Select
@@ -315,18 +339,6 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <TextField
-                  type="number"
-                  min={0}
-                  label="Discount (optional)"
-                  name="discount"
-                  control={control}
-                  identifier="service-discount"
-                  placeholder="Enter discount"
-                  disabled={isLoading}
-                  maxLength={FIELD_LIMITS.PRICE}
-                />
-
                 <Select
                   name="discount_type"
                   control={control}
@@ -335,6 +347,32 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   identifier="service-discount-type"
                   options={DiscountTypeOptions}
                   disabled={isLoading}
+                  onChange={(val) => {
+                    if (!val) {
+                      setValue("discount", "");
+                      clearErrors(["discount", "discount_type"]);
+                    } else {
+                      clearErrors("discount_type");
+                    }
+                  }}
+                />
+
+                <TextField
+                  type="number"
+                  min={0}
+                  label="Discount Value"
+                  name="discount"
+                  control={control}
+                  identifier="service-discount"
+                  placeholder={
+                    discountType === DISCOUNT_TYPE.PERCENTAGE
+                      ? "Enter percentage (e.g. 10)"
+                      : discountType === DISCOUNT_TYPE.AMOUNT
+                        ? "Enter amount (e.g. 100)"
+                        : "Enter discount"
+                  }
+                  disabled={isLoading}
+                  maxLength={FIELD_LIMITS.PRICE}
                 />
               </div>
 

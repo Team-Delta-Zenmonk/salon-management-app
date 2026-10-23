@@ -326,11 +326,14 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         },
         booking_date: bookingDate.format("YYYY-MM-DD"),
         booking_start_time: `${bookingDate.format("YYYY-MM-DD")}T${values.booking_start_time}:00Z`,
-        services: values.services.map((s, i) => ({
-          service_id: Number(s.service_id),
-          staff_id: s.staff_id != null ? Number(s.staff_id) : null,
-          sequence: i + 1,
-        })),
+        services: values.services.map((s, i) => {
+          const staffId = s.staff_id != null && Number(s.staff_id) > 0 ? Number(s.staff_id) : null;
+          return {
+            service_id: Number(s.service_id),
+            staff_id: staffId,
+            sequence: i + 1,
+          };
+        }),
         status: values.status,
         payment_preference: values.payment_preference || defaultPolicy,
         is_walk_in: Boolean(values.is_walk_in),

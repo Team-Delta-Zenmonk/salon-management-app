@@ -19,7 +19,7 @@ const BusinessDaySchema = z.object({
 export const MyProfileSchema = z.object({
   name: z.string()
     .min(1, "Required")
-    .max(FIELD_LIMITS.ITEM_NAME, `Max ${FIELD_LIMITS.ITEM_NAME} characters`)
+    .max(FIELD_LIMITS.SALON_NAME, `Max ${FIELD_LIMITS.SALON_NAME} characters`)
     .regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
   owner_name: z.string()
     .min(1, "Required")
@@ -34,7 +34,11 @@ export const MyProfileSchema = z.object({
   type: z.string(),
   address: z.object({
     address: z.string().min(1, "Required"),
-    map_link: z.string().optional().nullable(),
+    map_link: z
+      .string({ message: "Google Maps link is required" })
+      .min(1, "Required")
+      .url("Invalid Url")
+      .max(FIELD_LIMITS.URL, `Map link cannot exceed ${FIELD_LIMITS.URL} characters`),
     latitude: z.union([z.string(), z.number()]).optional().nullable(),
     longitude: z.union([z.string(), z.number()]).optional().nullable(),
     street: z.string().max(FIELD_LIMITS.ADDRESS, `Max ${FIELD_LIMITS.ADDRESS} characters`).optional().or(z.literal("")),
@@ -43,7 +47,7 @@ export const MyProfileSchema = z.object({
     pincode: z.string().max(FIELD_LIMITS.PINCODE, `Max ${FIELD_LIMITS.PINCODE} digits`).regex(VALIDATE_PATTERN.number, "Only numbers allowed").optional().or(z.literal("")),
   }),
   logo: z.any().nullable(),
-  photos: z.array(CloudinaryFileSchema),
+  photos: z.array(CloudinaryFileSchema).max(4, "Maximum 4 photos allowed"),
   business_hours: z.object({
     monday: BusinessDaySchema,
     tuesday: BusinessDaySchema,

@@ -484,8 +484,9 @@ export default function PlanAndBillingPage() {
       setCheckoutPlan(plan);
     } catch (err: any) {
       const msg =
+        (typeof err?.response?.data === "string" ? err.response.data : "") ||
         err?.response?.data?.message ||
-        err?.response?.data?.error ||
+        (typeof err?.response?.data?.error === "string" ? err.response.data.error : err?.response?.data?.error?.message) ||
         "Could not start checkout. Please try again.";
       callSnack(msg, "error");
     } finally {
@@ -796,7 +797,7 @@ export default function PlanAndBillingPage() {
                 <motion.div
                   key={plan.id}
                   variants={itemVariants}
-                  className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all flex-1 min-w-[260px] max-w-full overflow-visible ${isYearlyPlan
+                  className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all flex-1 min-w-[260px] max-w-full min-w-0 overflow-visible ${isYearlyPlan
                     ? "border-2 border-primary shadow-xl shadow-primary/10"
                     : "border border-border/80 hover:border-primary/40"
                     } ${isCurrentPlan && currentStatus === "active"
@@ -819,20 +820,31 @@ export default function PlanAndBillingPage() {
                     </div>
                   )}
 
-                  <div className="space-y-4">
-                    <div>
+                  <div className="space-y-4 min-w-0">
+                    <div className="min-w-0">
                       <span className={`text-xs font-bold uppercase tracking-wider ${isYearlyPlan ? "text-primary" : "text-muted-foreground"}`}>
                         {isYearlyPlan ? "Annual Commitment" : plan.id === "trial" ? "Trial Period" : "Pay As You Go"}
                       </span>
-                      <div className="flex items-center gap-2 mt-1">
-                        <h4 className="text-xl font-bold text-foreground capitalize">{plan.name}</h4>
-                        <Badge className="text-[10px] font-mono font-semibold bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
+                      <div className="flex items-center justify-between gap-2 mt-1 min-w-0">
+                        <h4 className="text-xl font-bold text-foreground capitalize min-w-0 flex-1 truncate">
+                          <EllipsisCell
+                            value={plan.name}
+                            maxChars={25}
+                            className="block font-bold text-xl truncate"
+                          />
+                        </h4>
+                        <Badge className="text-[10px] font-mono font-semibold bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 shrink-0">
                           {plan.duration_days ?? 0} days
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">
-                        {plan.description}
-                      </p>
+                      <div className="text-xs text-muted-foreground mt-1 min-h-[36px] min-w-0">
+                        <EllipsisCell
+                          value={plan.description || ""}
+                          maxChars={75}
+                          maxLines={2}
+                          className="block text-xs text-muted-foreground line-clamp-2 break-all"
+                        />
+                      </div>
                     </div>
 
                     <div className="pt-2 pb-3 border-b border-border/50">
@@ -865,17 +877,25 @@ export default function PlanAndBillingPage() {
                     </ul>
                   </div>
 
-                  <div className="pt-6 space-y-2">
+                  <div className="pt-6 space-y-2 min-w-0">
                     {plan.id === "trial" ? (
-                      <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-80">
-                        {currentStatus === "trial" ? `Trial Active (${plan.duration_days ?? 14} Days)` : "Trial Concluded"}
+                      <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-80 overflow-hidden">
+                        <EllipsisCell
+                          value={currentStatus === "trial" ? `Trial Active (${plan.duration_days ?? 14} Days)` : "Trial Concluded"}
+                          maxChars={30}
+                          className="truncate block w-full text-center"
+                        />
                       </Button>
                     ) : !isYearlyPlan && isActiveYearly ? (
-                      <div className="w-full text-center">
-                        <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-60 cursor-not-allowed">
-                          Not Available During Yearly Plan
+                      <div className="w-full text-center min-w-0">
+                        <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-60 cursor-not-allowed overflow-hidden">
+                          <EllipsisCell
+                            value="Not Available During Yearly Plan"
+                            maxChars={30}
+                            className="truncate block w-full text-center"
+                          />
                         </Button>
-                        <p className="text-[10px] text-muted-foreground mt-1.5">
+                        <p className="text-[10px] text-muted-foreground mt-1.5 truncate">
                           Available after{" "}
                           {expiresAt?.toLocaleDateString("en-IN", { dateStyle: "medium" })}
                         </p>
@@ -887,21 +907,27 @@ export default function PlanAndBillingPage() {
                           size="default"
                           onClick={() => openCheckout(plan.id)}
                           disabled={loadingPlan !== null}
-                          className={`w-full text-xs font-bold cursor-pointer ${isYearlyPlan ? "shadow-md shadow-primary/25" : ""
+                          className={`w-full text-xs font-bold cursor-pointer overflow-hidden ${isYearlyPlan ? "shadow-md shadow-primary/25" : ""
                             }`}
                         >
                           {loadingPlan === plan.id ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : isCurrentPlan && currentStatus === "active" ? (
-                            `Renew ${plan.name}`
-                          ) : isCurrentPlan && currentStatus === "trial" ? (
-                            `Pay & Activate ${plan.name}`
                           ) : (
-                            `Choose ${plan.name}`
+                            <EllipsisCell
+                              value={
+                                isCurrentPlan && currentStatus === "active"
+                                  ? `Renew ${plan.name}`
+                                  : isCurrentPlan && currentStatus === "trial"
+                                  ? `Pay & Activate ${plan.name}`
+                                  : `Choose ${plan.name}`
+                              }
+                              maxChars={28}
+                              className="truncate block w-full text-center"
+                            />
                           )}
                         </Button>
                         {isCurrentPlan && currentStatus === "active" && (
-                          <p className="text-[10px] text-muted-foreground text-center mt-1">
+                          <p className="text-[10px] text-muted-foreground text-center mt-1 truncate">
                             Extends current active plan by {plan.duration_days ?? 0} days
                           </p>
                         )}
@@ -913,10 +939,10 @@ export default function PlanAndBillingPage() {
             })}
             <motion.div
               variants={itemVariants}
-              className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-primary/40 transition-all flex-1 min-w-[260px] max-w-full"
+              className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-primary/40 transition-all flex-1 min-w-[260px] max-w-full min-w-0"
             >
-              <div className="space-y-4">
-                <div>
+              <div className="space-y-4 min-w-0">
+                <div className="min-w-0">
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Multi-Location</span>
                   <h4 className="text-xl font-bold text-foreground mt-1">Enterprise</h4>
                   <p className="text-xs text-muted-foreground mt-1 min-h-[36px]">

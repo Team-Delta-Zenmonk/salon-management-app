@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Store, Loader2 } from "lucide-react";
 import { AccordionNavList } from "./_components/accordion-nav-list";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -17,20 +18,52 @@ type SidebarProps = {
   isDesktop: boolean;
 };
 
+const SalonLogo = ({
+  logo,
+  name,
+  isLoading,
+}: {
+  logo?: string;
+  name?: string;
+  isLoading?: boolean;
+}) => {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 shrink-0 border border-border/50">
+        <Loader2 className="w-5 h-5 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 overflow-hidden shrink-0 shadow-xs border border-border/50">
+      <Store className="w-5 h-5 text-muted-foreground" />
+      {logo && (
+        <img
+          src={logo}
+          alt={name || "Salon Logo"}
+          className="absolute inset-0 w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
 const Sidebar = ({ drawerWidth, mobileOpen, desktopCollapsed = false, onToggleSidebar, isDesktop }: SidebarProps) => {
-  const { salon } = useAppSelector((state: RootState) => state.auth);
+  const { salon, isLoadingProfile } = useAppSelector((state: RootState) => state.auth);
 
   const drawerContent = (
     <div className="flex flex-col h-full bg-card">
       <div className={cn("border-b border-border h-[72px] flex items-center shrink-0", desktopCollapsed ? "justify-center px-0" : "pl-4 pr-6")}>
         <div className={cn("flex items-center", desktopCollapsed ? "justify-center" : "space-x-3 w-full")}>
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 overflow-hidden shrink-0 shadow-xs border border-border/50">
-            <img
-              src={salon?.logo || "/management-icon.png"}
-              alt={salon?.name || "Salon Logo"}
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <SalonLogo
+            logo={salon?.logo}
+            name={salon?.name}
+            isLoading={isLoadingProfile}
+          />
           {!desktopCollapsed && (
             <div className="min-w-0 flex-1">
               <EllipsisCell

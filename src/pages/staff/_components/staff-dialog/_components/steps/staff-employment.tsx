@@ -1,4 +1,5 @@
-import type { Control } from "react-hook-form";
+import { useWatch, type Control } from "react-hook-form";
+import dayjs from "dayjs";
 import type { StaffForm } from "../../../schema/staff.schema";
 import TextField from "../../../../../../components/form/textfield";
 import DatePicker from "../../../../../../components/form/date-picker";
@@ -9,6 +10,8 @@ import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../../../common/field-limits";
 
 export default function StaffEmployment({ control, disabled }: Readonly<{ control: Control<StaffForm>; disabled: boolean }>) {
+  const joiningDate = useWatch({ control, name: "joining_date" });
+
   return (
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -47,6 +50,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             identifier="staff-end"
             format="DD-MM-YYYY"
             disabled={disabled}
+            minDate={joiningDate ? dayjs(joiningDate, "DD-MM-YYYY") : null}
             label="End Date"
           />
         </div>

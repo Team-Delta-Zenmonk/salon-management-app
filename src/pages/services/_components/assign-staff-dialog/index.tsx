@@ -106,9 +106,16 @@ function StaffRow({
         />
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-semibold leading-tight truncate capitalize transition-colors duration-200 ${selected ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
-          <EllipsisCell value={getFullName(staff)} maxLines={1} maxChars={20} />
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p className={`text-sm font-semibold leading-tight truncate capitalize transition-colors duration-200 ${selected ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
+            <EllipsisCell value={getFullName(staff)} maxLines={1} maxChars={20} />
+          </p>
+          {!active && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-destructive/10 text-destructive border border-destructive/20 shrink-0">
+              Inactive
+            </span>
+          )}
+        </div>
         <p className="text-[11px] text-muted-foreground truncate capitalize mt-0.5">
           <EllipsisCell value={staff.title || "Staff Member"} maxLines={1} maxChars={20} />
         </p>
@@ -312,8 +319,15 @@ export default function AssignStaffDialog({
       onStaffAssigned?.();
       onClose();
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      callSnack(error?.message || "Failed to update staff assignment", "error");
+      const error = err as any;
+      const responseData = error?.response?.data;
+      const backendMessage =
+        typeof responseData === "string"
+          ? responseData
+          : responseData?.message ||
+            responseData?.error ||
+            (Array.isArray(responseData?.errors) && responseData.errors[0]?.message);
+      callSnack(backendMessage || error?.message || "Failed to update staff assignment", "error");
     } finally {
       setSaving(false);
     }

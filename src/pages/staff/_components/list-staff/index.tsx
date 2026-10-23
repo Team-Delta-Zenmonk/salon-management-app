@@ -32,6 +32,7 @@ import StaffDetailsDialog from "../staff-details-dialog";
 import StaffDialog from "../staff-dialog";
 import { motion, type Variants } from "framer-motion";
 import { EllipsisCell } from "@/components/ellipse-cell";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 dayjs.extend(customParseFormat);
 
@@ -84,6 +85,7 @@ function StaffCard({
   const initials = staff.first_name?.charAt(0).toUpperCase() || "S";
   const isActive =
     !staff.end_date || dayjs(staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const cardVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95 },
@@ -166,15 +168,24 @@ function StaffCard({
             </div>
           )}
 
-          <a
-            href={`tel:${staff.phone_number}`}
-            className="flex items-center gap-2 truncate hover:text-primary transition-colors group/phone"
-          >
-            <Phone className="w-3.5 h-3.5 text-muted-foreground/60 group-hover/phone:text-primary transition-colors shrink-0" />
-            <span className="truncate text-foreground/80 font-medium group-hover/phone:underline">
-              {staff.phone_number}
-            </span>
-          </a>
+          {isMobile ? (
+            <a
+              href={`tel:${staff.phone_number}`}
+              className="flex items-center gap-2 truncate hover:text-primary transition-colors group/phone"
+            >
+              <Phone className="w-3.5 h-3.5 text-muted-foreground/60 group-hover/phone:text-primary transition-colors shrink-0" />
+              <span className="truncate text-foreground/80 font-medium group-hover/phone:underline">
+                {staff.phone_number}
+              </span>
+            </a>
+          ) : (
+            <div className="flex items-center gap-2 truncate cursor-default select-text">
+              <Phone className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+              <span className="truncate text-foreground/80 font-medium">
+                {staff.phone_number}
+              </span>
+            </div>
+          )}
 
           <div className="flex items-center gap-2 truncate pt-1.5 border-t border-border/10">
             <span className="font-bold text-foreground/60 shrink-0">

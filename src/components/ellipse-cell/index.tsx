@@ -24,10 +24,18 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
-  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; placement: "top" | "bottom" }>({
-    top: 0,
+  const [tooltipPos, setTooltipPos] = useState<{
+    targetTop: number;
+    targetBottom: number;
+    left: number;
+    placement: "top" | "bottom";
+    arrowOffset: number;
+  }>({
+    targetTop: 0,
+    targetBottom: 0,
     left: 0,
     placement: "top",
+    arrowOffset: 0,
   });
 
   const isCharTruncated = Boolean(maxChars && value && value.length > maxChars);
@@ -63,27 +71,22 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
 
     const element = elementRef.current;
     const inputTarget = element.querySelector("input, textarea") as HTMLElement | null;
+    const rect = (inputTarget || element).getBoundingClientRect();
 
-    let rect: DOMRect;
-    if (inputTarget) {
-      rect = inputTarget.getBoundingClientRect();
-    } else {
-      try {
-        const range = document.createRange();
-        range.selectNodeContents(element);
-        const rangeRect = range.getBoundingClientRect();
-        rect = rangeRect.width > 0 ? rangeRect : element.getBoundingClientRect();
-      } catch {
-        rect = element.getBoundingClientRect();
-      }
-    }
-
-    const placement: "top" | "bottom" = rect.top < 65 ? "bottom" : "top";
-    const top = placement === "top" ? rect.top - 8 : rect.bottom + 8;
+    const placement: "top" | "bottom" = rect.top < 50 ? "bottom" : "top";
     const targetCenter = rect.left + rect.width / 2;
-    const left = Math.max(140, Math.min(window.innerWidth - 140, targetCenter));
+    const windowWidth = typeof window !== "undefined" ? window.innerWidth : 1000;
+    const maxHalfWidth = 140; // half of max-w-[280px]
+    const clampedLeft = Math.max(maxHalfWidth + 12, Math.min(windowWidth - maxHalfWidth - 12, targetCenter));
+    const arrowOffset = Math.max(-100, Math.min(100, targetCenter - clampedLeft));
 
-    setTooltipPos({ top, left, placement });
+    setTooltipPos({
+      targetTop: rect.top,
+      targetBottom: rect.bottom,
+      left: clampedLeft,
+      placement,
+      arrowOffset,
+    });
   };
 
   const checkCurrentlyOverflowing = (): boolean => {
@@ -194,18 +197,48 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (!showTooltip) return;
+    const handleScroll = () => {
+      setShowTooltip(false);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll, { capture: true });
+    };
+  }, [showTooltip]);
+
   const portalContent = showTooltip && Boolean(value) && typeof window !== "undefined" && (
     <div
-      className={cn(
-        "fixed z-[99999] px-3 py-1.5 bg-neutral-900 text-white text-xs font-semibold rounded-lg shadow-2xl border border-neutral-700 pointer-events-none max-w-[280px] sm:max-w-xs break-words text-center -translate-x-1/2 animate-in fade-in-0 zoom-in-95",
-        tooltipPos.placement === "top" ? "-translate-y-full" : "translate-y-0"
-      )}
+      className="fixed z-[99999] pointer-events-none"
       style={{
-        top: `${tooltipPos.top}px`,
+        ...(tooltipPos.placement === "top"
+          ? { bottom: `${Math.max(8, window.innerHeight - tooltipPos.targetTop + 8)}px` }
+          : { top: `${tooltipPos.targetBottom + 8}px` }),
         left: `${tooltipPos.left}px`,
+        transform: "translateX(-50%)",
       }}
     >
-      {value}
+      <div className="relative px-3 py-1.5 bg-neutral-900 text-white text-xs font-medium rounded-lg shadow-2xl border border-neutral-700 max-w-[280px] sm:max-w-xs break-words text-center animate-in fade-in-0 zoom-in-95 leading-relaxed">
+        {value}
+        {tooltipPos.placement === "top" ? (
+          <span
+            className="absolute -bottom-1.5 w-0 h-0 border-x-4 border-x-transparent border-t-[6px] border-t-neutral-900"
+            style={{
+              left: `calc(50% + ${tooltipPos.arrowOffset}px)`,
+              transform: "translateX(-50%)",
+            }}
+          />
+        ) : (
+          <span
+            className="absolute -top-1.5 w-0 h-0 border-x-4 border-x-transparent border-b-[6px] border-b-neutral-900"
+            style={{
+              left: `calc(50% + ${tooltipPos.arrowOffset}px)`,
+              transform: "translateX(-50%)",
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 

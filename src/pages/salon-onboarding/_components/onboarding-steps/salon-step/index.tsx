@@ -39,6 +39,7 @@ export default function SalonStep() {
             identifier="salon-photos"
             label="Salon Photos"
             uploadFn={uploadImages}
+            maxFiles={4}
           />
         </div>
       </div>

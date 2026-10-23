@@ -4,8 +4,14 @@ import { VALIDATE_PATTERN } from "../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../common/field-limits";
 
 export const bookingServiceSchema = z.object({
-  service_id: z.coerce.number({ message: "Required" }),
-  staff_id: z.coerce.number().optional().nullable(),
+  service_id: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number({ message: "Required" }).int().positive({ message: "Required" })
+  ),
+  staff_id: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined || Number(val) <= 0 ? null : Number(val)),
+    z.number().int().positive().nullable().optional()
+  ),
 });
 
 export const bookingSchema = z.object({
@@ -21,7 +27,9 @@ export const bookingSchema = z.object({
     { message: "Required" }
   ),
   booking_start_time: z.string({ message: "Required" }).min(1, { message: "Required" }),
-  status: z.enum(Object.values(BOOKING_STATUS) as [string, ...string[]]).optional(),
+  status: z.enum(Object.values(BOOKING_STATUS) as [string, ...string[]], {
+    message: "Status is required",
+  }),
   payment_preference: z.enum(["pay_at_venue", "partial_deposit", "full_upfront"], { message: "Payment preference is required" }),
   is_walk_in: z.boolean().default(false),
 });

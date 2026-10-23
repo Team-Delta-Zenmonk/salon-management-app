@@ -145,7 +145,10 @@ const MyProfile = () => {
         return raw;
       })(),
       deposit_percentage: salon?.deposit_percentage ?? null,
-    }
+    },
+    resetOptions: {
+      keepDirtyValues: true,
+    },
   });
 
   const { control, handleSubmit, setValue, clearErrors, watch, reset, formState: { isDirty } } = methods;
@@ -183,7 +186,14 @@ const MyProfile = () => {
         reset(data);
         return true;
       } else {
-        callSnack("Failed to update profile", "error");
+        const errorPayload: any = resultAction.payload;
+        const msg =
+          (typeof errorPayload === "string" ? errorPayload : "") ||
+          errorPayload?.message ||
+          errorPayload?.error ||
+          errorPayload?.errors?.[0]?.message ||
+          "Failed to update profile";
+        callSnack(msg, "error");
         return false;
       }
     } catch {
@@ -253,7 +263,7 @@ const MyProfile = () => {
               >
                 <motion.div
                   variants={itemVariants}
-                  className="relative group rounded-2xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg min-h-[210px] sm:min-h-[240px] md:h-[260px] hover:shadow-xl hover:border-primary/30 transition-all duration-300 w-full"
+                  className="relative group rounded-2xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg min-h-[220px] sm:min-h-[250px] md:h-[280px] hover:shadow-xl hover:border-primary/30 transition-all duration-300 w-full"
                 >
                   {activePhotos.length > 0 ? (
                     <Carousel
@@ -264,11 +274,11 @@ const MyProfile = () => {
                     >
                       <CarouselContent className="h-full -ml-0">
                         {activePhotos.map((photo: PhotoType, index: number) => (
-                          <CarouselItem key={photo.url || index} className="pl-0 min-h-[210px] sm:min-h-[240px] md:h-[260px] w-full">
+                          <CarouselItem key={photo.url || index} className="pl-0 min-h-[220px] sm:min-h-[250px] md:h-[280px] w-full">
                             <img
                               src={photo.url}
                               alt={`Salon Banner ${index + 1}`}
-                              className="object-cover w-full h-full"
+                              className="w-full h-full object-cover object-center"
                             />
                           </CarouselItem>
                         ))}

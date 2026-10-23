@@ -18,6 +18,7 @@ export const SalonSchema = z.object({
   photos: z
     .array(CloudinaryFileSchema)
     .min(1, "At least one salon photo is required")
+    .max(4, "Maximum 4 photos allowed")
     .nonempty("At least one salon photo is required"),
 });
 

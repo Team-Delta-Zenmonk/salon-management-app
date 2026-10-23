@@ -9,7 +9,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { EllipsisCell } from "@/components/ellipse-cell";
 
@@ -77,7 +76,7 @@ const Select = <T extends FieldValues>({
                 <div className="flex-1 text-left flex items-center gap-1.5 line-clamp-1 pr-2 w-1">
                   <EllipsisCell value={String(value ? (options?.find((o) => String(o.value) === String(value))?.label || value) : placeholder)} />
                 </div>
-                {value && (
+                {value && !disabled && (
                   <div
                     role="button"
                     tabIndex={0}

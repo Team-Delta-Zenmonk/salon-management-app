@@ -93,7 +93,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
           filename: result.filename || result.public_id || file.name,
         });
       }
-      setValue("photos", [...photos, ...uploadedData], { shouldDirty: true });
+      setValue("photos", [...photos, ...uploadedData], { shouldDirty: true, shouldValidate: true });
     } catch (err: any) {
       callSnack(extractUploadErrorMessage(err), "error");
     } finally {
@@ -223,7 +223,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     const updated = photos.filter((_, i) => i !== 0);
-                    setValue("photos", updated, { shouldDirty: true });
+                    setValue("photos", updated, { shouldDirty: true, shouldValidate: true });
                   }}
                   className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 p-0 flex items-center justify-center rounded-full bg-black/75 hover:bg-destructive hover:scale-110 text-white opacity-100 sm:opacity-0 sm:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 cursor-pointer z-20 shadow-md"
                   title="Delete photo"
@@ -269,7 +269,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         const updated = photos.filter((_, i) => i !== 1);
-                        setValue("photos", updated, { shouldDirty: true });
+                        setValue("photos", updated, { shouldDirty: true, shouldValidate: true });
                       }}
                       className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 p-0 flex items-center justify-center rounded-full bg-black/75 hover:bg-destructive hover:scale-110 text-white opacity-100 sm:opacity-0 sm:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 cursor-pointer z-20 shadow-md"
                       title="Delete photo"
@@ -314,7 +314,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         const updated = photos.filter((_, i) => i !== index);
-                        setValue("photos", updated, { shouldDirty: true });
+                        setValue("photos", updated, { shouldDirty: true, shouldValidate: true });
                         if (updated.length === 0) setIsGalleryOpen(false);
                       }}
                       className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 p-0 flex items-center justify-center rounded-full bg-black/75 hover:bg-destructive hover:scale-110 text-white opacity-100 sm:opacity-0 sm:pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all cursor-pointer z-20 shadow-md"
@@ -399,7 +399,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
               placeholder="Enter salon name"
               identifier="salon-name-field"
               rules={{ required: "Salon name is required" }}
-              maxLength={FIELD_LIMITS.NAME}
+              maxLength={FIELD_LIMITS.SALON_NAME}
               pattern={VALIDATE_PATTERN.alphabet}
               inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
             />

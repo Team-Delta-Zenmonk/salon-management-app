@@ -170,8 +170,10 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
       await loadAssignedServices();
       callSnack("Pricing updated successfully", "success");
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { message?: string } } };
-      callSnack(err?.response?.data?.message || "Failed to update pricing", "error");
+      const err = e as any;
+      const responseData = err?.response?.data;
+      const msg = typeof responseData === "string" ? responseData : responseData?.message || responseData?.error;
+      callSnack(msg || err?.message || "Failed to update pricing", "error");
     } finally {
       setPricingDialogOpen(false);
       setDialogContext(null);
@@ -187,8 +189,10 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
       await loadAssignedServices();
       callSnack("Service unassigned successfully", "success");
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { message?: string } } };
-      callSnack(err?.response?.data?.message || "Failed to unassign service", "error");
+      const err = e as any;
+      const responseData = err?.response?.data;
+      const msg = typeof responseData === "string" ? responseData : responseData?.message || responseData?.error;
+      callSnack(msg || err?.message || "Failed to unassign service", "error");
       await loadAssignedServices();
     } finally {
       setDeletingId(null);

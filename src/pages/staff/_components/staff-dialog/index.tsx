@@ -70,7 +70,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
 
   const methods = useForm<StaffForm>({
     resolver: zodResolver(StaffSchema),
-    mode: "onTouched",
+    mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: createStaffDefaultPayload(),
   });
@@ -201,14 +201,14 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
 
             <div className="shrink-0 px-6 pt-5 pb-6 border-b border-border/30 select-none">
               <div className="relative flex items-start justify-between">
-                <div className="absolute left-0 right-0 top-[18px] h-[2px] bg-border/40 mx-9 z-0" />
-                <motion.div
-                  className="absolute top-[18px] h-[2px] bg-primary z-0 ml-9"
-                  initial={false}
-                  animate={{ width: `calc(${progressPercent}% * (100% - 72px) / 100)` }}
-                  style={{ width: `calc(${progressPercent / 100} * (100% - 72px))` }}
-                  transition={{ duration: 0.35, ease: "easeInOut" }}
-                />
+                <div className="absolute left-[56px] right-[56px] top-[18px] h-[2px] bg-border/40 z-0 overflow-hidden">
+                  <motion.div
+                    className="h-full bg-primary"
+                    initial={false}
+                    animate={{ width: `${progressPercent}%` }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                  />
+                </div>
 
                 {STEPS.map((s, idx) => {
                   const isCompleted = idx < step;

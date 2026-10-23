@@ -192,7 +192,26 @@ export default function SalonOnboarding() {
         is_onboarded: true,
         subscription_plan: intendedPlan,
       });
-      dispatch(completeOnboarding({ slug: data.salon?.slug, subscription_plan: intendedPlan }));
+      if (salon?.uuid) {
+        try {
+          await dispatch(getSalonProfileAction(salon.uuid)).unwrap();
+        } catch {
+        }
+      }
+      dispatch(
+        completeOnboarding({
+          slug: data.salon?.slug,
+          subscription_plan: intendedPlan,
+          logo: data.salon?.logo?.url,
+          owner_name: data.owner?.owner_name,
+          type: data.salon?.type,
+          photos: data.salon?.photos,
+          address: data?.address?.address,
+          map_link: data?.address?.map_link,
+          latitude: String(data?.address?.latitude),
+          longitude: String(data?.address?.longitude),
+        })
+      );
       callSnack("Onboarding completed", "success");
       setConfirmedSlug(data.salon?.slug || "");
       setSuccessModalOpen(true);

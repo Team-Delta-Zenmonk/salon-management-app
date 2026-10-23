@@ -1,5 +1,6 @@
 import axios from "axios";
 import { APP_NAME } from "@/constants/app";
+import { extractErrorMessage } from "@/utils/api-error";
 
 const appName = APP_NAME;
 
@@ -42,6 +43,11 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    const normalizedMessage = extractErrorMessage(error, "");
+    if (normalizedMessage) {
+      error.message = normalizedMessage;
+    }
 
     const status = error?.response?.status;
     const code = error?.response?.data?.code;

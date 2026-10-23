@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { useMediaQuery } from "../hooks/use-media-query";
 import Sidebar from "../components/sidebar";
 import Topbar from "../components/topbar";
 import SubscriptionLockoutModal from "../components/subscription-lockout-modal";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import type { RootState } from "../store/store";
+import { getSalonProfileAction } from "../features/auth/profile/get-salon-profile/getSalonProfile.action";
 
 const drawerWidth = 260;
 
@@ -11,6 +14,14 @@ const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = React.useState(false);
+  const dispatch = useAppDispatch();
+  const { salon } = useAppSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    if (salon?.uuid) {
+      dispatch(getSalonProfileAction(salon.uuid));
+    }
+  }, [dispatch, salon?.uuid]);
 
   const handleToggleSidebar = () => {
     if (isDesktop) {

@@ -29,16 +29,7 @@ export default function ResetPassword() {
       callSnack("Password reset successfully", "success");
       navigate("/login");
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } | string } };
-      const backendMessage = (typeof error?.response?.data === 'string' ? error.response.data : error?.response?.data?.message) || "";
-
-      if (backendMessage.includes("Invalid token")) {
-        callSnack("Invalid token", "error");
-      } else if (backendMessage.includes("Token expired")) {
-        callSnack("Token expired", "error");
-      } else {
-        callSnack("Internal server error", "error");
-      }
+      callSnack(err, "error");
     } finally {
       setIsLoading(false);
     }

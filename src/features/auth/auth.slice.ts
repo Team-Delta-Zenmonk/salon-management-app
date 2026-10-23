@@ -49,12 +49,14 @@ export type AuthState = {
   salon: Salon | null;
   isAuthenticated: boolean;
   isOnboardingComplete: boolean;
+  isLoadingProfile: boolean;
 };
 
 const initialState: AuthState = {
   salon: null,
   isAuthenticated: false,
   isOnboardingComplete: false,
+  isLoadingProfile: false,
 };
 
 export const authSlice = createSlice({
@@ -64,10 +66,12 @@ export const authSlice = createSlice({
     logout(state) {
       state.salon = null;
       state.isAuthenticated = false;
+      state.isLoadingProfile = false;
     },
     setsalon(state, { payload }) {
       state.salon = payload;
       state.isAuthenticated = !!payload;
+      state.isLoadingProfile = false;
     },
     completeOnboarding(state, { payload }) {
       if (state.salon) {
@@ -90,9 +94,22 @@ export const authSlice = createSlice({
     builder.addCase(verifySalonAction.rejected, (state) => {
       state.isAuthenticated = false;
     });
+    builder.addCase(getSalonProfileAction.pending, (state) => {
+      state.isLoadingProfile = true;
+    });
     builder.addCase(getSalonProfileAction.fulfilled, (state, { payload }) => {
       state.salon = payload;
+      state.isLoadingProfile = false;
     });
+    builder.addCase(getSalonProfileAction.rejected, (state) => {
+      state.isLoadingProfile = false;
+    });
+    builder.addMatcher(
+      (action) => action.type === "persist/REHYDRATE",
+      (state) => {
+        state.isLoadingProfile = false;
+      }
+    );
   },
 });
 

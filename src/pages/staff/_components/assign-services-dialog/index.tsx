@@ -182,8 +182,15 @@ export default function AssignServicesDialog({
       onAssigned?.();
       onClose();
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      callSnack(error?.message || "Failed to update services", "error");
+      const error = err as any;
+      const responseData = error?.response?.data;
+      const backendMessage =
+        typeof responseData === "string"
+          ? responseData
+          : responseData?.message ||
+            responseData?.error ||
+            (Array.isArray(responseData?.errors) && responseData.errors[0]?.message);
+      callSnack(backendMessage || error?.message || "Failed to update services", "error");
     } finally {
       setSaving(false);
     }

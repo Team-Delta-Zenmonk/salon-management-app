@@ -7,7 +7,7 @@ import { VerifyEmailSchema, type VerifyEmailForm } from "./schema/verify-email.s
 import OTPInput from "../../components/form/otp-input";
 import { useLocation, useNavigate } from "react-router-dom";
 import { resendOTP } from "../../features/salon-onboarding/resend-otp/resend-otp.service";
-import { callSnack } from "../../components/snackbar";
+import { callSnack, extractErrorMessage } from "../../components/snackbar";
 import { useAppDispatch } from "../../store/hooks";
 import { verifySalonAction } from "../../features/auth/verify-salon/verify-salon.action";
 import { Button } from "../../components/ui/button";
@@ -27,7 +27,7 @@ export default function VerifyEmail() {
     resolver: zodResolver(VerifyEmailSchema),
   });
 
-  const { handleSubmit, control, reset } = methods;
+  const { handleSubmit, control, reset, setError } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -39,12 +39,15 @@ export default function VerifyEmail() {
         state: { plan: location.state?.plan },
       });
     } catch (err: unknown) {
-      const error = err as { response?: { data?: string } };
-      if (error.response?.data?.includes("OTP expired")) {
-        callSnack("OTP expired. Please request a new one.", "error");
-      } else {
-        callSnack("Internal server error", "error");
+      const message = extractErrorMessage(err, "Failed to verify OTP. Please try again.");
+
+      if (message.toLowerCase().includes("expired")) {
+        setCanResend(true);
+        setTimer(0);
       }
+
+      setError("otp", { type: "manual", message });
+      callSnack(message, "error");
     } finally {
       setIsLoading(false);
     }
@@ -70,13 +73,13 @@ export default function VerifyEmail() {
   const handleResend = async () => {
     try {
       setResendLoading(true);
-      const otpResonponse = await resendOTP(email);
-      callSnack(otpResonponse?.message ?? "OTP resent successfully", "success");
+      const otpResponse = await resendOTP(email);
+      callSnack(otpResponse?.message ?? "OTP resent successfully", "success");
       reset({ otp: "" });
       setTimer(60);
       setCanResend(false);
-    } catch {
-      callSnack("Failed to resend OTP", "error");
+    } catch (err: unknown) {
+      callSnack(extractErrorMessage(err, "Failed to resend OTP. Please try again."), "error");
     } finally {
       setResendLoading(false);
     }

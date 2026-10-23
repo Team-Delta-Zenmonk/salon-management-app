@@ -179,8 +179,10 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
 
       callSnack("Pricing updated successfully", "success");
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { message?: string } } };
-      callSnack(err?.response?.data?.message || "Failed to update pricing", "error");
+      const err = e as any;
+      const responseData = err?.response?.data;
+      const msg = typeof responseData === "string" ? responseData : responseData?.message || responseData?.error;
+      callSnack(msg || err?.message || "Failed to update pricing", "error");
     } finally {
       setDialogOpen(false);
       setDialogContext(null);
@@ -203,8 +205,10 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
       await loadServiceStaffs();
       callSnack("Staff unassigned successfully", "success");
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { message?: string } } };
-      callSnack(err?.response?.data?.message || "Failed to unassign staff", "error");
+      const err = e as any;
+      const responseData = err?.response?.data;
+      const msg = typeof responseData === "string" ? responseData : responseData?.message || responseData?.error;
+      callSnack(msg || err?.message || "Failed to unassign staff", "error");
       await loadServiceStaffs();
     } finally {
       setDeletingId(null);

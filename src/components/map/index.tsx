@@ -28,7 +28,8 @@ export default function LocationMap({ control, latitude, longitude, label, disab
     if (result?.formattedAddress) {
       setValue("address.address", result.formattedAddress);
       setValue("address.map_link", `https://www.google.com/maps?q=${lat},${lng}`);
-      clearErrors("address.address");
+      clearErrors?.("address.address");
+      clearErrors?.("address.map_link");
     }
   };
   return (

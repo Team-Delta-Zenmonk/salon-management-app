@@ -132,6 +132,15 @@ export const StaffSchema = z.object({
   photos: CloudinaryFileSchema.nullable().optional(),
   staff_docs: z.array(CloudinaryFileSchema).nullable().optional(),
   active_hours: ActiveHoursSchema.optional(),
-});
+}).refine(
+  (data) => {
+    if (!data.joining_date || !data.end_date) return true;
+    return !parseDateString(data.end_date).isBefore(parseDateString(data.joining_date), "day");
+  },
+  {
+    message: "End date cannot be before joining date",
+    path: ["end_date"],
+  }
+);
 
 export type StaffForm = z.infer<typeof StaffSchema>;

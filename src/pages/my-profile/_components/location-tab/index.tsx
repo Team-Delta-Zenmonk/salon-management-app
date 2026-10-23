@@ -204,7 +204,8 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
     setValue("address.state", stateName, { shouldDirty: true });
     setValue("address.pincode", pincodeValue, { shouldDirty: true });
 
-    setValue("address.map_link", `https://www.google.com/maps?q=${lat},${lon}`, { shouldDirty: true });
+    setValue("address.map_link", `https://www.google.com/maps?q=${lat},${lon}`, { shouldDirty: true, shouldValidate: true });
+    clearErrors?.("address.map_link");
 
     setShowSuggestions(false);
     setSearchQuery("");

@@ -8,7 +8,7 @@ import { useState } from "react";
 import PasswordField from "../../components/form/password-field";
 import { registerSalon } from "../../features/salon-onboarding/register-salon/register-salon.service";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { callSnack } from "../../components/snackbar";
+import { callSnack, extractErrorMessage } from "../../components/snackbar";
 import { VALIDATE_PATTERN } from "../../common/validate-pattern";
 import { Button } from "../../components/ui/button";
 import { motion } from "framer-motion";
@@ -56,14 +56,11 @@ export default function SignUp() {
         },
       });
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } | string } };
-      const backendMessage = (typeof error?.response?.data === 'string' ? error.response.data : error?.response?.data?.message) || "";
-
-      if (backendMessage.includes("Email already registered")) {
-        methods.setError("email", { type: "manual", message: "Email already registered. Please login." });
-      } else {
-        callSnack("Internal server error", "error");
+      const message = extractErrorMessage(err, "Failed to register salon. Please try again.");
+      if (message.toLowerCase().includes("email already registered")) {
+        methods.setError("email", { type: "manual", message });
       }
+      callSnack(message, "error");
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +133,7 @@ export default function SignUp() {
                           disabled={isLoading}
                           pattern={VALIDATE_PATTERN.alphabet}
                           inputPropsClassName="bg-white dark:bg-neutral-900"
-                          maxLength={FIELD_LIMITS.NAME}
+                          maxLength={FIELD_LIMITS.SALON_NAME}
                         />
                       ),
                     },
