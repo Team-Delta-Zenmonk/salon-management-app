@@ -347,6 +347,7 @@ const MyProfile = () => {
                       <div className="space-y-1 sm:space-y-1.5 min-w-0 flex-1">
                         <EllipsisCell
                           value={activeName || "Your Salon"}
+                          maxChars={20}
                           className={cn(
                             "text-lg sm:text-xl md:text-2xl font-black tracking-tight capitalize block min-w-0",
                             activePhotos.length > 0 ? "text-white drop-shadow-md" : "text-foreground"

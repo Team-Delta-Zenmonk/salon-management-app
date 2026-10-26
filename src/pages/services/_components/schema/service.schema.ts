@@ -11,14 +11,14 @@ export const getServiceSchema = (isSubService: boolean = false) =>
     .object({
       name: z
         .string({ message: "Required" })
-        .min(2, { message: "Minimum 2 characters" })
+        .min(1, { message: "Required" })
         .max(FIELD_LIMITS.ITEM_NAME, { message: `Maximum ${FIELD_LIMITS.ITEM_NAME} characters` })
         .regex(VALIDATE_PATTERN.alphabetWithSpecial, {
           message: "Only alphabets and special characters are allowed",
         }),
       description: z
         .string({ message: "Required" })
-        .min(2, { message: "Minimum 2 characters" })
+        .min(1, { message: "Required" })
         .max(FIELD_LIMITS.DESCRIPTION, { message: `Maximum ${FIELD_LIMITS.DESCRIPTION} characters` })
         .regex(VALIDATE_PATTERN.alphabetWithSpecial, {
           message: "Only alphabets and special characters are allowed",

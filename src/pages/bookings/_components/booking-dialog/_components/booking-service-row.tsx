@@ -15,6 +15,8 @@ interface BookingServiceRowProps {
   onRemove: () => void;
   watchedServiceId?: string | number;
   onServiceChange?: () => void;
+  onServiceScrollEnd?: () => void;
+  isLoadingMoreServices?: boolean;
 }
 
 const formatPrice = (price: number) => `₹${Math.round(price).toLocaleString("en-IN")}`;
@@ -30,6 +32,8 @@ export default function BookingServiceRow({
   onRemove,
   watchedServiceId,
   onServiceChange,
+  onServiceScrollEnd,
+  isLoadingMoreServices,
 }: Readonly<BookingServiceRowProps>) {
   return (
     <div className="rounded-xl border border-border/50 p-3.5 sm:p-4 relative bg-muted/5 transition-colors hover:bg-muted/10">
@@ -43,6 +47,8 @@ export default function BookingServiceRow({
             translate={false}
             control={control as any}
             onChange={onServiceChange}
+            onScrollEnd={onServiceScrollEnd}
+            isLoadingMore={isLoadingMoreServices}
           />
         </div>
 

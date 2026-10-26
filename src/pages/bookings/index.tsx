@@ -63,8 +63,8 @@ export default function BookingPage() {
   const selectedPayment = watch("payment");
 
   useEffect(() => {
-    dispatch(listStaffAction({ page: 1, limit: 100 }));
-    dispatch(listServicesAction({ page: 1, limit: 100 }));
+    dispatch(listStaffAction({ page: 1, limit: 10 }));
+    dispatch(listServicesAction({ page: 1, limit: 10, include_sub_services: true }));
   }, [dispatch]);
 
   useEffect(() => {

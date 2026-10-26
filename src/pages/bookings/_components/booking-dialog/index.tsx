@@ -22,6 +22,7 @@ import Select from "../../../../components/form/select";
 import DatePicker from "../../../../components/form/date-picker";
 import TimePicker from "../../../../components/form/time-picker";
 import { listServiceStaff } from "../../../../features/service/list-staff/list-staff.service";
+import { listServicesAction } from "../../../../features/service/list-services/list-service.action";
 import { createBookingAction } from "../../../../features/booking/create-booking/create-booking.action";
 import { updateBookingAction } from "../../../../features/booking/update-booking/update-booking.action";
 import { useDownloadInvoice } from "../../../../features/invoice/hooks/use-download-invoice";
@@ -63,10 +64,18 @@ const formatPrice = (price: number) => `₹${Math.round(price).toLocaleString("e
 export default function BookingDialog({ open, onClose, mode, booking }: Readonly<BookingDialogProps>) {
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state) => state.auth);
-  const { data: services } = useAppSelector((state) => state.service);
+  const { data: services, hasMore: hasMoreServices, loading: isLoadingServices } = useAppSelector((state) => state.service);
+  const [servicePage, setServicePage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const { downloadInvoice, isDownloading: isDownloadingInvoice } = useDownloadInvoice();
   const [staffMap, setStaffMap] = useState<StaffMap>({});
+
+  const handleFetchMoreServices = useCallback(() => {
+    if (!hasMoreServices || isLoadingServices) return;
+    const nextPage = servicePage + 1;
+    setServicePage(nextPage);
+    dispatch(listServicesAction({ page: nextPage, limit: 10, include_sub_services: true }));
+  }, [dispatch, hasMoreServices, isLoadingServices, servicePage]);
 
   const handleDownloadInvoice = () => {
     if (booking?.uuid) {
@@ -217,6 +226,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         if (svc.service_id) fetchStaffForRow(idx, svc.service_id);
       });
     } else {
+      setServicePage(1);
       reset({
         customer_name: "",
         customer_phone: "",
@@ -478,6 +488,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                       onServiceChange={() => {
                         setValue(`services.${index}.staff_id`, "" as any);
                       }}
+                      onServiceScrollEnd={handleFetchMoreServices}
+                      isLoadingMoreServices={isLoadingServices}
                     />
                   ))}
                 </div>

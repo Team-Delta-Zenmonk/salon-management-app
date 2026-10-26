@@ -47,7 +47,7 @@ export default function AssignServicesDialog({
     defaultValues: { service_uuids: [] },
   });
 
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, formState: { isDirty } } = methods;
 
   const { data: services } = useAppSelector((state: RootState) => state.service);
 
@@ -62,10 +62,19 @@ export default function AssignServicesDialog({
 
     dispatch(listServicesAction({ page: 1, limit: 10 }));
 
-    listStaffServices(staff.uuid)
+    listStaffServices(staff.uuid, { page: 1, limit: 10 })
       .then((res) => {
-        const rows = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
+        const rows: any[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
         setAssignedStaffServices(rows);
+
+        const assignedUuids = Array.from(
+          new Set(
+            rows
+              .map((ss: any) => ss.service?.uuid)
+              .filter(Boolean)
+          )
+        );
+        reset({ service_uuids: assignedUuids });
       })
       .catch(() => {
         setAssignedStaffServices([]);
@@ -73,7 +82,7 @@ export default function AssignServicesDialog({
       .finally(() => {
         setLoading(false);
       });
-  }, [open, staff.uuid, dispatch]);
+  }, [open, staff.uuid, dispatch, reset]);
 
   const serviceIdToUuidMap = useMemo(() => {
     return new Map(services.map((s) => [s.id, s.uuid]));
@@ -83,21 +92,13 @@ export default function AssignServicesDialog({
     const list = Array.isArray(assignedStaffServices) ? assignedStaffServices : [];
     return new Map(
       list
-        .map((ss) => {
-          const serviceUuid = serviceIdToUuidMap.get(ss.service_id);
+        .map((ss: any) => {
+          const serviceUuid = ss.service?.uuid || serviceIdToUuidMap.get(ss.service_id);
           return serviceUuid ? [serviceUuid, ss] : null;
         })
         .filter(Boolean) as [string, AssignedStaffService][],
     );
   }, [assignedStaffServices, serviceIdToUuidMap]);
-
-  useEffect(() => {
-    if (!services.length) return;
-
-    reset({
-      service_uuids: Array.from(assignedServiceMap.keys()),
-    });
-  }, [assignedServiceMap, services, reset]);
 
   const serviceState = useAppSelector((state: RootState) => state.service);
   const serviceHasMore = Boolean(serviceState?.hasMore);
@@ -275,7 +276,7 @@ export default function AssignServicesDialog({
               <Button
                 type="submit"
                 form="assign-services-form"
-                disabled={saving || loading}
+                disabled={saving || loading || !isDirty}
                 className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
               >
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

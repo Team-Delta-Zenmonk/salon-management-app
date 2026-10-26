@@ -23,9 +23,19 @@ const Select = <T extends FieldValues>({
   rules,
   triggerClassName,
   onChange: customOnChange,
+  onScrollEnd,
+  isLoadingMore = false,
 }: CustomSelectProps<T>) => {
   const generatedId = useId();
   const selectId = identifier || generatedId;
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (!onScrollEnd || isLoadingMore) return;
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop - clientHeight < 24) {
+      onScrollEnd();
+    }
+  };
 
   return (
     <Controller
@@ -92,18 +102,26 @@ const Select = <T extends FieldValues>({
                   </div>
                 )}
               </SelectTrigger>
-              <SelectContent align="start">
+              <SelectContent align="start" onScroll={handleScroll}>
                 {options && options.length > 0 ? (
-                  options.map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      data-test-id={`li-${identifier}-${option.label}`}
-                      className={"capitalize"}
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))
+                  <>
+                    {options.map((option) => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        data-test-id={`li-${identifier}-${option.label}`}
+                        className={"capitalize"}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                    {isLoadingMore && (
+                      <div className="py-2.5 px-3 flex items-center justify-center text-xs font-medium text-primary gap-2 bg-primary/5 rounded-md my-1">
+                        <span className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+                        Loading more...
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <SelectItem
                     value=""

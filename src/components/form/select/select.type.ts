@@ -12,4 +12,6 @@ export type CustomSelectProps<T extends FieldValues> = {
   rules?: any;
   triggerClassName?: string;
   onChange?: (value: string | null) => void;
+  onScrollEnd?: () => void;
+  isLoadingMore?: boolean;
 };

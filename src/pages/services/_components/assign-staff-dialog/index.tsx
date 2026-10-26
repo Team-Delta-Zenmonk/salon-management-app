@@ -159,7 +159,7 @@ export default function AssignStaffDialog({
     defaultValues: { staff_ids: [] },
   });
 
-  const { handleSubmit, reset, setValue, control } = methods;
+  const { handleSubmit, reset, setValue, control, formState: { isDirty } } = methods;
   const selectedIds = useWatch({ control, name: "staff_ids" }) ?? [];
 
   const { data: allStaff } = useAppSelector((state: RootState) => state.staff);
@@ -183,7 +183,11 @@ export default function AssignStaffDialog({
     const serviceUuidsToQuery =
       childrenServices.length > 0 ? childrenServices.map((s) => s.uuid) : [serviceUuid];
 
-    Promise.allSettled(serviceUuidsToQuery.map((uuid) => listServiceStaff(uuid, salonUUID)))
+    Promise.allSettled(
+      serviceUuidsToQuery.map((uuid) =>
+        listServiceStaff(uuid, salonUUID, { page: 1, limit: 10, include_parent: true })
+      )
+    )
       .then((results) => {
         const allRows: AssignedStaffService[] = [];
         results.forEach((result) => {
@@ -194,32 +198,32 @@ export default function AssignStaffDialog({
           }
         });
         setAssignedStaffServices(allRows);
+
+        const assignedUuids = Array.from(
+          new Set(
+            allRows
+              .map((ss: any) => ss.staff?.uuid || ss.staff_uuid)
+              .filter(Boolean)
+          )
+        );
+        reset({ staff_ids: assignedUuids });
       })
       .finally(() => {
         setLoading(false);
       });
   }, [open, serviceUuid, salonUUID, dispatch, reset, allServices]);
 
-  const staffIdToUuidMap = useMemo(() => {
-    return new Map(allStaff.map((s) => [s.id, s.uuid]));
-  }, [allStaff]);
-
   const assignedStaffMap = useMemo(() => {
     const map = new Map<string, AssignedStaffService[]>();
-    assignedStaffServices.forEach((ss) => {
-      const staffUuid = ss.staff_uuid || (ss.staff_id ? staffIdToUuidMap.get(ss.staff_id) : undefined);
+    assignedStaffServices.forEach((ss: any) => {
+      const staffUuid = ss.staff?.uuid || ss.staff_uuid;
       if (!staffUuid) return;
       const existing = map.get(staffUuid) || [];
       existing.push(ss);
       map.set(staffUuid, existing);
     });
     return map;
-  }, [assignedStaffServices, staffIdToUuidMap]);
-
-  useEffect(() => {
-    if (!allStaff.length) return;
-    reset({ staff_ids: Array.from(assignedStaffMap.keys()) });
-  }, [assignedStaffMap, allStaff, reset]);
+  }, [assignedStaffServices]);
 
   const staffState = useAppSelector((state: RootState) => state.staff);
   const staffHasMore = Boolean(staffState?.hasMore);
@@ -434,7 +438,7 @@ export default function AssignStaffDialog({
                 <Button
                   type="submit"
                   form="assign-staff-scroll"
-                  disabled={saving || loading}
+                  disabled={saving || loading || !isDirty}
                   className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
                 >
                   {saving ? (
