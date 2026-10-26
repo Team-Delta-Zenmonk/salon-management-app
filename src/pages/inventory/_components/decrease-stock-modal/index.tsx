@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,13 +8,18 @@ import {
 } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import TextField from "../../../../components/form/textfield";
 import { useAppDispatch } from "../../../../store/hooks";
 import { decreaseStockAction } from "../../../../features/inventory/decrease-items-stock/decrease-items-stock.action";
 import { callSnack } from "../../../../components/snackbar";
 import type { InventoryItem } from "../../../../features/inventory/inventory-item.slice";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
+import {
+  getDecreaseStockSchema,
+  type DecreaseStockForm,
+} from "../schema/decrease-stock.schema";
 
 interface DecreaseStockModalProps {
   open: boolean;
@@ -31,14 +36,27 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
+  const currentStock = inventoryItem?.current_stock ?? 0;
 
-  const { control, handleSubmit, reset } = useForm<{ quantity: number }>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+  } = useForm<DecreaseStockForm>({
     defaultValues: {
       quantity: 1,
     },
+    resolver: zodResolver(getDecreaseStockSchema(currentStock)) as unknown as Resolver<DecreaseStockForm>,
+    mode: "onChange",
   });
 
-  const onSubmit = async (data: { quantity: number }) => {
+  useEffect(() => {
+    if (open) {
+      reset({ quantity: 1 });
+    }
+  }, [open, inventoryItem, reset]);
+
+  const onSubmit = async (data: DecreaseStockForm) => {
     if (!inventoryItem) return;
 
     setLoading(true);
@@ -66,7 +84,7 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden min-h-0">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col flex-1 overflow-hidden min-h-0">
           <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
             <div className="text-sm text-muted-foreground font-medium">
               Enter the quantity you want to subtract from <strong className="font-semibold text-foreground">{inventoryItem?.name}</strong>.
@@ -83,13 +101,7 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
               label="Quantity to Decrease"
               placeholder="e.g. 5"
               maxLength={FIELD_LIMITS.QUANTITY}
-              rules={{
-                required: "Required",
-                min: { value: 1, message: "Quantity must be at least 1" },
-                max: { value: inventoryItem?.current_stock || 0, message: "Cannot decrease more than current stock" }
-              }}
-              min={1}
-              max={inventoryItem?.current_stock || 1000}
+              disabled={currentStock <= 0}
             />
           </div>
           <DialogFooter className="m-0 px-4 sm:px-6 py-3.5 sm:py-4 border-t bg-muted/10 gap-2.5 sm:gap-3 flex flex-row items-center justify-end shrink-0">
@@ -104,7 +116,7 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
             </Button>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || currentStock <= 0}
               className="w-1/2 sm:w-auto flex-1 sm:flex-none rounded-full px-4 sm:px-6 font-semibold shadow-md hover:shadow-lg transition-all"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

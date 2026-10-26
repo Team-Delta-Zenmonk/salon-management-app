@@ -171,8 +171,9 @@ const StockCard: React.FC<{
             variant="ghost"
             size="icon"
             onClick={(e) => onDecreaseClick(e, item)}
-            title="Decrease Stock"
-            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors cursor-pointer"
+            disabled={item.current_stock <= 0}
+            title={item.current_stock <= 0 ? "Stock is already 0" : "Decrease Stock"}
+            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
           >
             <MinusCircleIcon className="h-4.5 w-4.5" />
           </Button>
@@ -266,8 +267,9 @@ const StockTableRow: React.FC<{
             variant="ghost"
             size="icon"
             onClick={(e) => onDecreaseClick(e, item)}
-            title="Decrease Stock"
-            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors cursor-pointer"
+            disabled={item.current_stock <= 0}
+            title={item.current_stock <= 0 ? "Stock is already 0" : "Decrease Stock"}
+            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
           >
             <MinusCircleIcon className="h-4 w-4" />
           </Button>
