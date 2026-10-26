@@ -31,7 +31,7 @@ export const MyProfileSchema = z.object({
     .length(FIELD_LIMITS.PHONE, `Must be ${FIELD_LIMITS.PHONE} digits`)
     .regex(VALIDATE_PATTERN.number, "Only numbers allowed"),
   about: z.string().max(FIELD_LIMITS.DESCRIPTION, `Maximum ${FIELD_LIMITS.DESCRIPTION} characters`).regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
-  type: z.string(),
+  type: z.string().trim().min(1, "Required"),
   address: z.object({
     address: z.string().min(1, "Required"),
     map_link: z

@@ -16,7 +16,7 @@ export const inventoryItemSchema = z.object({
     .max(FIELD_LIMITS.NAME, `Max ${FIELD_LIMITS.NAME} characters`)
     .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, "Only alphanumeric, spaces, hyphens, apostrophes, and dots allowed"),
   item_type: z.string().min(1, "Required"),
-  category_id: z.string().min(1, "Required").optional().or(z.literal("")),
+  category_id: z.string({ message: "Required" }).trim().min(1, "Required"),
   logo: z.any().optional().nullable(),
   variant_name: z
     .string()
