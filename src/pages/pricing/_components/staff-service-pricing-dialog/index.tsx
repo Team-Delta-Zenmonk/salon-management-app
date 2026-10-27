@@ -55,6 +55,7 @@ export default function StaffServicePricingDialog({
     setValue,
     trigger,
     getValues,
+    clearErrors,
     formState: { isDirty },
   } = methods;
 
@@ -73,11 +74,12 @@ export default function StaffServicePricingDialog({
 
   useEffect(() => {
     if (isFree) {
-      setValue("price", "0", { shouldValidate: true });
-    } else if (getValues("price") !== "") {
+      setValue("price", "0");
+      clearErrors("price");
+    } else if (getValues("price") !== "" && getValues("price") !== undefined) {
       trigger("price");
     }
-  }, [priceType, isFree, setValue, trigger, getValues]);
+  }, [priceType, isFree, setValue, trigger, getValues, clearErrors]);
 
   const submit = handleSubmit(async (data) => {
     try {

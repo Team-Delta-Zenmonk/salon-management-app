@@ -68,7 +68,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     mode: "onChange",
   });
 
-  const { handleSubmit, control, reset, watch, setValue, trigger, getValues } = methods;
+  const { handleSubmit, control, reset, watch, setValue, trigger, getValues, clearErrors } = methods;
 
   const discountType = watch("discount_type");
   const priceType = watch("price_type");
@@ -77,21 +77,23 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
   useEffect(() => {
     if (isFree) {
-      setValue("price", "0", { shouldValidate: true });
-      setValue("discount", "", { shouldValidate: true });
-      setValue("discount_type", "", { shouldValidate: true });
-    } else if (getValues("price") !== "") {
+      setValue("price", "0");
+      setValue("discount", "");
+      setValue("discount_type", "");
+      clearErrors(["price", "discount", "discount_type"]);
+    } else if (getValues("price") !== "" && getValues("price") !== undefined) {
       trigger("price");
     }
-  }, [priceType, isFree, setValue, trigger, getValues]);
+  }, [priceType, isFree, setValue, trigger, getValues, clearErrors]);
 
   useEffect(() => {
     if (!discountType) {
-      setValue("discount", "", { shouldValidate: true });
+      setValue("discount", "");
+      clearErrors(["discount", "discount_type"]);
     } else if (getValues("discount")) {
       trigger("discount");
     }
-  }, [discountType, price, setValue, trigger, getValues]);
+  }, [discountType, price, setValue, trigger, getValues, clearErrors]);
 
   const buildPayload = (data: ServiceForm, logoUrl?: string): CreateServicePayload => {
     const payload: CreateServicePayload = {
