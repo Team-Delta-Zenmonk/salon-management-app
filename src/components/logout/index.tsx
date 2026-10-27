@@ -19,14 +19,15 @@ const LogoutButton = ({ iconOnly = false }: LogoutButtonProps = {}) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
   const dispatch = useAppDispatch();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
       setIsLoading(true);
-      persistor.purge();
+      await persistor.purge();
       dispatch(logout());
       navigate("/login", { replace: true });
     } catch {
       callSnack("Error during logout", "error");
+    } finally {
       setIsLoading(false);
     }
   };

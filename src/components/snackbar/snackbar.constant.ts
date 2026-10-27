@@ -41,7 +41,6 @@ export const getSnackBarStyles = (state: string) => {
     flexWrap: "nowrap" as const,
     maxWidth: "min(420px, calc(100vw - 32px))",
     width: "fit-content",
-    textTransform: "capitalize",
     ...getVariantStyle(),
   };
 };

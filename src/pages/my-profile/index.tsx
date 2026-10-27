@@ -211,7 +211,7 @@ const MyProfile = () => {
       },
       (formErrors) => {
         console.error("Form validation errors:", formErrors);
-        callSnack("Please check the form for errors", "error");
+        callSnack("Please check form errors", "error");
       }
     )();
   };

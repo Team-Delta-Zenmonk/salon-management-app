@@ -150,9 +150,16 @@ export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Reado
                     <div className="min-w-0 flex-1">
                       <EllipsisCell
                         value={staffName}
+                        maxChars={50}
                         className={clsx("text-sm transition-colors capitalize block", isSelected ? "font-bold text-foreground" : "font-medium text-foreground/90 group-hover:text-foreground")}
                       />
-                      <p className="text-xs text-muted-foreground/80 mt-0.5">{staff.email}</p>
+                      {staff.email ? (
+                        <EllipsisCell
+                          value={staff.email}
+                          maxChars={40}
+                          className="text-xs text-muted-foreground/80 mt-0.5 block"
+                        />
+                      ) : null}
                     </div>
                   </motion.div>
                 );

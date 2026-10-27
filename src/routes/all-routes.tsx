@@ -22,6 +22,7 @@ import Appearance from "../pages/appearance";
 import PlanAndBillingPage from "../pages/billing";
 import UnProtectedRoute from "./unprotected-route";
 import NotFoundPage from "../pages/not-found";
+import SuspendedPage from "../pages/suspended";
 
 function AllRoutes() {
   return (
@@ -41,6 +42,7 @@ function AllRoutes() {
       </Route>
 
       <Route element={<ProtectedRoute />}>
+        <Route path="/suspended" element={<SuspendedPage />} />
         <Route element={<Layout />}>
           <Route path="/my-profile" element={<MyProfile/>} />
           <Route path="/dashboard" element={<Dashboard/>} />

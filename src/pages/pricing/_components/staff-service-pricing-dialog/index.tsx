@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import type { StaffPricingType } from "../../types/staff-service.types";
 import Select from "../../../../components/form/select";
-import { PriceTypeOptions } from "../../../../common/enums/price-type.enum";
+import { PRICE_TYPE, PriceTypeOptions } from "../../../../common/enums/price-type.enum";
 import TextField from "../../../../components/form/textfield";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -39,10 +39,11 @@ export default function StaffServicePricingDialog({
 
   const methods = useForm<StaffPricingFormValues>({
     resolver: zodResolver(staffPricingSchema),
+    mode: "onChange",
     defaultValues: {
       price_type: current?.price_type ?? "fixed",
-      price: current?.price ? String(current.price) : "0",
-      duration: current?.duration ? String(current.duration) : "0",
+      price: current?.price != null ? String(current.price) : "",
+      duration: current?.duration != null ? String(current.duration) : "",
     },
   });
 
@@ -52,25 +53,31 @@ export default function StaffServicePricingDialog({
     reset,
     watch,
     setValue,
+    trigger,
+    getValues,
     formState: { isDirty },
   } = methods;
 
   const priceType = watch("price_type");
-  const isFree = priceType === "free";
+  const isFree = priceType === PRICE_TYPE.FREE;
 
   useEffect(() => {
     if (!open) return;
 
     reset({
       price_type: current?.price_type ?? "fixed",
-      price: current?.price ? String(current.price) : "0",
-      duration: current?.duration ? String(current.duration) : "0",
+      price: current?.price != null ? String(current.price) : "",
+      duration: current?.duration != null ? String(current.duration) : "",
     });
   }, [open, current, reset]);
 
   useEffect(() => {
-    if (isFree) setValue("price", "0");
-  }, [isFree, setValue]);
+    if (isFree) {
+      setValue("price", "0", { shouldValidate: true });
+    } else if (getValues("price") !== "") {
+      trigger("price");
+    }
+  }, [priceType, isFree, setValue, trigger, getValues]);
 
   const submit = handleSubmit(async (data) => {
     try {
@@ -96,7 +103,7 @@ export default function StaffServicePricingDialog({
         </DialogHeader>
 
         <FormProvider {...methods}>
-          <form onSubmit={submit}>
+          <form onSubmit={submit} noValidate>
             <div className="flex flex-col py-5 px-6 gap-4">
               <Select
                 name="price_type"
@@ -110,6 +117,7 @@ export default function StaffServicePricingDialog({
 
               <TextField
                 type="number"
+                min={0}
                 label="Price"
                 name="price"
                 control={control}

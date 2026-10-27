@@ -225,6 +225,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
             <span className="w-1.5 h-6 rounded bg-primary shrink-0" />
             <EllipsisCell
               value={`${staffDisplayName}'s Services`}
+              maxChars={60}
               className="text-base sm:text-lg font-bold text-foreground capitalize block min-w-0"
             />
           </div>
@@ -287,7 +288,8 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                 <div className="flex items-center gap-3 min-w-0">
                   <EllipsisCell
                     value={group.parent.name}
-                    className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize shrink-0 max-w-[300px]"
+                    maxChars={50}
+                    className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize block shrink-0 max-w-[300px]"
                   />
                   <div className="h-px bg-border/55 flex-1" />
                 </div>
@@ -311,7 +313,8 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                           </Avatar>
                           <EllipsisCell
                             value={svc.name}
-                            className="font-bold text-sm sm:text-base text-foreground capitalize block min-w-0"
+                            maxChars={50}
+                            className="font-bold text-sm sm:text-base text-foreground capitalize block min-w-0 flex-1"
                           />
                         </div>
 

@@ -8,9 +8,9 @@ import TextField from "../../../../components/form/textfield";
 import { uploadImages } from "../../../../features/upload-images/upload-images.service";
 import FilePicker from "../../../../components/form/file-picker";
 import Select from "../../../../components/form/select";
-import { PriceTypeOptions } from "../../../../common/enums/price-type.enum";
+import { PRICE_TYPE, PriceTypeOptions } from "../../../../common/enums/price-type.enum";
 import { ServiceGenderOptions } from "../../../../common/enums/service-gender.enum";
-import { DISCOUNT_TYPE, DiscountTypeOptions } from "../../../../common/enums/discount-type.enum";
+import { DISCOUNT_TYPE, DiscountTypeOptions, type DiscountType } from "../../../../common/enums/discount-type.enum";
 import type { RootState } from "../../../../store/store";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { createServiceService } from "../../../../features/service/create-service/create-service.service";
@@ -65,17 +65,33 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
   const methods = useForm<ServiceForm>({
     resolver: zodResolver(getServiceSchema(!shouldShowCategory)),
+    mode: "onChange",
   });
 
-  const { handleSubmit, control, reset, watch, setValue, clearErrors } = methods;
+  const { handleSubmit, control, reset, watch, setValue, trigger, getValues } = methods;
 
   const discountType = watch("discount_type");
+  const priceType = watch("price_type");
+  const price = watch("price");
+  const isFree = priceType === PRICE_TYPE.FREE;
+
+  useEffect(() => {
+    if (isFree) {
+      setValue("price", "0", { shouldValidate: true });
+      setValue("discount", "", { shouldValidate: true });
+      setValue("discount_type", "", { shouldValidate: true });
+    } else if (getValues("price") !== "") {
+      trigger("price");
+    }
+  }, [priceType, isFree, setValue, trigger, getValues]);
 
   useEffect(() => {
     if (!discountType) {
-      clearErrors(["discount", "discount_type"]);
+      setValue("discount", "", { shouldValidate: true });
+    } else if (getValues("discount")) {
+      trigger("discount");
     }
-  }, [discountType, clearErrors]);
+  }, [discountType, price, setValue, trigger, getValues]);
 
   const buildPayload = (data: ServiceForm, logoUrl?: string): CreateServicePayload => {
     const payload: CreateServicePayload = {
@@ -83,22 +99,27 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
       description: data.description || undefined,
       gender: data.gender!,
       price_type: data.price_type!,
-      price: Number(data.price),
+      price: data.price_type === PRICE_TYPE.FREE ? 0 : Number(data.price),
       duration: Number(data.duration),
       is_active: data.is_active ?? false,
       is_popular: data.is_popular ?? false,
       logo: logoUrl || undefined,
     };
 
-    if (data.discount !== undefined && data.discount !== null && data.discount !== "") {
-      payload.discount = Number(data.discount);
-    } else {
+    if (data.price_type === PRICE_TYPE.FREE) {
       payload.discount = 0;
-    }
-    if (data.discount_type) {
-      payload.discount_type = data.discount_type as any;
-    } else {
       payload.discount_type = null;
+    } else {
+      if (data.discount !== undefined && data.discount !== null && data.discount !== "") {
+        payload.discount = Number(data.discount);
+      } else {
+        payload.discount = 0;
+      }
+      if (data.discount_type) {
+        payload.discount_type = data.discount_type as DiscountType;
+      } else {
+        payload.discount_type = null;
+      }
     }
 
     if (mode === "create") {
@@ -167,16 +188,21 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   });
 
   useEffect(() => {
+    if (!open || categories.length > 0) return;
+
     const fetchCategories = async () => {
       try {
         await dispatch(listCategoriesAction({ page: 1, limit: 100 })).unwrap();
-      } catch {
-        callSnack("Failed to fetch categories", "error");
+      } catch (err: unknown) {
+        const errorObj = err as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
+        if (!errorObj?.isSuspended && !errorObj?.isHandledGlobally) {
+          callSnack("Failed to fetch categories", "error");
+        }
       }
     };
 
     fetchCategories();
-  }, [dispatch]);
+  }, [open, categories.length, dispatch]);
 
   useEffect(() => {
     if (!open) return;
@@ -197,6 +223,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         is_popular: false,
       });
     } else if (mode === "update" && service) {
+      const isServiceFree = service.price_type === PRICE_TYPE.FREE;
       reset({
         name: service.name ?? "",
         description: service.description ?? "",
@@ -205,12 +232,12 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         gender: defaultGender ?? service.gender,
         price_type: service.price_type,
         duration: service.duration == null ? "" : String(service.duration),
-        price: service.price == null ? "" : String(service.price),
+        price: isServiceFree ? "0" : (service.price == null ? "" : String(service.price)),
         discount:
-          service.discount == null || Number(service.discount) === 0
+          isServiceFree || service.discount == null || Number(service.discount) === 0
             ? ""
             : String(service.discount),
-        discount_type: service.discount_type ?? undefined,
+        discount_type: isServiceFree ? undefined : (service.discount_type ?? undefined),
         is_active: service.is_active ?? false,
         is_popular: service.is_popular ?? false,
       });
@@ -235,7 +262,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         </DialogHeader>
 
         <FormProvider {...methods}>
-          <form onSubmit={onSubmit}>
+          <form onSubmit={onSubmit} noValidate>
             <div className="flex flex-col py-5 px-6 gap-4 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
               <TextField
                 type="text"
@@ -320,8 +347,8 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   name="price"
                   control={control}
                   identifier="service-price"
-                  placeholder="Enter price"
-                  disabled={isLoading}
+                  placeholder={isFree ? "0" : "Enter price"}
+                  disabled={isLoading || isFree}
                   maxLength={FIELD_LIMITS.PRICE}
                 />
 
@@ -346,15 +373,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   placeholder="Discount Type"
                   identifier="service-discount-type"
                   options={DiscountTypeOptions}
-                  disabled={isLoading}
-                  onChange={(val) => {
-                    if (!val) {
-                      setValue("discount", "");
-                      clearErrors(["discount", "discount_type"]);
-                    } else {
-                      clearErrors("discount_type");
-                    }
-                  }}
+                  disabled={isLoading || isFree}
                 />
 
                 <TextField
@@ -365,13 +384,15 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   control={control}
                   identifier="service-discount"
                   placeholder={
-                    discountType === DISCOUNT_TYPE.PERCENTAGE
-                      ? "Enter percentage (e.g. 10)"
-                      : discountType === DISCOUNT_TYPE.AMOUNT
-                        ? "Enter amount (e.g. 100)"
-                        : "Enter discount"
+                    isFree
+                      ? "Not applicable for free service"
+                      : discountType === DISCOUNT_TYPE.PERCENTAGE
+                        ? "Enter percentage (e.g. 10)"
+                        : discountType === DISCOUNT_TYPE.AMOUNT
+                          ? "Enter amount (e.g. 100)"
+                          : "Enter discount"
                   }
-                  disabled={isLoading}
+                  disabled={isLoading || isFree}
                   maxLength={FIELD_LIMITS.PRICE}
                 />
               </div>

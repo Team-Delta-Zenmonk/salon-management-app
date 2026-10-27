@@ -200,6 +200,7 @@ export default function Login() {
                     identifier="login-form-password"
                     disabled={isLoading}
                     placeholder="••••••••"
+                    inputPropsClassName="bg-white dark:bg-neutral-900"
                     maxLength={FIELD_LIMITS.PASSWORD}
                   />
                 </motion.div>

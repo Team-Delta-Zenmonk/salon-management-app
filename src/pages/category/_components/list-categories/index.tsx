@@ -131,7 +131,8 @@ export default function ListCategories({
                     <div className="flex-1 min-w-0">
                       <EllipsisCell
                         value={category.name}
-                        className="text-foreground font-bold text-lg leading-tight group-hover:text-primary transition-colors duration-300 capitalize"
+                        maxChars={16}
+                        className="font-bold text-foreground text-base sm:text-lg leading-tight group-hover:text-primary transition-colors block capitalize"
                       />
                     </div>
                   </div>
@@ -139,9 +140,10 @@ export default function ListCategories({
                 
                 <div className="mb-6 min-h-[40px]">
                   <EllipsisCell
-                    value={category.description || "No description provided for this category."}
+                    value={category.description || "No description available"}
+                    maxChars={50}
                     maxLines={2}
-                    className="text-muted-foreground/90 text-sm leading-relaxed"
+                    className="text-muted-foreground/90 text-sm leading-relaxed block"
                   />
                 </div>
               </div>
@@ -156,6 +158,7 @@ export default function ListCategories({
                     size="icon"
                     onClick={() => handleUpdateClick(category)}
                     disabled={deleteLoading}
+                    title="Edit Category"
                     className="h-8 w-8 bg-background/50 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full shadow-sm"
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -165,6 +168,7 @@ export default function ListCategories({
                     size="icon"
                     onClick={() => handleDeleteClick(category)}
                     disabled={deleteLoading}
+                    title="Delete Category"
                     className="h-8 w-8 bg-background/50 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full shadow-sm"
                   >
                     <Trash2 className="h-3.5 w-3.5" />

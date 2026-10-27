@@ -35,8 +35,11 @@ const SearchCategories = ({ searchQuery }: SearchCategoriesProps) => {
             search: trimmedSearch || undefined,
           })
         ).unwrap();
-      } catch {
-        callSnack("Failed to fetch categories", "error");
+      } catch (err: unknown) {
+        const errorObj = err as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
+        if (!errorObj?.isSuspended && !errorObj?.isHandledGlobally) {
+          callSnack("Failed to fetch categories", "error");
+        }
       } finally {
         setIsLoading(false);
       }

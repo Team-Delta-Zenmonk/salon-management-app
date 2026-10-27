@@ -1,17 +1,51 @@
 import React from "react";
 import { closeSnackbar, enqueueSnackbar, type VariantType } from "notistack";
 import { X } from "lucide-react";
+import { APP_NAME } from "@/constants/app";
 import { getSnackBarStyles } from "./snackbar.constant";
 import { Message } from "./_components/message";
 import { extractErrorMessage } from "@/utils/api-error";
 
-export { extractErrorMessage };
+export { extractErrorMessage, closeSnackbar };
+
+const appName = APP_NAME.toLowerCase();
+let isSuspendedState = false;
+
+export const setAppSuspended = (suspended: boolean) => {
+  isSuspendedState = suspended;
+  if (suspended) {
+    closeSnackbar();
+  }
+};
+
+export const getAppSuspended = () => isSuspendedState;
+
+if (typeof window !== "undefined") {
+  window.addEventListener(`${appName}:account-suspended`, () => {
+    setAppSuspended(true);
+  });
+  window.addEventListener(`${appName}:account-resumed`, () => {
+    setAppSuspended(false);
+  });
+}
 
 export const callSnack = async (
   msgOrError: string | unknown,
   variant: VariantType,
   maxWidth?: number
 ) => {
+  if (
+    isSuspendedState &&
+    (variant === "error" || variant === "warning")
+  ) {
+    return;
+  }
+
+  const errorObj = msgOrError as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
+  if (errorObj?.isSuspended || errorObj?.isHandledGlobally) {
+    return;
+  }
+
   const displayMsg =
     typeof msgOrError === "string"
       ? msgOrError

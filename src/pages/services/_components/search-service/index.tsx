@@ -52,8 +52,11 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
     const fetchCategories = async () => {
       try {
         await dispatch(listCategoriesAction({ page: 1, limit: 100 })).unwrap();
-      } catch {
-        callSnack("Failed to fetch categories", "error");
+      } catch (err: unknown) {
+        const errorObj = err as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
+        if (!errorObj?.isSuspended && !errorObj?.isHandledGlobally) {
+          callSnack("Failed to fetch categories", "error");
+        }
       }
     };
     fetchCategories();
@@ -92,8 +95,11 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
         }
 
         await dispatch(listServicesAction(params)).unwrap();
-      } catch {
-        callSnack("Failed to fetch services", "error");
+      } catch (err: unknown) {
+        const errorObj = err as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
+        if (!errorObj?.isSuspended && !errorObj?.isHandledGlobally) {
+          callSnack("Failed to fetch services", "error");
+        }
       } finally {
         setIsLoading(false);
       }

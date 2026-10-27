@@ -60,6 +60,26 @@ export const getServiceSchema = (isSubService: boolean = false) =>
     })
     .superRefine((data, ctx) => {
       const numPrice = Number(data.price);
+
+      if (data.price_type === PRICE_TYPE.FIXED) {
+        if (!isNaN(numPrice) && numPrice <= 0) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["price"],
+            message: "Price must be greater than 0",
+          });
+        }
+      } else if (data.price_type === PRICE_TYPE.FREE) {
+        if (!isNaN(numPrice) && numPrice !== 0) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["price"],
+            message: "Price must be 0 for free service",
+          });
+        }
+        return;
+      }
+
       const hasDiscountType = Boolean(data.discount_type);
       const discountStr =
         data.discount !== undefined && data.discount !== null
@@ -104,15 +124,15 @@ export const getServiceSchema = (isSubService: boolean = false) =>
             ctx.addIssue({
               code: "custom",
               path: ["discount"],
-              message: "Discount cannot exceed 100%",
+              message: "Discount percentage cannot be greater than 100%",
             });
           }
         } else if (data.discount_type === DISCOUNT_TYPE.AMOUNT) {
-          if (!isNaN(numPrice) && numDiscount > numPrice) {
+          if (!isNaN(numPrice) && numPrice > 0 && numDiscount > numPrice) {
             ctx.addIssue({
               code: "custom",
               path: ["discount"],
-              message: "Discount cannot exceed price",
+              message: "Discount amount cannot exceed the service price.",
             });
           }
         }

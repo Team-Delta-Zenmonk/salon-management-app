@@ -236,13 +236,13 @@ export function ServiceCard({
                   </div>
                 )}
               </div>
-              <EllipsisCell
-                value={subServicesNames}
-                maxChars={20}
-                className={
-                  "text-[11px] font-medium text-foreground flex-1 min-w-0 pr-1 capitalize"
-                }
-              />
+              <span
+                className="text-[11px] font-medium text-foreground flex-1 min-w-0 pr-1 capitalize truncate select-none inline-block"
+              >
+                {subServicesNames.length > 20
+                  ? `${subServicesNames.slice(0, 20)}...`
+                  : subServicesNames}
+              </span>
             </div>
           </div>
         )}

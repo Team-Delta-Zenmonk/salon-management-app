@@ -214,7 +214,7 @@ export function SubServicesDrawer({
                         <EllipsisCell
                           value={sub.name}
                           maxChars={50}
-                          className="font-semibold text-foreground text-[14px] leading-snug capitalize"
+                          className="font-semibold text-foreground text-[14px] leading-snug capitalize block"
                         />
                         {sub.description && (
                           <EllipsisCell
@@ -222,7 +222,7 @@ export function SubServicesDrawer({
                               sub.description || "No description provided."
                             }
                             maxChars={50}
-                            className="text-muted-foreground text-[11px] mt-0.5 line-clamp-1"
+                            className="text-muted-foreground text-[11px] mt-0.5 line-clamp-1 block"
                           />
                         )}
                       </div>

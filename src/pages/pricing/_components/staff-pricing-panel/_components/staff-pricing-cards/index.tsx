@@ -314,7 +314,8 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                     <div className="flex items-center gap-3 min-w-0">
                       <EllipsisCell
                         value={service.name}
-                        className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize shrink-0 max-w-[300px]"
+                        maxChars={50}
+                        className="font-bold text-foreground/80 text-xs uppercase tracking-wider capitalize block shrink-0 max-w-[300px]"
                       />
                       <div className="h-px bg-border/55 flex-1" />
                     </div>
@@ -342,7 +343,8 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                               </Avatar>
                               <EllipsisCell
                                 value={staff_name}
-                                className="font-bold text-sm sm:text-base text-foreground capitalize block min-w-0"
+                                maxChars={50}
+                                className="font-bold text-sm sm:text-base text-foreground capitalize block min-w-0 flex-1"
                               />
                             </div>
 

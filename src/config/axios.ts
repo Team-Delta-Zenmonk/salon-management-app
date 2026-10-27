@@ -1,4 +1,5 @@
 import axios from "axios";
+import { closeSnackbar } from "notistack";
 import { APP_NAME } from "@/constants/app";
 import { extractErrorMessage } from "@/utils/api-error";
 
@@ -64,6 +65,41 @@ axiosInstance.interceptors.response.use(
               message:
                 error?.response?.data?.error ||
                 "Your trial period has ended. Please upgrade your plan.",
+            },
+          })
+        );
+      }
+      return Promise.reject(error);
+    }
+
+    const isSuspensionError =
+      status === 403 &&
+      (code === "ACCOUNT_SUSPENDED" ||
+        code === "SUBSCRIPTION_SUSPENDED" ||
+        String(code || "").toLowerCase().includes("suspended") ||
+        String(error?.response?.data?.message || "").toLowerCase().includes("suspended") ||
+        String(error?.response?.data?.error || "").toLowerCase().includes("suspended"));
+
+    if (isSuspensionError) {
+      error.isSuspended = true;
+      error.isHandledGlobally = true;
+
+      try {
+        closeSnackbar();
+      } catch {
+      }
+
+      const isProfileRequest = originalRequest?.url?.includes("/salons/");
+
+      if (typeof window !== "undefined" && !isProfileRequest) {
+        window.dispatchEvent(
+          new CustomEvent(`${appName.toLowerCase()}:account-suspended`, {
+            detail: {
+              code,
+              message:
+                error?.response?.data?.error ||
+                error?.response?.data?.message ||
+                "Your salon account has been suspended.",
             },
           })
         );
