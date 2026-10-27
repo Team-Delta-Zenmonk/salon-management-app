@@ -49,10 +49,10 @@ export const getServiceSchema = (isSubService: boolean = false) =>
         .refine((val) => !isNaN(Number(val)) && Number(val) <= 100000, {
           message: "Price cannot exceed ₹1,00,000",
         }),
-      discount: z.string().optional().nullable(),
+      discount: z.union([z.string(), z.number()]).optional().nullable(),
       discount_type: z
         .enum(Object.values(DISCOUNT_TYPE))
-      .or(z.literal(""))
+        .or(z.literal(""))
         .optional()
         .nullable(),
       is_active: z.boolean().optional(),
@@ -61,32 +61,33 @@ export const getServiceSchema = (isSubService: boolean = false) =>
     .superRefine((data, ctx) => {
       const numPrice = Number(data.price);
       const hasDiscountType = Boolean(data.discount_type);
-    const hasDiscountValue = Boolean(
-      data.discount !== undefined && data.discount !== null && data.discount.trim() !== ""
-    );
-    const numDiscount = hasDiscountValue ? Number(data.discount) : 0;
+      const discountStr =
+        data.discount !== undefined && data.discount !== null
+          ? String(data.discount).trim()
+          : "";
+      const hasDiscountValue = discountStr !== "";
+      const numDiscount = hasDiscountValue ? Number(discountStr) : 0;
 
       if (hasDiscountType) {
-      if (!hasDiscountValue) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["discount"],
-          message: "Required",
-        });
-        return;
+        if (!hasDiscountValue) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["discount"],
+            message: "Required",
+          });
+          return;
+        }
+        if (isNaN(numDiscount) || numDiscount <= 0) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["discount"],
+            message: "Discount must be greater than 0",
+          });
+          return;
+        }
       }
-      if (isNaN(numDiscount) || numDiscount <= 0) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["discount"],
-          message: "Discount must be greater than 0",
-        });
-        return;
-      }
-    }
 
-    // If discount value is entered (> 0), discount_type is required
-    if (hasDiscountValue && numDiscount > 0) {
+      if (hasDiscountValue && numDiscount > 0) {
         if (!hasDiscountType) {
           ctx.addIssue({
             code: "custom",
@@ -95,24 +96,23 @@ export const getServiceSchema = (isSubService: boolean = false) =>
           });
           return;
         }
-    }
+      }
 
-      // Value bounds validation
-    if (hasDiscountType && hasDiscountValue && numDiscount > 0) {
-      if (data.discount_type === DISCOUNT_TYPE.PERCENTAGE) {
+      if (hasDiscountType && hasDiscountValue && numDiscount > 0) {
+        if (data.discount_type === DISCOUNT_TYPE.PERCENTAGE) {
           if (numDiscount > 100) {
             ctx.addIssue({
               code: "custom",
               path: ["discount"],
-              message: "Discount percentage cannot be greater than 100%",
+              message: "Discount cannot exceed 100%",
             });
           }
         } else if (data.discount_type === DISCOUNT_TYPE.AMOUNT) {
-          if (!isNaN(numPrice) && numPrice > 0 && numDiscount > numPrice) {
+          if (!isNaN(numPrice) && numDiscount > numPrice) {
             ctx.addIssue({
               code: "custom",
               path: ["discount"],
-              message: "Discount amount cannot be greater than the price (100%)",
+              message: "Discount cannot exceed price",
             });
           }
         }

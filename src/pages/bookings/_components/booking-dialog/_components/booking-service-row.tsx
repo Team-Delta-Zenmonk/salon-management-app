@@ -10,7 +10,13 @@ interface BookingServiceRowProps {
   serviceOptions: { label: string; value: string }[];
   staffOptions: { label: string; value: string }[];
   staffLoading: boolean;
-  selectedStaff?: { duration: number; price: number } | null;
+  selectedStaff?: {
+    duration: number;
+    price: number;
+    originalPrice?: number;
+    hasDiscount?: boolean;
+    discountBadge?: string | null;
+  } | null;
   showRemoveButton: boolean;
   onRemove: () => void;
   watchedServiceId?: string | number;
@@ -44,6 +50,7 @@ export default function BookingServiceRow({
             placeholder="Select Service"
             identifier={`booking-service-${index}`}
             options={serviceOptions}
+            triggerClassName="capitalize"
             translate={false}
             control={control as any}
             onChange={onServiceChange}
@@ -58,6 +65,7 @@ export default function BookingServiceRow({
             placeholder={staffLoading ? "Loading..." : "Any Available"}
             identifier={`booking-staff-${index}`}
             options={staffOptions}
+            triggerClassName="capitalize"
             translate={false}
             disabled={!watchedServiceId || staffLoading}
             control={control as any}
@@ -78,13 +86,29 @@ export default function BookingServiceRow({
       </div>
 
       {selectedStaff && (
-        <div className="flex items-center gap-3 mt-3 pl-1">
+        <div className="flex items-center gap-2 mt-3 pl-1 flex-wrap">
           <span className="text-xs font-medium text-muted-foreground bg-background px-2 py-1 rounded-md shadow-sm border border-border/50">
             {Number(selectedStaff.duration)} mins
           </span>
-          <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
-            {formatPrice(Number(selectedStaff.price))}
-          </span>
+          {selectedStaff.hasDiscount && selectedStaff.originalPrice !== undefined ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs line-through text-muted-foreground font-medium">
+                {formatPrice(Number(selectedStaff.originalPrice))}
+              </span>
+              <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
+                {formatPrice(Number(selectedStaff.price))}
+              </span>
+              {selectedStaff.discountBadge && (
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                  {selectedStaff.discountBadge}
+                </span>
+              )}
+            </div>
+          ) : (
+            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
+              {formatPrice(Number(selectedStaff.price))}
+            </span>
+          )}
         </div>
       )}
     </div>

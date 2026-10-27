@@ -51,7 +51,7 @@ export default function ListCategories({
       await dispatch(listCategoriesAction({ page: 1, limit: 10, search: searchQuery.trim() || undefined, })).unwrap();
       callSnack("Category deleted successfully", "success");
     } catch (err: any) {
-      callSnack(err?.response?.data?.message || "Failed to delete category", "error");
+      callSnack(err, "error");
     } finally {
       setDeleteLoading(false);
       setDeleteDialogOpen(false);

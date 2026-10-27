@@ -30,6 +30,7 @@ import { isBookingFullyPaid } from "../../utils/is-booking-fully-paid";
 import dayjs from "dayjs";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import BookingServiceRow from "./_components/booking-service-row";
+import { getDiscountedPrice } from "../../../../common/utils/discount.utils";
 
 type PaymentPreference = "pay_at_venue" | "partial_deposit" | "full_upfront";
 
@@ -260,20 +261,53 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       });
   };
 
-  const getServicePriceAndDuration = (rowIndex: number, serviceId: any, staffId: any): { duration: number; price: number } | undefined => {
+  const getServicePriceAndDuration = (
+    rowIndex: number,
+    serviceId: any,
+    staffId: any,
+  ): {
+    duration: number;
+    price: number;
+    originalPrice?: number;
+    hasDiscount?: boolean;
+    discountBadge?: string | null;
+  } | undefined => {
     if (!serviceId) return undefined;
     const serviceObj = services.find((s) => s.id === Number(serviceId));
+    let duration = 0;
+    let basePrice = 0;
+
     if (staffId != null && staffId !== "") {
       const staffList = Array.isArray(staffMap[rowIndex]?.data) ? staffMap[rowIndex].data : [];
       const ss = staffList.find((item) => item.staff_id === Number(staffId));
       if (ss) {
-        return { duration: Number(ss.duration) || 0, price: Number(ss.price) || 0 };
+        duration = Number(ss.duration) || 0;
+        basePrice = Number(ss.price) || 0;
       }
     }
-    if (serviceObj) {
-      return { duration: Number(serviceObj.duration) || 0, price: Number(serviceObj.price) || 0 };
+
+    if (!duration && serviceObj) {
+      duration = Number(serviceObj.duration) || 0;
     }
-    return undefined;
+    if (!basePrice && serviceObj) {
+      basePrice = Number(serviceObj.price) || 0;
+    }
+
+    if (!serviceObj && !basePrice) return undefined;
+
+    const discountInfo = getDiscountedPrice({
+      service: serviceObj,
+      price: basePrice,
+      base_price: basePrice,
+    });
+
+    return {
+      duration,
+      price: discountInfo.finalPrice,
+      originalPrice: discountInfo.originalPrice,
+      hasDiscount: discountInfo.hasDiscount,
+      discountBadge: discountInfo.discountBadge,
+    };
   };
 
   const isStaffLoading = (rowIndex: number) => staffMap[rowIndex]?.loading ?? false;
