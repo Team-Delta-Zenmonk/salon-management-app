@@ -31,6 +31,7 @@ import dayjs from "dayjs";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import BookingServiceRow from "./_components/booking-service-row";
 import { getDiscountedPrice } from "../../../../common/utils/discount.utils";
+import type { Service } from "../../../../features/service/service.slice";
 
 type PaymentPreference = "pay_at_venue" | "partial_deposit" | "full_upfront";
 
@@ -66,7 +67,11 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state) => state.auth);
   const { data: services, hasMore: hasMoreServices, loading: isLoadingServices } = useAppSelector((state) => state.service);
+  const rootServices = useMemo(() => {
+    return (services || []).filter((s) => s.parent_id === null || s.parent_id === undefined);
+  }, [services]);
   const [servicePage, setServicePage] = useState(1);
+  const [subServiceCache, setSubServiceCache] = useState<Record<number, Service>>({});
   const [isLoading, setIsLoading] = useState(false);
   const { downloadInvoice, isDownloading: isDownloadingInvoice } = useDownloadInvoice();
   const [staffMap, setStaffMap] = useState<StaffMap>({});
@@ -75,7 +80,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     if (!hasMoreServices || isLoadingServices) return;
     const nextPage = servicePage + 1;
     setServicePage(nextPage);
-    dispatch(listServicesAction({ page: nextPage, limit: 10, include_sub_services: true }));
+    dispatch(listServicesAction({ page: nextPage, limit: 10, include_sub_services: false }));
   }, [dispatch, hasMoreServices, isLoadingServices, servicePage]);
 
   const handleDownloadInvoice = () => {
@@ -133,32 +138,25 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
   const watchedServices = useWatch({ control, name: "services" });
 
-  const allServiceOptions = useMemo(() => {
-    const parentIds = new Set<number>();
-    services.forEach((s: any) => {
-      if (s.parent_id) parentIds.add(s.parent_id);
-    });
-    return services
-      .filter((s: any) => !parentIds.has(s.id))
-      .map((s: any) => ({ label: s.name, value: String(s.id) }));
-  }, [services]);
-
-  const getServiceOptionsForRow = useCallback(
+  const getDisabledServicesForRow = useCallback(
     (rowIndex: number) => {
-      const selectedIds = new Set(
-        (watchedServices ?? [])
-          .map((s, i) => (i !== rowIndex && s.service_id ? Number(s.service_id) : null))
-          .filter(Boolean)
-      );
-
-      return allServiceOptions.filter((opt) => !selectedIds.has(Number(opt.value)));
+      const selectedIds = new Set<number>();
+      (watchedServices ?? []).forEach((s, i) => {
+        if (i !== rowIndex && s.service_id) {
+          selectedIds.add(Number(s.service_id));
+        }
+      });
+      return selectedIds;
     },
-    [allServiceOptions, watchedServices],
+    [watchedServices],
   );
 
   const fetchStaffForRow = useCallback(
     async (rowIndex: number, serviceId: number) => {
-      const service = services.find((s) => s.id === Number(serviceId));
+      let service = services.find((s) => s.id === Number(serviceId));
+      if (!service && subServiceCache[Number(serviceId)]) {
+        service = subServiceCache[Number(serviceId)];
+      }
       if (!service || !salon?.uuid) return;
 
       setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: true, data: prev[rowIndex]?.data ?? [] } }));
@@ -173,7 +171,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: false, data: [] } }));
       }
     },
-    [services, salon?.uuid],
+    [services, subServiceCache, salon?.uuid],
   );
 
   useEffect(() => {
@@ -273,7 +271,10 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     discountBadge?: string | null;
   } | undefined => {
     if (!serviceId) return undefined;
-    const serviceObj = services.find((s) => s.id === Number(serviceId));
+    let serviceObj = services.find((s) => s.id === Number(serviceId));
+    if (!serviceObj && subServiceCache[Number(serviceId)]) {
+      serviceObj = subServiceCache[Number(serviceId)];
+    }
     let duration = 0;
     let basePrice = 0;
 
@@ -403,7 +404,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     }
   };
 
-  const canAddMore = fields.length < allServiceOptions.length;
+  const canAddMore = !watchedServices.some((s) => !s.service_id);
 
   return (
     <Dialog
@@ -512,18 +513,23 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                       key={field.id}
                       index={index}
                       control={control as any}
-                      serviceOptions={getServiceOptionsForRow(index)}
+                      rootServices={rootServices}
+                      isLoadingRootServices={isLoadingServices}
+                      onRootScrollEnd={handleFetchMoreServices}
+                      disabledServices={getDisabledServicesForRow(index)}
                       staffOptions={getStaffOptions(index)}
                       staffLoading={isStaffLoading(index)}
                       selectedStaff={getServicePriceAndDuration(index, watchedServices?.[index]?.service_id, watchedServices?.[index]?.staff_id)}
                       showRemoveButton={fields.length > 1}
                       onRemove={() => handleRemoveService(index)}
                       watchedServiceId={watchedServices?.[index]?.service_id}
-                      onServiceChange={() => {
+                      onServiceChange={(newId, serviceObj) => {
                         setValue(`services.${index}.staff_id`, "" as any);
+                        if (serviceObj) {
+                          setSubServiceCache((prev) => ({ ...prev, [serviceObj.id]: serviceObj }));
+                        }
                       }}
-                      onServiceScrollEnd={handleFetchMoreServices}
-                      isLoadingMoreServices={isLoadingServices}
+                      subServiceCache={subServiceCache}
                     />
                   ))}
                 </div>

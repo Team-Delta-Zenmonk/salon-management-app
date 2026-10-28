@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Filter, SlidersHorizontal, X } from "lucide-react";
-import type { Control } from "react-hook-form";
+import { Controller, type Control } from "react-hook-form";
 import Select from "@/components/form/select";
 import { Button } from "@/components/ui/button";
+import HierarchicalServiceSelect from "@/components/hierarchical-service-select";
+import type { Service } from "@/features/service/service.slice";
+import { ALL_SERVICES_VALUE } from "../constants/booking.constants";
 import {
   Dialog,
   DialogContent,
@@ -26,18 +29,23 @@ interface LegendItem {
 interface BookingFilterDialogProps {
   control: Control<any>;
   staffOptions: SelectOption[];
-  serviceOptions: SelectOption[];
+  serviceOptions?: SelectOption[];
   paymentOptions: SelectOption[];
   statusLegend?: LegendItem[];
   hasActiveFilters?: boolean;
+  rootServices?: Service[];
+  isLoadingRootServices?: boolean;
+  onRootScrollEnd?: () => void;
 }
 
 export default function BookingFilterDialog({
   control,
   staffOptions,
-  serviceOptions,
   paymentOptions,
   statusLegend = [],
+  rootServices = [],
+  isLoadingRootServices = false,
+  onRootScrollEnd,
 }: Readonly<BookingFilterDialogProps>) {
   const [open, setOpen] = useState(false);
 
@@ -100,15 +108,25 @@ export default function BookingFilterDialog({
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Service
               </label>
-              <div className="[&_button]:bg-muted/30 [&_button]:border-border/50 [&_button]:text-foreground [&_button]:rounded-xl">
-                <Select
+              <div>
+                <Controller
                   name="service"
                   control={control}
-                  placeholder="All Services"
-                  options={serviceOptions}
-                  identifier="booking-service-filter-modal"
-                  translate={false}
-                  disabled={serviceOptions.length === 1}
+                  render={({ field: { value, onChange } }) => (
+                    <HierarchicalServiceSelect
+                      value={value}
+                      onChange={onChange}
+                      rootServices={rootServices}
+                      isLoadingRootServices={isLoadingRootServices}
+                      onRootScrollEnd={onRootScrollEnd}
+                      valueMode="uuid"
+                      allowClearOption={{
+                        label: "All Services",
+                        value: ALL_SERVICES_VALUE,
+                      }}
+                      triggerClassName="bg-muted/30 border-border/50 text-foreground rounded-xl h-10"
+                    />
+                  )}
                 />
               </div>
             </div>

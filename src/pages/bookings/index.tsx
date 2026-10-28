@@ -21,6 +21,8 @@ import { listServicesAction } from "../../features/service/list-services/list-se
 import Select from "../../components/form/select";
 import { Button } from "@/components/ui/button";
 import BookingFilterDialog from "./_components/booking-filter-dialog";
+import HierarchicalServiceSelect from "@/components/hierarchical-service-select";
+import { Controller } from "react-hook-form";
 
 interface FilterForm {
   staff: string;
@@ -31,7 +33,11 @@ interface FilterForm {
 export default function BookingPage() {
   const dispatch = useAppDispatch();
   const { data: staff } = useAppSelector((state) => state.staff);
-  const { data: services } = useAppSelector((state) => state.service);
+  const { data: services, hasMore: hasMoreServices, loading: isLoadingServices } = useAppSelector((state) => state.service);
+  const rootServices = useMemo(() => {
+    return (services || []).filter((s) => s.parent_id === null || s.parent_id === undefined);
+  }, [services]);
+  const [servicePage, setServicePage] = useState(1);
   const { data: bookings, total, page, limit, loading, updatingBookingUuid } = useAppSelector((state) => state.booking);
 
   const [viewMode, setViewMode] = useState<"calendar" | "table">("calendar");
@@ -64,8 +70,15 @@ export default function BookingPage() {
 
   useEffect(() => {
     dispatch(listStaffAction({ page: 1, limit: 10 }));
-    dispatch(listServicesAction({ page: 1, limit: 10, include_sub_services: true }));
+    dispatch(listServicesAction({ page: 1, limit: 10, include_sub_services: false }));
   }, [dispatch]);
+
+  const handleFetchMoreServices = () => {
+    if (!hasMoreServices || isLoadingServices) return;
+    const nextPage = servicePage + 1;
+    setServicePage(nextPage);
+    dispatch(listServicesAction({ page: nextPage, limit: 10, include_sub_services: false }));
+  };
 
   useEffect(() => {
     setStatePage(1);
@@ -214,9 +227,11 @@ export default function BookingPage() {
             <BookingFilterDialog
               control={control}
               staffOptions={staffOptions}
-              serviceOptions={serviceOptions}
               paymentOptions={paymentOptions}
               statusLegend={statusLegend}
+              rootServices={rootServices}
+              isLoadingRootServices={isLoadingServices}
+              onRootScrollEnd={handleFetchMoreServices}
             />
           </div>
           <CreateBooking />
@@ -241,15 +256,25 @@ export default function BookingPage() {
               disabled={staffOptions.length === 1}
             />
           </div>
-          <div className="w-[175px] min-w-[150px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/50 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">
-            <Select
+          <div className="w-[195px] min-w-[160px]">
+            <Controller
               name="service"
               control={control}
-              placeholder="All Services"
-              options={serviceOptions}
-              identifier="booking-service-filter"
-              translate={false}
-              disabled={serviceOptions.length === 1}
+              render={({ field: { value, onChange } }) => (
+                <HierarchicalServiceSelect
+                  value={value}
+                  onChange={onChange}
+                  rootServices={rootServices}
+                  isLoadingRootServices={isLoadingServices}
+                  onRootScrollEnd={handleFetchMoreServices}
+                  valueMode="uuid"
+                  allowClearOption={{
+                    label: "All Services",
+                    value: ALL_SERVICES_VALUE,
+                  }}
+                  triggerClassName="bg-card/60 backdrop-blur-md shadow-sm border-border/50 hover:bg-card/80 transition-all text-foreground rounded-md h-10"
+                />
+              )}
             />
           </div>
           <div className="w-[190px] min-w-[160px] [&_button]:bg-card/60 [&_button]:backdrop-blur-md [&_button]:shadow-sm [&_button]:border-border/50 [&_button]:hover:bg-card/80 [&_button]:transition-all [&_button]:text-foreground [&_button]:rounded-md">

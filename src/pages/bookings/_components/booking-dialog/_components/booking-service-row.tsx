@@ -1,14 +1,18 @@
-import type { Control } from "react-hook-form";
+import { Controller, type Control } from "react-hook-form";
 import { Button } from "../../../../../components/ui/button";
 import { X } from "lucide-react";
 import Select from "../../../../../components/form/select";
-import type { SelectOption } from "../../../../../components/form/select/select.type";
 import type { BookingFormValues } from "../../../schema/booking.schema";
+import type { Service } from "../../../../../features/service/service.slice";
+import HierarchicalServiceSelect from "@/components/hierarchical-service-select";
 
 interface BookingServiceRowProps {
   index: number;
   control: Control<BookingFormValues>;
-  serviceOptions: SelectOption[];
+  rootServices: Service[];
+  isLoadingRootServices?: boolean;
+  onRootScrollEnd?: () => void;
+  disabledServices?: Set<number>;
   staffOptions: { label: string; value: string }[];
   staffLoading: boolean;
   selectedStaff?: {
@@ -21,10 +25,8 @@ interface BookingServiceRowProps {
   showRemoveButton: boolean;
   onRemove: () => void;
   watchedServiceId?: string | number;
-  onServiceChange?: () => void;
-  onServiceScrollEnd?: () => void;
-  isLoadingMoreServices?: boolean;
-  onServiceOpenChange?: (open: boolean) => void;
+  onServiceChange?: (serviceId: string, serviceObj?: Service) => void;
+  subServiceCache?: Record<number, Service>;
 }
 
 const formatPrice = (price: number) => `₹${Math.round(price).toLocaleString("en-IN")}`;
@@ -32,7 +34,10 @@ const formatPrice = (price: number) => `₹${Math.round(price).toLocaleString("e
 export default function BookingServiceRow({
   index,
   control,
-  serviceOptions,
+  rootServices,
+  isLoadingRootServices,
+  onRootScrollEnd,
+  disabledServices,
   staffOptions,
   staffLoading,
   selectedStaff,
@@ -40,26 +45,38 @@ export default function BookingServiceRow({
   onRemove,
   watchedServiceId,
   onServiceChange,
-  onServiceScrollEnd,
-  isLoadingMoreServices,
-  onServiceOpenChange,
+  subServiceCache,
 }: Readonly<BookingServiceRowProps>) {
   return (
     <div className="rounded-xl border border-border/50 p-3.5 sm:p-4 relative bg-muted/5 transition-colors hover:bg-muted/10">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
-          <Select
+          <Controller
             name={`services.${index}.service_id`}
-            placeholder="Select Service"
-            identifier={`booking-service-${index}`}
-            options={serviceOptions}
-            triggerClassName="capitalize"
-            translate={false}
-            control={control as any}
-            onChange={onServiceChange}
-            onOpenChange={onServiceOpenChange}
-            onScrollEnd={onServiceScrollEnd}
-            isLoadingMore={isLoadingMoreServices}
+            control={control}
+            render={({ field: { value, onChange }, fieldState: { error } }) => (
+              <div>
+                <HierarchicalServiceSelect
+                  value={value}
+                  onChange={(newId, serviceObj) => {
+                    onChange(newId);
+                    onServiceChange?.(newId, serviceObj);
+                  }}
+                  rootServices={rootServices}
+                  isLoadingRootServices={isLoadingRootServices}
+                  onRootScrollEnd={onRootScrollEnd}
+                  disabledServices={disabledServices}
+                  placeholder="Select Service"
+                  hasError={!!error}
+                  subServiceCache={subServiceCache}
+                />
+                {error && (
+                  <p className="text-xs text-destructive mt-1 font-medium">
+                    {error.message}
+                  </p>
+                )}
+              </div>
+            )}
           />
         </div>
 
@@ -99,7 +116,7 @@ export default function BookingServiceRow({
               <span className="text-xs line-through text-muted-foreground font-medium">
                 {formatPrice(Number(selectedStaff.originalPrice))}
               </span>
-              <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
+              <span className="text-xs font-semibold text-foreground">
                 {formatPrice(Number(selectedStaff.price))}
               </span>
               {selectedStaff.discountBadge && (
@@ -109,7 +126,7 @@ export default function BookingServiceRow({
               )}
             </div>
           ) : (
-            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
+            <span className="text-xs font-semibold text-foreground">
               {formatPrice(Number(selectedStaff.price))}
             </span>
           )}

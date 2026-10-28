@@ -23,6 +23,7 @@ export interface Service {
   price: number;
   discount?: number | null;
   discount_type?: DiscountType | null;
+  sub_services_count?: number;
   created_at: string;
   updated_at: string;
 }
