@@ -2,12 +2,13 @@ import type { Control } from "react-hook-form";
 import { Button } from "../../../../../components/ui/button";
 import { X } from "lucide-react";
 import Select from "../../../../../components/form/select";
+import type { SelectOption } from "../../../../../components/form/select/select.type";
 import type { BookingFormValues } from "../../../schema/booking.schema";
 
 interface BookingServiceRowProps {
   index: number;
   control: Control<BookingFormValues>;
-  serviceOptions: { label: string; value: string }[];
+  serviceOptions: SelectOption[];
   staffOptions: { label: string; value: string }[];
   staffLoading: boolean;
   selectedStaff?: {
@@ -23,6 +24,7 @@ interface BookingServiceRowProps {
   onServiceChange?: () => void;
   onServiceScrollEnd?: () => void;
   isLoadingMoreServices?: boolean;
+  onServiceOpenChange?: (open: boolean) => void;
 }
 
 const formatPrice = (price: number) => `₹${Math.round(price).toLocaleString("en-IN")}`;
@@ -40,6 +42,7 @@ export default function BookingServiceRow({
   onServiceChange,
   onServiceScrollEnd,
   isLoadingMoreServices,
+  onServiceOpenChange,
 }: Readonly<BookingServiceRowProps>) {
   return (
     <div className="rounded-xl border border-border/50 p-3.5 sm:p-4 relative bg-muted/5 transition-colors hover:bg-muted/10">
@@ -54,6 +57,7 @@ export default function BookingServiceRow({
             translate={false}
             control={control as any}
             onChange={onServiceChange}
+            onOpenChange={onServiceOpenChange}
             onScrollEnd={onServiceScrollEnd}
             isLoadingMore={isLoadingMoreServices}
           />

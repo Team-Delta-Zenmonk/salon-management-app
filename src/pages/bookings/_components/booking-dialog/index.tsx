@@ -478,7 +478,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                 <TextField
                   type="text"
                   name="customer_phone"
-                  label="Customer Phone"
+                  label="Customer Phone (Optional)"
                   placeholder="Enter phone number"
                   control={control as any}
                   identifier="booking-customer-phone"

@@ -32,6 +32,7 @@ export function ServiceCard({
   refreshTrigger,
 }: Readonly<ServiceCardProps>) {
   const [subServices, setSubServices] = useState<Service[]>([]);
+  const [totalSubServicesCount, setTotalSubServicesCount] = useState<number>(0);
   const [subLoading, setSubLoading] = useState(true);
 
   useEffect(() => {
@@ -41,12 +42,16 @@ export function ServiceCard({
         setSubLoading(true);
         const res = await listSubServicesService(service.uuid);
         if (isMounted) {
-          setSubServices(res?.rows ?? []);
+          const rows = res?.rows ?? [];
+          const totalCount = typeof res?.count === "number" ? res.count : rows.length;
+          setSubServices(rows);
+          setTotalSubServicesCount(totalCount);
         }
       } catch {
         if (isMounted) {
           callSnack("Failed to fetch sub-services", "error");
           setSubServices([]);
+          setTotalSubServicesCount(0);
         }
       } finally {
         if (isMounted) {
@@ -146,7 +151,7 @@ export function ServiceCard({
             </Badge>
             {hasSubServices && (
               <Badge className="bg-primary/10 text-primary border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-primary/10">
-                {subServices.length} Sub-services
+                {totalSubServicesCount || subServices.length} Sub-services
               </Badge>
             )}
             {service.is_popular && (
@@ -232,7 +237,7 @@ export function ServiceCard({
                 ))}
                 {subServices.length > 4 && (
                   <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[9px] font-bold ring-2 ring-background border border-primary/20 shrink-0">
-                    +{subServices.length - 4}
+                    +{(totalSubServicesCount || subServices.length) - 4}
                   </div>
                 )}
               </div>

@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
+import InfiniteScroll from "react-infinite-scroll-component";
 import {
   Sheet,
   SheetContent,
@@ -61,33 +62,76 @@ export function SubServicesDrawer({
 }: Readonly<SubServicesDrawerProps>) {
   const [subServices, setSubServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const limit = 10;
+  const isFetchingRef = useRef(false);
+
+  const fetchSubServices = useCallback(
+    async (pageNum: number, isInitial = false) => {
+      if (!parentService || isFetchingRef.current) return;
+      isFetchingRef.current = true;
+      if (isInitial) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      try {
+        const res = await listSubServicesService(parentService.uuid, {
+          page: pageNum,
+          limit,
+        });
+
+        const rows: Service[] = Array.isArray(res) ? res : res?.rows ?? res?.data ?? [];
+        const total: number = res?.count ?? res?.total ?? rows.length;
+
+        setTotalCount(total);
+        setSubServices((prev) => {
+          if (pageNum === 1) return rows;
+          const existingIds = new Set(prev.map((item) => item.id));
+          const newRows = rows.filter((item) => !existingIds.has(item.id));
+          const combined = [...prev, ...newRows];
+          setHasMore(combined.length < total);
+          return combined;
+        });
+        setHasMore((prevTotal) => {
+          if (pageNum === 1) return rows.length < total;
+          return prevTotal;
+        });
+        setPage(pageNum);
+      } catch {
+        callSnack("Failed to fetch sub-services", "error");
+        if (pageNum === 1) {
+          setSubServices([]);
+          setTotalCount(0);
+          setHasMore(false);
+        }
+      } finally {
+        isFetchingRef.current = false;
+        if (isInitial) {
+          setLoading(false);
+        } else {
+          setLoadingMore(false);
+        }
+      }
+    },
+    [parentService, limit]
+  );
 
   useEffect(() => {
     if (!open || !parentService) return;
-    let isMounted = true;
-    const fetchSubServices = async () => {
-      try {
-        setLoading(true);
-        const res = await listSubServicesService(parentService.uuid);
-        if (isMounted) {
-          setSubServices(res?.rows ?? []);
-        }
-      } catch {
-        if (isMounted) {
-          callSnack("Failed to fetch sub-services", "error");
-          setSubServices([]);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-    fetchSubServices();
-    return () => {
-      isMounted = false;
-    };
-  }, [open, parentService, refreshTrigger]);
+    setPage(1);
+    fetchSubServices(1, true);
+  }, [open, parentService?.uuid, refreshTrigger, fetchSubServices]);
+
+  const loadMore = () => {
+    if (!loading && !loadingMore && hasMore) {
+      fetchSubServices(page + 1, false);
+    }
+  };
 
   if (!parentService) return null;
 
@@ -120,8 +164,8 @@ export function SubServicesDrawer({
 
         <div className="flex justify-between items-center px-6 py-4 bg-muted/5 border-b border-border/50 shrink-0">
           <span className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
-            Sub-services ({subServices.length})
-            {loading && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
+            Sub-services ({totalCount || subServices.length})
+            {(loading || loadingMore) && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
           </span>
           <Button
             size="sm"
@@ -134,7 +178,10 @@ export function SubServicesDrawer({
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+        <div
+          id={`drawer-subservices-scrollable-${parentService.uuid}`}
+          className="flex-1 overflow-y-auto p-6 custom-scrollbar"
+        >
           <AnimatePresence mode="wait">
             {loading ? (
               <motion.div
@@ -182,123 +229,135 @@ export function SubServicesDrawer({
                 </p>
               </motion.div>
             ) : (
-              <motion.div
-                key="list"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                exit="hidden"
-                className="space-y-4 pb-6"
+              <InfiniteScroll
+                dataLength={subServices.length}
+                next={loadMore}
+                hasMore={hasMore}
+                scrollableTarget={`drawer-subservices-scrollable-${parentService.uuid}`}
+                loader={
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
+                  </div>
+                }
               >
-                {subServices.map((sub) => (
-                  <motion.div
-                    key={sub.uuid}
-                    variants={itemVariants}
-                    className="group relative bg-card border border-border/50 hover:border-primary/30 p-4 rounded-2xl flex flex-col gap-3.5 transition-all duration-300 shadow-xs hover:shadow-md"
-                  >
-                    <div className="flex gap-3 min-w-0">
-                      <Avatar className="w-10 h-10 rounded-xl ring-1 ring-border/50 shrink-0 bg-background overflow-hidden">
-                        {sub.logo ? (
-                          <AvatarImage
-                            src={sub.logo}
-                            alt={sub.name}
-                            className="object-cover"
-                          />
-                        ) : (
-                          <AvatarFallback className="bg-primary/5 text-primary rounded-xl">
-                            <SparklesIcon className="w-4 h-4 opacity-60" />
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        <EllipsisCell
-                          value={sub.name}
-                          maxChars={50}
-                          className="font-semibold text-foreground text-[14px] leading-snug capitalize block"
-                        />
-                        {sub.description && (
-                          <EllipsisCell
-                            value={
-                              sub.description || "No description provided."
-                            }
-                            maxChars={50}
-                            className="text-muted-foreground text-[11px] mt-0.5 line-clamp-1 block"
-                          />
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/50 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                          {sub.gender}
-                        </div>
-                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/5 border border-primary/10 text-[10px] font-medium text-primary uppercase tracking-wide">
-                          {sub.price_type !== "fixed" && (
-                            <span className="opacity-60 font-normal mr-0.5">
-                              {sub.price_type}
-                            </span>
+                <motion.div
+                  key="list"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  className="space-y-4 pb-6"
+                >
+                  {subServices.map((sub) => (
+                    <motion.div
+                      key={sub.uuid}
+                      variants={itemVariants}
+                      className="group relative bg-card border border-border/50 hover:border-primary/30 p-4 rounded-2xl flex flex-col gap-3.5 transition-all duration-300 shadow-xs hover:shadow-md"
+                    >
+                      <div className="flex gap-3 min-w-0">
+                        <Avatar className="w-10 h-10 rounded-xl ring-1 ring-border/50 shrink-0 bg-background overflow-hidden">
+                          {sub.logo ? (
+                            <AvatarImage
+                              src={sub.logo}
+                              alt={sub.name}
+                              className="object-cover"
+                            />
+                          ) : (
+                            <AvatarFallback className="bg-primary/5 text-primary rounded-xl">
+                              <SparklesIcon className="w-4 h-4 opacity-60" />
+                            </AvatarFallback>
                           )}
-                          <span className="font-semibold text-[9px]">₹</span>
-                          {sub.price}
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          <EllipsisCell
+                            value={sub.name}
+                            maxChars={50}
+                            className="font-semibold text-foreground text-[14px] leading-snug capitalize"
+                          />
+                          {sub.description && (
+                            <EllipsisCell
+                              value={
+                                sub.description || "No description provided."
+                              }
+                              maxChars={50}
+                              className="text-muted-foreground text-[11px] mt-0.5 line-clamp-1"
+                            />
+                          )}
                         </div>
-                        {sub.duration && (
-                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/50 text-[10px] font-medium text-muted-foreground">
-                            <ClockIcon className="w-3 h-3 opacity-60" />
-                            {sub.duration} min
-                          </div>
-                        )}
-                        {sub.is_popular && (
-                          <Badge className="bg-amber-500/10 text-amber-600 border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-amber-500/10">
-                            Popular
-                          </Badge>
-                        )}
-                        {!sub.is_active && (
-                          <Badge
-                            variant="destructive"
-                            className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-none text-[9px] h-5 px-1.5 py-0"
-                          >
-                            Inactive
-                          </Badge>
-                        )}
                       </div>
 
-                      <div className="flex gap-0.5 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-full hover:bg-green-500/10 hover:text-green-600 text-muted-foreground transition-colors"
-                          onClick={() => onAssignStaff(sub)}
-                          disabled={deleteLoading}
-                          title="Assign Staff"
-                        >
-                          <UserPlusIcon className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-full hover:bg-purple-500/10 hover:text-purple-600 text-muted-foreground transition-colors"
-                          onClick={() => onEdit(sub, parentService.uuid)}
-                          disabled={deleteLoading}
-                          title="Edit Sub-service"
-                        >
-                          <Edit2Icon className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors"
-                          onClick={() => onDelete(sub, parentService.uuid)}
-                          disabled={deleteLoading}
-                          title="Delete Sub-service"
-                        >
-                          <Trash2Icon className="w-3.5 h-3.5" />
-                        </Button>
+                      <div className="flex items-center justify-between mt-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/50 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                            {sub.gender}
+                          </div>
+                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/5 border border-primary/10 text-[10px] font-medium text-primary uppercase tracking-wide">
+                            {sub.price_type !== "fixed" && (
+                              <span className="opacity-60 font-normal mr-0.5">
+                                {sub.price_type}
+                              </span>
+                            )}
+                            <span className="font-semibold text-[9px]">₹</span>
+                            {sub.price}
+                          </div>
+                          {sub.duration && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/50 text-[10px] font-medium text-muted-foreground">
+                              <ClockIcon className="w-3 h-3 opacity-60" />
+                              {sub.duration} min
+                            </div>
+                          )}
+                          {sub.is_popular && (
+                            <Badge className="bg-amber-500/10 text-amber-600 border-none text-[10px] font-semibold px-2 py-0.5 rounded-md hover:bg-amber-500/10">
+                              Popular
+                            </Badge>
+                          )}
+                          {!sub.is_active && (
+                            <Badge
+                              variant="destructive"
+                              className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-none text-[9px] h-5 px-1.5 py-0"
+                            >
+                              Inactive
+                            </Badge>
+                          )}
+                        </div>
+
+                        <div className="flex gap-0.5 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full hover:bg-green-500/10 hover:text-green-600 text-muted-foreground transition-colors"
+                            onClick={() => onAssignStaff(sub)}
+                            disabled={deleteLoading}
+                            title="Assign Staff"
+                          >
+                            <UserPlusIcon className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full hover:bg-purple-500/10 hover:text-purple-600 text-muted-foreground transition-colors"
+                            onClick={() => onEdit(sub, parentService.uuid)}
+                            disabled={deleteLoading}
+                            title="Edit Sub-service"
+                          >
+                            <Edit2Icon className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors"
+                            onClick={() => onDelete(sub, parentService.uuid)}
+                            disabled={deleteLoading}
+                            title="Delete Sub-service"
+                          >
+                            <Trash2Icon className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </InfiniteScroll>
             )}
           </AnimatePresence>
         </div>

@@ -2,8 +2,9 @@ import React, { useId } from "react";
 import clsx from "clsx";
 import { X } from "lucide-react";
 import { Controller, type FieldValues } from "react-hook-form";
-import type { CustomSelectProps } from "./select.type";
+import type { CustomSelectProps, SelectOption } from "./select.type";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Select as ShadcnSelect,
   SelectContent,
@@ -23,8 +24,10 @@ const Select = <T extends FieldValues>({
   rules,
   triggerClassName,
   onChange: customOnChange,
+  onOpenChange,
   onScrollEnd,
   isLoadingMore = false,
+  renderOption,
 }: CustomSelectProps<T>) => {
   const generatedId = useId();
   const selectId = identifier || generatedId;
@@ -70,6 +73,7 @@ const Select = <T extends FieldValues>({
                 onChange(val);
                 if (customOnChange) customOnChange(val);
               }}
+              onOpenChange={onOpenChange}
               disabled={disabled}
             >
               <SelectTrigger
@@ -105,16 +109,57 @@ const Select = <T extends FieldValues>({
               <SelectContent align="start" onScroll={handleScroll}>
                 {options && options.length > 0 ? (
                   <>
-                    {options.map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        data-test-id={`li-${identifier}-${option.label}`}
-                        className={"capitalize"}
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                    {options.map((option) => {
+                      const opt = option as SelectOption;
+                      return (
+                        <SelectItem
+                          key={opt.value}
+                          value={opt.value}
+                          disabled={opt.disabled}
+                          data-test-id={`li-${identifier}-${opt.label}`}
+                          className={clsx(
+                            "capitalize transition-colors",
+                            opt.isSubItem && "pl-5 border-l-2 border-primary/30 ml-1.5 my-0.5",
+                          )}
+                        >
+                          {renderOption ? (
+                            renderOption(opt)
+                          ) : (
+                            <div
+                              className="flex items-center justify-between gap-2 w-full min-w-0"
+                              onClick={opt.onClick}
+                            >
+                              <div className="flex flex-col min-w-0">
+                                <span className={clsx("truncate text-sm", opt.isSubItem ? "text-foreground font-normal" : "font-medium text-foreground")}>
+                                  {opt.label}
+                                </span>
+                                {opt.subtitle && (
+                                  <span className="text-[11px] text-muted-foreground truncate">
+                                    {opt.subtitle}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {opt.badge && (
+                                  <Badge
+                                    variant={opt.badgeVariant || (opt.isSubItem ? "outline" : "secondary")}
+                                    className={clsx(
+                                      "text-[10px] px-1.5 py-0 shrink-0 font-normal",
+                                      opt.isSubItem
+                                        ? "text-primary border-primary/30 bg-primary/5"
+                                        : "bg-muted text-muted-foreground"
+                                    )}
+                                  >
+                                    {opt.badge}
+                                  </Badge>
+                                )}
+                                {opt.trailingElement}
+                              </div>
+                            </div>
+                          )}
+                        </SelectItem>
+                      );
+                    })}
                     {isLoadingMore && (
                       <div className="py-2.5 px-3 flex items-center justify-center text-xs font-medium text-primary gap-2 bg-primary/5 rounded-md my-1">
                         <span className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />

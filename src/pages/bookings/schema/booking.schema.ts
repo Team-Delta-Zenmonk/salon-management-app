@@ -16,7 +16,15 @@ export const bookingServiceSchema = z.object({
 
 export const bookingSchema = z.object({
   customer_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
-  customer_phone: z.string({ message: "Required" }).min(10, { message: "Phone number must be at least 10 digits" }).max(FIELD_LIMITS.PHONE, { message: `Max ${FIELD_LIMITS.PHONE} digits` }).regex(/^\d{10}$/, { message: "Phone number must be exactly 10 digits" }),
+  customer_phone: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (val) => !val || /^\d{10}$/.test(val),
+      { message: "Phone number must be exactly 10 digits" }
+    ),
   services: z.array(bookingServiceSchema).min(1, { message: "At least one service is required" }),
   booking_date: z.any().refine(
     (val) => {
