@@ -96,8 +96,12 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
   useEffect(() => {
     if (!discountType) {
-      setValue("discount", "");
+      setValue("discount", "", { shouldValidate: false });
       clearErrors(["discount", "discount_type"]);
+      const timer = setTimeout(() => {
+        clearErrors(["discount", "discount_type"]);
+      }, 0);
+      return () => clearTimeout(timer);
     } else if (getValues("discount")) {
       trigger("discount");
     }
@@ -388,6 +392,16 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   identifier="service-discount-type"
                   options={DiscountTypeOptions}
                   disabled={isLoading || isFree}
+                  onChange={(val) => {
+                    if (!val) {
+                      setValue("discount_type", "");
+                      setValue("discount", "", { shouldValidate: false, shouldDirty: true });
+                      clearErrors(["discount", "discount_type"]);
+                      setTimeout(() => {
+                        clearErrors(["discount", "discount_type"]);
+                      }, 0);
+                    }
+                  }}
                 />
 
                 <TextField
@@ -400,13 +414,13 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   placeholder={
                     isFree
                       ? "Not applicable for free service"
-                      : discountType === DISCOUNT_TYPE.PERCENTAGE
-                        ? "Enter percentage (e.g. 10)"
-                        : discountType === DISCOUNT_TYPE.AMOUNT
-                          ? "Enter amount (e.g. 100)"
-                          : "Enter discount"
+                      : !discountType
+                        ? "Select discount type first"
+                        : discountType === DISCOUNT_TYPE.PERCENTAGE
+                          ? "Enter percentage (e.g. 10)"
+                          : "Enter amount (e.g. 100)"
                   }
-                  disabled={isLoading || isFree}
+                  disabled={isLoading || isFree || !discountType}
                   maxLength={FIELD_LIMITS.PRICE}
                 />
               </div>

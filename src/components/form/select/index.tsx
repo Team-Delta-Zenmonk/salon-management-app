@@ -97,8 +97,8 @@ const Select = <T extends FieldValues>({
                     onPointerDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      onChange("");
                       if (customOnChange) customOnChange("");
+                      onChange("");
                     }}
                     className="mr-1 flex items-center justify-center rounded-full p-0.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                   >
