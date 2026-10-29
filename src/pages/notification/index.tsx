@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import InfiniteScroll from "react-infinite-scroll-component";
 import {
   Bell,
   CheckCheck,
@@ -9,6 +10,7 @@ import {
   MoreHorizontal,
   MailOpen,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { useNotifications } from "../../features/notification/notification-context";
 import {
@@ -29,10 +31,15 @@ export default function NotificationPage() {
   const {
     notifications,
     unreadCount,
+    total,
+    page,
     markAsRead,
     markAllAsRead,
     deleteNotification,
     loading,
+    isFetchingMore,
+    hasMore,
+    fetchNotifications,
   } = useNotifications();
 
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
@@ -50,6 +57,12 @@ export default function NotificationPage() {
     }
     const meta = getNotificationMetadata(item.type);
     navigate(meta.targetRoute(item.data));
+  };
+
+  const handleFetchMore = () => {
+    if (!loading && !isFetchingMore && hasMore) {
+      fetchNotifications(page + 1, activeTab === "unread" ? false : undefined);
+    }
   };
 
   return (
@@ -95,7 +108,7 @@ export default function NotificationPage() {
                 : "bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted"
             )}
           >
-            All ({notifications.length})
+            All ({total})
           </button>
           <button
             type="button"
@@ -173,129 +186,148 @@ export default function NotificationPage() {
               )}
             </div>
           ) : (
-            filteredNotifications.map((item) => {
-              const meta = getNotificationMetadata(item.type);
-              const Icon = meta.icon;
-              const hasBookingTarget = Boolean(
-                item.data?.booking_uuid || item.booking_id || item.type?.startsWith("BOOKING_")
-              );
+            <InfiniteScroll
+              dataLength={filteredNotifications.length}
+              next={handleFetchMore}
+              hasMore={activeTab === "all" ? hasMore : false}
+              scrollableTarget="main-content-scroll"
+              scrollThreshold={0.8}
+              loader={
+                <div className="flex justify-center py-5">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              }
+              endMessage={
+                filteredNotifications.length > 0 && total > 10 ? (
+                  <div className="text-center py-4 text-xs text-muted-foreground/70">
+                    No more notifications
+                  </div>
+                ) : null
+              }
+            >
+              {filteredNotifications.map((item) => {
+                const meta = getNotificationMetadata(item.type);
+                const Icon = meta.icon;
+                const hasBookingTarget = Boolean(
+                  item.data?.booking_uuid || item.booking_id || item.type?.startsWith("BOOKING_")
+                );
 
-              return (
-                <div
-                  key={item.uuid}
-                  onClick={() => handleActionClick(item)}
-                  className={cn(
-                    "p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 transition-colors cursor-pointer group relative border-l-4 border-l-transparent",
-                    !item.is_read
-                      ? "bg-primary/10 border-l-primary hover:bg-primary/15"
-                      : "hover:bg-muted/40"
-                  )}
-                >
-
+                return (
                   <div
+                    key={item.uuid}
+                    onClick={() => handleActionClick(item)}
                     className={cn(
-                      "w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center shrink-0 border shadow-xs transition-transform group-hover:scale-105",
-                      meta.bgClass,
-                      meta.colorClass,
-                      meta.borderClass
+                      "p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4 transition-colors cursor-pointer group relative border-l-4 border-l-transparent",
+                      !item.is_read
+                        ? "bg-primary/10 border-l-primary hover:bg-primary/15"
+                        : "hover:bg-muted/40"
                     )}
                   >
-                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
+                    <div
+                      className={cn(
+                        "w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center shrink-0 border shadow-xs transition-transform group-hover:scale-105",
+                        meta.bgClass,
+                        meta.colorClass,
+                        meta.borderClass
+                      )}
+                    >
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </div>
 
-                  <div className="flex-1 min-w-0 pr-2">
-                    <p className="text-sm leading-relaxed text-foreground">
-                      <span className="font-semibold text-foreground mr-1.5">
-                        {item.title}
-                      </span>
-                      <span className="text-muted-foreground">{item.message}</span>
-                    </p>
+                    <div className="flex-1 min-w-0 pr-2">
+                      <p className="text-sm leading-relaxed text-foreground">
+                        <span className="font-semibold text-foreground mr-1.5">
+                          {item.title}
+                        </span>
+                        <span className="text-muted-foreground">{item.message}</span>
+                      </p>
 
-                    {hasBookingTarget && (
-                      <div className="mt-3">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleActionClick(item);
-                          }}
-                          className="h-7 text-xs rounded-full px-3.5 gap-1.5 font-semibold text-primary hover:text-primary border-primary/30 hover:bg-primary/10 cursor-pointer shadow-2xs"
-                        >
-                          View Booking
-                          <ArrowRight className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col items-end gap-1.5 shrink-0 self-start pt-0.5">
-                    <span className="text-xs font-medium text-muted-foreground/75 whitespace-nowrap">
-                      {formatNotificationTime(item.created_at)}
-                    </span>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        className="inline-flex items-center justify-center h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors outline-none"
-                        title="Options"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44 p-1 rounded-xl z-50">
-                        {!item.is_read ? (
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markAsRead(item.uuid);
-                            }}
-                            className="text-xs font-medium gap-2 cursor-pointer py-2"
-                          >
-                            <Check className="w-3.5 h-3.5 text-primary" />
-                            Mark as read
-                          </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markAsRead(item.uuid);
-                            }}
-                            className="text-xs font-medium gap-2 cursor-pointer py-2 text-muted-foreground"
-                          >
-                            <MailOpen className="w-3.5 h-3.5" />
-                            Already read
-                          </DropdownMenuItem>
-                        )}
-
-                        {hasBookingTarget && (
-                          <DropdownMenuItem
+                      {hasBookingTarget && (
+                        <div className="mt-3">
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleActionClick(item);
                             }}
-                            className="text-xs font-medium gap-2 cursor-pointer py-2"
+                            className="h-7 text-xs rounded-full px-3.5 gap-1.5 font-semibold text-primary hover:text-primary border-primary/30 hover:bg-primary/10 cursor-pointer shadow-2xs"
                           >
-                            <ArrowRight className="w-3.5 h-3.5 text-primary" />
-                            Go to bookings
-                          </DropdownMenuItem>
-                        )}
+                            View Booking
+                            <ArrowRight className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
 
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteNotification(item.uuid);
-                          }}
-                          className="text-xs font-medium gap-2 text-destructive cursor-pointer py-2 focus:text-destructive focus:bg-destructive/10"
+                    <div className="flex flex-col items-end gap-1.5 shrink-0 self-start pt-0.5">
+                      <span className="text-xs font-medium text-muted-foreground/75 whitespace-nowrap">
+                        {formatNotificationTime(item.created_at)}
+                      </span>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          className="inline-flex items-center justify-center h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors outline-none"
+                          title="Options"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          <MoreHorizontal className="w-4 h-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44 p-1 rounded-xl z-50">
+                          {!item.is_read ? (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAsRead(item.uuid);
+                              }}
+                              className="text-xs font-medium gap-2 cursor-pointer py-2"
+                            >
+                              <Check className="w-3.5 h-3.5 text-primary" />
+                              Mark as read
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAsRead(item.uuid);
+                              }}
+                              className="text-xs font-medium gap-2 cursor-pointer py-2 text-muted-foreground"
+                            >
+                              <MailOpen className="w-3.5 h-3.5" />
+                              Already read
+                            </DropdownMenuItem>
+                          )}
+
+                          {hasBookingTarget && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleActionClick(item);
+                              }}
+                              className="text-xs font-medium gap-2 cursor-pointer py-2"
+                            >
+                              <ArrowRight className="w-3.5 h-3.5 text-primary" />
+                              Go to bookings
+                            </DropdownMenuItem>
+                          )}
+
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteNotification(item.uuid);
+                            }}
+                            className="text-xs font-medium gap-2 text-destructive cursor-pointer py-2 focus:text-destructive focus:bg-destructive/10"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </InfiniteScroll>
           )}
         </div>
       </div>

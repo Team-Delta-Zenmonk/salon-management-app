@@ -64,7 +64,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   const shouldShowCategory = !(isCreatingSubService || isEditingSubService);
 
   const methods = useForm<ServiceForm>({
-    resolver: zodResolver(getServiceSchema(!shouldShowCategory)),
+    resolver: zodResolver(getServiceSchema(!shouldShowCategory, salon?.currency)),
     mode: "onChange",
   });
 

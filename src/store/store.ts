@@ -12,6 +12,9 @@ import inventoryLogReducer from "../features/inventory/inventory-log.slice";
 import itemsCategoryReducer from "../features/inventory/inventory-items-category.slice";
 import bookingReducer from "../features/booking/booking.slice";
 import plansReducer from "../features/subscription/plans.slice";
+import notificationReducer from "../features/notification/notification.slice";
+import dashboardReducer from "../features/dashboard/dashboard.slice";
+import stripeReducer from "../features/stripe/stripe.slice";
 
 const storage = createWebStorage("local");
 
@@ -25,6 +28,9 @@ const rootReducer = combineSlices({
   itemsCategory: itemsCategoryReducer,
   booking: bookingReducer,
   plans: plansReducer,
+  notification: notificationReducer,
+  dashboard: dashboardReducer,
+  stripe: stripeReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

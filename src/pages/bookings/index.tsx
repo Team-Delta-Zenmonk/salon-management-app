@@ -91,7 +91,7 @@ export default function BookingPage() {
         start_date: startDateStr,
         end_date: endDateStr,
         page: statePage,
-        limit: 12,
+        limit: 10,
         view: viewMode,
         payment_policy: selectedPayment !== "ALL" ? selectedPayment : undefined,
         staff_uuid: selectedStaff !== ALL_STAFF_VALUE ? selectedStaff : undefined,

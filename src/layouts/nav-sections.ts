@@ -61,11 +61,11 @@ export const navigationSections: NavSection[] = [
     items: [
       {
         id: "services-menu",
-        name: "Services & Catalog",
+        name: "Catalog & Services",
         icon: Scissors,
         children: [
-          { name: "All Services", path: "/services", icon: Scissors },
           { name: "Categories", path: "/categories", icon: LayoutList },
+          { name: "Services", path: "/services", icon: Scissors },
         ],
       },
       {

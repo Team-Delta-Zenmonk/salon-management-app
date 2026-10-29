@@ -8,6 +8,7 @@ export type ServiceType = {
   price?: number;
   duration?: number;
   logo?: string | null;
+  sub_services_count?: number;
   children?: ServiceType[];
 };
 

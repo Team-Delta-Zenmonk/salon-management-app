@@ -70,7 +70,7 @@ const initialState: BookingState = {
   data: [],
   total: 0,
   page: 1,
-  limit: 12,
+  limit: 10,
   loading: false,
   updatingBookingUuid: null,
 };
@@ -83,7 +83,7 @@ export const bookingSlice = createSlice({
       state.data = [];
       state.total = 0;
       state.page = 1;
-      state.limit = 12;
+      state.limit = 10;
       state.loading = false;
       state.updatingBookingUuid = null;
     },

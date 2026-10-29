@@ -146,7 +146,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
           )}
         >
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            All Services
+            Total
             <span className="text-primary text-base font-medium bg-primary/10 px-2.5 py-0.5 rounded-full">
               {total}
             </span>

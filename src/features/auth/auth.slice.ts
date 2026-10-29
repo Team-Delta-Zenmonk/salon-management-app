@@ -32,6 +32,7 @@ export interface Salon {
   business_hours?: Record<string, any>;
   allowed_payment_policies?: string[];
   deposit_percentage?: number | null;
+  currency?: string;
   storefront_theme_id?: number;
   storefrontTheme?: {
     id?: number;

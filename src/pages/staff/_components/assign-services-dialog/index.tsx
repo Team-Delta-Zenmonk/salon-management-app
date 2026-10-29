@@ -46,7 +46,7 @@ interface SubServicePagination {
 interface AssignServicesDialogProps {
   open: boolean;
   onClose: () => void;
-  staff: { uuid: string; first_name?: string; last_name?: string };
+  staff: { uuid: string; first_name?: string | null; last_name?: string | null };
   onAssigned?: () => void;
 }
 

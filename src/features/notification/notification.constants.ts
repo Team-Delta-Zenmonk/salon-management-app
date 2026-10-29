@@ -2,7 +2,7 @@ import type { ManagerOptions, SocketOptions } from "socket.io-client";
 
 export const NOTIFICATION_PAGINATION = {
   DEFAULT_PAGE: 1,
-  DEFAULT_LIMIT: 20,
+  DEFAULT_LIMIT: 10,
   DROPDOWN_LIMIT: 3,
 };
 

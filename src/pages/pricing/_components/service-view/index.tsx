@@ -40,8 +40,9 @@ export default function ServiceView() {
           name: c.name,
           price_type: c.price_type,
           price: c.price,
-          duration: c.duration,
+          duration: c.duration ? Number(c.duration) : undefined,
           logo: c.logo,
+          sub_services_count: c.sub_services_count,
         }));
 
         setSubServicesByParentUuid((p) => ({ ...p, [parentUuid]: subServices }));
@@ -77,6 +78,7 @@ export default function ServiceView() {
           price: p.price,
           duration: p.duration ? Number(p.duration) : undefined,
           logo: p.logo,
+          sub_services_count: p.sub_services_count,
           children: subServicesByParentUuid[p.uuid] ?? [],
         }),
       ),
@@ -86,6 +88,12 @@ export default function ServiceView() {
   const selectedService = useMemo(
     () => servicesTree.find((s) => s.uuid === selectedServiceUuid) ?? null,
     [servicesTree, selectedServiceUuid],
+  );
+
+  const isSubServicesLoading = Boolean(
+    selectedServiceUuid &&
+      (subServicesLoadingByParentUuid[selectedServiceUuid] ??
+        (subServicesByParentUuid[selectedServiceUuid] === undefined))
   );
 
   return (
@@ -118,7 +126,10 @@ export default function ServiceView() {
         className="flex-1 min-w-0 w-full flex flex-col min-h-[400px] lg:h-full lg:min-h-0 lg:max-h-[var(--pricing-container-max-height)] bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl shadow-sm overflow-hidden"
       >
         <div id="service-staff-panel-scroll" className="flex-1 h-full min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar">
-          <StaffPricingPanel selectedService={selectedService} />
+          <StaffPricingPanel
+            selectedService={selectedService}
+            isLoadingSubServices={isSubServicesLoading}
+          />
         </div>
       </div>
     </div>

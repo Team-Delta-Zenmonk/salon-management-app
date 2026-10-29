@@ -34,6 +34,10 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     return children.length > 0 ? children : [selectedService];
   }, [selectedService]);
 
+  const serviceUuidsKey = useMemo(() => {
+    return servicesToShow.map((s) => s.uuid).sort().join(",");
+  }, [servicesToShow]);
+
   const [serviceStaffsMap, setServiceStaffsMap] = useState<Record<string, StaffPricingType[]>>({});
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -79,7 +83,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     setPageMap(initialPageMap);
     setHasMoreMap(initialHasMoreMap);
     setInitialLoading(false);
-  }, [servicesToShow, salonUUID, pageSize]);
+  }, [serviceUuidsKey, salonUUID, pageSize]);
 
   const hasAnyMore = useMemo(() => {
     return servicesToShow.some((svc) => hasMoreMap[svc.uuid]);
@@ -123,7 +127,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, hasAnyMore, salonUUID, servicesToShow, hasMoreMap, pageMap, pageSize, serviceStaffsMap]);
+  }, [loadingMore, hasAnyMore, salonUUID, servicesToShow, hasMoreMap, pageMap, pageSize]);
 
   useEffect(() => {
     loadServiceStaffs();

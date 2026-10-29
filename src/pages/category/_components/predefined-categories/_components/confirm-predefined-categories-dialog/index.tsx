@@ -27,7 +27,7 @@ export default function PredefinedCategoryDetailsDialog({ open, onClose, categor
         name: category.name,
         description: category.description,
       });
-      await dispatch(listCategoriesAction({ page: 1, limit: 20 })).unwrap();
+      await dispatch(listCategoriesAction({ page: 1, limit: 10 })).unwrap();
       callSnack("Category created successfully", "success");
       onClose();
     } catch (err: any) {

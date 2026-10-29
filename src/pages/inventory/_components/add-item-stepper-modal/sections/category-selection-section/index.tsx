@@ -44,7 +44,7 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
         await dispatch(
           fetchItemCategoriesAction({
             page: pageNum,
-            limit: 12,
+            limit: 10,
           })
         ).unwrap();
       } catch (error) {

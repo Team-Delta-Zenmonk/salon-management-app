@@ -5,9 +5,11 @@ import { PRICE_TYPE } from "../../../../common/enums/price-type.enum";
 import { DISCOUNT_TYPE } from "../../../../common/enums/discount-type.enum";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
+import { getCurrencyConfig } from "../../../../common/currencies.config";
 
-export const getServiceSchema = (isSubService: boolean = false) =>
-  z
+export const getServiceSchema = (isSubService: boolean = false, currencyCode?: string) => {
+  const currencyConfig = getCurrencyConfig(currencyCode);
+  return z
     .object({
       name: z
         .string({ message: "Required" })
@@ -61,12 +63,12 @@ export const getServiceSchema = (isSubService: boolean = false) =>
     .superRefine((data, ctx) => {
       const numPrice = Number(data.price);
 
-      if (data.price_type === PRICE_TYPE.FIXED) {
-        if (!isNaN(numPrice) && numPrice <= 0) {
+      if (data.price_type === PRICE_TYPE.FIXED || data.price_type === PRICE_TYPE.FROM) {
+        if (!isNaN(numPrice) && numPrice < currencyConfig.minServicePrice) {
           ctx.addIssue({
             code: "custom",
             path: ["price"],
-            message: "Price must be greater than 0",
+            message: `Price must be at least ${currencyConfig.symbol}${currencyConfig.minServicePrice} for paid services`,
           });
         }
       } else if (data.price_type === PRICE_TYPE.FREE) {
@@ -138,6 +140,7 @@ export const getServiceSchema = (isSubService: boolean = false) =>
         }
       }
     });
+};
 
 export const serviceSchema = getServiceSchema(false);
 

@@ -28,12 +28,24 @@ export default function StaffServiceManagementPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const currentView = searchParams.get("view");
+
+  useEffect(() => {
+    if (!currentView || (currentView !== "service" && currentView !== "staff")) {
+      setSearchParams({ view: "staff" }, { replace: true });
+    }
+  }, [currentView, setSearchParams]);
+
   const viewMode: ViewMode = currentView === "service" ? "service" : "staff";
 
   useEffect(() => {
-    dispatch(listServicesAction({ page: 1, limit: 10 }));
-    dispatch(listStaffAction({ page: 1, limit: 10 }));
-  }, [dispatch]);
+    if (!currentView) return;
+
+    if (viewMode === "service") {
+      dispatch(listServicesAction({ page: 1, limit: 10 }));
+    } else {
+      dispatch(listStaffAction({ page: 1, limit: 10 }));
+    }
+  }, [dispatch, viewMode, currentView]);
 
   const handleViewChange = (newMode: ViewMode) => {
     setSearchParams((prev) => {

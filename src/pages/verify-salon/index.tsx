@@ -211,7 +211,7 @@ export default function VerifyEmail() {
                   {!canResend ? (
                     <div className="w-full space-y-2">
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Code expires in</span>
+                        <span>Resend code in</span>
                         <span className="font-semibold text-foreground tabular-nums">{timer}s</span>
                       </div>
                       <div className="w-full h-1 rounded-full bg-muted overflow-hidden">

@@ -41,7 +41,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const limit = 12;
+  const limit = 10;
 
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
 

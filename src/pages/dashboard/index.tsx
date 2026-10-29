@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -6,14 +6,13 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { onboardStripeAction } from "../../features/stripe/onboard-stripe/onboard-stripe.action";
 import { getStripeDashboardLinkAction } from "../../features/stripe/get-dashboard-link/get-dashboard-link.action";
 import { getSalonProfileAction } from "../../features/auth/profile/get-salon-profile/getSalonProfile.action";
-import { listBookingsAction } from "../../features/booking/get-bookings/get-bookings.action";
 import { listStaffAction } from "../../features/staff/list-staff/list-staff.action";
 import { listServicesAction } from "../../features/service/list-services/list-service.action";
-import { BOOKING_FILTER } from "../../common/enums/booking-filter.enum";
+import { getDashboardAnalyticsAction } from "../../features/dashboard/dashboard.action";
+import { setVerifyingStripe } from "../../features/dashboard/dashboard.slice";
 import { BOOKING_SOURCE } from "../../common/enums/booking-source.enum";
 import type { RootState } from "../../store/store";
 
-import { getBookingsService } from "../../features/booking/get-bookings/get-bookings.service";
 import { DashboardHeader } from "./_components/dashboard-header";
 import { StatsGrid } from "./_components/stats-grid";
 import { RevenueChart } from "./_components/revenue-chart";
@@ -21,72 +20,44 @@ import { TodayBookingsSection, type TodayBookingItem } from "./_components/today
 import { ServiceDistribution } from "./_components/service-distribution";
 import { StaffLeaderboard } from "./_components/staff-leaderboard";
 
-import {
-  composeDashboardViewModel,
-  getDashboardQueryDateRange,
-  INITIAL_DASHBOARD_VIEW_MODEL,
-  type DashboardViewModel,
-} from "./utils/dashboard-view.model";
-import { containerVariants, getTodayFormattedDate } from "./utils/dashboard.constants";
+import { containerVariants } from "./utils/dashboard.constants";
 
 export default function Dashboard() {
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state: RootState) => state.auth);
-  const { data: reduxBookings, loading: bookingsLoading } = useAppSelector((state: RootState) => state.booking);
-  const { data: staffList, loading: staffLoading } = useAppSelector((state: RootState) => state.staff);
-  const { data: catalogServices } = useAppSelector((state: RootState) => state.service);
+  const { staffLoading, catalogServices, dashboardView, chartLoading, isInitialLoaded, isVerifyingStripe, timeRange, dashboardTodayBookings } =
+    useAppSelector((state: RootState) => ({
+      staffLoading: state.staff.loading,
+      catalogServices: state.service.data,
+      dashboardView: state.dashboard.viewModel,
+      chartLoading: state.dashboard.loading,
+      isInitialLoaded: state.dashboard.isInitialLoaded,
+      isVerifyingStripe: state.dashboard.isVerifyingStripe,
+      timeRange: state.dashboard.timeRange,
+      dashboardTodayBookings: state.dashboard.todayBookings,
+    }));
+  const { data: staffList } = useAppSelector((state: RootState) => state.staff);
+  const { isOnboarding: isConnecting } = useAppSelector((state: RootState) => state.stripe);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [timeRange, setTimeRange] = useState<"7d" | "30d">("7d");
-  const [chartLoading, setChartLoading] = useState<boolean>(true);
-  const [dashboardView, setDashboardView] = useState<DashboardViewModel>(INITIAL_DASHBOARD_VIEW_MODEL);
 
-  const loadChartData = useCallback(async (range: "7d" | "30d") => {
-    setChartLoading(true);
-    try {
-      const { startDateStr, endDateStr } = getDashboardQueryDateRange(range);
-      const res: any = await getBookingsService({
-        start_date: startDateStr,
-        end_date: endDateStr,
-        view: "calendar",
-      });
-      const rawBookings: any[] = Array.isArray(res) ? res : res?.data || [];
-      const viewModel = composeDashboardViewModel(rawBookings, range);
-      setDashboardView(viewModel);
-    } catch (err) {
-      console.error("Failed to load dashboard data:", err);
-      setDashboardView(INITIAL_DASHBOARD_VIEW_MODEL);
-    } finally {
-      setChartLoading(false);
-    }
-  }, []);
-
-  const loadTodayBookings = useCallback(() => {
-    const todayStr = getTodayFormattedDate();
-    dispatch(
-      listBookingsAction({
-        filter: BOOKING_FILTER.DAY,
-        start_date: todayStr,
-        end_date: todayStr,
-        page: 1,
-        limit: 50,
-        view: "calendar",
-      })
-    );
-  }, [dispatch]);
+  const loadChartData = useCallback(
+    (range: "7d" | "30d") => {
+      dispatch(getDashboardAnalyticsAction(range));
+    },
+    [dispatch]
+  );
 
   const loadStaffAndServices = useCallback(() => {
-    dispatch(listStaffAction({ page: 1, limit: 50 }));
-    dispatch(listServicesAction({ page: 1, limit: 50 }));
+    dispatch(listStaffAction({ page: 1, limit: 10 }));
+    dispatch(listServicesAction({ page: 1, limit: 10 }));
   }, [dispatch]);
 
   const checkStripeOnboarding = useCallback(() => {
     if (searchParams.get("stripe_onboarded") === "true" && salon?.uuid) {
-      setIsVerifying(true);
+      dispatch(setVerifyingStripe(true));
       dispatch(getSalonProfileAction(salon.uuid)).finally(() => {
-        setTimeout(() => setIsVerifying(false), 5000);
+        setTimeout(() => dispatch(setVerifyingStripe(false)), 5000);
       });
       const nextParams = new URLSearchParams(searchParams);
       nextParams.delete("stripe_onboarded");
@@ -95,21 +66,17 @@ export default function Dashboard() {
   }, [searchParams, salon?.uuid, dispatch, setSearchParams]);
 
   const handleTimeRangeChange = (range: "7d" | "30d") => {
-    setTimeRange(range);
     loadChartData(range);
   };
 
   const handleStripeConnect = async () => {
     try {
-      setIsConnecting(true);
       const res = await dispatch(onboardStripeAction()).unwrap();
       if (res?.message?.url) {
         window.location.href = res.message.url;
       }
     } catch (error) {
       console.error("Failed to connect account:", error);
-    } finally {
-      setIsConnecting(false);
     }
   };
 
@@ -125,14 +92,15 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    if (isInitialLoaded) return;
+
     loadChartData("7d");
-    loadTodayBookings();
     loadStaffAndServices();
     checkStripeOnboarding();
-  }, [loadChartData, loadTodayBookings, loadStaffAndServices, checkStripeOnboarding]);
+  }, [dispatch, isInitialLoaded]);
 
   const todayBookings: TodayBookingItem[] = useMemo(() => {
-    return reduxBookings.map((booking) => {
+    return dashboardTodayBookings.map((booking: any) => {
       const bookingServices = booking.booking_services ?? [];
       const isCustomerBooking = booking.created_by === BOOKING_SOURCE.CUSTOMER;
       const customerName = isCustomerBooking
@@ -162,7 +130,7 @@ export default function Dashboard() {
         initials,
       };
     });
-  }, [reduxBookings]);
+  }, [dashboardTodayBookings]);
 
   return (
     <motion.div
@@ -173,7 +141,7 @@ export default function Dashboard() {
       <DashboardHeader
         salonName={salon?.name}
         salonSlug={salon?.slug}
-        isVerifying={isVerifying}
+        isVerifying={isVerifyingStripe}
         stripeAccountId={salon?.stripe_account_id}
         isConnecting={isConnecting}
         onStripeConnect={handleStripeConnect}
@@ -199,7 +167,7 @@ export default function Dashboard() {
             chartLoading={chartLoading}
             onTimeRangeChange={handleTimeRangeChange}
           />
-          <TodayBookingsSection todayBookings={todayBookings} bookingsLoading={bookingsLoading} />
+          <TodayBookingsSection todayBookings={todayBookings} bookingsLoading={chartLoading} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -211,7 +179,7 @@ export default function Dashboard() {
           />
           <StaffLeaderboard
             staffList={staffList}
-            todayBookings={reduxBookings}
+            todayBookings={dashboardTodayBookings}
             loading={staffLoading}
           />
         </div>

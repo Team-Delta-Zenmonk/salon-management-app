@@ -9,9 +9,11 @@ import TextField from "../../../../components/form/textfield";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { staffPricingSchema } from "../schema/staff-pricing.schema";
+import { getStaffPricingSchema, staffPricingSchema } from "../schema/staff-pricing.schema";
 import { EllipsisCell } from "@/components/ellipse-cell";
 import { FIELD_LIMITS } from "@/common/field-limits";
+import { useAppSelector } from "@/store/hooks";
+import type { RootState } from "@/store/store";
 
 export type StaffPricingFormValues = z.infer<typeof staffPricingSchema>;
 
@@ -36,9 +38,10 @@ export default function StaffServicePricingDialog({
 }: Readonly<StaffServicePricingDialogProps>) {
   const { staff_name, service_name, current } = context;
   const [loading, setLoading] = useState(false);
+  const salon = useAppSelector((state: RootState) => state.auth.salon);
 
   const methods = useForm<StaffPricingFormValues>({
-    resolver: zodResolver(staffPricingSchema),
+    resolver: zodResolver(getStaffPricingSchema(salon?.currency)),
     mode: "onChange",
     defaultValues: {
       price_type: current?.price_type ?? "fixed",
@@ -99,8 +102,12 @@ export default function StaffServicePricingDialog({
       <DialogContent className="sm:max-w-[440px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
         <DialogHeader className="px-6 py-5 border-b bg-muted/20">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex flex-col items-start gap-1">
-            Edit Pricing
-            <EllipsisCell value={`${staff_name} &bull; ${service_name}`} maxChars={30} className="text-xs text-muted-foreground font-normal mt-1.5" />
+            <span>Edit Pricing</span>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-normal mt-0.5">
+              <EllipsisCell value={staff_name} maxChars={20} className="capitalize" />
+              <span>&bull;</span>
+              <EllipsisCell value={service_name} maxChars={25} className="capitalize" />
+            </div>
           </DialogTitle>
         </DialogHeader>
 
@@ -117,28 +124,30 @@ export default function StaffServicePricingDialog({
                 disabled={loading}
               />
 
-              <TextField
-                type="number"
-                min={0}
-                label="Price"
-                name="price"
-                control={control}
-                identifier="edit-price"
-                placeholder="Enter price"
-                disabled={loading || isFree}
-                maxLength={FIELD_LIMITS.PRICE}
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <TextField
+                  type="number"
+                  min={0}
+                  label="Price"
+                  name="price"
+                  control={control}
+                  identifier="edit-price"
+                  placeholder="Enter price"
+                  disabled={loading || isFree}
+                  maxLength={FIELD_LIMITS.PRICE}
+                />
 
-              <TextField
-                type="number"
-                label="Duration (in minutes)"
-                name="duration"
-                control={control}
-                identifier="edit-duration"
-                placeholder="Enter duration"
-                disabled={loading}
-                maxLength={FIELD_LIMITS.DURATION}
-              />
+                <TextField
+                  type="number"
+                  label="Duration (mins)"
+                  name="duration"
+                  control={control}
+                  identifier="edit-duration"
+                  placeholder="Duration"
+                  disabled={loading}
+                  maxLength={FIELD_LIMITS.DURATION}
+                />
+              </div>
             </div>
 
             <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">

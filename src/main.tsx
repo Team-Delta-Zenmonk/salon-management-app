@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import "./utils/leaflet-icon-fix";
@@ -12,7 +11,6 @@ import { ColorThemeProvider } from "./providers/color-theme-provider.tsx";
 import { ThemeProvider } from "./components/theme-provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
     <BrowserRouter>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <ColorThemeProvider>
@@ -26,5 +24,4 @@ createRoot(document.getElementById("root")!).render(
         </ColorThemeProvider>
       </ThemeProvider>
     </BrowserRouter>
-  </StrictMode>
 );
