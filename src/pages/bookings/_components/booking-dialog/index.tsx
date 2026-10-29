@@ -15,6 +15,7 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
+import { isFormChanged } from "../../../../common/utils/is-form-changed";
 import { bookingSchema, type BookingFormValues } from "../../schema/booking.schema";
 import TextField from "../../../../components/form/textfield";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
@@ -73,6 +74,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   const [servicePage, setServicePage] = useState(1);
   const [subServiceCache, setSubServiceCache] = useState<Record<number, Service>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [initialValues, setInitialValues] = useState<BookingFormValues | null>(null);
   const { downloadInvoice, isDownloading: isDownloadingInvoice } = useDownloadInvoice();
   const [staffMap, setStaffMap] = useState<StaffMap>({});
 
@@ -129,7 +131,13 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     },
   });
 
-  const { handleSubmit, reset, control, setValue } = methods;
+  const { handleSubmit, reset, control, setValue, watch } = methods;
+
+  const currentValues = watch();
+  const isChanged = useMemo(
+    () => mode === "create" || isFormChanged(initialValues, currentValues),
+    [mode, initialValues, currentValues]
+  );
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -210,7 +218,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       const hh = String(d.getUTCHours()).padStart(2, "0");
       const mm = String(d.getUTCMinutes()).padStart(2, "0");
 
-      reset({
+      const defaults = {
         customer_name: booking.customer_name || booking.customer?.name || booking.admin_booking?.name || "",
         customer_phone: booking.customer_phone || booking.customer?.phone || booking.admin_booking?.phone || "",
         services: bookingServices,
@@ -219,13 +227,17 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         status: booking.status,
         payment_preference: (booking.payment_preference || booking.payment_policy || defaultPolicy) as PaymentPreference,
         is_walk_in: booking.is_walk_in ?? false,
-      });
+      };
+
+      setInitialValues(defaults);
+      reset(defaults);
 
       bookingServices.forEach((svc: any, idx: number) => {
         if (svc.service_id) fetchStaffForRow(idx, svc.service_id);
       });
     } else {
       setServicePage(1);
+      setInitialValues(null);
       reset({
         customer_name: "",
         customer_phone: "",
@@ -358,6 +370,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   };
 
   const onSubmit: SubmitHandler<BookingFormValues> = async (values) => {
+    if (mode === "update" && !isChanged) return;
     setIsLoading(true);
     try {
       const bookingDate = dayjs(values.booking_date, "DD-MM-YYYY").isValid()
@@ -631,7 +644,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading || isDownloadingInvoice}
+                disabled={isLoading || isDownloadingInvoice || (mode === "update" && !isChanged)}
                 className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
               >
                 {isLoading ? (

@@ -17,8 +17,31 @@ export type BookingServiceItem = {
   staff?: {
     uuid: string;
     first_name: string;
-    last_name?: string;
+    last_name?: string | null;
   };
+};
+
+export type RawBooking = {
+  uuid: string;
+  status?: BookingStatus;
+  created_by?: string;
+  booking_start_time?: string;
+  booking_end_time?: string;
+  booking_date?: string;
+  total_price?: number;
+  total_duration?: number;
+  customer?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  } | null;
+  admin_booking?: {
+    name?: string;
+    phone?: string;
+    email?: string;
+  } | null;
+  booking_services?: BookingServiceItem[];
+  [key: string]: any;
 };
 
 export type Booking = {
@@ -43,6 +66,11 @@ export type Booking = {
   admin_booking?: {
     name?: string;
     phone?: string;
-  };
+  } | null;
+  customer?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  } | null;
   [key: string]: any;
 };

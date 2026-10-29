@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, type FieldPath } from "react-hook-form";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useAppDispatch } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
 import { createStaffService } from "../../../../features/staff/create-staff/create-staff.service";
@@ -22,6 +22,7 @@ import { Button } from "../../../../components/ui/button";
 import { Loader2, Check, ArrowRight, ArrowLeft, User, Briefcase, CalendarClock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Staff } from "../../../../features/staff/staff.slice";
+import { isFormChanged } from "../../../../common/utils/is-form-changed";
 
 type Props = {
   open: boolean;
@@ -42,31 +43,12 @@ const STEP_FIELDS: Record<number, FieldPath<StaffForm>[]> = {
   2: ["active_hours"],
 };
 
-const normalizeValue = (val: any): any => {
-  if (val === null || val === undefined) return "";
-  if (typeof val === "boolean" || typeof val === "number") return val;
-  if (typeof val === "string") return val.trim();
-  if (Array.isArray(val)) return val.map(normalizeValue);
-  if (typeof val === "object") {
-    const res: Record<string, any> = {};
-    for (const key of Object.keys(val).sort()) {
-      res[key] = normalizeValue(val[key]);
-    }
-    return res;
-  }
-  return val;
-};
-
-const isFormChanged = (initial: StaffForm | null, current: StaffForm): boolean => {
-  if (!initial) return false;
-  return JSON.stringify(normalizeValue(initial)) !== JSON.stringify(normalizeValue(current));
-};
-
 export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Props>) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [initialValues, setInitialValues] = useState<StaffForm | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const methods = useForm<StaffForm>({
     resolver: zodResolver(StaffSchema),
@@ -84,6 +66,17 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
     [initialValues, currentValues]
   );
 
+  useEffect(() => {
+    const scrollToTop = () => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
+    };
+    scrollToTop();
+    const frameId = requestAnimationFrame(scrollToTop);
+    return () => cancelAnimationFrame(frameId);
+  }, [step, open]);
+
   const close = () => {
     if (isLoading) return;
     onClose();
@@ -91,7 +84,12 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
 
   const back = () => {
     if (step === 0) close();
-    else setStep((s) => s - 1);
+    else {
+      setStep((s) => s - 1);
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
+    }
   };
 
   const next = async () => {
@@ -101,6 +99,9 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
       if (!ok) return;
     }
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
   };
 
   const onSubmit = handleSubmit(async (data) => {
@@ -251,7 +252,7 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 py-6 min-h-0 custom-scrollbar">
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-6 py-6 min-h-0 custom-scrollbar">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}
@@ -260,6 +261,11 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                   className="w-full"
+                  onAnimationStart={() => {
+                    if (scrollContainerRef.current) {
+                      scrollContainerRef.current.scrollTop = 0;
+                    }
+                  }}
                 >
                   {step === 0 && <StaffBasicInformation control={control} disabled={isLoading} />}
                   {step === 1 && <StaffEmployment control={control} disabled={isLoading} />}

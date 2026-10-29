@@ -16,6 +16,7 @@ import { callSnack } from "../../../../components/snackbar";
 import { Edit2Icon, Trash2Icon, UserPlusIcon, SparklesIcon, PlusIcon, ClockIcon, Loader2 } from "lucide-react";
 import type { Service } from "../../../../features/service/service.slice";
 import { EllipsisCell } from "../../../../components/ellipse-cell";
+import { SubServiceImage } from "./sub-service-image";
 
 interface SubServicesDrawerProps {
   open: boolean;
@@ -255,19 +256,17 @@ export function SubServicesDrawer({
                       className="group relative bg-card border border-border/50 hover:border-primary/30 p-4 rounded-2xl flex flex-col gap-3.5 transition-all duration-300 shadow-xs hover:shadow-md"
                     >
                       <div className="flex gap-3 min-w-0">
-                        <Avatar className="w-10 h-10 rounded-xl ring-1 ring-border/50 shrink-0 bg-background overflow-hidden">
-                          {sub.logo ? (
-                            <AvatarImage
-                              src={sub.logo}
-                              alt={sub.name}
-                              className="object-cover"
-                            />
-                          ) : (
-                            <AvatarFallback className="bg-primary/5 text-primary rounded-xl">
-                              <SparklesIcon className="w-4 h-4 opacity-60" />
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
+                        <div className="w-10 h-10 rounded-xl ring-1 ring-border/50 shrink-0 bg-background overflow-hidden">
+                          <SubServiceImage
+                            src={sub.logo}
+                            alt={sub.name}
+                            fallback={
+                              <div className="w-full h-full flex items-center justify-center bg-primary/5 text-primary rounded-xl">
+                                <SparklesIcon className="w-4 h-4 opacity-60" />
+                              </div>
+                            }
+                          />
+                        </div>
                         <div className="min-w-0 flex-1">
                           <EllipsisCell
                             value={sub.name}

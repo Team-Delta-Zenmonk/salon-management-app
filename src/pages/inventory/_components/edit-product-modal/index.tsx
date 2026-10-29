@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { isFormChanged } from "../../../../common/utils/is-form-changed";
 import {
   Dialog,
   DialogContent,
@@ -42,9 +43,10 @@ const UNITS = ["ml", "l", "g", "kg", "pieces", "box", "bottle", "tube"].map((u) 
 export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClose, inventoryItem, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [itemDetails, setItemDetails] = useState<InventoryItem | null>(null);
+  const [initialValues, setInitialValues] = useState<InventoryItemForm | null>(null);
   const categories = useAppSelector((state) => state.itemsCategory.data) ?? [];
 
-  const { control, handleSubmit, reset } = useForm<InventoryItemForm>({
+  const { control, handleSubmit, reset, watch } = useForm<InventoryItemForm>({
     resolver: zodResolver(inventoryItemSchema) as unknown as Resolver<InventoryItemForm>,
     defaultValues: {
       name: "",
@@ -59,12 +61,18 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
     },
   });
 
+  const currentValues = watch();
+  const isChanged = useMemo(
+    () => isFormChanged(initialValues, currentValues),
+    [initialValues, currentValues]
+  );
+
   const fetchItemDetails = React.useCallback(async (uuid: string) => {
     setLoading(true);
     try {
       const data = await getSingleInventoryItem(uuid);
       setItemDetails(data);
-      reset({
+      const defaults: InventoryItemForm = {
         name: data.name,
         brand: data.brand || "",
         category_id: data.category?.uuid || "",
@@ -74,7 +82,9 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
         unit: data.unit || "",
         unit_price: data.unit_price,
         min_stock_level: data.min_stock_level || 0,
-      });
+      };
+      setInitialValues(defaults);
+      reset(defaults);
     } catch (error) {
       console.error(error);
       callSnack("Failed to load item details", "error");
@@ -90,7 +100,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
   }, [open, inventoryItem, fetchItemDetails]);
 
   const onSubmit = async (data: InventoryItemForm) => {
-    if (!inventoryItem) return;
+    if (!inventoryItem || !isChanged) return;
 
     setLoading(true);
     try {
@@ -268,7 +278,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
               <Button
                 type="submit"
                 form="edit-product-form"
-                disabled={loading}
+                disabled={loading || !isChanged}
                 className="w-1/2 sm:w-auto flex-1 sm:flex-none rounded-full px-4 sm:px-6 font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

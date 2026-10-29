@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { CalendarDays, LayoutList } from "lucide-react";
@@ -9,12 +10,14 @@ import BookingDetailsDialog from "./_components/booking-calender/_components/boo
 import BookingTable from "./_components/booking-table";
 import BookingReceiptDialog from "./_components/booking-receipt-dialog";
 import type { Booking, BookingStatus } from "./types/booking.type";
+import { formatBookingItem } from "./utils/format-booking-item";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { listBookingsAction } from "../../features/booking/get-bookings/get-bookings.action";
 import { updateBookingAction } from "../../features/booking/update-booking/update-booking.action";
+import { getBookingByUuidService } from "../../features/booking/get-booking-by-uuid/get-booking-by-uuid.service";
+import { callSnack } from "../../components/snackbar";
 import { BOOKING_STATUS } from "../../common/enums/booking-status.enum";
 import { BOOKING_FILTER } from "../../common/enums/booking-filter.enum";
-import { BOOKING_SOURCE } from "../../common/enums/booking-source.enum";
 import { ALL_SERVICES_VALUE, ALL_STAFF_VALUE, BOOKING_STATUS_COLORS } from "./constants/booking.constants";
 import { listStaffAction } from "../../features/staff/list-staff/list-staff.action";
 import { listServicesAction } from "../../features/service/list-services/list-service.action";
@@ -32,6 +35,8 @@ interface FilterForm {
 
 export default function BookingPage() {
   const dispatch = useAppDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { data: staff } = useAppSelector((state) => state.staff);
   const { data: services, hasMore: hasMoreServices, loading: isLoadingServices } = useAppSelector((state) => state.service);
   const rootServices = useMemo(() => {
@@ -131,40 +136,46 @@ export default function BookingPage() {
     { label: "Full Payment Upfront", value: "full_upfront" },
   ];
 
-  const mappedBookings = useMemo(() => {
-    return bookings.map((booking) => {
-      const bookingServices = booking.booking_services ?? [];
-      const isCustomerBooking = booking.created_by === BOOKING_SOURCE.CUSTOMER;
+  const mappedBookings = useMemo(() => bookings.map(formatBookingItem), [bookings]);
 
-      const customerName = isCustomerBooking
-        ? booking.customer?.name || "Registered Customer"
-        : booking.admin_booking?.name || "Walk-in Customer";
+  useEffect(() => {
+    const incomingBookingUuid = (location.state as { bookingUuid?: string } | null)?.bookingUuid;
+    if (!incomingBookingUuid) return;
 
-      const customerEmail = isCustomerBooking ? booking.customer?.email || "" : "";
-      const customerPhone = isCustomerBooking ? "" : booking.admin_booking?.phone || "";
+    const existing = mappedBookings.find((b) => b.uuid === incomingBookingUuid);
+    if (existing) {
+      setSelectedBooking(existing);
+      setIsDrawerOpen(true);
+      navigate(location.pathname, { replace: true, state: {} });
+      return;
+    }
 
-      const serviceNames = bookingServices.map((bs: any) => bs.service?.name).filter(Boolean);
-      const staffNames = [
-        ...new Set(
-          bookingServices
-            .map((bs: any) => `${bs.staff?.first_name || ""} ${bs.staff?.last_name || ""}`.trim())
-            .filter(Boolean)
-        ),
-      ];
+    if (loading) return;
 
-      return {
-        ...booking,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
-        service_name: serviceNames.length > 0 ? serviceNames.join(", ") : "Unknown Service",
-        staff_name: staffNames.length > 0 ? staffNames.join(", ") : "Unknown",
-        start_time: booking.booking_start_time?.endsWith('Z') ? booking.booking_start_time.slice(0, -1) : booking.booking_start_time,
-        end_time: booking.booking_end_time?.endsWith('Z') ? booking.booking_end_time.slice(0, -1) : booking.booking_end_time,
-        created_by: booking.created_by,
-      };
-    });
-  }, [bookings]);
+    let isMounted = true;
+    getBookingByUuidService(incomingBookingUuid)
+      .then((data) => {
+        if (!isMounted) return;
+        if (data) {
+          const formatted = formatBookingItem(data);
+          setSelectedBooking(formatted);
+          setIsDrawerOpen(true);
+        }
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        callSnack(err?.message || "Failed to load booking details", "error");
+      })
+      .finally(() => {
+        if (isMounted) {
+          navigate(location.pathname, { replace: true, state: {} });
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [location.state, mappedBookings, loading, navigate, location.pathname]);
 
   const filteredBookings = useMemo(() => {
     return mappedBookings.filter((booking: any) => {

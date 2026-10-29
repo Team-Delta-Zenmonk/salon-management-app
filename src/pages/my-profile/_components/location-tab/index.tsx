@@ -232,7 +232,8 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
               placeholder="Search for salon location..."
               value={searchQuery}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                const formatted = e.target.value.replace(/^\s+/, "").replaceAll(/\s{2,}/g, " ");
+                setSearchQuery(formatted);
                 setShowSuggestions(true);
               }}
               onFocus={() => setShowSuggestions(true)}

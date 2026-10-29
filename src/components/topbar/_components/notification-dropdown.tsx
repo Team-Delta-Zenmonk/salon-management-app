@@ -35,7 +35,10 @@ export const NotificationDropdown: React.FC = () => {
 
     const meta = getNotificationMetadata(item.type);
     const targetRoute = meta.targetRoute(item.data);
-    navigate(targetRoute);
+    const bookingUuid = item.data?.booking_uuid || undefined;
+    navigate(targetRoute, {
+      state: bookingUuid ? { bookingUuid } : undefined,
+    });
   };
 
   const displayNotifications = notifications.slice(

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Users, Calendar, CheckCircle2, UserPlus, ArrowRight } from "lucide-react";
+import { Users, Calendar, CheckCircle2, UserPlus, ArrowRight, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
@@ -20,6 +20,19 @@ export const StaffLeaderboard = ({
   loading,
 }: StaffLeaderboardProps) => {
   const navigate = useNavigate();
+
+  const todayKey = useMemo(() => {
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    return dayNames[new Date().getDay()];
+  }, []);
 
   const staffTodayCountMap = useMemo(() => {
     const map = new Map<string | number, number>();
@@ -94,6 +107,9 @@ export const StaffLeaderboard = ({
                 staffTodayCountMap.get(nameKey) ||
                 0;
 
+              const todayShift = staff.active_hours?.[todayKey];
+              const isWorkingToday = Boolean(todayShift?.start_time && todayShift?.end_time);
+
               return (
                 <div
                   key={staff.uuid || staff.id}
@@ -124,10 +140,15 @@ export const StaffLeaderboard = ({
                         <Calendar className="w-3 h-3 shrink-0" />
                         <span>{todayCount} Booked</span>
                       </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-muted/70 text-muted-foreground border border-border/50">
+                    ) : isWorkingToday ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                         <CheckCircle2 className="w-3 h-3 shrink-0" />
                         <span>Available</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-muted/70 text-muted-foreground border border-border/50">
+                        <Clock className="w-3 h-3 shrink-0" />
+                        <span>Off Today</span>
                       </span>
                     )}
                   </div>

@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { isFormChanged } from "../../../../common/utils/is-form-changed";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
 import { getServiceSchema, type ServiceForm } from "../schema/service.schema";
@@ -46,6 +47,7 @@ interface ServiceDialogProps {
 export default function ServiceDialog({ open, onClose, mode, service, parentService, onCreated }: Readonly<ServiceDialogProps>) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [initialValues, setInitialValues] = useState<ServiceForm | null>(null);
 
   const categories = useAppSelector((state: RootState) => state.category.data) ?? [];
   const salon = useAppSelector((state: RootState) => state.auth.salon);
@@ -69,6 +71,12 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   });
 
   const { handleSubmit, control, reset, watch, setValue, trigger, getValues, clearErrors } = methods;
+
+  const currentValues = watch();
+  const isChanged = useMemo(
+    () => mode === "create" || isFormChanged(initialValues, currentValues),
+    [mode, initialValues, currentValues]
+  );
 
   const discountType = watch("discount_type");
   const priceType = watch("price_type");
@@ -138,6 +146,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   };
 
   const onSubmit = handleSubmit(async (data) => {
+    if (mode === "update" && !isChanged) return;
     try {
       setIsLoading(true);
       const logoUrl = data.logo?.url || (mode === "update" ? service?.logo : undefined);
@@ -210,6 +219,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     if (!open) return;
 
     if (mode === "create") {
+      setInitialValues(null);
       reset({
         name: "",
         description: "",
@@ -226,7 +236,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
       });
     } else if (mode === "update" && service) {
       const isServiceFree = service.price_type === PRICE_TYPE.FREE;
-      reset({
+      const defaults = {
         name: service.name ?? "",
         description: service.description ?? "",
         logo: null,
@@ -242,7 +252,9 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         discount_type: isServiceFree ? undefined : (service.discount_type ?? undefined),
         is_active: service.is_active ?? false,
         is_popular: service.is_popular ?? false,
-      });
+      };
+      setInitialValues(defaults);
+      reset(defaults);
     }
   }, [open, mode, service, parentService, reset, defaultGender]);
 
@@ -431,7 +443,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || (mode === "update" && !isChanged)}
                 className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

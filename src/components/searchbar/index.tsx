@@ -17,18 +17,22 @@ const SearchBar = ({ onSearch, placeholder }: SearchBarProps) => {
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    const cleaned = input.trim().replaceAll(/\s{2,}/g, " ");
-    setSearchQuery(input);
+    const formatted = input.replace(/^\s+/, "").replaceAll(/\s{2,}/g, " ");
+    setSearchQuery(formatted);
 
-    if (cleaned === "") {
+    const trimmed = formatted.trim();
+    if (!trimmed) {
       debouncedSearch.cancel();
-      handleClearSearch();
+      if (searchQuery !== "") {
+        onSearch("");
+      }
     } else {
-      debouncedSearch(cleaned);
+      debouncedSearch(trimmed);
     }
   };
 
   const handleClearSearch = () => {
+    debouncedSearch.cancel();
     setSearchQuery("");
     onSearch("");
   };

@@ -56,7 +56,10 @@ export default function NotificationPage() {
       markAsRead(item.uuid);
     }
     const meta = getNotificationMetadata(item.type);
-    navigate(meta.targetRoute(item.data));
+    const bookingUuid = item.data?.booking_uuid || (item.booking_id ? String(item.booking_id) : undefined);
+    navigate(meta.targetRoute(item.data), {
+      state: bookingUuid ? { bookingUuid } : undefined,
+    });
   };
 
   const handleFetchMore = () => {

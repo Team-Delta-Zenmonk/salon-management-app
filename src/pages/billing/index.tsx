@@ -39,7 +39,6 @@ import { fetchSubscriptionPlans } from "@/features/subscription/fetch-subscripti
 import {
   createSubscriptionIntent,
   getInvoices,
-  getSubscriptionInvoices,
   type SubscriptionInvoice,
   type InvoicesPagination,
 } from "@/features/subscription/subscription.service";
@@ -444,8 +443,10 @@ export default function PlanAndBillingPage() {
   };
 
   useEffect(() => {
-    fetchInvoices(invoiceTypeFilter, currentPage, sortOrder);
-  }, [invoiceTypeFilter, currentPage, sortOrder]);
+    if (currentTab === "invoices") {
+      fetchInvoices(invoiceTypeFilter, currentPage, sortOrder);
+    }
+  }, [currentTab, invoiceTypeFilter, currentPage, sortOrder]);
 
   useEffect(() => {
     dispatch(fetchSubscriptionPlans());
@@ -507,8 +508,6 @@ export default function PlanAndBillingPage() {
     const poll = async () => {
       try {
         const updatedSalon = await dispatch(getSalonProfileAction(salon!.uuid)).unwrap();
-        const updatedInvoices = await getSubscriptionInvoices();
-        setInvoices(updatedInvoices);
 
         if (updatedSalon?.subscription_status === "active") {
           callSnack(`Subscription activated! Welcome to ${appName} Pro 🎉`, "success");

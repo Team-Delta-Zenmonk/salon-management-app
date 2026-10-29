@@ -9,7 +9,8 @@ import { uploadImages } from "../../../../features/upload-images/upload-images.s
 import { useAppDispatch } from "../../../../store/hooks";
 import { updateCategoryAction } from "../../../../features/category/update-category/update-category.action";
 import { callSnack } from "../../../../components/snackbar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { isFormChanged } from "../../../../common/utils/is-form-changed";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { createCategoryService } from "../../../../features/category/create-category/create-categories.service";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../../../components/ui/dialog";
@@ -26,6 +27,7 @@ interface CategoryDialogProps {
 export default function CategoryDialog({ open, onClose, mode, category }: Readonly<CategoryDialogProps>) {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [initialValues, setInitialValues] = useState<categoryForm | null>(null);
 
   const methods = useForm<categoryForm>({
     resolver: zodResolver(categorySchema),
@@ -36,19 +38,30 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
     },
   });
 
-  const { handleSubmit, control, reset } = methods;
+  const { handleSubmit, control, reset, watch } = methods;
+
+  const currentValues = watch();
+  const isChanged = useMemo(
+    () => mode === "create" || isFormChanged(initialValues, currentValues),
+    [mode, initialValues, currentValues]
+  );
 
   useEffect(() => {
     if (!open) return;
 
     if (mode === "update" && category) {
-      reset({ name: category?.name, description: category?.description, logo: undefined });
+      const defaults = { name: category?.name || "", description: category?.description || "", logo: undefined };
+      setInitialValues(defaults);
+      reset(defaults);
     } else {
-      reset({ name: "", description: "", logo: undefined });
+      const defaults = { name: "", description: "", logo: undefined };
+      setInitialValues(null);
+      reset(defaults);
     }
   }, [open, mode, category, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
+    if (mode === "update" && !isChanged) return;
     try {
       setIsLoading(true);
 
@@ -151,7 +164,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || (mode === "update" && !isChanged)}
                 className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

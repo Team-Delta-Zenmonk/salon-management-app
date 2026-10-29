@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { ClipboardPlus, Package, AlertTriangle, XCircle, Coins, ClipboardList, ChevronDown } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-import { useDebounce } from "use-debounce";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { listInventoryItemsAction } from "../../features/inventory/list-inventory-items/list-inventory-items.action";
 import { listInventoryLogsAction } from "../../features/inventory/list-inventory-logs/list-inventory-logs.action";
@@ -125,7 +124,7 @@ export default function Inventory() {
   const activeTab = searchParams.get("tab") === "stock" ? 1 : 0;
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch] = useDebounce(searchTerm, 500);
+  const debouncedSearch = searchTerm;
 
   const [isLogTransactionOpen, setIsLogTransactionOpen] = useState(false);
   const [isCreateItemOpen, setIsCreateItemOpen] = useState(false);

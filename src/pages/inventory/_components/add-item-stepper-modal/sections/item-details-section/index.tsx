@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "../../../../../../components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useForm, type Resolver } from "react-hook-form";
@@ -41,11 +41,12 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
 
-  const { control, handleSubmit } = useForm<InventoryItemForm>({
+  const { control, handleSubmit, setValue } = useForm<InventoryItemForm>({
     resolver: zodResolver(inventoryItemSchema) as unknown as Resolver<InventoryItemForm>,
     defaultValues: {
       name: "",
       brand: "",
+      category_id: selectedCategory?.uuid || "",
       variant_name: "",
       unit: "",
       unit_price: 0,
@@ -54,6 +55,12 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
       min_stock_level: 0,
     },
   });
+
+  useEffect(() => {
+    if (selectedCategory?.uuid) {
+      setValue("category_id", selectedCategory.uuid, { shouldValidate: true });
+    }
+  }, [selectedCategory, setValue]);
 
   const onSubmit = async (data: InventoryItemForm) => {
     if (!selectedCategory) {
