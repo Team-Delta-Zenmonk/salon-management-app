@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -26,6 +27,16 @@ export default function DeleteDialog({
   isLoading,
   onDelete,
 }: Readonly<DeleteDialogProps>) {
+  const [cachedItemName, setCachedItemName] = useState(itemName);
+
+  useEffect(() => {
+    if (itemName) {
+      setCachedItemName(itemName);
+    }
+  }, [itemName]);
+
+  const displayName = itemName || cachedItemName;
+
   return (
     <Dialog
       open={open}
@@ -46,7 +57,7 @@ export default function DeleteDialog({
           <p className="text-sm text-muted-foreground leading-relaxed">
             Are you sure you want to delete{" "}
             <EllipsisCell
-              value={itemName}
+              value={displayName}
               maxChars={30}
               className="text-foreground font-semibold inline align-baseline"
             />

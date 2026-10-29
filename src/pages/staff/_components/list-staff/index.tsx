@@ -280,6 +280,7 @@ export default function ListStaff({
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [deletingStaff, setDeletingStaff] = useState<Staff | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
 
   const handleEdit = (staff: Staff) => {
@@ -288,16 +289,21 @@ export default function ListStaff({
   };
 
   const handleDelete = (staff: Staff) => {
-    setSelectedStaff(staff);
+    setDeletingStaff(staff);
     setDeleteDialogOpen(true);
   };
 
+  const handleCloseDelete = () => {
+    setDeleteDialogOpen(false);
+    setDeletingStaff(null);
+  };
+
   const handleDeleteConfirm = async () => {
-    if (!selectedStaff) return;
+    if (!deletingStaff) return;
 
     try {
       setDeleteLoading(true);
-      await removeStaffService(selectedStaff.uuid);
+      await removeStaffService(deletingStaff.uuid);
 
       await dispatch(
         listStaffAction({
@@ -317,7 +323,7 @@ export default function ListStaff({
     } finally {
       setDeleteLoading(false);
       setDeleteDialogOpen(false);
-      setSelectedStaff(null);
+      setDeletingStaff(null);
     }
   };
 
@@ -403,17 +409,16 @@ export default function ListStaff({
         />
       )}
 
-      <DeleteDialog
-        open={deleteDialogOpen}
-        onClose={() => {
-          setDeleteDialogOpen(false);
-          setSelectedStaff(null);
-        }}
-        title="Delete Staff Member?"
-        itemName={selectedStaff ? getFullName(selectedStaff) : ""}
-        isLoading={deleteLoading}
-        onDelete={handleDeleteConfirm}
-      />
+      {deletingStaff && (
+        <DeleteDialog
+          open={deleteDialogOpen}
+          onClose={handleCloseDelete}
+          title="Delete Staff Member?"
+          itemName={getFullName(deletingStaff)}
+          isLoading={deleteLoading}
+          onDelete={handleDeleteConfirm}
+        />
+      )}
 
       {selectedStaff && assignOpen && (
         <AssignServicesDialog
