@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { isFormChanged } from "../../../../common/utils/is-form-changed";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ interface LogTransactionModalProps {
 
 export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, onClose, onSuccess, transactionToEdit, createdItem, onAddNewItem }) => {
   const [loading, setLoading] = useState(false);
+  const [initialValues, setInitialValues] = useState<InventoryLogForm | null>(null);
   const stockItems = useAppSelector((state) => state.inventoryItem.data);
 
   const { control, handleSubmit, reset, watch, trigger } = useForm<InventoryLogForm>({
@@ -54,6 +56,12 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
   const orderedDate = watch("ordered_date");
   const receivedDate = watch("received_date");
 
+  const currentValues = watch();
+  const isChanged = useMemo(
+    () => !transactionToEdit || isFormChanged(initialValues, currentValues),
+    [transactionToEdit, initialValues, currentValues]
+  );
+
   const options = stockItems.map((item: InventoryItem) => {
     const itemName = item.name ? item.name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "";
     const brandName = item.brand ? item.brand.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "No Brand";
@@ -69,7 +77,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
   useEffect(() => {
     if (open) {
       if (transactionToEdit) {
-        reset({
+        const defaults: InventoryLogForm = {
           item_uuid: transactionToEdit.item.uuid,
           ordered_date: transactionToEdit.ordered_date ? dayjs(transactionToEdit.ordered_date).format("YYYY-MM-DD") : "",
           received_date: transactionToEdit.received_date ? dayjs(transactionToEdit.received_date).format("YYYY-MM-DD") : "",
@@ -78,8 +86,11 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
           damaged_quantity: transactionToEdit.damaged_quantity || 0,
           returned_quantity: transactionToEdit.returned_quantity || 0,
           bill_amount: Number(transactionToEdit.bill_amount) || 0,
-        });
+        };
+        setInitialValues(defaults);
+        reset(defaults);
       } else if (createdItem) {
+        setInitialValues(null);
         reset({
           item_uuid: createdItem.uuid,
           ordered_date: "",
@@ -91,6 +102,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
           bill_amount: 0,
         });
       } else {
+        setInitialValues(null);
         reset({
           item_uuid: "",
           ordered_date: "",
@@ -107,6 +119,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
 
 
   const onSubmit = async (data: InventoryLogForm) => {
+    if (transactionToEdit && !isChanged) return;
     setLoading(true);
     try {
       const payload = {
@@ -269,7 +282,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
             </Button>
             <Button
               type="submit"
-              disabled={loading || !itemUuid}
+              disabled={loading || !itemUuid || (Boolean(transactionToEdit) && !isChanged)}
               className="w-1/2 sm:w-auto flex-1 sm:flex-none rounded-full px-4 sm:px-6 font-semibold shadow-md hover:shadow-lg transition-all"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
