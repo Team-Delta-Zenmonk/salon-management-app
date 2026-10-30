@@ -365,10 +365,12 @@ export default function PlanAndBillingPage() {
       if (page === 1) {
         setMobileInvoices(fetchedInvoices);
         setMobilePage(1);
-        setMobileHasMore(res.pagination ? res.pagination.page < res.pagination.totalPages : false);
+        const totalPages = res.pagination ? Math.ceil(res.pagination.total / res.pagination.limit) : 1;
+        setMobileHasMore(res.pagination ? res.pagination.page < totalPages : false);
       }
       if (res.pagination) {
-        setPagination(res.pagination);
+        const totalPages = Math.ceil(res.pagination.total / res.pagination.limit);
+        setPagination({ ...res.pagination, totalPages });
       }
     } catch {
       if (requestId === fetchRequestIdRef.current) {
@@ -406,7 +408,8 @@ export default function PlanAndBillingPage() {
       }
       setMobileInvoices((prev) => [...prev, ...newInvoices]);
       setMobilePage(nextPage);
-      setMobileHasMore(res.pagination ? nextPage < res.pagination.totalPages : false);
+      const totalPages = res.pagination ? Math.ceil(res.pagination.total / res.pagination.limit) : 1;
+      setMobileHasMore(res.pagination ? nextPage < totalPages : false);
     } catch (err) {
       console.error("Failed to fetch more mobile invoices", err);
     } finally {
