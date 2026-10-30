@@ -3,7 +3,9 @@ import type { SubscriptionPlan } from "@/common/enums/subscription-plan.enum";
 import { fetchSubscriptionPlans } from "./fetch-subscription-plans.action";
 
 export interface BackendPlan {
-  id: SubscriptionPlan;
+  id: number;
+  uuid: string;
+  code: SubscriptionPlan | string;
   name: string;
   amount: number;
   formatted_price: string;
@@ -11,6 +13,7 @@ export interface BackendPlan {
   billing_cycle: string;
   description: string;
   duration_days: number;
+  is_active?: boolean;
 }
 
 export interface PlansState {

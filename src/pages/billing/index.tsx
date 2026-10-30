@@ -307,7 +307,7 @@ export default function PlanAndBillingPage() {
   const fetchRequestIdRef = useRef(0);
   const { downloadInvoice, isDownloading: isDownloadingInvoice, downloadingId } = useDownloadInvoice();
 
-  const trialPlan = reduxPlans.find((p) => p.id === "trial");
+  const trialPlan = reduxPlans.find((p) => p.code === "trial" || (p.id as any) === "trial");
   const trialDurationDays = trialPlan?.duration_days ?? 14;
 
   const currentStatus = salon?.subscription_status || SUBSCRIPTION_STATUS.TRIAL;
@@ -470,9 +470,16 @@ export default function PlanAndBillingPage() {
     expiresAt > now;
 
   const openCheckout = async (
-    plan: string
+    planUuidOrCode: string,
+    planCodeArg?: string
   ) => {
-    if (isActiveYearly && plan === SUBSCRIPTION_PLAN.MONTHLY) {
+    const matchedPlan = reduxPlans.find(
+      (p) => p.uuid === planUuidOrCode || p.code === planUuidOrCode || (p.id as any) === planUuidOrCode
+    );
+    const planUuid = matchedPlan?.uuid || planUuidOrCode;
+    const planCode = planCodeArg || (matchedPlan?.code as string) || planUuidOrCode;
+
+    if (isActiveYearly && planCode === SUBSCRIPTION_PLAN.MONTHLY) {
       callSnack(
         `Your yearly plan is active until ${expiresAt?.toLocaleDateString("en-IN", { dateStyle: "long" })}. You can switch to monthly after it expires.`,
         "error"
@@ -481,11 +488,11 @@ export default function PlanAndBillingPage() {
     }
 
     try {
-      setLoadingPlan(plan);
-      const res = await createSubscriptionIntent(plan);
+      setLoadingPlan(planCode);
+      const res = await createSubscriptionIntent(planUuid);
       setClientSecret(res.clientSecret);
       setIntentAmount(res.amount);
-      setCheckoutPlan(plan);
+      setCheckoutPlan(planCode);
     } catch (err: any) {
       const msg =
         (typeof err?.response?.data === "string" ? err.response.data : "") ||
@@ -769,8 +776,9 @@ export default function PlanAndBillingPage() {
         ) : (
           <>
             {reduxPlans.map((plan) => {
-              const isCurrentPlan = currentPlan === plan.id;
-              const isYearlyPlan = plan.id === "yearly";
+              const planCode = (plan.code || plan.id) as string;
+              const isCurrentPlan = currentPlan === planCode;
+              const isYearlyPlan = planCode === "yearly";
 
               const featuresMap: Record<string, string[]> = {
                 monthly: [
@@ -789,7 +797,7 @@ export default function PlanAndBillingPage() {
                 ],
               };
 
-              const features = featuresMap[plan.id] || [
+              const features = featuresMap[planCode] || [
                 "Full platform access",
                 "Unlimited staff seats",
                 "POS, Inventory & Analytics",
@@ -797,7 +805,7 @@ export default function PlanAndBillingPage() {
 
               return (
                 <motion.div
-                  key={plan.id}
+                  key={plan.uuid || plan.id}
                   variants={itemVariants}
                   className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all flex-1 min-w-[260px] max-w-full min-w-0 overflow-visible ${isYearlyPlan
                     ? "border-2 border-primary shadow-xl shadow-primary/10"
@@ -825,7 +833,7 @@ export default function PlanAndBillingPage() {
                   <div className="space-y-4 min-w-0">
                     <div className="min-w-0">
                       <span className={`text-xs font-bold uppercase tracking-wider ${isYearlyPlan ? "text-primary" : "text-muted-foreground"}`}>
-                        {isYearlyPlan ? "Annual Commitment" : plan.id === "trial" ? "Trial Period" : "Pay As You Go"}
+                        {isYearlyPlan ? "Annual Commitment" : planCode === "trial" ? "Trial Period" : "Pay As You Go"}
                       </span>
                       <div className="flex items-center justify-between gap-2 mt-1 min-w-0">
                         <h4 className="text-xl font-bold text-foreground capitalize min-w-0 flex-1 truncate">
@@ -862,7 +870,7 @@ export default function PlanAndBillingPage() {
                         <p className="text-[10px] text-primary font-semibold mt-0.5">
                           = ₹{Math.round(plan.amount / 12).toLocaleString()}/mo • {plan.duration_days ?? "?"} days duration
                         </p>
-                      ) : plan.id === "trial" ? (
+                      ) : planCode === "trial" ? (
                         <p className="text-[10px] text-muted-foreground mt-0.5">Free for {plan.duration_days ?? "?"} days</p>
                       ) : (
                         <p className="text-[10px] text-muted-foreground mt-0.5">Duration: {plan.duration_days ?? "?"} days • Cancel anytime</p>
@@ -880,7 +888,7 @@ export default function PlanAndBillingPage() {
                   </div>
 
                   <div className="pt-6 space-y-2 min-w-0">
-                    {plan.id === "trial" ? (
+                    {planCode === "trial" ? (
                       <Button variant="outline" size="default" disabled className="w-full text-xs font-bold opacity-80 overflow-hidden">
                         <EllipsisCell
                           value={currentStatus === "trial" ? `Trial Active (${plan.duration_days ?? 14} Days)` : "Trial Concluded"}
@@ -907,12 +915,12 @@ export default function PlanAndBillingPage() {
                         <Button
                           variant={isYearlyPlan || isCurrentPlan ? "default" : "outline"}
                           size="default"
-                          onClick={() => openCheckout(plan.id)}
+                          onClick={() => openCheckout(plan.uuid, planCode)}
                           disabled={loadingPlan !== null}
                           className={`w-full text-xs font-bold cursor-pointer overflow-hidden ${isYearlyPlan ? "shadow-md shadow-primary/25" : ""
                             }`}
                         >
-                          {loadingPlan === plan.id ? (
+                          {loadingPlan === planCode ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           ) : (
                             <EllipsisCell
