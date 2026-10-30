@@ -102,25 +102,6 @@ export default function BookingServiceRow({
           <span className="text-xs font-medium text-muted-foreground bg-background px-2 py-1 rounded-md shadow-sm border border-border/50">
             {Number(selectedStaff.duration)} mins
           </span>
-          {selectedStaff.hasDiscount && selectedStaff.originalPrice !== undefined ? (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs line-through text-muted-foreground font-medium">
-                {formatPrice(Number(selectedStaff.originalPrice))}
-              </span>
-              <span className="text-xs font-semibold text-foreground">
-                {formatPrice(Number(selectedStaff.price))}
-              </span>
-              {selectedStaff.discountBadge && (
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                  {selectedStaff.discountBadge}
-                </span>
-              )}
-            </div>
-          ) : (
-            <span className="text-xs font-semibold text-foreground">
-              {formatPrice(Number(selectedStaff.price))}
-            </span>
-          )}
         </div>
       )}
     </div>
