@@ -4,7 +4,6 @@ export interface ListServicesParams {
   page?: number;
   limit?: number;
   search?: string;
-  include_sub_services?: boolean;
 }
 
 export const listServicesService = async (params?: ListServicesParams) => {
@@ -21,9 +20,6 @@ export const listServicesService = async (params?: ListServicesParams) => {
   }
   if (params?.search) {
     queryParams.append("search", params.search);
-  }
-  if (params?.include_sub_services !== undefined) {
-    queryParams.append("include_sub_services", params.include_sub_services.toString());
   }
 
   const queryString = queryParams.toString();

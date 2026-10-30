@@ -75,14 +75,14 @@ export default function BookingPage() {
 
   useEffect(() => {
     dispatch(listStaffAction({ page: 1, limit: 10 }));
-    dispatch(listServicesAction({ page: 1, limit: 10, include_sub_services: false }));
+    dispatch(listServicesAction({ page: 1, limit: 10 }));
   }, [dispatch]);
 
   const handleFetchMoreServices = () => {
     if (!hasMoreServices || isLoadingServices) return;
     const nextPage = servicePage + 1;
     setServicePage(nextPage);
-    dispatch(listServicesAction({ page: nextPage, limit: 10, include_sub_services: false }));
+    dispatch(listServicesAction({ page: nextPage, limit: 10 }));
   };
 
   useEffect(() => {
@@ -275,15 +275,12 @@ export default function BookingPage() {
                 <HierarchicalServiceSelect
                   value={value}
                   onChange={onChange}
-                  rootServices={rootServices}
-                  isLoadingRootServices={isLoadingServices}
-                  onRootScrollEnd={handleFetchMoreServices}
                   valueMode="uuid"
                   allowClearOption={{
                     label: "All Services",
                     value: ALL_SERVICES_VALUE,
                   }}
-                  triggerClassName="bg-card/60 backdrop-blur-md shadow-sm border-border/50 hover:bg-card/80 transition-all text-foreground rounded-md h-10"
+                  triggerClassName="bg-card/60 backdrop-blur-md shadow-sm border-border/50 hover:bg-card/80 transition-all text-foreground rounded-md h-10 flex items-center"
                 />
               )}
             />

@@ -103,7 +103,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           control={control}
           identifier="staff-ec-name"
           disabled={disabled}
-          pattern={VALIDATE_PATTERN.alphabet}
+          pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
           maxLength={FIELD_LIMITS.NAME}
           placeholder="Contact relative name"
           inputPropsClassName="capitalize"

@@ -18,7 +18,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           control={control}
           identifier="staff-first"
           disabled={disabled}
-          pattern={VALIDATE_PATTERN.alphabet}
+          pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
           maxLength={FIELD_LIMITS.NAME}
           placeholder="First name"
           inputPropsClassName="capitalize"
@@ -31,7 +31,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
           control={control}
           identifier="staff-last"
           disabled={disabled}
-          pattern={VALIDATE_PATTERN.alphabet}
+          pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
           maxLength={FIELD_LIMITS.NAME}
           placeholder="Last name"
           inputPropsClassName="capitalize"

@@ -160,7 +160,7 @@ export default function AssignServicesDialog({
     setExpanded({});
     setSubServicesMap({});
 
-    dispatch(listServicesAction({ page: 1, limit: 10, include_sub_services: false }));
+    dispatch(listServicesAction({ page: 1, limit: 10 }));
 
     fetchAllAssignedStaffServices(staff.uuid)
       .then((rows) => {
@@ -189,7 +189,6 @@ export default function AssignServicesDialog({
         listServicesAction({
           page: servicePage + 1,
           limit: serviceLimit,
-          include_sub_services: false,
         }),
       ).unwrap();
     } catch (e) {
@@ -407,6 +406,7 @@ export default function AssignServicesDialog({
                       const isPartiallyAssigned = !isParentSelected && hasSubSelected;
                       const isIndeterminate = isPartiallyAssigned && !allSubSelected;
                       const isEffectivelyChecked = isParentSelected || allSubSelected;
+                      const hasSubServices = Number(service.sub_services_count ?? 0) > 0;
 
                       return (
                         <div key={service.uuid} className="flex flex-col gap-1.5">
@@ -465,28 +465,30 @@ export default function AssignServicesDialog({
                               </div>
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleExpand(service);
-                              }}
-                              title={isExpanded ? "Hide subservices" : "Show subservices"}
-                              className={clsx(
-                                "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ml-2 cursor-pointer border",
-                                isExpanded
-                                  ? "bg-primary/10 text-primary border-primary/20"
-                                  : "bg-muted/40 text-muted-foreground border-border/40 hover:bg-muted hover:text-foreground",
-                              )}
-                            >
-                              <span>Subservices</span>
-                              <ChevronDown
+                            {hasSubServices && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleExpand(service);
+                                }}
+                                title={isExpanded ? "Hide subservices" : "Show subservices"}
                                 className={clsx(
-                                  "w-3.5 h-3.5 transition-transform duration-200",
-                                  isExpanded && "rotate-180",
+                                  "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ml-2 cursor-pointer border",
+                                  isExpanded
+                                    ? "bg-primary/10 text-primary border-primary/20"
+                                    : "bg-muted/40 text-muted-foreground border-border/40 hover:bg-muted hover:text-foreground",
                                 )}
-                              />
-                            </button>
+                              >
+                                <span>Subservices</span>
+                                <ChevronDown
+                                  className={clsx(
+                                    "w-3.5 h-3.5 transition-transform duration-200",
+                                    isExpanded && "rotate-180",
+                                  )}
+                                />
+                              </button>
+                            )}
                           </div>
 
                           <AnimatePresence initial={false}>

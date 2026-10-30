@@ -57,8 +57,8 @@ const ActiveHoursSchema = z
   .optional();
 
 export const StaffSchema = z.object({
-  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
-  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  first_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Only alphabets with numbers and special characters are allowed" }),
+  last_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Only alphabets with numbers and special characters are allowed" }),
   email: z
     .string({ message: "Required" })
     .min(1, { message: "Required" })
@@ -120,7 +120,7 @@ export const StaffSchema = z.object({
 
   address: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.ADDRESS, { message: `Address must be less than ${FIELD_LIMITS.ADDRESS} characters` }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Invalid characters in address" }),
   emergency_contact: z.object({
-    name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+    name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Only alphabets with numbers and special characters are allowed" }),
     phone: z
       .string({ message: "Required" })
       .min(1, { message: "Required" })

@@ -116,9 +116,6 @@ export default function BookingFilterDialog({
                     <HierarchicalServiceSelect
                       value={value}
                       onChange={onChange}
-                      rootServices={rootServices}
-                      isLoadingRootServices={isLoadingRootServices}
-                      onRootScrollEnd={onRootScrollEnd}
                       valueMode="uuid"
                       allowClearOption={{
                         label: "All Services",

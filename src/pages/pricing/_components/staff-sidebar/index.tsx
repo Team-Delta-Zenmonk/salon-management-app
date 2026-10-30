@@ -9,6 +9,7 @@ import { EllipsisCell } from "@/components/ellipse-cell";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Loader2 } from "lucide-react";
 import { listStaffAction } from "../../../../features/staff/list-staff/list-staff.action";
+import { isStaffInactive } from "@/utils/staff-status";
 
 interface StaffSidebarProps {
   selectedStaffUuid: string | null;
@@ -18,7 +19,10 @@ interface StaffSidebarProps {
 export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Readonly<StaffSidebarProps>) {
   const dispatch = useAppDispatch();
   const staffState = useAppSelector((state: RootState) => state.staff);
-  const staffs = useMemo(() => staffState?.data ?? [], [staffState?.data]);
+  const staffs = useMemo(
+    () => (staffState?.data ?? []).filter((s: Staff) => !isStaffInactive(s)),
+    [staffState?.data]
+  );
   const hasMore = Boolean(staffState?.hasMore);
   const loading = Boolean(staffState?.loading);
   const page = staffState?.page ?? 1;

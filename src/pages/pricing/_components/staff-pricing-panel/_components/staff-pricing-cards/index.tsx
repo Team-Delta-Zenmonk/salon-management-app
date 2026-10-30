@@ -15,6 +15,7 @@ import { Button } from "../../../../../../components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../../../../../components/ui/avatar";
 import type { Staff } from "../../../../../../features/staff/staff.slice";
 import { EllipsisCell } from "@/components/ellipse-cell";
+import { isStaffInactive } from "@/utils/staff-status";
 
 interface DialogContext {
   staff_uuid: string;
@@ -230,7 +231,13 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
 
   const hasAnyAssignments = servicesToShow.some((service) => {
     const assignedRows = serviceStaffsMap[service.uuid] ?? [];
-    return assignedRows.length > 0;
+    return assignedRows.some((row: any) => {
+      const staff =
+        staffs.find((s) => s.id === row.staff_id) ||
+        staffs.find((s) => s.uuid === row.staff_uuid) ||
+        row.staff;
+      return Boolean(staff && !isStaffInactive(staff));
+    });
   });
 
   return (
@@ -249,13 +256,6 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
             View staff price & duration for this service and its subservices.
           </p>
         </div>
-        <Button
-          onClick={() => setAssignDialogOpen(true)}
-          className="w-full sm:w-auto shrink-0 rounded-xl shadow-sm shadow-primary/10"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Assign Staff
-        </Button>
       </div>
 
       {!hasAnyAssignments ? (
@@ -306,7 +306,10 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                     row.staff;
                   return { staff, staffServiceRow: row };
                 })
-                .filter((item): item is { staff: Staff; staffServiceRow: StaffPricingType } => Boolean(item.staff));
+                .filter(
+                  (item): item is { staff: Staff; staffServiceRow: StaffPricingType } =>
+                    Boolean(item.staff && !isStaffInactive(item.staff))
+                );
 
               if (assignedStaffs.length === 0) return null;
 
@@ -361,20 +364,6 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                                 title="Edit Custom Pricing"
                               >
                                 <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleRemove(service.uuid, staffServiceRow.uuid!)}
-                                disabled={deletingId === staffServiceRow.uuid}
-                                className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all disabled:opacity-50"
-                                title="Unassign Staff"
-                              >
-                                {deletingId === staffServiceRow.uuid ? (
-                                  <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                )}
                               </Button>
                             </div>
                           </div>

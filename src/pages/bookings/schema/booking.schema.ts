@@ -15,7 +15,7 @@ export const bookingServiceSchema = z.object({
 });
 
 export const bookingSchema = z.object({
-  customer_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphabet, { message: "Only alphabets are allowed" }),
+  customer_name: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.NAME, { message: `Max ${FIELD_LIMITS.NAME} characters` }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Only alphabets with numbers and special characters are allowed" }),
   customer_phone: z
     .string()
     .trim()

@@ -16,7 +16,7 @@ export default function OwnerStep() {
         control={control}
         identifier="owner-name"
         placeholder="Enter owner name"
-        pattern={VALIDATE_PATTERN.alphabet}
+        pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
         maxLength={FIELD_LIMITS.NAME}
       />
     </div>

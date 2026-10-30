@@ -27,6 +27,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { motion, AnimatePresence } from "framer-motion";
 import { EllipsisCell } from "@/components/ellipse-cell";
+import { isStaffInactive } from "@/utils/staff-status";
 
 dayjs.extend(customParseFormat);
 
@@ -35,6 +36,7 @@ interface AssignStaffDialogProps {
   onClose: () => void;
   serviceUuid: string;
   service: {
+    parent_id?: number | string | null;
     price_type: string;
     price: number;
     duration: number | string;
@@ -62,8 +64,7 @@ const getFullName = (staff: Staff) =>
 const getInitials = (staff: Staff) =>
   `${staff.first_name?.charAt(0) ?? ""}${staff.last_name?.charAt(0) ?? ""}`.toUpperCase() || "S";
 
-const isStaffActive = (staff: Staff) =>
-  !staff.end_date || dayjs(staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
+const isStaffActive = (staff: Staff) => !isStaffInactive(staff);
 
 function StaffRow({
   staff,
@@ -176,42 +177,27 @@ export default function AssignStaffDialog({
     reset({ staff_ids: [] });
     dispatch(listStaffAction({ page: 1, limit: 10 }));
 
-    const parentServiceObj = allServices.find((s) => s.uuid === serviceUuid);
-    const childrenServices = parentServiceObj
-      ? allServices.filter((s) => s.parent_id && String(s.parent_id) === String(parentServiceObj.id))
-      : [];
-    const serviceUuidsToQuery =
-      childrenServices.length > 0 ? childrenServices.map((s) => s.uuid) : [serviceUuid];
-
-    Promise.allSettled(
-      serviceUuidsToQuery.map((uuid) =>
-        listServiceStaff(uuid, salonUUID, { page: 1, limit: 10, include_parent: true })
-      )
-    )
-      .then((results) => {
-        const allRows: AssignedStaffService[] = [];
-        results.forEach((result) => {
-          if (result.status === "fulfilled") {
-            const res = result.value;
-            const rows = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
-            allRows.push(...rows);
-          }
-        });
-        setAssignedStaffServices(allRows);
+    listServiceStaff(serviceUuid, salonUUID, { page: 1, limit: 1000, include_parent: false })
+      .then((res) => {
+        const rows: AssignedStaffService[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
+        setAssignedStaffServices(rows);
 
         const assignedUuids = Array.from(
           new Set(
-            allRows
+            rows
               .map((ss: any) => ss.staff?.uuid || ss.staff_uuid)
               .filter(Boolean)
           )
         );
         reset({ staff_ids: assignedUuids });
       })
+      .catch((err) => {
+        console.error("Failed to load assigned staff:", err);
+      })
       .finally(() => {
         setLoading(false);
       });
-  }, [open, serviceUuid, salonUUID, dispatch, reset, allServices]);
+  }, [open, serviceUuid, salonUUID, dispatch, reset]);
 
   const assignedStaffMap = useMemo(() => {
     const map = new Map<string, AssignedStaffService[]>();
@@ -261,27 +247,6 @@ export default function AssignStaffDialog({
     try {
       const selectedStaffUuids = values.staff_ids;
 
-      const parentServiceObj = allServices.find((s) => s.uuid === serviceUuid);
-      const childrenServices = parentServiceObj
-        ? allServices.filter((s) => s.parent_id && String(s.parent_id) === String(parentServiceObj.id))
-        : [];
-      const allServicesToAssign =
-        childrenServices.length > 0
-          ? childrenServices.map((s) => ({
-              uuid: s.uuid,
-              price_type: s.price_type,
-              price: s.price ? Number(s.price) : undefined,
-              duration: s.duration ? Number(s.duration) : undefined,
-            }))
-          : [
-              {
-                uuid: serviceUuid,
-                price_type: service.price_type,
-                price: service.price,
-                duration: Number(service.duration),
-              },
-            ];
-
       const toAssign: {
         service_uuid: string;
         staff_uuid: string;
@@ -292,14 +257,12 @@ export default function AssignStaffDialog({
       selectedStaffUuids
         .filter((staffUuid) => !assignedStaffMap.has(staffUuid))
         .forEach((staffUuid) => {
-          allServicesToAssign.forEach((srv) => {
-            toAssign.push({
-              service_uuid: srv.uuid,
-              staff_uuid: staffUuid,
-              price_type: srv.price_type,
-              price: srv.price,
-              duration: srv.duration,
-            });
+          toAssign.push({
+            service_uuid: serviceUuid,
+            staff_uuid: staffUuid,
+            price_type: service.price_type,
+            price: service.price ? Number(service.price) : undefined,
+            duration: Number(service.duration),
           });
         });
 
@@ -315,8 +278,9 @@ export default function AssignStaffDialog({
       if (toAssign.length > 0) {
         await assignStaffToService({ staff_services: toAssign });
       }
+      const isSubService = Boolean(service?.parent_id);
       if (toUnassign.length > 0) {
-        await unassignStaffFromService({ staff_services: toUnassign, cascade: true });
+        await unassignStaffFromService({ staff_services: toUnassign, cascade: !isSubService });
       }
 
       callSnack("Staff assignment updated successfully", "success");

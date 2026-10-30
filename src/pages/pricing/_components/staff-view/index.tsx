@@ -1,15 +1,29 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
 import StaffSidebar from "../staff-sidebar";
 import StaffServicesPanel from "../staff-services-panel";
+import { isStaffInactive } from "@/utils/staff-status";
 
 export default function StaffView() {
   const staffState = useAppSelector((state: RootState) => state.staff);
-  const staffs = staffState?.data ?? [];
+  const activeStaffs = useMemo(
+    () => (staffState?.data ?? []).filter((s) => !isStaffInactive(s)),
+    [staffState?.data]
+  );
   const [selectedStaffUuid, setSelectedStaffUuid] = useState<string | null>(() => {
-    return staffs.length > 0 ? staffs[0].uuid : null;
+    return activeStaffs.length > 0 ? activeStaffs[0].uuid : null;
   });
+
+  useEffect(() => {
+    if (activeStaffs.length > 0) {
+      if (!selectedStaffUuid || !activeStaffs.some((s) => s.uuid === selectedStaffUuid)) {
+        setSelectedStaffUuid(activeStaffs[0].uuid);
+      }
+    } else {
+      setSelectedStaffUuid(null);
+    }
+  }, [activeStaffs, selectedStaffUuid]);
 
   return (
     <div

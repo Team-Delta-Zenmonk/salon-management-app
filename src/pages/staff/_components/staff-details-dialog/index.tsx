@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { motion, AnimatePresence } from "framer-motion";
 import { EllipsisCell } from "../../../../components/ellipse-cell";
+import { isStaffInactive } from "@/utils/staff-status";
 
 dayjs.extend(customParseFormat);
 
@@ -111,7 +112,7 @@ export default function StaffDetailsDialog({
 
   const fullName = `${staff.first_name} ${staff.last_name || ""}`.trim();
   const initials = staff.first_name?.charAt(0).toUpperCase() || "S";
-  const isActive = !staff.end_date || dayjs(staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
+  const isActive = !isStaffInactive(staff);
   const todayKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dayjs().day()];
 
   return (

@@ -9,9 +9,6 @@ import HierarchicalServiceSelect from "@/components/hierarchical-service-select"
 interface BookingServiceRowProps {
   index: number;
   control: Control<BookingFormValues>;
-  rootServices: Service[];
-  isLoadingRootServices?: boolean;
-  onRootScrollEnd?: () => void;
   disabledServices?: Set<number>;
   staffOptions: { label: string; value: string }[];
   staffLoading: boolean;
@@ -34,9 +31,6 @@ const formatPrice = (price: number) => `₹${Math.round(price).toLocaleString("e
 export default function BookingServiceRow({
   index,
   control,
-  rootServices,
-  isLoadingRootServices,
-  onRootScrollEnd,
   disabledServices,
   staffOptions,
   staffLoading,
@@ -62,9 +56,6 @@ export default function BookingServiceRow({
                     onChange(newId);
                     onServiceChange?.(newId, serviceObj);
                   }}
-                  rootServices={rootServices}
-                  isLoadingRootServices={isLoadingRootServices}
-                  onRootScrollEnd={onRootScrollEnd}
                   disabledServices={disabledServices}
                   placeholder="Select Service"
                   hasError={!!error}

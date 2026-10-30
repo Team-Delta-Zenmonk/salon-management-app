@@ -3,7 +3,6 @@ import { axiosInstance } from "../../../config/axios";
 export interface ListServiceStaffParams {
   page?: number;
   limit?: number;
-  offset?: number;
   include_parent?: boolean;
 }
 
@@ -17,7 +16,6 @@ export const listServiceStaff = async (
       salon_uuid: salonUuid,
       ...(pagination?.page ? { page: pagination.page } : {}),
       ...(pagination?.limit ? { limit: pagination.limit } : {}),
-      ...(pagination?.offset !== undefined ? { offset: pagination.offset } : {}),
       ...(pagination?.include_parent !== undefined ? { include_parent: pagination.include_parent } : {}),
     },
   });

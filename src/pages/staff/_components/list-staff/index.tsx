@@ -28,6 +28,7 @@ import type {
 } from "../../../../features/staff/staff.slice";
 import { useAppDispatch } from "../../../../store/hooks";
 import AssignServicesDialog from "../assign-services-dialog";
+import { isStaffInactive } from "@/utils/staff-status";
 import StaffDetailsDialog from "../staff-details-dialog";
 import StaffDialog from "../staff-dialog";
 import { motion, type Variants } from "framer-motion";
@@ -83,8 +84,7 @@ function StaffCard({
   deleteLoading: boolean;
 }) {
   const initials = staff.first_name?.charAt(0).toUpperCase() || "S";
-  const isActive =
-    !staff.end_date || dayjs(staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
+  const isActive = !isStaffInactive(staff);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const cardVariants: Variants = {

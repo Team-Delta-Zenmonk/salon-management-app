@@ -13,7 +13,7 @@ import { FormProvider, useForm, useFieldArray, useWatch, Controller, type Submit
 import { cn } from "../../../../lib/utils";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { BOOKING_STATUS } from "../../../../common/enums/booking-status.enum";
 import { isFormChanged } from "../../../../common/utils/is-form-changed";
 import { bookingSchema, type BookingFormValues } from "../../schema/booking.schema";
@@ -33,6 +33,7 @@ import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import BookingServiceRow from "./_components/booking-service-row";
 import { getDiscountedPrice } from "../../../../common/utils/discount.utils";
 import type { Service } from "../../../../features/service/service.slice";
+import { isStaffInactive } from "@/utils/staff-status";
 
 type PaymentPreference = "pay_at_venue" | "partial_deposit" | "full_upfront";
 
@@ -58,7 +59,7 @@ interface ServiceStaff {
   };
 }
 
-type StaffMap = Record<number, { loading: boolean; data: ServiceStaff[] }>;
+type StaffMap = Record<number, { loading: boolean; data: ServiceStaff[]; serviceId?: number }>;
 
 const EMPTY_SERVICE = { service_id: undefined as any, staff_id: undefined as any };
 
@@ -77,12 +78,13 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   const [initialValues, setInitialValues] = useState<BookingFormValues | null>(null);
   const { downloadInvoice, isDownloading: isDownloadingInvoice } = useDownloadInvoice();
   const [staffMap, setStaffMap] = useState<StaffMap>({});
+  const inFlightStaffRequests = useRef<Record<string, boolean>>({});
 
   const handleFetchMoreServices = useCallback(() => {
     if (!hasMoreServices || isLoadingServices) return;
     const nextPage = servicePage + 1;
     setServicePage(nextPage);
-    dispatch(listServicesAction({ page: nextPage, limit: 10, include_sub_services: false }));
+    dispatch(listServicesAction({ page: nextPage, limit: 10 }));
   }, [dispatch, hasMoreServices, isLoadingServices, servicePage]);
 
   const handleDownloadInvoice = () => {
@@ -160,37 +162,47 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   );
 
   const fetchStaffForRow = useCallback(
-    async (rowIndex: number, serviceId: number) => {
-      let service = services.find((s) => s.id === Number(serviceId));
+    async (rowIndex: number, serviceId: number, serviceOverride?: Service) => {
+      let service = serviceOverride || services.find((s) => s.id === Number(serviceId));
       if (!service && subServiceCache[Number(serviceId)]) {
         service = subServiceCache[Number(serviceId)];
       }
       if (!service || !salon?.uuid) return;
 
-      setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: true, data: prev[rowIndex]?.data ?? [] } }));
+      const cacheKey = `${rowIndex}_${service.uuid}`;
+      if (inFlightStaffRequests.current[cacheKey]) {
+        return;
+      }
+      inFlightStaffRequests.current[cacheKey] = true;
+
+      setStaffMap((prev) => ({
+        ...prev,
+        [rowIndex]: { loading: true, data: prev[rowIndex]?.data ?? [], serviceId: Number(serviceId) },
+      }));
 
       try {
         const res = await listServiceStaff(service.uuid, salon.uuid, { include_parent: true });
         const data = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
-        setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: false, data } }));
+        setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: false, data, serviceId: Number(serviceId) } }));
       } catch (err) {
         console.error("Failed to fetch staff for row", rowIndex, err);
         callSnack("Failed to load staff for service", "error");
-        setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: false, data: [] } }));
+        setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: false, data: [], serviceId: Number(serviceId) } }));
+      } finally {
+        delete inFlightStaffRequests.current[cacheKey];
       }
     },
     [services, subServiceCache, salon?.uuid],
   );
 
   useEffect(() => {
-    if (!watchedServices) return;
+    if (!watchedServices || !open) return;
 
     watchedServices.forEach((svc, idx) => {
       if (svc.service_id) {
         const current = staffMap[idx];
-        const currentServiceInStaff = current?.data?.[0]?.service_id;
-        if (currentServiceInStaff !== Number(svc.service_id)) {
-          fetchStaffForRow(idx, svc.service_id);
+        if (current?.serviceId !== Number(svc.service_id) && !current?.loading) {
+          fetchStaffForRow(idx, Number(svc.service_id));
         }
       } else {
         setStaffMap((prev) => {
@@ -201,18 +213,78 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         });
       }
     });
-  }, [watchedServices?.map((s) => s.service_id).join(",")]);
+  }, [watchedServices?.map((s) => s.service_id).join(","), open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setStaffMap({});
+      inFlightStaffRequests.current = {};
+      return;
+    }
 
     setStaffMap({});
+    inFlightStaffRequests.current = {};
 
     if (mode === "update" && booking) {
-      const bookingServices = booking.booking_services?.map((bs: any) => ({
-        service_id: String(bs.service_id),
-        staff_id: bs.staff_id != null ? String(bs.staff_id) : undefined,
-      })) ?? [{ ...EMPTY_SERVICE }];
+      const initialSubCache: Record<number, Service> = {};
+      const initialStaffMap: StaffMap = {};
+
+      booking.booking_services?.forEach((bs: any, idx: number) => {
+        if (bs.service && bs.service_id) {
+          initialSubCache[bs.service_id] = {
+            id: bs.service_id,
+            uuid: bs.service.uuid,
+            name: bs.service.name,
+            duration: bs.duration_minutes || bs.service.duration,
+            price: bs.price || bs.service.price,
+            parent_id: bs.service.parent_id,
+            ...bs.service,
+          } as Service;
+        }
+
+        const isInactive = isStaffInactive(bs.staff);
+        if (bs.staff_id && bs.staff && !isInactive) {
+          initialStaffMap[idx] = {
+            loading: true,
+            serviceId: Number(bs.service_id),
+            data: [
+              {
+                id: bs.id,
+                staff_id: bs.staff_id,
+                service_id: bs.service_id,
+                price: bs.price,
+                duration: bs.duration_minutes,
+                staff: {
+                  id: bs.staff.id || bs.staff_id,
+                  uuid: bs.staff.uuid,
+                  first_name: bs.staff.first_name,
+                  last_name: bs.staff.last_name,
+                  end_date: bs.staff.end_date,
+                },
+              },
+            ],
+          };
+        } else if (bs.service_id) {
+          initialStaffMap[idx] = {
+            loading: true,
+            serviceId: Number(bs.service_id),
+            data: [],
+          };
+        }
+      });
+
+      if (Object.keys(initialSubCache).length > 0) {
+        setSubServiceCache((prev) => ({ ...prev, ...initialSubCache }));
+      }
+      setStaffMap(initialStaffMap);
+
+      const bookingServices = booking.booking_services?.map((bs: any) => {
+        const isInactive = isStaffInactive(bs.staff);
+        return {
+          service_id: String(bs.service_id),
+          staff_id: bs.staff_id != null && !isInactive ? String(bs.staff_id) : undefined,
+        };
+      }) ?? [{ ...EMPTY_SERVICE }];
 
       const d = new Date(booking.booking_start_time);
       const hh = String(d.getUTCHours()).padStart(2, "0");
@@ -233,7 +305,9 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       reset(defaults);
 
       bookingServices.forEach((svc: any, idx: number) => {
-        if (svc.service_id) fetchStaffForRow(idx, svc.service_id);
+        if (svc.service_id) {
+          fetchStaffForRow(idx, Number(svc.service_id), initialSubCache[Number(svc.service_id)]);
+        }
       });
     } else {
       setServicePage(1);
@@ -256,10 +330,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     const staffList = Array.isArray(rowData?.data) ? rowData.data : [];
     if (!staffList.length) return [];
     return staffList
-      .filter((ss) => {
-        if (!ss.staff || !ss.staff.end_date) return true;
-        return dayjs(ss.staff.end_date, "DD-MM-YYYY").isAfter(dayjs());
-      })
+      .filter((ss) => !isStaffInactive(ss.staff))
       .map((ss) => {
         const lastName = ss.staff.last_name ? ` ${ss.staff.last_name}` : "";
         return {
@@ -292,7 +363,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
     if (staffId != null && staffId !== "") {
       const staffList = Array.isArray(staffMap[rowIndex]?.data) ? staffMap[rowIndex].data : [];
-      const ss = staffList.find((item) => item.staff_id === Number(staffId));
+      const ss = staffList.find((item) => item.staff_id === Number(staffId) && !isStaffInactive(item.staff));
       if (ss) {
         duration = Number(ss.duration) || 0;
         basePrice = Number(ss.price) || 0;
@@ -487,7 +558,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                   control={control as any}
                   identifier="booking-customer-name"
                   maxLength={FIELD_LIMITS.NAME}
-                  pattern={VALIDATE_PATTERN.alphabet}
+                  pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                 />
                 <TextField
                   type="text"
@@ -526,9 +597,6 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                       key={field.id}
                       index={index}
                       control={control as any}
-                      rootServices={rootServices}
-                      isLoadingRootServices={isLoadingServices}
-                      onRootScrollEnd={handleFetchMoreServices}
                       disabledServices={getDisabledServicesForRow(index)}
                       staffOptions={getStaffOptions(index)}
                       staffLoading={isStaffLoading(index)}

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronRight, ChevronLeft, Loader2, Check, ChevronDown } from "lucide-react";
 import { listSubServicesService } from "@/features/service/list-sub-services/list-sub-services.service";
+import { listServicesAction } from "@/features/service/list-services/list-service.action";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { Service } from "@/features/service/service.slice";
 import EllipsisCell from "@/components/ellipse-cell";
 import { cn } from "@/lib/utils";
@@ -9,9 +11,6 @@ import { cn } from "@/lib/utils";
 export interface HierarchicalServiceSelectProps {
   value?: string | number;
   onChange: (serviceId: string, serviceObj?: Service) => void;
-  rootServices: Service[];
-  isLoadingRootServices?: boolean;
-  onRootScrollEnd?: () => void;
   disabledServices?: Set<number>;
   disabled?: boolean;
   placeholder?: string;
@@ -28,9 +27,6 @@ export interface HierarchicalServiceSelectProps {
 export default function HierarchicalServiceSelect({
   value,
   onChange,
-  rootServices,
-  isLoadingRootServices = false,
-  onRootScrollEnd,
   disabledServices,
   disabled = false,
   placeholder = "Select Service",
@@ -40,6 +36,12 @@ export default function HierarchicalServiceSelect({
   allowClearOption,
   triggerClassName,
 }: Readonly<HierarchicalServiceSelectProps>) {
+  const dispatch = useAppDispatch();
+  const reduxServiceState = useAppSelector((state) => state.service);
+  const reduxServices = reduxServiceState?.data ?? [];
+  const reduxHasMore = reduxServiceState?.hasMore ?? false;
+  const reduxLoading = reduxServiceState?.loading ?? false;
+
   const [open, setOpen] = useState(false);
   const [activeParent, setActiveParent] = useState<Service | null>(null);
 
@@ -48,10 +50,38 @@ export default function HierarchicalServiceSelect({
   const [subHasMore, setSubHasMore] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
 
+  const [localRootPage, setLocalRootPage] = useState(1);
+  const [isRefreshingRoots, setIsRefreshingRoots] = useState(false);
+
   const [localCache, setLocalCache] = useState<Record<string, Service>>({});
 
   const rootListRef = useRef<HTMLDivElement>(null);
   const subListRef = useRef<HTMLDivElement>(null);
+
+  const rootServices = React.useMemo(() => {
+    return (reduxServices || []).filter((s) => s.parent_id === null || s.parent_id === undefined);
+  }, [reduxServices]);
+
+  const isLoadingRootServices = isRefreshingRoots || reduxLoading;
+
+  const fetchFreshRootServices = useCallback(async () => {
+    setIsRefreshingRoots(true);
+    setLocalRootPage(1);
+    try {
+      await dispatch(listServicesAction({ page: 1, limit: 10 })).unwrap();
+    } catch (err) {
+      console.error("Failed to fetch services on open", err);
+    } finally {
+      setIsRefreshingRoots(false);
+    }
+  }, [dispatch]);
+
+  const handleRootScrollEnd = useCallback(() => {
+    if (!reduxHasMore || reduxLoading || isRefreshingRoots) return;
+    const nextPage = localRootPage + 1;
+    setLocalRootPage(nextPage);
+    dispatch(listServicesAction({ page: nextPage, limit: 10 }));
+  }, [reduxHasMore, reduxLoading, isRefreshingRoots, localRootPage, dispatch]);
 
   useEffect(() => {
     if (Object.keys(subServiceCache).length > 0) {
@@ -84,10 +114,10 @@ export default function HierarchicalServiceSelect({
   }, [value, rootServices, localCache, allowClearOption]);
 
   const handleRootScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (!onRootScrollEnd || isLoadingRootServices) return;
+    if (isLoadingRootServices) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - scrollTop - clientHeight < 24) {
-      onRootScrollEnd();
+      handleRootScrollEnd();
     }
   };
 
@@ -173,20 +203,22 @@ export default function HierarchicalServiceSelect({
         setOpen(nextOpen);
         if (!nextOpen) {
           setActiveParent(null);
+        } else {
+          fetchFreshRootServices();
         }
       }}
     >
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          "flex w-full items-center justify-between gap-1.5 rounded-md border border-input-border bg-input-bg py-2 px-3 text-sm transition-all outline-none select-none hover:border-input-border-hover focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 text-left capitalize h-10",
+          "flex w-full items-center justify-between gap-1.5 rounded-md border border-input-border bg-input-bg px-3 text-sm transition-all outline-none select-none hover:border-input-border-hover focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 text-left capitalize h-10 leading-none",
           hasError && "border-input-border-error ring-input-ring-error ring-2",
           triggerClassName
         )}
       >
-        <span className={cn("truncate flex-1", !selectedLabel && "text-muted-foreground")}>
+        <span className={cn("truncate flex-1 flex items-center min-w-0 leading-normal", !selectedLabel && "text-muted-foreground")}>
           {selectedLabel ? (
-            <EllipsisCell value={selectedLabel} maxChars={35} />
+            <EllipsisCell value={selectedLabel} maxChars={35} className="truncate" />
           ) : (
             placeholder
           )}

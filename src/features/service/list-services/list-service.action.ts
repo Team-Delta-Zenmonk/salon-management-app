@@ -7,7 +7,6 @@ export interface ListServicesParams {
   page?: number;
   limit?: number;
   search?: string;
-  include_sub_services?: boolean;
 }
 
 export const listServicesAction = createAsyncThunk(

@@ -88,7 +88,15 @@ const Select = <T extends FieldValues>({
                 aria-invalid={hasError}
               >
                 <div className="flex-1 text-left flex items-center gap-1.5 line-clamp-1 pr-2 w-1">
-                  <EllipsisCell value={String(value ? (options?.find((o) => String(o.value) === String(value))?.label || value) : placeholder)} />
+                  <EllipsisCell
+                    value={String(
+                      disabled && placeholder === "Loading..."
+                        ? placeholder
+                        : value
+                          ? (options?.find((o) => String(o.value) === String(value))?.label || (placeholder === "Loading..." ? placeholder : value))
+                          : placeholder
+                    )}
+                  />
                 </div>
                 {value && !disabled && (
                   <div

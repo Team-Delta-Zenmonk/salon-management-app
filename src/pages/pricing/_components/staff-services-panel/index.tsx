@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/a
 import type { Staff } from "../../../../features/staff/staff.slice";
 import type { Service } from "../../../../features/service/service.slice";
 import { EllipsisCell } from "@/components/ellipse-cell";
+import { isStaffInactive } from "@/utils/staff-status";
 
 interface StaffServicesPanelProps {
   selectedStaffUuid: string | null;
@@ -32,7 +33,7 @@ interface DialogContext {
 export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<StaffServicesPanelProps>) {
   const staffState = useAppSelector((state: RootState) => state.staff);
   const staffs = staffState?.data ?? [];
-  const selectedStaff = staffs.find((s: Staff) => s.uuid === selectedStaffUuid);
+  const selectedStaff = staffs.find((s: Staff) => s.uuid === selectedStaffUuid && !isStaffInactive(s));
 
   const { data: allServices } = useAppSelector((state: RootState) => state.service);
 
@@ -50,7 +51,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadAssignedServices = useCallback(async () => {
-    if (!selectedStaffUuid) return;
+    if (!selectedStaffUuid || !selectedStaff) return;
     try {
       setLoading(true);
       setPage(1);
@@ -68,7 +69,7 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
   }, [selectedStaffUuid]);
 
   const fetchMoreAssignedServices = useCallback(async () => {
-    if (!selectedStaffUuid || loadingMore || !hasMore) return;
+    if (!selectedStaffUuid || !selectedStaff || loadingMore || !hasMore) return;
     try {
       setLoadingMore(true);
       const nextPage = page + 1;
@@ -233,13 +234,6 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
             Manage the services provided by this staff member and their custom pricing.
           </p>
         </div>
-        <Button
-          onClick={() => setAssignDialogOpen(true)}
-          className="w-full sm:w-auto shrink-0 rounded-xl shadow-sm shadow-primary/10"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Assign Services
-        </Button>
       </div>
 
       {loading ? (
@@ -327,20 +321,6 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
                             title="Edit Custom Pricing"
                           >
                             <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => svc.pricing.uuid && handleRemove(svc.pricing.uuid)}
-                            disabled={deletingId === svc.pricing.uuid}
-                            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all disabled:opacity-50"
-                            title="Unassign Service"
-                          >
-                            {deletingId === svc.pricing.uuid ? (
-                              <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            )}
                           </Button>
                         </div>
                       </div>
