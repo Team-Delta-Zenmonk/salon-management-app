@@ -34,6 +34,7 @@ import BookingServiceRow from "./_components/booking-service-row";
 import { getDiscountedPrice } from "../../../../common/utils/discount.utils";
 import type { Service } from "../../../../features/service/service.slice";
 import { isStaffInactive } from "@/utils/staff-status";
+import { evaluateBookingTiming } from "../../utils/booking-timing.utils";
 
 type PaymentPreference = "pay_at_venue" | "partial_deposit" | "full_upfront";
 
@@ -147,6 +148,8 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
   });
 
   const watchedServices = useWatch({ control, name: "services" });
+  const watchedBookingDate = useWatch({ control, name: "booking_date" });
+  const watchedStartTime = useWatch({ control, name: "booking_start_time" });
 
   const getDisabledServicesForRow = useCallback(
     (rowIndex: number) => {
@@ -413,6 +416,15 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
     return { totalPrice, totalDuration, count: completedCount };
   }, [watchedServices, staffMap, services]);
 
+  const timingNotice = useMemo(() => {
+    return evaluateBookingTiming(
+      watchedBookingDate,
+      watchedStartTime,
+      totals.totalDuration,
+      salon?.business_hours
+    );
+  }, [watchedBookingDate, watchedStartTime, totals.totalDuration, salon?.business_hours]);
+
   const handleAddService = () => {
     append({ ...EMPTY_SERVICE });
   };
@@ -648,6 +660,22 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                 />
               </div>
 
+              {timingNotice && (
+                <div
+                  className={cn(
+                    "rounded-xl p-3 text-xs font-medium flex items-center gap-2.5 transition-colors",
+                    timingNotice.type === "midnight"
+                      ? "bg-destructive/10 border border-destructive/30 text-destructive"
+                      : "bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400"
+                  )}
+                >
+                  <span className="text-sm shrink-0">
+                    {timingNotice.type === "midnight" ? "❌" : "⚠️"}
+                  </span>
+                  <span>{timingNotice.message}</span>
+                </div>
+              )}
+
               <Separator className="my-1 border-border/50" />
 
               <div className="flex flex-col gap-1.5">
@@ -712,7 +740,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading || isDownloadingInvoice || (mode === "update" && !isChanged)}
+                disabled={isLoading || isDownloadingInvoice || (mode === "update" && !isChanged) || timingNotice?.type === "midnight"}
                 className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
               >
                 {isLoading ? (

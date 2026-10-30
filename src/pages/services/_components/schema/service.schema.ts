@@ -41,8 +41,8 @@ export const getServiceSchema = (
         .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
           message: "Duration must be greater than 0",
         })
-        .refine((val) => !isNaN(Number(val)) && Number(val) <= 600, {
-          message: "Duration cannot exceed 10 hours (600 minutes)",
+        .refine((val) => !isNaN(Number(val)) && Number(val) <= 1440, {
+          message: "Duration cannot exceed 24 hours (1440 minutes)",
         }),
       gender: z.enum(Object.values(SERVICE_GENDER), { message: "Required" }),
       price_type: z.enum(Object.values(PRICE_TYPE), { message: "Required" }),
