@@ -31,7 +31,7 @@ import {
 import { Button } from "../../../../components/ui/button";
 import { Switch } from "../../../../components/ui/switch";
 import { Label } from "../../../../components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 
 import type { Service } from "../../../../features/service/service.slice";
 import type { CreateServicePayload } from "../../../../features/service/create-service/create-service.service";
@@ -49,6 +49,8 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [initialValues, setInitialValues] = useState<ServiceForm | null>(null);
+  const [confirmSubSyncOpen, setConfirmSubSyncOpen] = useState(false);
+  const [pendingPayload, setPendingPayload] = useState<CreateServicePayload | null>(null);
 
   const categories = useAppSelector((state: RootState) => state.category.data) ?? [];
   const salon = useAppSelector((state: RootState) => state.auth.salon);
@@ -166,6 +168,26 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     return payload;
   };
 
+  const executeUpdate = async (payload: CreateServicePayload) => {
+    try {
+      setIsLoading(true);
+      await dispatch(updateServiceAction({ uuid: service!.uuid, body: payload })).unwrap();
+      callSnack("Service updated successfully", "success");
+      setConfirmSubSyncOpen(false);
+      setPendingPayload(null);
+      onCreated?.();
+      onClose();
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { errors?: { message: string }[] } } };
+      callSnack(
+        error?.response?.data?.errors?.[0]?.message || "Service Update Failed",
+        "error"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const onSubmit = handleSubmit(async (data) => {
     if (mode === "update" && !isChanged) return;
     try {
@@ -201,13 +223,24 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
           isCreatingSubService ? "Sub-service created successfully" : "Service created successfully",
           "success"
         );
+        onCreated?.();
+        onClose();
       } else {
-        await dispatch(updateServiceAction({ uuid: service!.uuid, body: payload })).unwrap();
-        callSnack("Service updated successfully", "success");
-      }
+        const subCount = Number(service?.sub_services_count || 0);
+        const isMainService = !service?.parent_id;
+        const isPricingModified =
+          payload.price_type !== service?.price_type ||
+          Number(payload.price) !== Number(service?.price);
 
-      onCreated?.();
-      onClose();
+        if (isMainService && subCount > 0 && isPricingModified) {
+          setIsLoading(false);
+          setPendingPayload(payload);
+          setConfirmSubSyncOpen(true);
+          return;
+        }
+
+        await executeUpdate(payload);
+      }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: { message: string }[] } } };
       callSnack(
@@ -309,15 +342,16 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   }, [open, mode, service, parentService, effectiveParent, isParentFree, isParentFixed, isParentFrom, reset, defaultGender]);
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          if (isLoading) return;
-          onClose();
-        }
-      }}
-    >
+    <>
+      <Dialog
+        open={open}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            if (isLoading) return;
+            onClose();
+          }
+        }}
+      >
       <DialogContent className="sm:max-w-[550px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
         <DialogHeader className="px-6 py-5 border-b bg-muted/20">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
@@ -520,5 +554,85 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         </FormProvider>
       </DialogContent>
     </Dialog>
+
+    {confirmSubSyncOpen && pendingPayload && (
+      <Dialog
+        open={confirmSubSyncOpen}
+        onOpenChange={(isOpen) => {
+          if (!isOpen && !isLoading) {
+            setConfirmSubSyncOpen(false);
+            setPendingPayload(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[460px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+          <DialogHeader className="px-6 py-5 border-b bg-amber-500/10 dark:bg-amber-500/20">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-amber-500/20 dark:bg-amber-500/30 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-bold tracking-tight text-foreground">
+                  Update Sub-Services Pricing?
+                </DialogTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  This action affects existing sub-services.
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="px-6 py-5 space-y-3">
+            <p className="text-sm text-foreground/90 leading-relaxed">
+              This service has <strong className="text-foreground">{service?.sub_services_count}</strong> sub-service{(service?.sub_services_count || 0) > 1 ? "s" : ""}.
+            </p>
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3.5 text-xs text-amber-800 dark:text-amber-300 space-y-2">
+              <p className="font-semibold">
+                Changing price type to <span className="uppercase font-bold underline">{pendingPayload.price_type}</span>:
+              </p>
+              <ul className="list-disc list-inside space-y-1 pl-1">
+                {pendingPayload.price_type === PRICE_TYPE.FREE && (
+                  <li>All sub-services will be set to <strong>Free (₹0)</strong>.</li>
+                )}
+                {pendingPayload.price_type === PRICE_TYPE.FIXED && (
+                  <li>All sub-services will be set to <strong>Fixed Price (₹{pendingPayload.price})</strong>.</li>
+                )}
+                {pendingPayload.price_type === PRICE_TYPE.FROM && (
+                  <li>All sub-services will be set to <strong>From Pricing</strong>, and any sub-service priced below <strong>₹{pendingPayload.price}</strong> will be updated to at least ₹{pendingPayload.price}.</li>
+                )}
+              </ul>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Are you sure you want to proceed and update the pricing across all sub-services?
+            </p>
+          </div>
+
+          <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isLoading}
+              onClick={() => {
+                setConfirmSubSyncOpen(false);
+                setPendingPayload(null);
+              }}
+              className="rounded-full px-5 text-xs font-semibold"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={isLoading}
+              onClick={() => executeUpdate(pendingPayload)}
+              className="rounded-full px-6 text-xs font-semibold shadow-md bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {isLoading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+              {isLoading ? "Updating..." : "Yes, Update All"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )}
+  </>
   );
 }
