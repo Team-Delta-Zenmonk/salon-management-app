@@ -20,6 +20,7 @@ import { listServiceStaff } from "../../../../features/service/list-staff/list-s
 import { assignStaffToService } from "../../../../features/staff-service/staff-service.service";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
+import { applySubServicePricingRules } from "../../../../utils/service-pricing.util";
 import {
   Dialog,
   DialogContent,
@@ -63,10 +64,20 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
   const isCreatingSubService = mode === "create" && Boolean(parentService);
   const isEditingSubService = mode === "update" && Boolean(service?.parent_id);
+  const effectiveParent = parentService || service?.parent;
+  const isParentFree = Boolean(effectiveParent && effectiveParent.price_type === PRICE_TYPE.FREE);
+  const isParentFixed = Boolean(effectiveParent && effectiveParent.price_type === PRICE_TYPE.FIXED);
+  const isParentFrom = Boolean(effectiveParent && effectiveParent.price_type === PRICE_TYPE.FROM);
+  const isSubServicePriceTypeLocked =
+    (isCreatingSubService || isEditingSubService) &&
+    (isParentFree || isParentFixed || isParentFrom);
+  const isSubServicePriceValueLocked =
+    (isCreatingSubService || isEditingSubService) && (isParentFree || isParentFixed);
+  const parentMinPrice = isParentFrom && effectiveParent?.price != null ? effectiveParent.price : 0;
   const shouldShowCategory = !(isCreatingSubService || isEditingSubService);
 
   const methods = useForm<ServiceForm>({
-    resolver: zodResolver(getServiceSchema(!shouldShowCategory, salon?.currency)),
+    resolver: zodResolver(getServiceSchema(!shouldShowCategory, salon?.currency, effectiveParent)),
     mode: "onChange",
   });
 
@@ -139,11 +150,17 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     if (mode === "create") {
       if (isCreatingSubService) {
         payload.parent_id = parentService?.uuid;
+        applySubServicePricingRules(parentService, payload);
       } else {
         payload.category_id = data.category_id;
       }
-    } else if (data.category_id) {
-      payload.category_id = data.category_id;
+    } else {
+      if (isEditingSubService && effectiveParent) {
+        applySubServicePricingRules(effectiveParent, payload);
+      }
+      if (data.category_id) {
+        payload.category_id = data.category_id;
+      }
     }
 
     return payload;
@@ -230,25 +247,54 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
         logo: null,
         category_id: undefined,
         gender: defaultGender ?? (parentService?.gender ?? undefined),
-        price_type: undefined,
+        price_type: isParentFree
+          ? PRICE_TYPE.FREE
+          : isParentFixed
+            ? PRICE_TYPE.FIXED
+            : isParentFrom
+              ? PRICE_TYPE.FROM
+              : undefined,
         duration: "",
-        price: "",
+        price: isParentFree
+          ? "0"
+          : isParentFixed && parentService?.price != null
+            ? String(parentService.price)
+            : isParentFrom && parentService?.price != null
+              ? String(parentService.price)
+              : "",
         discount: undefined,
         discount_type: undefined,
         is_active: true,
         is_popular: false,
       });
     } else if (mode === "update" && service) {
-      const isServiceFree = service.price_type === PRICE_TYPE.FREE;
+      const isServiceFree = isParentFree || service.price_type === PRICE_TYPE.FREE;
+      const initialPriceType = isParentFree
+        ? PRICE_TYPE.FREE
+        : isParentFixed
+          ? PRICE_TYPE.FIXED
+          : isParentFrom
+            ? PRICE_TYPE.FROM
+            : service.price_type;
+      const initialPrice = isServiceFree
+        ? "0"
+        : isParentFixed && effectiveParent?.price != null
+          ? String(effectiveParent.price)
+          : service.price == null
+            ? isParentFrom && effectiveParent?.price != null
+              ? String(effectiveParent.price)
+              : ""
+            : String(service.price);
+
       const defaults = {
         name: service.name ?? "",
         description: service.description ?? "",
         logo: null,
         category_id: service?.category?.uuid,
         gender: defaultGender ?? service.gender,
-        price_type: service.price_type,
+        price_type: initialPriceType,
         duration: service.duration == null ? "" : String(service.duration),
-        price: isServiceFree ? "0" : (service.price == null ? "" : String(service.price)),
+        price: initialPrice,
         discount:
           isServiceFree || service.discount == null || Number(service.discount) === 0
             ? ""
@@ -260,7 +306,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
       setInitialValues(defaults);
       reset(defaults);
     }
-  }, [open, mode, service, parentService, reset, defaultGender]);
+  }, [open, mode, service, parentService, effectiveParent, isParentFree, isParentFixed, isParentFrom, reset, defaultGender]);
 
   return (
     <Dialog
@@ -353,20 +399,26 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   placeholder="Price Type"
                   identifier="service-price-type"
                   options={PriceTypeOptions}
-                  disabled={isLoading}
+                  disabled={isLoading || isSubServicePriceTypeLocked}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextField
                   type="number"
-                  min={0}
+                  min={parentMinPrice > 0 ? parentMinPrice : 0}
                   label="Price"
                   name="price"
                   control={control}
                   identifier="service-price"
-                  placeholder={isFree ? "0" : "Enter price"}
-                  disabled={isLoading || isFree}
+                  placeholder={
+                    isFree
+                      ? "0"
+                      : parentMinPrice > 0
+                        ? `Minimum ₹${parentMinPrice}`
+                        : "Enter price"
+                  }
+                  disabled={isLoading || isFree || isSubServicePriceValueLocked}
                   maxLength={FIELD_LIMITS.PRICE}
                 />
 

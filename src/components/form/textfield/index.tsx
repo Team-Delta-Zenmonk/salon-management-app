@@ -171,6 +171,7 @@ const TextField = <T extends FieldValues>({
                       identifier={identifier}
                       min={min}
                       max={max}
+                      disabled={disabled}
                     />
                   ) : onEndAdornmentClick ? (
                     <button

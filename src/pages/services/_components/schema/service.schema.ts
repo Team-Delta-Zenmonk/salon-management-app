@@ -7,7 +7,11 @@ import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
 import { getCurrencyConfig } from "../../../../common/currencies.config";
 
-export const getServiceSchema = (isSubService: boolean = false, currencyCode?: string) => {
+export const getServiceSchema = (
+  isSubService: boolean = false,
+  currencyCode?: string,
+  parentService?: { price_type?: string; price?: number } | null
+) => {
   const currencyConfig = getCurrencyConfig(currencyCode);
   return z
     .object({
@@ -62,6 +66,21 @@ export const getServiceSchema = (isSubService: boolean = false, currencyCode?: s
     })
     .superRefine((data, ctx) => {
       const numPrice = Number(data.price);
+
+      if (
+        isSubService &&
+        parentService &&
+        parentService.price_type === PRICE_TYPE.FROM &&
+        parentService.price != null
+      ) {
+        if (!isNaN(numPrice) && numPrice < parentService.price) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["price"],
+            message: `Price must be at least ${currencyConfig.symbol}${parentService.price}`,
+          });
+        }
+      }
 
       if (data.price_type === PRICE_TYPE.FIXED || data.price_type === PRICE_TYPE.FROM) {
         if (!isNaN(numPrice) && numPrice < currencyConfig.minServicePrice) {

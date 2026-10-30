@@ -16,6 +16,7 @@ export interface Service {
   category_id?: number | null;
   category?: Category;
   parent_id?: string | null;
+  parent?: Service | null;
   is_active: boolean;
   is_popular: boolean;
   gender: ServiceGender;

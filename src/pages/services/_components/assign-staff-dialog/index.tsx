@@ -177,7 +177,7 @@ export default function AssignStaffDialog({
     reset({ staff_ids: [] });
     dispatch(listStaffAction({ page: 1, limit: 10 }));
 
-    listServiceStaff(serviceUuid, salonUUID, { page: 1, limit: 1000, include_parent: false })
+    listServiceStaff(serviceUuid, salonUUID, { page: 1, limit: 100, include_parent: false })
       .then((res) => {
         const rows: AssignedStaffService[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
         setAssignedStaffServices(rows);

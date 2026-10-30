@@ -238,6 +238,7 @@ export default function ListServices({
           onClose={handleCloseEdit}
           mode="update"
           service={selectedService}
+          parentService={activeParentService && editingSubServiceParent === activeParentService.uuid ? activeParentService : (services.find((s) => s.uuid === editingSubServiceParent) || undefined)}
           onCreated={async () => {
             if (editingSubServiceParent) {
               triggerSubServiceRefresh(editingSubServiceParent);
