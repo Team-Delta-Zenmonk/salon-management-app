@@ -18,6 +18,7 @@ import { createCategorySchema, type CreateCategoryForm } from "../schema/create-
 import type { UseFormSetValue } from "react-hook-form";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
+import { useAppSelector } from "../../../../store/hooks";
 
 interface CreateCategoryModalProps {
   open: boolean;
@@ -35,7 +36,9 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   setValue,
 }) => {
   const [loading, setLoading] = useState(false);
-  const { control, handleSubmit, reset } = useForm<CreateCategoryForm>({
+  const existingCategories = useAppSelector((state) => state.itemsCategory.data);
+
+  const { control, handleSubmit, reset, setError, clearErrors } = useForm<CreateCategoryForm>({
     resolver: zodResolver(createCategorySchema),
     defaultValues: {
       name: "",
@@ -45,24 +48,47 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   React.useEffect(() => {
     if (open) {
       reset({ name: "" });
+      clearErrors();
     }
-  }, [open, reset]);
+  }, [open, reset, clearErrors]);
 
   const onSubmit = async (data: CreateCategoryForm) => {
+    const trimmedName = data.name.trim();
+
+    const isDuplicate = existingCategories.some(
+      (cat) => cat.name?.trim().toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      const duplicateMsg = "Category with this name already exists";
+      setError("name", {
+        type: "manual",
+        message: duplicateMsg,
+      });
+      callSnack(duplicateMsg, "error");
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await createItemCategory({ name: data.name.trim().toLowerCase() });
+      const res = await createItemCategory({ name: trimmedName.toLowerCase() });
       setValue("category_uuid", res?.uuid || "");
       callSnack("Category created successfully", "success");
       onSuccess(res.data || res);
       onClose();
 
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      callSnack(
-        err?.response?.data?.message || "Failed to create category",
-        "error"
-      );
+    } catch (error: any) {
+      const errorMessage =
+        (typeof error?.response?.data === "string" ? error.response.data : "") ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create category";
+
+      setError("name", {
+        type: "manual",
+        message: errorMessage,
+      });
+      callSnack(errorMessage, "error");
     } finally {
       setLoading(false);
     }

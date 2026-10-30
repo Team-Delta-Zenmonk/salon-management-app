@@ -10,7 +10,10 @@ export const createItemCategoryAction = createAsyncThunk(
       return res;
     } catch (err: any) {
       return thunkAPI.rejectWithValue({
-        message: err?.response?.data?.message || "Unable to create item category",
+        message:
+          (typeof err?.response?.data === "string" ? err.response.data : "") ||
+          err?.response?.data?.message ||
+          "Unable to create item category",
       });
     }
   }

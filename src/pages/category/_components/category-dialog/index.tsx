@@ -38,7 +38,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
     },
   });
 
-  const { handleSubmit, control, reset, watch } = methods;
+  const { handleSubmit, control, reset, watch, setError } = methods;
 
   const currentValues = watch();
   const isChanged = useMemo(
@@ -93,7 +93,17 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
 
       onClose();
     } catch (err: any) {
-      callSnack(err?.response?.data?.message || "Category with this name already exists", "error");
+      const errorMessage =
+        (typeof err?.response?.data === "string" ? err.response.data : "") ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Category with this name already exists";
+
+      setError("name", {
+        type: "manual",
+        message: errorMessage,
+      });
+      callSnack(errorMessage, "error");
     } finally {
       setIsLoading(false);
     }
