@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 interface SubServiceImageProps {
   src?: string | null;
@@ -39,10 +40,10 @@ export const SubServiceImage: React.FC<SubServiceImageProps> = ({
         </div>
       )}
       <img
-        src={src}
+        src={getOptimizedImageUrl(src, MEDIA_PRESETS.AVATAR)}
         alt={alt}
         className={cn(
-          "size-full object-cover transition-opacity duration-200",
+          "size-full object-cover object-[center_20%] transition-opacity duration-200",
           loading ? "opacity-0" : "opacity-100",
           className
         )}

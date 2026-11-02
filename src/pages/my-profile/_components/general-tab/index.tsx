@@ -21,6 +21,8 @@ import { callSnack } from "../../../../components/snackbar";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import type { CloudinaryFile } from "../../../../common/cloudinary.schema";
+import { Badge } from "../../../../components/ui/badge";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 interface BrandingSectionProps {
   control: Control<SalonProfileForm>;
@@ -124,7 +126,11 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
             className="relative w-20 h-20 rounded-2xl overflow-hidden border border-border/50 bg-background/40 flex items-center justify-center shadow-md hover:border-primary/20 transition-all duration-300 group shrink-0 cursor-pointer"
           >
             {logo?.url ? (
-              <img src={logo.url} className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" alt="Logo Preview" />
+              <img
+                src={getOptimizedImageUrl(logo.url, MEDIA_PRESETS.AVATAR)}
+                className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                alt="Logo Preview"
+              />
             ) : (
               <Store className="w-7 h-7 text-muted-foreground/30" />
             )}
@@ -184,9 +190,14 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
         <div className="space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <p className="text-xs font-bold text-foreground">Gallery & Cover Photos</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-bold text-foreground">Gallery & Cover Photos</p>
+                <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal border-primary/30 text-primary">
+                  1st Photo = Cover Banner
+                </Badge>
+              </div>
               <p className="text-[10px] text-muted-foreground/80 leading-relaxed">
-                These images will be displayed on client-facing booking pages.
+                The 1st photo serves as your primary Storefront & Profile Cover (recommended: 1920 × 640 px, landscape). Remaining photos appear in your Gallery Showcase.
               </p>
             </div>
           </div>
@@ -213,8 +224,11 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                 className="group relative rounded-2xl overflow-hidden border border-border/50 bg-background/40 shadow-sm hover:border-primary/30 transition-all duration-300 flex flex-col aspect-[4/3] cursor-pointer"
                 onClick={() => openLightbox(0)}
               >
+                <div className="absolute top-1.5 left-1.5 bg-black/75 backdrop-blur-xs text-white px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider uppercase z-20 shadow-xs pointer-events-none border border-white/20">
+                  Cover
+                </div>
                 <img 
-                  src={photos[0].url} 
+                  src={getOptimizedImageUrl(photos[0].url, MEDIA_PRESETS.SALON_GALLERY_THUMB)} 
                   alt={photos[0].filename || "Cover 1"} 
                   className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                 />
@@ -252,7 +266,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                 }}
               >
                 <img 
-                  src={photos[1].url} 
+                  src={getOptimizedImageUrl(photos[1].url, MEDIA_PRESETS.SALON_GALLERY_THUMB)} 
                   alt={photos[1].filename || "Cover 2"} 
                   className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                 />
@@ -305,7 +319,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
                     onClick={() => openLightbox(index)}
                   >
                     <img
-                      src={photo.url}
+                      src={getOptimizedImageUrl(photo.url, MEDIA_PRESETS.SALON_GALLERY_THUMB)}
                       alt={photo.filename || `Photo ${index + 1}`}
                       className="object-cover w-full h-full"
                     />

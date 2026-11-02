@@ -22,6 +22,7 @@ import PaymentPolicyCard from "./_components/payment-policy-card/index";
 import { UnsavedChangesBanner } from "../../components/unsaved-changes-banner";
 import { EllipsisCell } from "../../components/ellipse-cell";
 import type { CloudinaryFile } from "../../common/cloudinary.schema";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../common/utils/media.utils";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -263,7 +264,7 @@ const MyProfile = () => {
               >
                 <motion.div
                   variants={itemVariants}
-                  className="relative group rounded-2xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg min-h-[220px] sm:min-h-[250px] md:h-[280px] hover:shadow-xl hover:border-primary/30 transition-all duration-300 w-full"
+                  className="relative group rounded-2xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-md shadow-lg min-h-[260px] sm:min-h-[300px] md:h-[380px] lg:h-[400px] hover:shadow-xl hover:border-primary/30 transition-all duration-300 w-full"
                 >
                   {activePhotos.length > 0 ? (
                     <Carousel
@@ -274,9 +275,9 @@ const MyProfile = () => {
                     >
                       <CarouselContent className="h-full -ml-0">
                         {activePhotos.map((photo: PhotoType, index: number) => (
-                          <CarouselItem key={photo.url || index} className="pl-0 min-h-[220px] sm:min-h-[250px] md:h-[280px] w-full">
+                          <CarouselItem key={photo.url || index} className="pl-0 min-h-[260px] sm:min-h-[300px] md:h-[380px] lg:h-[400px] w-full">
                             <img
-                              src={photo.url}
+                              src={getOptimizedImageUrl(photo.url, MEDIA_PRESETS.SALON_BANNER)}
                               alt={`Salon Banner ${index + 1}`}
                               className="w-full h-full object-cover object-center"
                             />
@@ -338,7 +339,7 @@ const MyProfile = () => {
                         activePhotos.length > 0 ? "border-white/20" : "border-border/60"
                       )}>
                         <img
-                          src={activeLogo?.url || "/management-icon.png"}
+                          src={getOptimizedImageUrl(activeLogo?.url, MEDIA_PRESETS.AVATAR) || "/management-icon.png"}
                           className="object-cover w-full h-full"
                           alt="Salon Logo"
                         />

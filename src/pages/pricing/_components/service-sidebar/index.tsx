@@ -9,6 +9,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import type { RootState } from "../../../../store/store";
 import { listServicesAction } from "../../../../features/service/list-services/list-service.action";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 interface ServiceSideBarProps {
   services: ServiceType[];
@@ -150,7 +151,11 @@ export default function ServiceSidebar({
                       )}
                     >
                       {s.logo ? (
-                        <AvatarImage src={s.logo} alt={s.name} />
+                        <AvatarImage
+                          src={getOptimizedImageUrl(s.logo, MEDIA_PRESETS.AVATAR)}
+                          alt={s.name}
+                          className="object-cover object-[center_20%]"
+                        />
                       ) : (
                         <AvatarFallback className={clsx("bg-transparent", isSelected ? "text-primary" : "text-muted-foreground")}>
                           <Layers className="h-5 w-5" />

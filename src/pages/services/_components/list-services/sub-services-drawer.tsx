@@ -17,6 +17,7 @@ import { Edit2Icon, Trash2Icon, UserPlusIcon, SparklesIcon, PlusIcon, ClockIcon,
 import type { Service } from "../../../../features/service/service.slice";
 import { EllipsisCell } from "../../../../components/ellipse-cell";
 import { SubServiceImage } from "./sub-service-image";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 interface SubServicesDrawerProps {
   open: boolean;
@@ -143,8 +144,9 @@ export function SubServicesDrawer({
           <div className="flex gap-4 items-center">
             <Avatar className="w-12 h-12 ring-2 ring-primary/10">
               <AvatarImage
-                src={parentService.logo || undefined}
+                src={getOptimizedImageUrl(parentService.logo, MEDIA_PRESETS.AVATAR) || undefined}
                 alt={parentService.name}
+                className="object-cover object-[center_20%]"
               />
               <AvatarFallback className="bg-primary/5 text-primary font-bold text-lg">
                 {parentService.name

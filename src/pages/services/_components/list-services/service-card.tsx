@@ -6,6 +6,7 @@ import { Button } from "../../../../components/ui/button";
 import { EllipsisCell } from "../../../../components/ellipse-cell";
 import type { Service } from "../../../../features/service/service.slice";
 import { cn } from "@/lib/utils";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 interface ServiceCardProps {
   service: Service;
@@ -51,9 +52,9 @@ export function ServiceCard({
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <Avatar className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ring-2 ring-primary/10 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10 shrink-0 overflow-hidden">
               <AvatarImage
-                src={service.logo || undefined}
+                src={getOptimizedImageUrl(service.logo, MEDIA_PRESETS.AVATAR) || undefined}
                 alt={service.name}
-                className="object-cover"
+                className="object-cover object-[center_20%]"
               />
               <AvatarFallback className="bg-primary/5 text-primary font-bold text-base sm:text-lg rounded-2xl">
                 {service.name ? service.name.charAt(0).toUpperCase() : "?"}
