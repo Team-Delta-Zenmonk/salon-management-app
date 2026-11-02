@@ -1,6 +1,6 @@
 import React from "react";
-import type { Control, UseFormSetValue, FieldPath } from "react-hook-form";
-import { useWatch } from "react-hook-form";
+import type { Control, UseFormSetValue, UseFormClearErrors, UseFormTrigger, FieldPath } from "react-hook-form";
+import { useWatch, useFormContext } from "react-hook-form";
 import type { SalonProfileForm } from "../../schema/my-profile.schema";
 import { DAY_KEYS, DAY_LABELS } from "../constants/business-hours.constants";
 import { Switch } from "../../../../components/ui/switch";
@@ -10,22 +10,40 @@ import TimePicker from "../../../../components/form/time-picker";
 interface HoursSectionProps {
   control: Control<SalonProfileForm>;
   setValue: UseFormSetValue<SalonProfileForm>;
+  clearErrors?: UseFormClearErrors<SalonProfileForm>;
+  trigger?: UseFormTrigger<SalonProfileForm>;
   isSaving: boolean;
 }
 
 export const HoursSection: React.FC<HoursSectionProps> = ({
   control,
   setValue,
+  clearErrors,
+  trigger,
 }) => {
+  const formContext = useFormContext<SalonProfileForm>();
+  const activeClearErrors = clearErrors || formContext?.clearErrors;
+  const activeTrigger = trigger || formContext?.trigger;
+
   const businessHours = useWatch({ control, name: "business_hours" }) || {};
 
   const handleToggleDay = (dayKey: string, checked: boolean) => {
     const path = `business_hours.${dayKey}` as FieldPath<SalonProfileForm>;
+    const startTimePath = `business_hours.${dayKey}.start_time` as FieldPath<SalonProfileForm>;
+    const endTimePath = `business_hours.${dayKey}.end_time` as FieldPath<SalonProfileForm>;
+
+    activeClearErrors?.([path, startTimePath, endTimePath]);
+
     if (checked) {
       setValue(path, { start_time: "09:00", end_time: "21:00" }, { shouldDirty: true });
     } else {
       setValue(path, null, { shouldDirty: true });
     }
+  };
+
+  const handleTimeChange = (dayKey: string) => {
+    const endTimePath = `business_hours.${dayKey}.end_time` as FieldPath<SalonProfileForm>;
+    activeTrigger?.(endTimePath);
   };
 
   return (
@@ -88,6 +106,7 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
                       identifier={`start-time-${dayKey}`}
                       triggerClassName="bg-white dark:bg-neutral-900 !h-8 text-xs"
                       isManual
+                      handleChange={() => handleTimeChange(dayKey)}
                     />
                   </div>
                   <div className="space-y-1">
@@ -99,6 +118,7 @@ export const HoursSection: React.FC<HoursSectionProps> = ({
                       identifier={`end-time-${dayKey}`}
                       triggerClassName="bg-white dark:bg-neutral-900 !h-8 text-xs"
                       isManual
+                      handleChange={() => handleTimeChange(dayKey)}
                     />
                   </div>
                 </div>

@@ -16,6 +16,7 @@ import {
   UserCheck,
   FileText,
   Loader2,
+  CreditCard,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Booking, BookingStatus, BookingServiceItem } from "../../../../types/booking.type";
@@ -23,9 +24,11 @@ import { BOOKING_STATUS } from "../../../../../../common/enums/booking-status.en
 import { formatTimeRange } from "../../../../utils/format-time-range";
 import { deleteBookingAction } from "../../../../../../features/booking/delete-booking/delete-booking.action";
 import { updateBookingAction } from "../../../../../../features/booking/update-booking/update-booking.action";
+import { collectRemainingPaymentAction } from "../../../../../../features/booking/collect-remaning-payment/collect-remaining-payment.action";
 import { useAppDispatch } from "../../../../../../store/hooks";
 import { callSnack } from "../../../../../../components/snackbar";
 import EllipsisCell from "@/components/ellipse-cell";
+import { cn } from "@/lib/utils";
 import BookingDialog from "../../../booking-dialog";
 import BookingActionConfirmDialog from "../booking-action-confirm-dialog";
 import BookingReceiptDialog from "../../../booking-receipt-dialog";
@@ -84,6 +87,7 @@ export default function BookingDetailsDialog({
   const [editOpen, setEditOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCollectingPayment, setIsCollectingPayment] = useState(false);
   const { downloadInvoice, isDownloading: isDownloadingInvoice } = useDownloadInvoice();
 
   const handleDownloadInvoice = () => {
@@ -127,14 +131,82 @@ export default function BookingDetailsDialog({
     onClose();
   };
 
-  const totalPrice = (booking?.booking_services ?? []).reduce(
-    (sum: number, bs: BookingServiceItem) => sum + (Number(bs.price) || 0),
-    0,
-  );
+  const handleCollectRemaining = async () => {
+    if (!booking) return;
+    setIsCollectingPayment(true);
+    try {
+      await dispatch(collectRemainingPaymentAction({ uuid: booking.uuid })).unwrap();
+      callSnack("Remaining payment collected successfully", "success");
+    } catch (err: any) {
+      callSnack(err?.message || "Failed to collect remaining payment", "error");
+    } finally {
+      setIsCollectingPayment(false);
+    }
+  };
+
+  const totalPrice = useMemo(() => {
+    return (
+      Number(booking?.total_price) ||
+      (booking?.booking_services ?? []).reduce(
+        (sum: number, bs: BookingServiceItem) => sum + (Number(bs.price) || 0),
+        0,
+      ) ||
+      0
+    );
+  }, [booking]);
+
   const totalDuration = (booking?.booking_services ?? []).reduce(
     (sum: number, bs: BookingServiceItem) => sum + (Number(bs.duration_minutes) || 0),
     0,
   );
+
+  const paymentBreakdown = useMemo(() => {
+    if (!booking) {
+      return {
+        total: 0,
+        paid: 0,
+        remaining: 0,
+        percentage: 0,
+        label: "Pay at Venue",
+        isFullyPaid: false,
+      };
+    }
+
+    const total = totalPrice;
+    const policy = booking.payment_preference || booking.payment_policy;
+    const onlinePaid = Number(booking.amount_paid_online) || 0;
+    const deposit = Number(booking.deposit_amount) || 0;
+    let paid = 0;
+    let label = "Pay at Venue";
+
+    if (policy === "full_upfront" || (onlinePaid > 0 && onlinePaid >= total)) {
+      paid = total;
+      label = "Paid Upfront";
+    } else if (policy === "partial_deposit" || (onlinePaid > 0 && onlinePaid < total)) {
+      paid = onlinePaid || deposit || 0;
+      label = "Partial Deposit";
+    } else if (policy === "pay_at_venue" || (!policy && onlinePaid === 0)) {
+      paid = deposit || 0;
+      label = "Pay at Venue";
+    }
+
+    const isFullyPaidFlag = isBookingFullyPaid(booking) || (total > 0 && paid >= total);
+    if (isFullyPaidFlag) {
+      paid = total;
+    }
+
+    const remaining = Math.max(0, total - paid);
+    const percentage = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+
+    return {
+      total,
+      paid,
+      remaining,
+      percentage,
+      label,
+      isFullyPaid: isFullyPaidFlag,
+    };
+  }, [booking, totalPrice]);
 
   return (
     <>
@@ -291,6 +363,79 @@ export default function BookingDetailsDialog({
                     )}
                   </motion.section>
 
+                  {/* Payment & Deposit Breakdown */}
+                  <motion.section
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15, duration: 0.2 }}
+                    className="rounded-2xl border border-border/60 bg-muted/20 p-4 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-primary" />
+                        <p className="text-xs font-bold text-foreground uppercase tracking-wider">
+                          Payment & Deposit
+                        </p>
+                      </div>
+                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-border/50 bg-background/80 text-foreground">
+                        {paymentBreakdown.label}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 pt-1 text-center">
+                      <div className="p-2.5 rounded-xl bg-background/80 border border-border/50">
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground/70 tracking-wider">Total</p>
+                        <p className="text-sm font-bold text-foreground mt-0.5">₹{Math.round(paymentBreakdown.total).toLocaleString("en-IN")}</p>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-background/80 border border-border/50">
+                        <p className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 tracking-wider">Paid / Deposit</p>
+                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">₹{Math.round(paymentBreakdown.paid).toLocaleString("en-IN")}</p>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-background/80 border border-border/50">
+                        <p className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400 tracking-wider">Remaining</p>
+                        <p className="text-sm font-bold text-amber-600 dark:text-amber-400 mt-0.5">₹{Math.round(paymentBreakdown.remaining).toLocaleString("en-IN")}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex justify-between items-center text-xs font-medium text-muted-foreground">
+                        <span>Payment Progress</span>
+                        <span className={cn(
+                          "font-semibold text-xs",
+                          paymentBreakdown.percentage === 100 ? "text-emerald-600 dark:text-emerald-400" : paymentBreakdown.percentage > 0 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"
+                        )}>
+                          {paymentBreakdown.percentage}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-muted/60 rounded-full h-2 overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all duration-500",
+                            paymentBreakdown.percentage === 100 ? "bg-emerald-500" : paymentBreakdown.percentage > 0 ? "bg-amber-500" : "bg-neutral-400"
+                          )}
+                          style={{ width: `${paymentBreakdown.percentage}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {paymentBreakdown.remaining > 0 && !isCancelled && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleCollectRemaining}
+                        disabled={isCollectingPayment}
+                        className="w-full mt-2 rounded-xl h-9 font-semibold text-xs gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm cursor-pointer"
+                      >
+                        {isCollectingPayment ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <IndianRupee className="h-3.5 w-3.5" />
+                        )}
+                        Pay Remaining (₹{Math.round(paymentBreakdown.remaining).toLocaleString("en-IN")})
+                      </Button>
+                    )}
+                  </motion.section>
+
                   {booking.notes?.trim() && (
                     <motion.section
                       initial={{ opacity: 0, y: 6 }}
@@ -346,12 +491,6 @@ export default function BookingDetailsDialog({
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           {isFutureBooking ? "Not Started Yet" : "Mark Complete"}
                         </Button>
-                      </div>
-
-                      <div className="flex items-center gap-3 py-0.5">
-                        <div className="flex-1 h-px bg-border/40" />
-                        <span className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-wider">Danger Zone</span>
-                        <div className="flex-1 h-px bg-border/40" />
                       </div>
 
                       <div className="grid gap-2 grid-cols-2">

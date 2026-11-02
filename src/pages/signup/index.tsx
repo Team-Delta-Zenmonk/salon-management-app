@@ -131,7 +131,7 @@ export default function SignUp() {
                           identifier="signup-salon-name"
                           placeholder="e.g. Glamour Studio"
                           disabled={isLoading}
-                          pattern={VALIDATE_PATTERN.alphabet}
+                          pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                           inputPropsClassName="bg-white dark:bg-neutral-900"
                           maxLength={FIELD_LIMITS.SALON_NAME}
                         />

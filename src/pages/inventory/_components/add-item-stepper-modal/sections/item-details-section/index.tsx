@@ -127,7 +127,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 placeholder="e.g., Haircare Shampoo"
                 maxLength={FIELD_LIMITS.ITEM_NAME}
                 disabled={loading}
-                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
+                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                 inputPropsClassName="capitalize"
               />
 
@@ -140,7 +140,7 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
                 placeholder="e.g., BrandName"
                 maxLength={FIELD_LIMITS.NAME}
                 disabled={loading}
-                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
+                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                 inputPropsClassName="capitalize"
               />
             </div>

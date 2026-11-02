@@ -4,7 +4,11 @@ import { FIELD_LIMITS } from "../../../common/field-limits";
 
 export const SignUpSchema = z
   .object({
-    salon_name: z.string({ message: "Required" }).min(1, "Required").max(FIELD_LIMITS.SALON_NAME, { message: `Max ${FIELD_LIMITS.SALON_NAME} characters` }),
+    salon_name: z
+      .string({ message: "Required" })
+      .min(1, "Required")
+      .max(FIELD_LIMITS.SALON_NAME, { message: `Max ${FIELD_LIMITS.SALON_NAME} characters` })
+      .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Only alphabets, numbers, and allowed characters are allowed" }),
     email: z
       .string({ message: "Required" })
       .email({ message: "Invalid Email" })

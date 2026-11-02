@@ -20,7 +20,7 @@ export const MyProfileSchema = z.object({
   name: z.string()
     .min(1, "Required")
     .max(FIELD_LIMITS.SALON_NAME, `Max ${FIELD_LIMITS.SALON_NAME} characters`)
-    .regex(VALIDATE_PATTERN.alphabet, "Only letters and spaces allowed"),
+    .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, "Only letters with numbers and special characters are allowed"),
   owner_name: z.string()
     .min(1, "Required")
     .max(FIELD_LIMITS.NAME, `Max ${FIELD_LIMITS.NAME} characters`)

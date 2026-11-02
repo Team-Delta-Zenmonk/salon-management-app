@@ -22,6 +22,7 @@ import Select from "../../../../components/form/select";
 import { useAppSelector } from "../../../../store/hooks";
 import { inventoryItemSchema, type InventoryItemForm } from "../schema/inventory-item.schema";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
+import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 
 interface EditProductModalProps {
   open: boolean;
@@ -157,6 +158,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                 label="Item Name"
                 maxLength={FIELD_LIMITS.ITEM_NAME}
                 disabled={loading}
+                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                 inputPropsClassName="capitalize"
               />
 
@@ -168,6 +170,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                 label="Brand"
                 maxLength={FIELD_LIMITS.NAME}
                 disabled={loading}
+                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                 inputPropsClassName="capitalize"
               />
 

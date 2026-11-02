@@ -19,8 +19,8 @@ export const getServiceSchema = (
         .string({ message: "Required" })
         .min(1, { message: "Required" })
         .max(FIELD_LIMITS.ITEM_NAME, { message: `Maximum ${FIELD_LIMITS.ITEM_NAME} characters` })
-        .regex(VALIDATE_PATTERN.alphabetWithSpecial, {
-          message: "Only alphabets and special characters are allowed",
+        .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, {
+          message: "Only alphabets, numbers, and allowed characters are allowed",
         }),
       description: z
         .string({ message: "Required" })

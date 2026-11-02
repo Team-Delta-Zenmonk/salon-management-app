@@ -365,21 +365,27 @@ export default function AssignServicesDialog({
       const toAssign: {
         staff_uuid: string;
         service_uuid: string;
-        price_type: string;
+        price_type?: string;
         price: number;
-        duration: number;
+        duration?: number;
       }[] = [];
 
       selectedUuids.forEach((serviceUuid) => {
         if (!existingAssignedMap.has(serviceUuid)) {
           const srv = allKnownServices.get(serviceUuid);
-          const rawPrice = srv?.price_type === "free" ? 0 : Number(srv?.price ?? 0);
+          const isFree = srv?.price_type === "free";
+          const resolvedPrice = isFree
+            ? 0
+            : srv?.price != null && !isNaN(Number(srv.price))
+            ? Number(srv.price)
+            : 0;
+
           toAssign.push({
             staff_uuid: staff.uuid,
             service_uuid: serviceUuid,
-            price_type: srv?.price_type || "fixed",
-            price: Number.isFinite(rawPrice) ? rawPrice : 0,
-            duration: Number(srv?.duration) || 0,
+            price_type: srv?.price_type,
+            price: resolvedPrice,
+            duration: srv?.duration ? Number(srv.duration) : undefined,
           });
         }
       });

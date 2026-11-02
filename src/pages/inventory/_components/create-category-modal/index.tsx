@@ -114,7 +114,7 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
               placeholder="Enter category name"
               maxLength={FIELD_LIMITS.ITEM_NAME}
               disabled={loading}
-              pattern={VALIDATE_PATTERN.alphabetWithSpecial}
+              pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
             />
           </div>
 

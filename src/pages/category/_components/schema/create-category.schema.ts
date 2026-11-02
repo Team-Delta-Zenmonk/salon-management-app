@@ -10,7 +10,7 @@ export const categorySchema = z.object({
     .min(1, { message: "Required" })
     .min(2, { message: "Minimum 2 characters length is required" })
     .max(FIELD_LIMITS.ITEM_NAME, { message: `Max ${FIELD_LIMITS.ITEM_NAME} characters` })
-    .regex(VALIDATE_PATTERN.alphabetWithSpecial, { message: "Only alphabets and special characters are allowed" }),
+    .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Only alphabets, numbers, and allowed characters are allowed" }),
   description: z
     .string({ message: "Required" })
     .trim()

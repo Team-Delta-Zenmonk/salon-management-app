@@ -22,7 +22,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           control={control}
           identifier="staff-title"
           disabled={disabled}
-          pattern={VALIDATE_PATTERN.alphabet}
+          pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
           maxLength={FIELD_LIMITS.TITLE}
           placeholder="Stylist, Barber, Receptionist, etc."
           inputPropsClassName="capitalize"

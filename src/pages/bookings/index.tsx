@@ -2,13 +2,10 @@ import { useState, useMemo, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import { CalendarDays, LayoutList } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
 import CustomScheduler from "./_components/custom-scheduler";
 import CreateBooking from "./_components/create-booking";
 import BookingDetailsDialog from "./_components/booking-calender/_components/booking-detail-drawer";
-import BookingTable from "./_components/booking-table";
-import BookingReceiptDialog from "./_components/booking-receipt-dialog";
 import type { Booking, BookingStatus } from "./types/booking.type";
 import { formatBookingItem } from "./utils/format-booking-item";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -22,7 +19,6 @@ import { ALL_SERVICES_VALUE, ALL_STAFF_VALUE, BOOKING_STATUS_COLORS } from "./co
 import { listStaffAction } from "../../features/staff/list-staff/list-staff.action";
 import { listServicesAction } from "../../features/service/list-services/list-service.action";
 import Select from "../../components/form/select";
-import { Button } from "@/components/ui/button";
 import BookingFilterDialog from "./_components/booking-filter-dialog";
 import HierarchicalServiceSelect from "@/components/hierarchical-service-select";
 import { Controller } from "react-hook-form";
@@ -43,12 +39,10 @@ export default function BookingPage() {
     return (services || []).filter((s) => s.parent_id === null || s.parent_id === undefined);
   }, [services]);
   const [servicePage, setServicePage] = useState(1);
-  const { data: bookings, total, page, limit, loading, updatingBookingUuid } = useAppSelector((state) => state.booking);
+  const { data: bookings, loading, updatingBookingUuid } = useAppSelector((state) => state.booking);
 
-  const [viewMode, setViewMode] = useState<"calendar" | "table">("calendar");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [receiptBooking, setReceiptBooking] = useState<Booking | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [statePage, setStatePage] = useState(1);
 
@@ -87,7 +81,7 @@ export default function BookingPage() {
 
   useEffect(() => {
     setStatePage(1);
-  }, [startDateStr, endDateStr, selectedPayment, selectedStaff, selectedService, viewMode]);
+  }, [startDateStr, endDateStr, selectedPayment, selectedStaff, selectedService]);
 
   useEffect(() => {
     dispatch(
@@ -97,13 +91,13 @@ export default function BookingPage() {
         end_date: endDateStr,
         page: statePage,
         limit: 10,
-        view: viewMode,
+        view: "calendar",
         payment_policy: selectedPayment !== "ALL" ? selectedPayment : undefined,
         staff_uuid: selectedStaff !== ALL_STAFF_VALUE ? selectedStaff : undefined,
         service_uuid: selectedService !== ALL_SERVICES_VALUE ? selectedService : undefined,
       })
     );
-  }, [dispatch, startDateStr, endDateStr, statePage, viewMode, selectedPayment, selectedStaff, selectedService]);
+  }, [dispatch, startDateStr, endDateStr, statePage, selectedPayment, selectedStaff, selectedService]);
 
   const staffOptions = useMemo(
     () => [
@@ -214,10 +208,10 @@ export default function BookingPage() {
     { label: "Online", color: "#10b981", dotClass: "bg-emerald-500" },
   ];
 
-  const liveReceiptBooking = useMemo(() => {
-    if (!receiptBooking) return null;
-    return mappedBookings.find((b) => b.uuid === receiptBooking.uuid) || receiptBooking;
-  }, [mappedBookings, receiptBooking]);
+  const liveSelectedBooking = useMemo(() => {
+    if (!selectedBooking) return null;
+    return mappedBookings.find((b) => b.uuid === selectedBooking.uuid) || selectedBooking;
+  }, [mappedBookings, selectedBooking]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden min-w-0">
@@ -297,52 +291,19 @@ export default function BookingPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 justify-start">
-          {viewMode === "calendar" && (
-            <div className="hidden sm:flex flex-wrap items-center gap-2">
-              {statusLegend.map(({ label, color, dotClass }) => (
-                <span
-                  key={label}
-                  className={`inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold py-1.5 px-2.5 rounded-full border backdrop-blur-sm transition-all border-border/50 bg-card/60 text-muted-foreground`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass || ""}`}
-                    style={!dotClass ? { backgroundColor: color } : undefined}
-                  />
-                  {label}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center justify-center p-1 rounded-xl bg-card/60 backdrop-blur-md border border-border/50 shadow-sm gap-1 shrink-0">
-            <Button
-              variant={viewMode === "calendar" ? "secondary" : "ghost"}
-              size="xs"
-              onClick={() => setViewMode("calendar")}
-              className={`h-8 px-3 flex-1 sm:flex-initial justify-center rounded-lg font-bold gap-1.5 text-xs transition-all ${
-                viewMode === "calendar"
-                  ? "bg-background text-foreground shadow-sm border border-border/50"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+        <div className="hidden sm:flex flex-wrap items-center gap-2">
+          {statusLegend.map(({ label, color, dotClass }) => (
+            <span
+              key={label}
+              className="inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold py-1.5 px-2.5 rounded-full border backdrop-blur-sm transition-all border-border/50 bg-card/60 text-muted-foreground"
             >
-              <CalendarDays className="w-3.5 h-3.5" />
-              Calendar
-            </Button>
-            <Button
-              variant={viewMode === "table" ? "secondary" : "ghost"}
-              size="xs"
-              onClick={() => setViewMode("table")}
-              className={`h-8 px-3 flex-1 sm:flex-initial justify-center rounded-lg font-bold gap-1.5 text-xs transition-all ${
-                viewMode === "table"
-                  ? "bg-background text-foreground shadow-sm border border-border/50"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <LayoutList className="w-3.5 h-3.5" />
-              Table
-            </Button>
-          </div>
+              <span
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass || ""}`}
+                style={!dotClass ? { backgroundColor: color } : undefined}
+              />
+              {label}
+            </span>
+          ))}
         </div>
       </motion.div>
 
@@ -352,49 +313,28 @@ export default function BookingPage() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="w-full flex-1 flex flex-col min-w-0"
       >
-        {viewMode === "calendar" ? (
-          <CustomScheduler
-            bookings={filteredBookings}
-            currentDate={currentDate}
-            onDateChange={setCurrentDate}
-            updateBookingStatus={(uuid, status) => dispatch(updateBookingAction({ uuid, body: { status } }))}
-            getStatusColor={getStatusColor}
-            onEventClick={handleEventClick}
-            updatingBookingUuid={updatingBookingUuid}
-          />
-        ) : (
-          <BookingTable
-            bookings={filteredBookings}
-            onViewReceipt={(b) => setReceiptBooking(b)}
-            hasMore={bookings.length < total}
-            fetchMoreBookings={() => {
-              if (!loading && bookings.length < total) {
-                setStatePage((prev) => prev + 1);
-              }
-            }}
-            loading={loading}
-            updatingBookingUuid={updatingBookingUuid}
-          />
-        )}
+        <CustomScheduler
+          bookings={filteredBookings}
+          currentDate={currentDate}
+          onDateChange={setCurrentDate}
+          updateBookingStatus={(uuid, status) => dispatch(updateBookingAction({ uuid, body: { status } }))}
+          getStatusColor={getStatusColor}
+          onEventClick={handleEventClick}
+          updatingBookingUuid={updatingBookingUuid}
+        />
       </motion.div>
 
       <div className="h-8 w-full shrink-0" />
 
       <BookingDetailsDialog
         open={isDrawerOpen}
-        booking={selectedBooking}
+        booking={liveSelectedBooking}
         onClose={() => {
           setIsDrawerOpen(false);
           setSelectedBooking(null);
         }}
         getStatusColor={getStatusColor}
         onCancel={handleCancel}
-      />
-
-      <BookingReceiptDialog
-        open={Boolean(receiptBooking)}
-        onClose={() => setReceiptBooking(null)}
-        booking={liveReceiptBooking}
       />
     </div>
   );

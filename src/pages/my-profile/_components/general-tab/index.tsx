@@ -414,7 +414,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
               identifier="salon-name-field"
               rules={{ required: "Salon name is required" }}
               maxLength={FIELD_LIMITS.SALON_NAME}
-              pattern={VALIDATE_PATTERN.alphabet}
+              pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
               inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
             />
           </div>

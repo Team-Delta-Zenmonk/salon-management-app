@@ -152,7 +152,7 @@ const MyProfile = () => {
     },
   });
 
-  const { control, handleSubmit, setValue, clearErrors, watch, reset, formState: { isDirty } } = methods;
+  const { control, handleSubmit, setValue, clearErrors, trigger, watch, reset, formState: { isDirty } } = methods;
 
   const onSubmit = async (data: SalonProfileForm) => {
     setIsSaving(true);
@@ -419,6 +419,8 @@ const MyProfile = () => {
                   <HoursSection
                     control={control}
                     setValue={setValue}
+                    clearErrors={clearErrors}
+                    trigger={trigger}
                     isSaving={isSaving}
                   />
                 </motion.div>

@@ -127,7 +127,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 name="name"
                 control={control}
                 identifier="category-name"
-                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
+                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                 disabled={isLoading}
                 maxLength={FIELD_LIMITS.ITEM_NAME}
               />
@@ -139,7 +139,7 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
                 control={control}
                 identifier="category-description"
                 disabled={isLoading}
-                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
+                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                 maxLength={FIELD_LIMITS.DESCRIPTION}
                 multiline
               />

@@ -204,13 +204,20 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
           const staffList = Array.isArray(parentStaff) ? parentStaff : (parentStaff?.data ?? parentStaff?.rows ?? []);
           const subServiceUuid = createdService?.uuid || createdService?.data?.uuid;
 
+          const isFree = (payload.price_type as string) === PRICE_TYPE.FREE;
+          const resolvedPrice = isFree
+            ? 0
+            : payload.price != null && !isNaN(Number(payload.price))
+            ? Number(payload.price)
+            : 0;
+
           const staff_services = staffList
             .map((item: any) => ({
               service_uuid: subServiceUuid,
               staff_uuid: item.staff?.uuid || item.staff_uuid,
               price_type: payload.price_type,
-              price: Number(payload.price ?? 0),
-              duration: Number(payload.duration ?? 0),
+              price: resolvedPrice,
+              duration: payload.duration,
             }))
             .filter((item: any) => item.staff_uuid);
 
@@ -371,7 +378,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 placeholder="Enter service name"
                 disabled={isLoading}
                 maxLength={FIELD_LIMITS.ITEM_NAME}
-                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
+                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
               />
 
               <TextField
