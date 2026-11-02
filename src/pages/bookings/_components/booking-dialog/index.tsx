@@ -187,6 +187,16 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         const res = await listServiceStaff(service.uuid, salon.uuid, { include_parent: true });
         const data = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
         setStaffMap((prev) => ({ ...prev, [rowIndex]: { loading: false, data, serviceId: Number(serviceId) } }));
+
+        const currentSelectedStaffId = watchedServices?.[rowIndex]?.staff_id;
+        if (currentSelectedStaffId) {
+          const isStillValid = data.some(
+            (item: any) => String(item.staff_id) === String(currentSelectedStaffId) && !isStaffInactive(item.staff)
+          );
+          if (!isStillValid) {
+            setValue(`services.${rowIndex}.staff_id`, "" as any);
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch staff for row", rowIndex, err);
         callSnack("Failed to load staff for service", "error");
@@ -195,7 +205,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
         delete inFlightStaffRequests.current[cacheKey];
       }
     },
-    [services, subServiceCache, salon?.uuid],
+    [services, subServiceCache, salon?.uuid, watchedServices, setValue],
   );
 
   useEffect(() => {
@@ -283,9 +293,10 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
       const bookingServices = booking.booking_services?.map((bs: any) => {
         const isInactive = isStaffInactive(bs.staff);
+        const hasStaffDetails = Boolean(bs.staff?.first_name || bs.staff?.name);
         return {
           service_id: String(bs.service_id),
-          staff_id: bs.staff_id != null && !isInactive ? String(bs.staff_id) : undefined,
+          staff_id: bs.staff_id != null && !isInactive && hasStaffDetails ? String(bs.staff_id) : undefined,
         };
       }) ?? [{ ...EMPTY_SERVICE }];
 

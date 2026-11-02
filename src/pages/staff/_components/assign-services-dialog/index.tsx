@@ -209,27 +209,121 @@ export default function AssignServicesDialog({
   );
 
   const handleToggleParent = useCallback(
-    (parentService: Service) => {
+    async (parentService: Service) => {
       const parentUuid = parentService.uuid;
       const subInfo = subServicesMap[parentUuid];
-      const subItems = subInfo?.items || [];
-      const subUuids = subItems.map((s) => s.uuid);
+      let subItems = subInfo?.items || [];
+      const hasSubServices = Number(parentService.sub_services_count ?? 0) > 0;
 
-      setSelectedUuids((prev) => {
-        const next = new Set(prev);
-        const isParentSelected = next.has(parentUuid);
+      const assignedSubUuids = assignedStaffServices
+        .filter((ss) => ss.service?.parent_id === parentService.id)
+        .map((ss) => ss.service?.uuid)
+        .filter(Boolean) as string[];
 
-        if (isParentSelected) {
-          next.delete(parentUuid);
-          subUuids.forEach((u) => next.delete(u));
-        } else {
+      const subSelectedCount = subItems.filter((sub) => selectedUuids.has(sub.uuid)).length;
+      const hasAssignedSubService = assignedSubUuids.some((uuid) => selectedUuids.has(uuid));
+      const hasSubSelected = subSelectedCount > 0 || hasAssignedSubService;
+      const isParentSelected = selectedUuids.has(parentUuid);
+
+      const allSubSelected = subItems.length > 0 && subSelectedCount === subItems.length;
+      const isPartial = !isParentSelected && hasSubSelected;
+      const isComplete = isParentSelected || allSubSelected;
+
+      if (isPartial) {
+        setSelectedUuids((prev) => {
+          const next = new Set(prev);
           next.add(parentUuid);
-          subUuids.forEach((u) => next.add(u));
+          subItems.forEach((s) => next.add(s.uuid));
+          assignedSubUuids.forEach((u) => next.add(u));
+          return next;
+        });
+
+        if (hasSubServices && (!subInfo || subInfo.hasMore)) {
+          try {
+            const res = await listSubServicesService(parentUuid, { page: 1, limit: 100 });
+            const rows: Service[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
+            if (rows.length > 0) {
+              setSubServicesMap((prev) => {
+                const prevItems = prev[parentUuid]?.items || [];
+                const existingMap = new Map(prevItems.map((item) => [item.id, item]));
+                rows.forEach((r) => existingMap.set(r.id, r));
+                const combined = Array.from(existingMap.values());
+                return {
+                  ...prev,
+                  [parentUuid]: {
+                    items: combined,
+                    page: 1,
+                    limit: Math.max(10, rows.length),
+                    total: res?.count ?? res?.total ?? combined.length,
+                    hasMore: false,
+                    loading: false,
+                  },
+                };
+              });
+
+              setSelectedUuids((prev) => {
+                const next = new Set(prev);
+                rows.forEach((s) => next.add(s.uuid));
+                return next;
+              });
+            }
+          } catch (e) {
+            console.error("Failed to load subservices on parent selection", e);
+          }
         }
-        return next;
-      });
+      } else if (isComplete) {
+        setSelectedUuids((prev) => {
+          const next = new Set(prev);
+          next.delete(parentUuid);
+          subItems.forEach((s) => next.delete(s.uuid));
+          assignedSubUuids.forEach((u) => next.delete(u));
+          return next;
+        });
+      } else {
+        setSelectedUuids((prev) => {
+          const next = new Set(prev);
+          next.add(parentUuid);
+          subItems.forEach((s) => next.add(s.uuid));
+          assignedSubUuids.forEach((u) => next.add(u));
+          return next;
+        });
+
+        if (hasSubServices && (!subInfo || subInfo.hasMore)) {
+          try {
+            const res = await listSubServicesService(parentUuid, { page: 1, limit: 100 });
+            const rows: Service[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
+            if (rows.length > 0) {
+              setSubServicesMap((prev) => {
+                const prevItems = prev[parentUuid]?.items || [];
+                const existingMap = new Map(prevItems.map((item) => [item.id, item]));
+                rows.forEach((r) => existingMap.set(r.id, r));
+                const combined = Array.from(existingMap.values());
+                return {
+                  ...prev,
+                  [parentUuid]: {
+                    items: combined,
+                    page: 1,
+                    limit: Math.max(10, rows.length),
+                    total: res?.count ?? res?.total ?? combined.length,
+                    hasMore: false,
+                    loading: false,
+                  },
+                };
+              });
+
+              setSelectedUuids((prev) => {
+                const next = new Set(prev);
+                rows.forEach((s) => next.add(s.uuid));
+                return next;
+              });
+            }
+          } catch (e) {
+            console.error("Failed to load subservices on parent selection", e);
+          }
+        }
+      }
     },
-    [subServicesMap],
+    [subServicesMap, assignedStaffServices, selectedUuids],
   );
 
   const handleToggleChild = useCallback((subService: Service, parentService: Service) => {
@@ -271,20 +365,21 @@ export default function AssignServicesDialog({
       const toAssign: {
         staff_uuid: string;
         service_uuid: string;
-        price_type?: string;
-        price?: number;
-        duration?: number;
+        price_type: string;
+        price: number;
+        duration: number;
       }[] = [];
 
       selectedUuids.forEach((serviceUuid) => {
         if (!existingAssignedMap.has(serviceUuid)) {
           const srv = allKnownServices.get(serviceUuid);
+          const rawPrice = srv?.price_type === "free" ? 0 : Number(srv?.price ?? 0);
           toAssign.push({
             staff_uuid: staff.uuid,
             service_uuid: serviceUuid,
-            price_type: srv?.price_type,
-            price: srv?.price ? Number(srv.price) : undefined,
-            duration: srv?.duration ? Number(srv.duration) : undefined,
+            price_type: srv?.price_type || "fixed",
+            price: Number.isFinite(rawPrice) ? rawPrice : 0,
+            duration: Number(srv?.duration) || 0,
           });
         }
       });
@@ -314,8 +409,8 @@ export default function AssignServicesDialog({
         typeof responseData === "string"
           ? responseData
           : responseData?.message ||
-            responseData?.error ||
-            (Array.isArray(responseData?.errors) && responseData.errors[0]?.message);
+          responseData?.error ||
+          (Array.isArray(responseData?.errors) && responseData.errors[0]?.message);
       callSnack(backendMessage || error?.message || "Failed to update staff services", "error");
     } finally {
       setSaving(false);
@@ -337,11 +432,9 @@ export default function AssignServicesDialog({
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
             Assign Services
           </DialogTitle>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1 flex flex-wrap items-center gap-1">
             Assign or unassign main services and subservices for{" "}
-            <span className="font-semibold text-foreground">
-              {staff.first_name ? `${staff.first_name} ${staff.last_name || ""}`.trim() : "staff member"}
-            </span>
+            <EllipsisCell value={staff.first_name ? `${staff.first_name} ${staff.last_name || ""}`.trim() : "staff member"} maxChars={20} className="font-semibold text-foreground" />
             .
           </p>
         </DialogHeader>
@@ -386,196 +479,196 @@ export default function AssignServicesDialog({
                       </div>
                     }
                   >
-                  <div className="flex flex-col gap-2">
-                    {rootServices.map((service) => {
-                      const isParentSelected = selectedUuids.has(service.uuid);
-                      const subInfo = subServicesMap[service.uuid];
-                      const subItems = subInfo?.items || [];
-                      const isExpanded = Boolean(expanded[service.uuid]);
+                    <div className="flex flex-col gap-2">
+                      {rootServices.map((service) => {
+                        const isParentSelected = selectedUuids.has(service.uuid);
+                        const subInfo = subServicesMap[service.uuid];
+                        const subItems = subInfo?.items || [];
+                        const isExpanded = Boolean(expanded[service.uuid]);
 
-                      const hasAssignedSubService = assignedStaffServices.some(
-                        (ss) => ss.service?.parent_id === service.id && selectedUuids.has(ss.service?.uuid || "")
-                      );
+                        const hasAssignedSubService = assignedStaffServices.some(
+                          (ss) => ss.service?.parent_id === service.id && selectedUuids.has(ss.service?.uuid || "")
+                        );
 
-                      const subSelectedCount = subItems.filter((sub) =>
-                        selectedUuids.has(sub.uuid),
-                      ).length;
-                      const hasSubSelected = subSelectedCount > 0 || hasAssignedSubService;
-                      const allSubSelected = subItems.length > 0 && subSelectedCount === subItems.length;
+                        const subSelectedCount = subItems.filter((sub) =>
+                          selectedUuids.has(sub.uuid),
+                        ).length;
+                        const hasSubSelected = subSelectedCount > 0 || hasAssignedSubService;
+                        const allSubSelected = subItems.length > 0 && subSelectedCount === subItems.length;
 
-                      const isPartiallyAssigned = !isParentSelected && hasSubSelected;
-                      const isIndeterminate = isPartiallyAssigned && !allSubSelected;
-                      const isEffectivelyChecked = isParentSelected || allSubSelected;
-                      const hasSubServices = Number(service.sub_services_count ?? 0) > 0;
+                        const isPartiallyAssigned = !isParentSelected && hasSubSelected;
+                        const isIndeterminate = isPartiallyAssigned && !allSubSelected;
+                        const isEffectivelyChecked = isParentSelected || allSubSelected;
+                        const hasSubServices = Number(service.sub_services_count ?? 0) > 0;
 
-                      return (
-                        <div key={service.uuid} className="flex flex-col gap-1.5">
-                          <div
-                            className={clsx(
-                              "flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 group/parent",
-                              isEffectivelyChecked
-                                ? "bg-primary/10 border-primary/30"
-                                : isPartiallyAssigned
-                                  ? "bg-amber-500/10 border-amber-500/30 dark:bg-amber-500/15"
-                                  : "bg-card/60 border-border/50 hover:bg-card hover:border-border",
-                            )}
-                          >
+                        return (
+                          <div key={service.uuid} className="flex flex-col gap-1.5">
                             <div
-                              onClick={() => handleToggleParent(service)}
-                              className="flex items-center space-x-3 flex-1 min-w-0 select-none cursor-pointer"
+                              className={clsx(
+                                "flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl border transition-all duration-200 group/parent",
+                                isEffectivelyChecked
+                                  ? "bg-primary/10 border-primary/30"
+                                  : isPartiallyAssigned
+                                    ? "bg-amber-500/10 border-amber-500/30 dark:bg-amber-500/15"
+                                    : "bg-card/60 border-border/50 hover:bg-card hover:border-border",
+                              )}
                             >
-                              <Checkbox
-                                checked={isEffectivelyChecked}
-                                indeterminate={isIndeterminate}
-                                onCheckedChange={() => handleToggleParent(service)}
-                                className="pointer-events-none shrink-0"
-                              />
-                              <span
-                                className={clsx(
-                                  "p-1.5 rounded-lg border transition-colors shrink-0",
-                                  isEffectivelyChecked
-                                    ? "bg-primary/10 border-primary/20 text-primary"
-                                    : isPartiallyAssigned
-                                      ? "bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400"
-                                      : "bg-muted/40 border-border/30 text-muted-foreground group-hover/parent:text-foreground",
-                                )}
+                              <div
+                                onClick={() => handleToggleParent(service)}
+                                className="flex items-center space-x-3 flex-1 min-w-[200px] select-none cursor-pointer"
                               >
-                                {isPartiallyAssigned ? (
-                                  <BookmarkCheck className="w-3.5 h-3.5" />
-                                ) : (
-                                  <Layers className="w-3.5 h-3.5" />
-                                )}
-                              </span>
-                              <div className="flex flex-col min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                  <Label className="text-sm font-semibold tracking-wide text-foreground min-w-0 select-none cursor-pointer">
-                                    <EllipsisCell value={service.name} className="min-w-0 w-full capitalize" />
-                                  </Label>
-                                  {isPartiallyAssigned && (
-                                    <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 shrink-0">
-                                      Partial Subservices
+                                <Checkbox
+                                  checked={isEffectivelyChecked}
+                                  indeterminate={isIndeterminate}
+                                  onCheckedChange={() => handleToggleParent(service)}
+                                  className="pointer-events-none shrink-0"
+                                />
+                                <span
+                                  className={clsx(
+                                    "p-1.5 rounded-lg border transition-colors shrink-0",
+                                    isEffectivelyChecked
+                                      ? "bg-primary/10 border-primary/20 text-primary"
+                                      : isPartiallyAssigned
+                                        ? "bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400"
+                                        : "bg-muted/40 border-border/30 text-muted-foreground group-hover/parent:text-foreground",
+                                  )}
+                                >
+                                  {isPartiallyAssigned ? (
+                                    <BookmarkCheck className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <Layers className="w-3.5 h-3.5" />
+                                  )}
+                                </span>
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <Label className="text-sm font-semibold tracking-wide text-foreground min-w-0 select-none cursor-pointer">
+                                      <EllipsisCell value={service.name} className="min-w-0 w-full capitalize" maxChars={20} />
+                                    </Label>
+                                    {isPartiallyAssigned && (
+                                      <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 shrink-0">
+                                        Partial Subservices
+                                      </span>
+                                    )}
+                                  </div>
+                                  {service.price !== undefined && (
+                                    <span className="text-[11px] text-muted-foreground">
+                                      ₹{service.price} · {service.duration} mins
                                     </span>
                                   )}
                                 </div>
-                                {service.price !== undefined && (
-                                  <span className="text-[11px] text-muted-foreground">
-                                    ₹{service.price} · {service.duration} mins
-                                  </span>
-                                )}
                               </div>
+
+                              {hasSubServices && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleExpand(service);
+                                  }}
+                                  title={isExpanded ? "Hide subservices" : "Show subservices"}
+                                  className={clsx(
+                                    "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ml-auto cursor-pointer border",
+                                    isExpanded
+                                      ? "bg-primary/10 text-primary border-primary/20"
+                                      : "bg-muted/40 text-muted-foreground border-border/40 hover:bg-muted hover:text-foreground",
+                                  )}
+                                >
+                                  <span>Subservices</span>
+                                  <ChevronDown
+                                    className={clsx(
+                                      "w-3.5 h-3.5 transition-transform duration-200",
+                                      isExpanded && "rotate-180",
+                                    )}
+                                  />
+                                </button>
+                              )}
                             </div>
 
-                            {hasSubServices && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleExpand(service);
-                                }}
-                                title={isExpanded ? "Hide subservices" : "Show subservices"}
-                                className={clsx(
-                                  "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ml-2 cursor-pointer border",
-                                  isExpanded
-                                    ? "bg-primary/10 text-primary border-primary/20"
-                                    : "bg-muted/40 text-muted-foreground border-border/40 hover:bg-muted hover:text-foreground",
-                                )}
-                              >
-                                <span>Subservices</span>
-                                <ChevronDown
-                                  className={clsx(
-                                    "w-3.5 h-3.5 transition-transform duration-200",
-                                    isExpanded && "rotate-180",
-                                  )}
-                                />
-                              </button>
-                            )}
-                          </div>
-
-                          <AnimatePresence initial={false}>
-                            {isExpanded && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2, ease: "easeInOut" }}
-                                className="overflow-hidden"
-                              >
-                                <div className="ml-5 flex flex-col gap-1.5 border-l-2 border-primary/20 pl-3.5 py-1">
-                                  {subInfo?.loading && subItems.length === 0 ? (
-                                    <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground">
-                                      <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
-                                      <span>Loading subservices...</span>
-                                    </div>
-                                  ) : subItems.length === 0 ? (
-                                    <div className="py-2 text-xs text-muted-foreground italic">
-                                      No subservices found for this service.
-                                    </div>
-                                  ) : (
-                                    <div className="rounded-xl border border-border/40 bg-card/20 overflow-hidden">
-                                      <div
-                                        id={`subservices-scroll-${service.uuid}`}
-                                        className="max-h-[200px] overflow-y-auto p-2 flex flex-col gap-1.5"
-                                      >
-                                        <InfiniteScroll
-                                          dataLength={subItems.length}
-                                          next={() => fetchSubServices(service, subInfo.page + 1)}
-                                          hasMore={Boolean(subInfo?.hasMore)}
-                                          scrollableTarget={`subservices-scroll-${service.uuid}`}
-                                          loader={
-                                            <div className="flex justify-center py-2">
-                                              <Loader2 className="w-3.5 h-3.5 animate-spin text-primary/60" />
-                                            </div>
-                                          }
+                            <AnimatePresence initial={false}>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="ml-5 flex flex-col gap-1.5 border-l-2 border-primary/20 pl-3.5 py-1">
+                                    {subInfo?.loading && subItems.length === 0 ? (
+                                      <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground">
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                                        <span>Loading subservices...</span>
+                                      </div>
+                                    ) : subItems.length === 0 ? (
+                                      <div className="py-2 text-xs text-muted-foreground italic">
+                                        No subservices found for this service.
+                                      </div>
+                                    ) : (
+                                      <div className="rounded-xl border border-border/40 bg-card/20 overflow-hidden">
+                                        <div
+                                          id={`subservices-scroll-${service.uuid}`}
+                                          className="max-h-[200px] overflow-y-auto p-2 flex flex-col gap-1.5"
                                         >
-                                          <div className="flex flex-col gap-1.5">
-                                            {subItems.map((sub) => {
-                                              const isChildChecked = selectedUuids.has(sub.uuid);
-                                              return (
-                                                <div
-                                                  key={sub.uuid}
-                                                  onClick={() => handleToggleChild(sub, service)}
-                                                  className={clsx(
-                                                    "flex items-center justify-between p-2 rounded-lg border transition-all duration-150 cursor-pointer select-none",
-                                                    isChildChecked
-                                                      ? "bg-primary/8 border-primary/25"
-                                                      : "bg-card/40 border-border/30 hover:bg-muted/30 hover:border-border/60",
-                                                  )}
-                                                >
-                                                  <div className="flex items-center space-x-2.5 flex-1 min-w-0">
-                                                    <Checkbox
-                                                      checked={isChildChecked}
-                                                      onCheckedChange={() => handleToggleChild(sub, service)}
-                                                      className="pointer-events-none shrink-0"
-                                                    />
-                                                    <span className="p-1 rounded bg-muted/40 text-muted-foreground shrink-0">
-                                                      <Sparkles className="w-3 h-3 text-primary/70" />
-                                                    </span>
-                                                    <div className="flex flex-col min-w-0 flex-1">
-                                                      <span className="text-xs font-medium text-foreground truncate capitalize">
-                                                        {sub.name}
+                                          <InfiniteScroll
+                                            dataLength={subItems.length}
+                                            next={() => fetchSubServices(service, subInfo.page + 1)}
+                                            hasMore={Boolean(subInfo?.hasMore)}
+                                            scrollableTarget={`subservices-scroll-${service.uuid}`}
+                                            loader={
+                                              <div className="flex justify-center py-2">
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin text-primary/60" />
+                                              </div>
+                                            }
+                                          >
+                                            <div className="flex flex-col gap-1.5">
+                                              {subItems.map((sub) => {
+                                                const isChildChecked = selectedUuids.has(sub.uuid);
+                                                return (
+                                                  <div
+                                                    key={sub.uuid}
+                                                    onClick={() => handleToggleChild(sub, service)}
+                                                    className={clsx(
+                                                      "flex items-center justify-between p-2 rounded-lg border transition-all duration-150 cursor-pointer select-none",
+                                                      isChildChecked
+                                                        ? "bg-primary/8 border-primary/25"
+                                                        : "bg-card/40 border-border/30 hover:bg-muted/30 hover:border-border/60",
+                                                    )}
+                                                  >
+                                                    <div className="flex items-center space-x-2.5 flex-1 min-w-0">
+                                                      <Checkbox
+                                                        checked={isChildChecked}
+                                                        onCheckedChange={() => handleToggleChild(sub, service)}
+                                                        className="pointer-events-none shrink-0"
+                                                      />
+                                                      <span className="p-1 rounded bg-muted/40 text-muted-foreground shrink-0">
+                                                        <Sparkles className="w-3 h-3 text-primary/70" />
                                                       </span>
-                                                      <span className="text-[10px] text-muted-foreground">
-                                                        ₹{sub.price} · {sub.duration} mins
-                                                      </span>
+                                                      <div className="flex flex-col min-w-0 flex-1">
+                                                        <span className="text-xs font-medium text-foreground truncate capitalize">
+                                                          {sub.name}
+                                                        </span>
+                                                        <span className="text-[10px] text-muted-foreground">
+                                                          ₹{sub.price} · {sub.duration} mins
+                                                        </span>
+                                                      </div>
                                                     </div>
                                                   </div>
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
-                                        </InfiniteScroll>
+                                                );
+                                              })}
+                                            </div>
+                                          </InfiniteScroll>
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </InfiniteScroll>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </InfiniteScroll>
                 </div>
               </div>
             </div>

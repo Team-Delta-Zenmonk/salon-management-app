@@ -209,8 +209,8 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
               service_uuid: subServiceUuid,
               staff_uuid: item.staff?.uuid || item.staff_uuid,
               price_type: payload.price_type,
-              price: payload.price,
-              duration: payload.duration,
+              price: Number(payload.price ?? 0),
+              duration: Number(payload.duration ?? 0),
             }))
             .filter((item: any) => item.staff_uuid);
 

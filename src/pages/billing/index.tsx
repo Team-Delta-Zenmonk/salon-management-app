@@ -278,9 +278,13 @@ function CheckoutForm({ plan, planDuration, amount, salonName, onSuccess, onCanc
 export default function PlanAndBillingPage() {
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state: RootState) => state.auth);
-  const { plans: reduxPlans, isLoading: isLoadingPlans } = useAppSelector(
-    (state: RootState) => state.plans
-  );
+  const {
+    plans: reduxPlans,
+    isLoading: isLoadingPlans,
+    isInitialLoading: isInitialLoadingPlans,
+    hasMore: hasMorePlans,
+    page: plansPage,
+  } = useAppSelector((state: RootState) => state.plans);
 
   const [checkoutPlan, setCheckoutPlan] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -452,8 +456,14 @@ export default function PlanAndBillingPage() {
   }, [currentTab, invoiceTypeFilter, currentPage, sortOrder]);
 
   useEffect(() => {
-    dispatch(fetchSubscriptionPlans());
+    dispatch(fetchSubscriptionPlans({ page: 1, limit: 10 }));
   }, [dispatch]);
+
+  const fetchMoreSubscriptionPlans = () => {
+    if (hasMorePlans) {
+      dispatch(fetchSubscriptionPlans({ page: plansPage + 1, limit: 10 }));
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -735,46 +745,57 @@ export default function PlanAndBillingPage() {
         </div>
       </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="flex flex-wrap gap-4 sm:gap-6 items-stretch pl-1"
-      >
-        {isLoadingPlans && reduxPlans.length === 0 ? (
-          <>
-            {[1, 2].map((i) => (
-              <div
-                key={`plan-skeleton-${i}`}
-                className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6 flex flex-col justify-between flex-1 min-w-[260px] max-w-full animate-pulse space-y-6"
-              >
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="h-3 w-28 bg-muted rounded-md" />
-                    <div className="h-6 w-36 bg-muted rounded-md" />
-                    <div className="h-4 w-full bg-muted/60 rounded-md" />
-                  </div>
-                  <div className="pt-2 pb-3 border-b border-border/50 space-y-2">
-                    <div className="h-8 w-32 bg-muted rounded-md" />
-                    <div className="h-3 w-40 bg-muted/60 rounded-md" />
-                  </div>
-                  <div className="space-y-2.5 pt-2">
-                    {[1, 2, 3, 4, 5].map((f) => (
-                      <div key={f} className="flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 rounded-full bg-muted shrink-0" />
-                        <div className="h-3.5 bg-muted/60 rounded-md w-3/4" />
-                      </div>
-                    ))}
-                  </div>
+      {isInitialLoadingPlans && reduxPlans.length === 0 ? (
+        <div className="flex flex-wrap gap-4 sm:gap-6 items-stretch pl-1">
+          {[1, 2].map((i) => (
+            <div
+              key={`plan-skeleton-${i}`}
+              className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6 flex flex-col justify-between flex-1 min-w-[260px] max-w-full animate-pulse space-y-6"
+            >
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="h-3 w-28 bg-muted rounded-md" />
+                  <div className="h-6 w-36 bg-muted rounded-md" />
+                  <div className="h-4 w-full bg-muted/60 rounded-md" />
                 </div>
-                <div className="pt-6">
-                  <div className="h-10 w-full bg-muted rounded-xl" />
+                <div className="pt-2 pb-3 border-b border-border/50 space-y-2">
+                  <div className="h-8 w-32 bg-muted rounded-md" />
+                  <div className="h-3 w-40 bg-muted/60 rounded-md" />
+                </div>
+                <div className="space-y-2.5 pt-2">
+                  {[1, 2, 3, 4, 5].map((f) => (
+                    <div key={f} className="flex items-center gap-2">
+                      <div className="w-3.5 h-3.5 rounded-full bg-muted shrink-0" />
+                      <div className="h-3.5 bg-muted/60 rounded-md w-3/4" />
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </>
-        ) : (
-          <>
+              <div className="pt-6">
+                <div className="h-10 w-full bg-muted rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <InfiniteScroll
+          dataLength={reduxPlans.length}
+          next={fetchMoreSubscriptionPlans}
+          hasMore={hasMorePlans}
+          scrollableTarget="main-content-scroll"
+          scrollThreshold={0.8}
+          loader={
+            <div className="flex justify-center py-6 w-full">
+              <Loader2 className="w-6 h-6 animate-spin text-primary/60" />
+            </div>
+          }
+        >
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="flex flex-wrap gap-4 sm:gap-6 items-stretch pl-1"
+          >
             {reduxPlans.map((plan) => {
               const planCode = (plan.code || plan.id) as string;
               const isCurrentPlan = currentPlan === planCode;
@@ -986,9 +1007,9 @@ export default function PlanAndBillingPage() {
                 </Button>
               </div>
             </motion.div>
-          </>
-        )}
-      </motion.div>
+          </motion.div>
+        </InfiniteScroll>
+      )}
         </div>
       ) : (
         <div className="space-y-4 max-w-full min-w-0">

@@ -93,7 +93,7 @@ const Select = <T extends FieldValues>({
                       disabled && placeholder === "Loading..."
                         ? placeholder
                         : value
-                          ? (options?.find((o) => String(o.value) === String(value))?.label || (placeholder === "Loading..." ? placeholder : value))
+                          ? (options?.find((o) => String(o.value) === String(value))?.label || placeholder)
                           : placeholder
                     )}
                   />

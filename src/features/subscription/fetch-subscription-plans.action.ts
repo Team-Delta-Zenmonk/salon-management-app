@@ -1,16 +1,19 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { getSubscriptionPlansService } from "./subscription-plans.service";
-import type { BackendPlan } from "./plans.slice";
+import {
+  getSubscriptionPlansService,
+  type ListPlansParams,
+  type ListPlansResponse,
+} from "./subscription-plans.service";
 
 export const fetchSubscriptionPlans = createAsyncThunk<
-  BackendPlan[],
-  void,
+  ListPlansResponse,
+  ListPlansParams | void,
   { rejectValue: string }
->("subscription/fetchSubscriptionPlans", async (_, thunkAPI) => {
+>("subscription/fetchSubscriptionPlans", async (params, thunkAPI) => {
   try {
-    const plans = await getSubscriptionPlansService();
-    return plans;
+    const res = await getSubscriptionPlansService(params || undefined);
+    return res;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       return thunkAPI.rejectWithValue(

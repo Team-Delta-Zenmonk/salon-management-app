@@ -247,12 +247,13 @@ export default function AssignStaffDialog({
     try {
       const selectedStaffUuids = values.staff_ids;
 
+      const rawPrice = service.price_type === "free" ? 0 : Number(service.price ?? 0);
       const toAssign: {
         service_uuid: string;
         staff_uuid: string;
         price_type: string;
-        price?: number;
-        duration?: number;
+        price: number;
+        duration: number;
       }[] = [];
       selectedStaffUuids
         .filter((staffUuid) => !assignedStaffMap.has(staffUuid))
@@ -261,8 +262,8 @@ export default function AssignStaffDialog({
             service_uuid: serviceUuid,
             staff_uuid: staffUuid,
             price_type: service.price_type,
-            price: service.price ? Number(service.price) : undefined,
-            duration: Number(service.duration),
+            price: Number.isFinite(rawPrice) ? rawPrice : 0,
+            duration: Number(service.duration) || 0,
           });
         });
 
