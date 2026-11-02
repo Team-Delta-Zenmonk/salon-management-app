@@ -65,7 +65,6 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
         type: "manual",
         message: duplicateMsg,
       });
-      callSnack(duplicateMsg, "error");
       return;
     }
 
@@ -88,7 +87,14 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
         type: "manual",
         message: errorMessage,
       });
-      callSnack(errorMessage, "error");
+
+      const isDuplicateError =
+        errorMessage.toLowerCase().includes("already exists") ||
+        errorMessage.toLowerCase().includes("duplicate");
+
+      if (!isDuplicateError) {
+        callSnack(errorMessage, "error");
+      }
     } finally {
       setLoading(false);
     }

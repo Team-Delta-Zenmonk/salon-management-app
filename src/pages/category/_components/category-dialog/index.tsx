@@ -103,7 +103,14 @@ export default function CategoryDialog({ open, onClose, mode, category }: Readon
         type: "manual",
         message: errorMessage,
       });
-      callSnack(errorMessage, "error");
+
+      const isDuplicateError =
+        errorMessage.toLowerCase().includes("already exists") ||
+        errorMessage.toLowerCase().includes("duplicate");
+
+      if (!isDuplicateError) {
+        callSnack(errorMessage, "error");
+      }
     } finally {
       setIsLoading(false);
     }

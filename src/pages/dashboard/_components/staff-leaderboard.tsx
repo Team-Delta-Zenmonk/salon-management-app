@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avat
 import { EllipsisCell } from "../../../components/ellipse-cell";
 import { itemVariants } from "../utils/dashboard.constants";
 import type { Staff } from "../../../features/staff/staff.slice";
+import { isStaffInactive } from "@/utils/staff-status";
+import { cn } from "@/lib/utils";
 
 interface StaffLeaderboardProps {
   staffList: Staff[];
@@ -33,6 +35,11 @@ export const StaffLeaderboard = ({
     ];
     return dayNames[new Date().getDay()];
   }, []);
+
+  const activeCount = useMemo(
+    () => staffList.filter((s) => !isStaffInactive(s)).length,
+    [staffList]
+  );
 
   const staffTodayCountMap = useMemo(() => {
     const map = new Map<string | number, number>();
@@ -109,11 +116,17 @@ export const StaffLeaderboard = ({
 
               const todayShift = staff.active_hours?.[todayKey];
               const isWorkingToday = Boolean(todayShift?.start_time && todayShift?.end_time);
+              const isInactive = isStaffInactive(staff);
 
               return (
                 <div
                   key={staff.uuid || staff.id}
-                  className="flex items-center justify-between p-4 bg-background/40 border border-border/50 rounded-2xl hover:border-primary/30 transition-all group min-w-0"
+                  className={cn(
+                    "flex items-center justify-between p-4 border rounded-2xl transition-all group min-w-0",
+                    isInactive
+                      ? "bg-muted/20 border-border/40 opacity-80"
+                      : "bg-background/40 border-border/50 hover:border-primary/30"
+                  )}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Avatar className="h-10 w-10 border border-primary/10 shrink-0">
@@ -123,10 +136,22 @@ export const StaffLeaderboard = ({
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1 flex flex-col gap-0.5">
-                      <EllipsisCell
-                        value={fullName}
-                        className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors capitalize truncate"
-                      />
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <EllipsisCell
+                          value={fullName}
+                          className={cn(
+                            "font-semibold text-sm transition-colors capitalize truncate",
+                            isInactive ? "text-muted-foreground" : "text-foreground group-hover:text-primary"
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            "w-2 h-2 rounded-full shrink-0",
+                            isInactive ? "bg-rose-500" : "bg-emerald-500 animate-pulse"
+                          )}
+                          title={isInactive ? "Inactive" : "Active"}
+                        />
+                      </div>
                       <EllipsisCell
                         value={staff.title || "Salon Specialist"}
                         className="text-xs text-muted-foreground font-medium capitalize truncate"
@@ -135,7 +160,12 @@ export const StaffLeaderboard = ({
                   </div>
 
                   <div className="shrink-0 ml-3">
-                    {todayCount > 0 ? (
+                    {isInactive ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                        <span>Inactive</span>
+                      </span>
+                    ) : todayCount > 0 ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20">
                         <Calendar className="w-3 h-3 shrink-0" />
                         <span>{todayCount} Booked</span>
@@ -180,7 +210,11 @@ export const StaffLeaderboard = ({
 
       <div className="mt-4 pt-3 border-t border-border/30 flex flex-col sm:flex-row gap-2 items-center justify-between text-xs text-muted-foreground">
         <span>
-          Team status: <strong className="text-foreground">{staffList.length} Active Member{staffList.length !== 1 ? "s" : ""}</strong>
+          Team status:{" "}
+          <strong className="text-foreground">
+            {activeCount} Active Member{activeCount !== 1 ? "s" : ""}
+            {staffList.length - activeCount > 0 && ` (${staffList.length - activeCount} Inactive)`}
+          </strong>
         </span>
         <Button
           variant="ghost"
