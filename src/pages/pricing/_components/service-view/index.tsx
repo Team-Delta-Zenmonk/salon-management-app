@@ -7,6 +7,16 @@ import ServiceSidebar from "../service-sidebar";
 import StaffPricingPanel from "../staff-pricing-panel";
 import type { Service } from "../../../../features/service/service.slice";
 
+interface SubServicePagination {
+  items: ServiceType[];
+  page: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
+  loading: boolean;
+  loadingMore: boolean;
+}
+
 export default function ServiceView() {
   const serviceState = useAppSelector((state: RootState) => state.service);
   const allServices = useMemo(() => serviceState?.data ?? [], [serviceState?.data]);
@@ -15,8 +25,7 @@ export default function ServiceView() {
     const parentServicesInit = (serviceState?.data ?? []).filter((s: Service) => !s.parent_id);
     return parentServicesInit.length > 0 ? parentServicesInit[0].uuid : null;
   });
-  const [subServicesByParentUuid, setSubServicesByParentUuid] = useState<Record<string, ServiceType[]>>({});
-  const [subServicesLoadingByParentUuid, setSubServicesLoadingByParentUuid] = useState<Record<string, boolean>>({});
+  const [subServicesMap, setSubServicesMap] = useState<Record<string, SubServicePagination>>({});
 
   useEffect(() => {
     if (parentServices.length === 0) return;
@@ -26,15 +35,31 @@ export default function ServiceView() {
   }, [parentServices, selectedServiceUuid]);
 
   const fetchSubServicesForParent = useCallback(
-    async (parentUuid: string) => {
-      if (subServicesByParentUuid[parentUuid]) return;
+    async (parentUuid: string, page = 1) => {
+      const isInitial = page === 1;
+
+      setSubServicesMap((prev) => {
+        const current = prev[parentUuid];
+        return {
+          ...prev,
+          [parentUuid]: {
+            items: isInitial ? current?.items || [] : current?.items || [],
+            page,
+            limit: 10,
+            total: current?.total || 0,
+            hasMore: current?.hasMore ?? true,
+            loading: isInitial,
+            loadingMore: !isInitial,
+          },
+        };
+      });
+
       try {
-        setSubServicesLoadingByParentUuid((p) => ({ ...p, [parentUuid]: true }));
+        const res = await listSubServicesService(parentUuid, { page, limit: 10 });
+        const rows: Service[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
+        const total: number = res?.count ?? res?.total ?? rows.length;
 
-        const res = await listSubServicesService(parentUuid);
-        const rows = Array.isArray(res) ? res : (res?.rows ?? []);
-
-        const subServices: ServiceType[] = rows.map((c: Service) => ({
+        const mappedRows: ServiceType[] = rows.map((c: Service) => ({
           id: c.id,
           uuid: c.uuid,
           name: c.name,
@@ -45,44 +70,88 @@ export default function ServiceView() {
           sub_services_count: c.sub_services_count,
         }));
 
-        setSubServicesByParentUuid((p) => ({ ...p, [parentUuid]: subServices }));
+        setSubServicesMap((prev) => {
+          const prevItems = isInitial ? [] : prev[parentUuid]?.items || [];
+          const existingIds = new Set(prevItems.map((item) => item.id));
+          const newItems = mappedRows.filter((item) => !existingIds.has(item.id));
+          const combined = [...prevItems, ...newItems];
+
+          return {
+            ...prev,
+            [parentUuid]: {
+              items: combined,
+              page,
+              limit: 10,
+              total,
+              hasMore: combined.length < total,
+              loading: false,
+              loadingMore: false,
+            },
+          };
+        });
       } catch {
-        setSubServicesByParentUuid((p) => ({ ...p, [parentUuid]: [] }));
-      } finally {
-        setSubServicesLoadingByParentUuid((p) => ({ ...p, [parentUuid]: false }));
+        setSubServicesMap((prev) => ({
+          ...prev,
+          [parentUuid]: {
+            items: isInitial ? [] : prev[parentUuid]?.items || [],
+            page,
+            limit: 10,
+            total: isInitial ? 0 : prev[parentUuid]?.total || 0,
+            hasMore: false,
+            loading: false,
+            loadingMore: false,
+          },
+        }));
       }
     },
-    [subServicesByParentUuid],
+    [],
   );
 
   const handleExpandParent = useCallback(
     async (parentUuid: string) => {
-      await fetchSubServicesForParent(parentUuid);
+      if (!subServicesMap[parentUuid]) {
+        await fetchSubServicesForParent(parentUuid, 1);
+      }
     },
-    [fetchSubServicesForParent],
+    [subServicesMap, fetchSubServicesForParent],
   );
 
   useEffect(() => {
     if (!selectedServiceUuid) return;
-    fetchSubServicesForParent(selectedServiceUuid);
-  }, [selectedServiceUuid, fetchSubServicesForParent]);
+    if (!subServicesMap[selectedServiceUuid]) {
+      fetchSubServicesForParent(selectedServiceUuid, 1);
+    }
+  }, [selectedServiceUuid, subServicesMap, fetchSubServicesForParent]);
+
+  const loadMoreSubServices = useCallback(() => {
+    if (!selectedServiceUuid) return;
+    const currentInfo = subServicesMap[selectedServiceUuid];
+    if (!currentInfo || currentInfo.loading || currentInfo.loadingMore || !currentInfo.hasMore) return;
+    fetchSubServicesForParent(selectedServiceUuid, currentInfo.page + 1);
+  }, [selectedServiceUuid, subServicesMap, fetchSubServicesForParent]);
 
   const servicesTree: ServiceType[] = useMemo(
     () =>
       parentServices.map(
-        (p: Service): ServiceType => ({
-          id: p.id,
-          uuid: p.uuid,
-          name: p.name,
-          price_type: p.price_type,
-          price: p.price,
-          duration: p.duration ? Number(p.duration) : undefined,
-          logo: p.logo,
-          sub_services_count: p.sub_services_count,
-          children: subServicesByParentUuid[p.uuid] ?? [],
-        }),
+        (p: Service): ServiceType => {
+          const subInfo = subServicesMap[p.uuid];
+          return {
+            id: p.id,
+            uuid: p.uuid,
+            name: p.name,
+            price_type: p.price_type,
+            price: p.price,
+            duration: p.duration ? Number(p.duration) : undefined,
+            logo: p.logo,
+            sub_services_count: p.sub_services_count,
+            children: subInfo?.items ?? [],
+            subServicesHasMore: Boolean(subInfo?.hasMore),
+            subServicesLoadingMore: Boolean(subInfo?.loadingMore),
+            onFetchMoreSubServices: loadMoreSubServices,
+          };
+        },
       ),
-    [parentServices, subServicesByParentUuid],
+    [parentServices, subServicesMap, loadMoreSubServices],
   );
 
   const selectedService = useMemo(
@@ -90,11 +159,19 @@ export default function ServiceView() {
     [servicesTree, selectedServiceUuid],
   );
 
+  const selectedSubInfo = selectedServiceUuid ? subServicesMap[selectedServiceUuid] : null;
   const isSubServicesLoading = Boolean(
     selectedServiceUuid &&
-      (subServicesLoadingByParentUuid[selectedServiceUuid] ??
-        (subServicesByParentUuid[selectedServiceUuid] === undefined))
+      (selectedSubInfo?.loading ?? (selectedSubInfo === undefined))
   );
+
+  const subServicesLoadingMap = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    Object.keys(subServicesMap).forEach((uuid) => {
+      map[uuid] = subServicesMap[uuid].loading;
+    });
+    return map;
+  }, [subServicesMap]);
 
   return (
     <div
@@ -114,7 +191,7 @@ export default function ServiceView() {
           selectedServiceUuid={selectedServiceUuid}
           onSelectService={setSelectedServiceUuid}
           onExpandParent={handleExpandParent}
-          loadingMap={subServicesLoadingByParentUuid}
+          loadingMap={subServicesLoadingMap}
           isLoading={serviceState?.isInitialLoading || (serviceState?.loading && parentServices.length === 0)}
         />
       </div>

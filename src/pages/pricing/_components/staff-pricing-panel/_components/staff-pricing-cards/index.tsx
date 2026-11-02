@@ -35,16 +35,12 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     return children.length > 0 ? children : [selectedService];
   }, [selectedService]);
 
-  const serviceUuidsKey = useMemo(() => {
-    return servicesToShow.map((s) => s.uuid).sort().join(",");
-  }, [servicesToShow]);
-
   const [serviceStaffsMap, setServiceStaffsMap] = useState<Record<string, StaffPricingType[]>>({});
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [pageMap, setPageMap] = useState<Record<string, number>>({});
   const [hasMoreMap, setHasMoreMap] = useState<Record<string, boolean>>({});
-  const pageSize = 12;
+  const pageSize = 10;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogContext, setDialogContext] = useState<DialogContext | null>(null);
@@ -84,7 +80,33 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     setPageMap(initialPageMap);
     setHasMoreMap(initialHasMoreMap);
     setInitialLoading(false);
-  }, [serviceUuidsKey, salonUUID, pageSize]);
+  }, [selectedService.uuid, salonUUID, pageSize]);
+
+  useEffect(() => {
+    if (!salonUUID || initialLoading) return;
+
+    const uninitializedServices = servicesToShow.filter((svc) => !serviceStaffsMap[svc.uuid]);
+    if (uninitializedServices.length === 0) return;
+
+    uninitializedServices.forEach(async (svc) => {
+      try {
+        const res = await listServiceStaff(svc.uuid, salonUUID, { page: 1, limit: pageSize, include_parent: true });
+        const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
+        const total = typeof res?.total === "number" ? res.total : rows.length;
+
+        setServiceStaffsMap((prev) => ({ ...prev, [svc.uuid]: rows }));
+        setPageMap((prev) => ({ ...prev, [svc.uuid]: 1 }));
+        setHasMoreMap((prev) => ({
+          ...prev,
+          [svc.uuid]: rows.length === pageSize && rows.length < total,
+        }));
+      } catch {
+        setServiceStaffsMap((prev) => ({ ...prev, [svc.uuid]: [] }));
+        setPageMap((prev) => ({ ...prev, [svc.uuid]: 1 }));
+        setHasMoreMap((prev) => ({ ...prev, [svc.uuid]: false }));
+      }
+    });
+  }, [servicesToShow, salonUUID, initialLoading, serviceStaffsMap, pageSize]);
 
   const hasAnyMore = useMemo(() => {
     return servicesToShow.some((svc) => hasMoreMap[svc.uuid]);
@@ -135,16 +157,31 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
   }, [loadServiceStaffs]);
 
   useEffect(() => {
-    if (!hasAnyMore || initialLoading || loadingMore) return;
     const el = document.getElementById("service-staff-panel-scroll");
     if (!el) return;
-    const timer = setTimeout(() => {
-      if (el.scrollHeight <= el.clientHeight) {
-        fetchMoreServiceStaffs();
+
+    const handleScroll = () => {
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+      if (nearBottom) {
+        if (selectedService.subServicesHasMore && !selectedService.subServicesLoadingMore) {
+          selectedService.onFetchMoreSubServices?.();
+        } else if (hasAnyMore && !loadingMore && !initialLoading) {
+          fetchMoreServiceStaffs();
+        }
       }
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [totalLoadedStaffCount, hasAnyMore, initialLoading, loadingMore, fetchMoreServiceStaffs]);
+    };
+
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [
+    selectedService.subServicesHasMore,
+    selectedService.subServicesLoadingMore,
+    selectedService.onFetchMoreSubServices,
+    hasAnyMore,
+    loadingMore,
+    initialLoading,
+    fetchMoreServiceStaffs,
+  ]);
 
   const handleOpenEdit = async (staff_uuid: string, service: ServiceType, current?: StaffPricingType, fallbackStaff?: Staff) => {
     const staff = staffs.find((s: Staff) => s.uuid === staff_uuid) || fallbackStaff;
@@ -259,34 +296,40 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
       </div>
 
       {!hasAnyAssignments ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border/80 rounded-2xl bg-muted/10">
-          <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/50">
-            <UserPlus className="text-muted-foreground w-6 h-6" />
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border/80 rounded-2xl bg-muted/10">
+            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4 border border-border/50">
+              <UserPlus className="text-muted-foreground w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-foreground">
+              No Staff Assigned
+            </h3>
+            <p className="text-muted-foreground/80 text-sm mt-1.5 max-w-xs">
+              No staff members are assigned to provide this service yet.
+            </p>
           </div>
-          <h3 className="text-base font-bold text-foreground">
-            No Staff Assigned
-          </h3>
-          <p className="text-muted-foreground/80 text-sm mt-1.5 max-w-xs">
-            No staff members are assigned to provide this service yet.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setAssignDialogOpen(true)}
-            className="mt-5 rounded-xl"
-          >
-            Assign Staff Now
-          </Button>
+
+          {(selectedService.subServicesLoadingMore || loadingMore) && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
+            </div>
+          )}
         </div>
       ) : (
         <InfiniteScroll
-          dataLength={totalLoadedStaffCount}
-          next={fetchMoreServiceStaffs}
-          hasMore={hasAnyMore}
+          dataLength={totalLoadedStaffCount + servicesToShow.length}
+          next={() => {
+            if (selectedService.subServicesHasMore && !selectedService.subServicesLoadingMore) {
+              selectedService.onFetchMoreSubServices?.();
+            } else if (hasAnyMore && !loadingMore) {
+              fetchMoreServiceStaffs();
+            }
+          }}
+          hasMore={hasAnyMore || Boolean(selectedService.subServicesHasMore)}
           scrollableTarget="service-staff-panel-scroll"
           scrollThreshold={0.8}
           loader={
-            loadingMore ? (
+            (loadingMore || selectedService.subServicesLoadingMore) ? (
               <div className="flex justify-center py-4">
                 <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
               </div>

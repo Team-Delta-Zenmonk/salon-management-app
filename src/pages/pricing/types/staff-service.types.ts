@@ -10,6 +10,9 @@ export type ServiceType = {
   logo?: string | null;
   sub_services_count?: number;
   children?: ServiceType[];
+  subServicesHasMore?: boolean;
+  subServicesLoadingMore?: boolean;
+  onFetchMoreSubServices?: () => void;
 };
 
 export type StaffPricingType = {

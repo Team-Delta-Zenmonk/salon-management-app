@@ -253,14 +253,6 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
           <p className="text-muted-foreground/80 text-sm mt-1.5 max-w-xs">
             This staff member doesn't provide any services yet.
           </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setAssignDialogOpen(true)}
-            className="mt-5 rounded-xl"
-          >
-            Assign Services Now
-          </Button>
         </div>
       ) : (
         <InfiniteScroll
