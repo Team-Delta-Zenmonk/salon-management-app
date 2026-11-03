@@ -39,7 +39,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 dayjs.extend(customParseFormat);
 
 const getFullName = (staff: Staff) =>
-  `${staff.first_name} ${staff.last_name || ""}`.trim();
+  [staff.first_name, staff.last_name].filter((s): s is string => Boolean(s && s.trim())).map((s) => s.trim()).join(" ");
 
 const getGenderBadge = (gender: string) => (
   <Badge

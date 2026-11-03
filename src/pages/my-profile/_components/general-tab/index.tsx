@@ -459,7 +459,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             multiline
             rows={3}
             maxLength={FIELD_LIMITS.DESCRIPTION}
-            pattern={VALIDATE_PATTERN.alphabet}
+            pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
             inputPropsClassName="capitalize bg-white dark:bg-neutral-900"
           />
         </div>

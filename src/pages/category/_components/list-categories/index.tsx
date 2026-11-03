@@ -8,6 +8,7 @@ import type { AppDispatch } from "../../../../store/store";
 import { deleteCategoryService } from "../../../../features/category/delete-category/delete-category.service";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { callSnack } from "../../../../components/snackbar";
+import { FIELD_LIMITS } from "../../../../common/field-limits";
 import CategoryDialog from "../category-dialog";
 import type { Category } from "../../../../features/category/category.slice";
 import DeleteDialog from "../../../../components/delete-dialog";
@@ -132,7 +133,7 @@ export default function ListCategories({
                     <div className="flex-1 min-w-0">
                       <EllipsisCell
                         value={category.name}
-                        maxChars={16}
+                        maxChars={100}
                         className="font-bold text-foreground text-base sm:text-lg leading-tight group-hover:text-primary transition-colors block capitalize"
                       />
                     </div>
@@ -140,12 +141,18 @@ export default function ListCategories({
                 </div>
                 
                 <div className="mb-6 min-h-[40px]">
-                  <EllipsisCell
-                    value={category.description || "No description available"}
-                    maxChars={50}
-                    maxLines={2}
-                    className="text-muted-foreground/90 text-sm leading-relaxed block"
-                  />
+                  {category.description ? (
+                    <EllipsisCell
+                      value={category.description}
+                      maxChars={FIELD_LIMITS.DESCRIPTION}
+                      maxLines={2}
+                      className="text-muted-foreground/90 text-sm leading-relaxed block"
+                    />
+                  ) : (
+                    <p className="text-muted-foreground/50 text-sm italic">
+                      No description available
+                    </p>
+                  )}
                 </div>
               </div>
 

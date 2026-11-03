@@ -746,7 +746,7 @@ export default function PlanAndBillingPage() {
       </div>
 
       {isInitialLoadingPlans && reduxPlans.length === 0 ? (
-        <div className="flex flex-wrap gap-4 sm:gap-6 items-stretch pl-1">
+        <div className="flex flex-wrap gap-4 sm:gap-6 items-stretch pl-1 pt-6 sm:pt-7">
           {[1, 2].map((i) => (
             <div
               key={`plan-skeleton-${i}`}
@@ -784,6 +784,8 @@ export default function PlanAndBillingPage() {
           hasMore={hasMorePlans}
           scrollableTarget="main-content-scroll"
           scrollThreshold={0.8}
+          style={{ overflow: "visible" }}
+          className="!overflow-visible"
           loader={
             <div className="flex justify-center py-6 w-full">
               <Loader2 className="w-6 h-6 animate-spin text-primary/60" />
@@ -794,12 +796,14 @@ export default function PlanAndBillingPage() {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="flex flex-wrap gap-4 sm:gap-6 items-stretch pl-1"
+            className="flex flex-wrap gap-4 sm:gap-6 items-stretch pl-1 pt-6 sm:pt-7"
           >
             {reduxPlans.map((plan) => {
               const planCode = (plan.code || plan.id) as string;
-              const isCurrentPlan = currentPlan === planCode;
+              const isUserOnTrial = currentStatus === SUBSCRIPTION_STATUS.TRIAL || salon?.subscription_plan === SUBSCRIPTION_PLAN.TRIAL;
               const isYearlyPlan = planCode === "yearly";
+              const isCurrentPlan = isUserOnTrial ? planCode === "trial" : currentPlan === planCode;
+              const isRecommendedPlan = isYearlyPlan && !isCurrentPlan;
 
               const featuresMap: Record<string, string[]> = {
                 monthly: [
@@ -828,26 +832,20 @@ export default function PlanAndBillingPage() {
                 <motion.div
                   key={plan.uuid || plan.id}
                   variants={itemVariants}
-                  className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative transition-all flex-1 min-w-[260px] max-w-full min-w-0 overflow-visible ${isYearlyPlan
-                    ? "border-2 border-primary shadow-xl shadow-primary/10"
-                    : "border border-border/80 hover:border-primary/40"
-                    } ${isCurrentPlan && currentStatus === "active"
-                      ? "border-primary ring-2 ring-primary"
-                      : isCurrentPlan && currentStatus === "trial"
-                        ? "border-amber-500 ring-2 ring-amber-500/40"
-                        : ""
-                    }`}
+                  className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative flex-1 min-w-[260px] max-w-full min-w-0 overflow-visible ${
+                    isYearlyPlan || isCurrentPlan
+                      ? "border-2 border-primary shadow-xl shadow-primary/10"
+                      : "border-2 border-border/80"
+                  }`}
                 >
-                  {isCurrentPlan && currentStatus === "active" && (
+                  {isCurrentPlan && (
                     <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
                       Current Plan
                     </div>
                   )}
-                  {isCurrentPlan && currentStatus === "trial" && (
-                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center z-20">
-                      <span className="inline-block rounded-full px-3 py-0.5 text-[10px] font-bold shadow-xs uppercase tracking-wider bg-amber-500 text-white truncate max-w-full">
-                        Selected Plan • Trial Active
-                      </span>
+                  {isRecommendedPlan && (
+                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
+                      Recommended
                     </div>
                   )}
 
@@ -864,7 +862,7 @@ export default function PlanAndBillingPage() {
                             className="block font-bold text-xl truncate"
                           />
                         </h4>
-                        <Badge className="text-[10px] font-mono font-semibold bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 shrink-0">
+                        <Badge className="text-[10px] font-mono font-semibold bg-primary/10 text-primary border-primary/20 shrink-0 select-none">
                           {plan.duration_days ?? 0} days
                         </Badge>
                       </div>
@@ -970,7 +968,7 @@ export default function PlanAndBillingPage() {
             })}
             <motion.div
               variants={itemVariants}
-              className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:border-primary/40 transition-all flex-1 min-w-[260px] max-w-full min-w-0"
+              className="rounded-2xl border-2 border-border/80 bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs flex-1 min-w-[260px] max-w-full min-w-0"
             >
               <div className="space-y-4 min-w-0">
                 <div className="min-w-0">

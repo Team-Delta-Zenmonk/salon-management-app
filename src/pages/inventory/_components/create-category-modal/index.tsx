@@ -70,7 +70,7 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
 
     setLoading(true);
     try {
-      const res = await createItemCategory({ name: trimmedName.toLowerCase() });
+      const res = await createItemCategory({ name: trimmedName });
       setValue("category_uuid", res?.uuid || "");
       callSnack("Category created successfully", "success");
       onSuccess(res.data || res);

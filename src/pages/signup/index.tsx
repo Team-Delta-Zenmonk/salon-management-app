@@ -40,7 +40,7 @@ export default function SignUp() {
 
       const result = await registerSalon({
         email: data.email,
-        name: data.salon_name?.trim().toLowerCase(),
+        name: data.salon_name?.trim(),
         password: data.password,
       });
 

@@ -161,18 +161,18 @@ const MyProfile = () => {
       const compiledAddress = [address.street, address.city, address.state, address.pincode]
         .filter(Boolean)
         .join(", ");
-      const finalAddress = (compiledAddress || address.address || "").trim().toLowerCase();
+      const finalAddress = (compiledAddress || address.address || "").trim();
 
       const payload = {
-        name: data.name.trim().toLowerCase(),
-        owner_name: data.owner_name.trim().toLowerCase(),
+        name: data.name.trim(),
+        owner_name: data.owner_name.trim(),
         phone: data.phone.trim(),
-        about: data.about ? data.about.trim().toLowerCase() : "",
-        type: data.type ? data.type.trim().toLowerCase() : "",
+        about: data.about ? data.about.trim() : "",
+        type: data.type ? data.type.trim() : "",
         photos: data.photos,
         business_hours: data.business_hours,
         address: finalAddress,
-        map_link: address.map_link ? address.map_link.trim().toLowerCase() : null,
+        map_link: address.map_link ? address.map_link.trim() : null,
         latitude: address.latitude?.toString().trim() || null,
         longitude: address.longitude?.toString().trim() || null,
         logo: logo?.url || null,

@@ -71,13 +71,13 @@ export const ItemDetailsSection: React.FC<ItemDetailsSectionProps> = ({
     setLoading(true);
     try {
       const payload = {
-        name: data.name.trim().toLowerCase(),
-        brand: data.brand.trim().toLowerCase(),
+        name: data.name.trim(),
+        brand: data.brand.trim(),
         category_id: selectedCategory.uuid,
-        item_type: data.item_type?.trim().toLowerCase(),
+        item_type: data.item_type?.trim(),
         logo: data.logo?.url || undefined,
-        variant_name: data.variant_name?.trim().toLowerCase() || undefined,
-        unit: data.unit?.trim().toLowerCase() || undefined,
+        variant_name: data.variant_name?.trim() || undefined,
+        unit: data.unit?.trim() || undefined,
         unit_price: Number(data.unit_price),
         min_stock_level: Number(data.min_stock_level) || 0,
       };

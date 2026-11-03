@@ -106,13 +106,13 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
     setLoading(true);
     try {
       await updateInventoryItem(inventoryItem.uuid, {
-        name: data.name.trim().toLowerCase(),
-        brand: data.brand.trim().toLowerCase() || null,
+        name: data.name.trim(),
+        brand: data.brand.trim() || null,
         category_id: data.category_id,
         item_type: data.item_type,
         logo: data.logo?.url || null,
-        variant_name: data.variant_name?.trim().toLowerCase() || null,
-        unit: data.unit?.trim().toLowerCase() || null,
+        variant_name: data.variant_name?.trim() || null,
+        unit: data.unit?.trim() || null,
         unit_price: Number(data.unit_price),
         min_stock_level: Number(data.min_stock_level),
       });

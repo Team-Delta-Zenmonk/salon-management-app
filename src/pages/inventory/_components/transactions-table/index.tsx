@@ -58,7 +58,7 @@ const TransactionTableRow: React.FC<{
       <TableCell className="w-[220px] p-4 border-b border-border/30">
         <EllipsisCell
           value={item.item?.name || ""}
-          maxChars={8}
+          maxChars={40}
           className="font-bold text-foreground capitalize block"
         />
       </TableCell>

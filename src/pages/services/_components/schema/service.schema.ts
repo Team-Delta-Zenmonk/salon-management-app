@@ -26,8 +26,8 @@ export const getServiceSchema = (
         .string({ message: "Required" })
         .min(1, { message: "Required" })
         .max(FIELD_LIMITS.DESCRIPTION, { message: `Maximum ${FIELD_LIMITS.DESCRIPTION} characters` })
-        .regex(VALIDATE_PATTERN.alphabetWithSpecial, {
-          message: "Only alphabets and special characters are allowed",
+        .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, {
+          message: "Only alphabets, numbers, and allowed characters are allowed",
         }),
       logo: CloudinaryFileSchema.nullable().optional(),
       category_id: isSubService

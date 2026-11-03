@@ -473,7 +473,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
       const payload = {
         admin_booking: {
-          name: values.customer_name?.trim().toLowerCase(),
+          name: values.customer_name?.trim(),
           phone: values.customer_phone,
         },
         booking_date: bookingDate.format("YYYY-MM-DD"),

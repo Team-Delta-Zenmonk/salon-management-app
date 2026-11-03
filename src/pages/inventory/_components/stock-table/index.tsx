@@ -110,7 +110,7 @@ const StockCard: React.FC<{
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex flex-col min-w-0 w-full">
-              <EllipsisCell value={item.name || "-"} maxChars={20} className="text-sm font-semibold text-foreground/90 capitalize block min-w-0" />
+              <EllipsisCell value={item.name || "-"} maxChars={40} className="text-sm font-semibold text-foreground/90 capitalize block min-w-0" />
             </div>
 
             <div className="flex items-center gap-1.5 flex-wrap w-full mt-2.5">
@@ -215,7 +215,7 @@ const StockTableRow: React.FC<{
           <div className="flex flex-col min-w-0">
             <EllipsisCell
               value={item.name || "-"}
-              maxChars={18}
+              maxChars={40}
               className="font-bold text-foreground capitalize block"
             />
             {brandLabel && (

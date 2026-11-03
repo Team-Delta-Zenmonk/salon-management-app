@@ -112,8 +112,8 @@ export default function StaffDialog({ open, onClose, mode, staff }: Readonly<Pro
       const staff_docs = data.staff_docs || (mode === "update" ? staff?.staff_docs : undefined);
 
       const payload = {
-        first_name: data.first_name?.trim().toLowerCase(),
-        last_name: data.last_name ? data.last_name.trim().toLowerCase() : undefined,
+        first_name: data.first_name?.trim(),
+        last_name: data.last_name ? data.last_name.trim() : undefined,
         email: data.email,
         phone_number: data.phone_number,
         additional_phone_number: data.additional_phone_number || undefined,

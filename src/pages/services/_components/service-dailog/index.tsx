@@ -390,7 +390,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                 placeholder="Enter service description"
                 disabled={isLoading}
                 maxLength={FIELD_LIMITS.DESCRIPTION}
-                pattern={VALIDATE_PATTERN.alphabetWithSpecial}
+                pattern={VALIDATE_PATTERN.alphaNumericSpecialWithSpace}
                 multiline
               />
 
