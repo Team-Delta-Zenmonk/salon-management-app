@@ -132,7 +132,7 @@ export function showBrowserNotification(notification: NotificationItem): void {
     try {
       const desktopNotif = new Notification(notification.title, {
         body: notification.message,
-        icon: "/favicon.ico",
+        icon: "/favicon.svg",
         tag: notification.uuid,
       });
 

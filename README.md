@@ -90,7 +90,7 @@ VITE_MAPBOX_ACCESS_TOKEN=<your-mapbox-token>
 VITE_STRIPE_PUBLISHABLE_KEY=<your-stripe-publishable-key>
 VITE_CLOUDINARY_FOLDER=admin
 VITE_MAX_STAFF_DOCS_LIMIT=10
-VITE_APP_NAME=Veloura
+VITE_APP_NAME=Salops
 ```
 
 ---

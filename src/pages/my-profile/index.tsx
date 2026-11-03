@@ -339,7 +339,7 @@ const MyProfile = () => {
                         activePhotos.length > 0 ? "border-white/20" : "border-border/60"
                       )}>
                         <img
-                          src={getOptimizedImageUrl(activeLogo?.url, MEDIA_PRESETS.AVATAR) || "/management-icon.png"}
+                          src={getOptimizedImageUrl(activeLogo?.url, MEDIA_PRESETS.AVATAR) || "/logo.svg"}
                           className="object-cover w-full h-full"
                           alt="Salon Logo"
                         />
