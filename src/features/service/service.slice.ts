@@ -25,6 +25,9 @@ export interface Service {
   discount?: number | null;
   discount_type?: DiscountType | null;
   sub_services_count?: number;
+  assigned_sub_services_count?: number;
+  is_partial?: boolean;
+  is_full?: boolean;
   created_at: string;
   updated_at: string;
 }

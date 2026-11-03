@@ -31,6 +31,10 @@ interface AssignedStaffService {
     uuid: string;
     id: number;
     parent_id?: number | null;
+    sub_services_count?: number;
+    assigned_sub_services_count?: number;
+    is_partial?: boolean;
+    is_full?: boolean;
   };
 }
 
@@ -222,12 +226,29 @@ export default function AssignServicesDialog({
 
       const subSelectedCount = subItems.filter((sub) => selectedUuids.has(sub.uuid)).length;
       const hasAssignedSubService = assignedSubUuids.some((uuid) => selectedUuids.has(uuid));
-      const hasSubSelected = subSelectedCount > 0 || hasAssignedSubService;
+
+      const assignedParentRecord = assignedStaffServices.find(
+        (ss) => ss.service?.id === parentService.id || ss.service?.uuid === parentUuid,
+      );
+      const backendIsPartial = Boolean(assignedParentRecord?.service?.is_partial);
+      const backendAssignedSubCount = Number(
+        assignedParentRecord?.service?.assigned_sub_services_count ?? 0,
+      );
+
+      const hasSubSelected = subSelectedCount > 0 || hasAssignedSubService || backendAssignedSubCount > 0;
       const isParentSelected = selectedUuids.has(parentUuid);
 
-      const allSubSelected = subItems.length > 0 && subSelectedCount === subItems.length;
-      const isPartial = !isParentSelected && hasSubSelected;
-      const isComplete = isParentSelected || allSubSelected;
+      const allSubSelected =
+        subItems.length > 0
+          ? subSelectedCount === subItems.length
+          : !backendIsPartial && isParentSelected;
+
+      const isPartial =
+        subItems.length > 0
+          ? subSelectedCount > 0 && subSelectedCount < subItems.length
+          : backendIsPartial || (!isParentSelected && hasSubSelected);
+
+      const isComplete = !isPartial && (isParentSelected || allSubSelected);
 
       if (isPartial) {
         setSelectedUuids((prev) => {
@@ -499,12 +520,29 @@ export default function AssignServicesDialog({
                         const subSelectedCount = subItems.filter((sub) =>
                           selectedUuids.has(sub.uuid),
                         ).length;
-                        const hasSubSelected = subSelectedCount > 0 || hasAssignedSubService;
-                        const allSubSelected = subItems.length > 0 && subSelectedCount === subItems.length;
 
-                        const isPartiallyAssigned = !isParentSelected && hasSubSelected;
+                        const assignedParentRecord = assignedStaffServices.find(
+                          (ss) => ss.service?.id === service.id || ss.service?.uuid === service.uuid,
+                        );
+                        const backendIsPartial = Boolean(assignedParentRecord?.service?.is_partial);
+                        const backendAssignedSubCount = Number(
+                          assignedParentRecord?.service?.assigned_sub_services_count ?? 0,
+                        );
+
+                        const hasSubSelected =
+                          subSelectedCount > 0 || hasAssignedSubService || backendAssignedSubCount > 0;
+                        const allSubSelected =
+                          subItems.length > 0
+                            ? subSelectedCount === subItems.length
+                            : !backendIsPartial && isParentSelected;
+
+                        const isPartiallyAssigned =
+                          subItems.length > 0
+                            ? subSelectedCount > 0 && subSelectedCount < subItems.length
+                            : backendIsPartial || (!isParentSelected && hasSubSelected);
                         const isIndeterminate = isPartiallyAssigned && !allSubSelected;
-                        const isEffectivelyChecked = isParentSelected || allSubSelected;
+                        const isEffectivelyChecked =
+                          !isPartiallyAssigned && (isParentSelected || allSubSelected);
                         const hasSubServices = Number(service.sub_services_count ?? 0) > 0;
 
                         return (
