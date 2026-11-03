@@ -9,6 +9,7 @@ import { itemVariants } from "../utils/dashboard.constants";
 import type { Staff } from "../../../features/staff/staff.slice";
 import { isStaffInactive } from "@/utils/staff-status";
 import { cn } from "@/lib/utils";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../common/utils/media.utils";
 
 interface StaffLeaderboardProps {
   staffList: Staff[];
@@ -107,6 +108,7 @@ export const StaffLeaderboard = ({
                 .join("")
                 .toUpperCase() || "ST";
               const photoUrl = staff.photos?.secure_url || staff.photos?.url;
+              const optimizedPhotoUrl = photoUrl ? getOptimizedImageUrl(photoUrl, MEDIA_PRESETS.AVATAR) : undefined;
               const nameKey = `${staff.first_name} ${staff.last_name || ""}`.trim().toLowerCase();
               const todayCount =
                 (staff.id && staffTodayCountMap.get(staff.id)) ||
@@ -130,7 +132,7 @@ export const StaffLeaderboard = ({
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Avatar className="h-10 w-10 border border-primary/10 shrink-0">
-                      {photoUrl && <AvatarImage src={photoUrl} alt={fullName} />}
+                      {photoUrl && <AvatarImage src={optimizedPhotoUrl} alt={fullName} />}
                       <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                         {initials}
                       </AvatarFallback>

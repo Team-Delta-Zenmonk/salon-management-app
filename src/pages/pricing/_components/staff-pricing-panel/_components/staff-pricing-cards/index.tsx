@@ -16,6 +16,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "../../../../../../component
 import type { Staff } from "../../../../../../features/staff/staff.slice";
 import { EllipsisCell } from "@/components/ellipse-cell";
 import { isStaffInactive } from "@/utils/staff-status";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../../../common/utils/media.utils";
 
 interface DialogContext {
   staff_uuid: string;
@@ -386,7 +387,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               <Avatar className="w-10 h-10 sm:w-11 sm:h-11 bg-muted border border-border/50 text-muted-foreground transition-transform duration-200 group-hover:scale-105 shrink-0">
                                 {staff.photos?.url ? (
-                                   <AvatarImage src={staff.photos.url} alt={staff_name} />
+                                   <AvatarImage src={getOptimizedImageUrl(staff.photos.url, MEDIA_PRESETS.AVATAR)} alt={staff_name} />
                                 ) : (
                                    <AvatarFallback className="bg-transparent"><User className="h-5 w-5"/></AvatarFallback>
                                 )}

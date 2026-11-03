@@ -32,6 +32,14 @@ export const MEDIA_PRESETS = {
     quality: "auto:good",
     format: "auto",
   } as MediaTransformOptions,
+  STAFF_COVER: {
+    width: 640,
+    height: 480,
+    crop: "fill",
+    gravity: "face",
+    quality: "auto:good",
+    format: "auto",
+  } as MediaTransformOptions,
 };
 
 export function getOptimizedImageUrl(

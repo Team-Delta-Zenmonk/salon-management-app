@@ -14,6 +14,7 @@ import DeleteDialog from "../../../../components/delete-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
 import { Button } from "../../../../components/ui/button";
 import { EllipsisCell } from "../../../../components/ellipse-cell";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 interface ListCategoriesProps {
   categories: Category[];
@@ -124,7 +125,7 @@ export default function ListCategories({
                     <div className="relative shrink-0">
                       <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <Avatar className="h-14 w-14 ring-4 ring-background/50 border border-border/50 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10">
-                        <AvatarImage src={category.logo || undefined} alt={category.name} className="object-cover" />
+                        <AvatarImage src={category.logo ? getOptimizedImageUrl(category.logo, MEDIA_PRESETS.AVATAR) : undefined} alt={category.name} className="object-cover" />
                         <AvatarFallback className="bg-gradient-to-br from-muted to-muted/80 text-foreground text-xl font-bold">{category.name.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                     </div>

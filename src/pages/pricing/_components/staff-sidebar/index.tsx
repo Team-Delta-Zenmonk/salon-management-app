@@ -10,6 +10,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { Loader2 } from "lucide-react";
 import { listStaffAction } from "../../../../features/staff/list-staff/list-staff.action";
 import { isStaffInactive } from "@/utils/staff-status";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 interface StaffSidebarProps {
   selectedStaffUuid: string | null;
@@ -147,7 +148,7 @@ export default function StaffSidebar({ selectedStaffUuid, onSelectStaff }: Reado
                           : "border-border bg-muted text-muted-foreground",
                       )}
                     >
-                      {staff.photos?.url && <AvatarImage src={staff.photos.url} alt={staffName} />}
+                      {staff.photos?.url && <AvatarImage src={getOptimizedImageUrl(staff.photos.url, MEDIA_PRESETS.AVATAR)} alt={staffName} />}
                       <AvatarFallback className="bg-transparent font-bold">{initials}</AvatarFallback>
                     </Avatar>
 

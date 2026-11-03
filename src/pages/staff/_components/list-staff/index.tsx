@@ -28,6 +28,7 @@ import type {
 } from "../../../../features/staff/staff.slice";
 import { useAppDispatch } from "../../../../store/hooks";
 import AssignServicesDialog from "../assign-services-dialog";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 import { isStaffInactive } from "@/utils/staff-status";
 import StaffDetailsDialog from "../staff-details-dialog";
 import StaffDialog from "../staff-dialog";
@@ -110,7 +111,7 @@ function StaffCard({
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <Avatar className="w-14 h-14 rounded-2xl ring-2 ring-primary/10 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10 shrink-0 overflow-hidden">
               <AvatarImage
-                src={staff.photos?.url || undefined}
+                src={staff.photos?.url ? getOptimizedImageUrl(staff.photos.url, MEDIA_PRESETS.AVATAR) : undefined}
                 alt={getFullName(staff)}
                 className="object-cover"
               />
