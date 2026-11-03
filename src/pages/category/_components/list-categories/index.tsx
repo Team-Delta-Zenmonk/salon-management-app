@@ -8,7 +8,6 @@ import type { AppDispatch } from "../../../../store/store";
 import { deleteCategoryService } from "../../../../features/category/delete-category/delete-category.service";
 import { listCategoriesAction } from "../../../../features/category/list-categories/list-categories.action";
 import { callSnack } from "../../../../components/snackbar";
-import { FIELD_LIMITS } from "../../../../common/field-limits";
 import CategoryDialog from "../category-dialog";
 import type { Category } from "../../../../features/category/category.slice";
 import DeleteDialog from "../../../../components/delete-dialog";
@@ -116,40 +115,33 @@ export default function ListCategories({
                 show: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
               }}
               key={category.uuid}
-              className="group relative overflow-hidden bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between"
+              className="group relative overflow-hidden bg-card/60 backdrop-blur-md border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[200px]"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              
-              <div className="relative z-10">
-                <div className="flex items-start justify-between mb-5">
-                  <div className="flex items-center gap-4 w-full">
-                    <div className="relative shrink-0">
-                      <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <Avatar className="h-14 w-14 ring-4 ring-background/50 border border-border/50 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10">
-                        <AvatarImage src={category.logo ? getOptimizedImageUrl(category.logo, MEDIA_PRESETS.AVATAR) : undefined} alt={category.name} className="object-cover" />
-                        <AvatarFallback className="bg-gradient-to-br from-muted to-muted/80 text-foreground text-xl font-bold">{category.name.charAt(0).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <EllipsisCell
-                        value={category.name}
-                        maxChars={100}
-                        className="font-bold text-foreground text-base sm:text-lg leading-tight group-hover:text-primary transition-colors block capitalize"
-                      />
-                    </div>
-                  </div>
+
+              <div className="flex items-start gap-3.5 relative z-10 w-full mb-4">
+                <div className="relative shrink-0 mt-0.5">
+                  <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <Avatar className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ring-2 ring-primary/10 group-hover:border-primary/40 group-hover:shadow-lg transition-all duration-300 relative z-10 shrink-0 overflow-hidden">
+                    <AvatarImage src={category.logo ? getOptimizedImageUrl(category.logo, MEDIA_PRESETS.AVATAR) : undefined} alt={category.name} className="object-cover" />
+                    <AvatarFallback className="bg-primary/5 text-primary font-bold text-base sm:text-lg rounded-2xl">{category.name ? category.name.charAt(0).toUpperCase() : "?"}</AvatarFallback>
+                  </Avatar>
                 </div>
-                
-                <div className="mb-6 min-h-[40px]">
+
+                <div className="min-w-0 flex-1 flex flex-col gap-1">
+                  <EllipsisCell
+                    value={category.name}
+                    forceTooltip={true}
+                    className="font-bold text-foreground text-base sm:text-lg leading-tight group-hover:text-primary transition-colors block capitalize cursor-default"
+                  />
                   {category.description ? (
                     <EllipsisCell
                       value={category.description}
-                      maxChars={FIELD_LIMITS.DESCRIPTION}
-                      maxLines={2}
-                      className="text-muted-foreground/90 text-sm leading-relaxed block"
+                      forceTooltip={true}
+                      className="text-muted-foreground text-xs leading-relaxed line-clamp-2 mt-0.5 cursor-default"
                     />
                   ) : (
-                    <p className="text-muted-foreground/50 text-sm italic">
+                    <p className="text-muted-foreground/50 text-xs italic mt-0.5">
                       No description available
                     </p>
                   )}

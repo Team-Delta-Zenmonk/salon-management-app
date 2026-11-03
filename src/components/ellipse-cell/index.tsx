@@ -199,7 +199,17 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
 
   useEffect(() => {
     if (!showTooltip) return;
-    const handleScroll = () => {
+    const handleScroll = (e: Event) => {
+      const scrollTarget = e.target as Node | null;
+      if (
+        scrollTarget &&
+        scrollTarget !== document &&
+        scrollTarget !== document.documentElement &&
+        scrollTarget !== document.body &&
+        !scrollTarget.contains(elementRef.current)
+      ) {
+        return;
+      }
       setShowTooltip(false);
     };
     window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
