@@ -74,7 +74,7 @@ export default function BookingServiceRow({
         <div className="flex-1 min-w-0">
           <Select
             name={`services.${index}.staff_id`}
-            placeholder={staffLoading ? "Loading..." : "Any Available"}
+            placeholder={staffLoading ? "Loading..." : "Select Specialist"}
             identifier={`booking-staff-${index}`}
             options={staffOptions}
             triggerClassName="capitalize"

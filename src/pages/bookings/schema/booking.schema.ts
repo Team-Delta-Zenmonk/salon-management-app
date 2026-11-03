@@ -9,8 +9,8 @@ export const bookingServiceSchema = z.object({
     z.number({ message: "Required" }).int().positive({ message: "Required" })
   ),
   staff_id: z.preprocess(
-    (val) => (val === "" || val === null || val === undefined || Number(val) <= 0 ? null : Number(val)),
-    z.number().int().positive().nullable().optional()
+    (val) => (val === "" || val === null || val === undefined || Number(val) <= 0 ? undefined : Number(val)),
+    z.number({ message: "Specialist is required" }).int().positive({ message: "Specialist is required" })
   ),
 });
 
