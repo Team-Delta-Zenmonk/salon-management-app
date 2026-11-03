@@ -46,6 +46,17 @@ function Calendar({
   }, [customMonth, defaultMonth, selectedDate]);
 
   const [uncontrolledMonth, setUncontrolledMonth] = React.useState<Date>(initialMonth);
+
+  React.useEffect(() => {
+    if (customMonth) {
+      setUncontrolledMonth(customMonth);
+    } else if (selectedDate) {
+      setUncontrolledMonth(selectedDate);
+    } else if (defaultMonth) {
+      setUncontrolledMonth(defaultMonth);
+    }
+  }, [customMonth, selectedDate, defaultMonth]);
+
   const currentMonth = customMonth ?? uncontrolledMonth;
   const [showYearGrid, setShowYearGrid] = React.useState(false);
 

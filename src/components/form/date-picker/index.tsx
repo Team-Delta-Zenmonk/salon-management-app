@@ -26,6 +26,7 @@ const DatePicker = <T extends FieldValues>({
   disabled,
   minDate,
   maxDate,
+  defaultMonth,
   handleChange,
   rules,
 }: CustomDatePickerProps<T>) => {
@@ -107,6 +108,15 @@ const DatePicker = <T extends FieldValues>({
                   <Calendar
                     mode="single"
                     selected={dateValue}
+                    defaultMonth={
+                      defaultMonth
+                        ? dayjs.isDayjs(defaultMonth)
+                          ? defaultMonth.toDate()
+                          : defaultMonth
+                        : maxDate
+                          ? maxDate.toDate()
+                          : undefined
+                    }
                     onSelect={handleDateChange}
                     disabled={(date) => {
                       let isDisabled = false;

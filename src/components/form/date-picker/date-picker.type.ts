@@ -15,6 +15,7 @@ export type CustomDatePickerProps<T extends FieldValues> = {
   disabled?: boolean;
   minDate?: Dayjs | null;
   maxDate?: Dayjs | null;
+  defaultMonth?: Date | Dayjs;
   handleChange?: () => void;
   label?: string;
   rules?: any;
