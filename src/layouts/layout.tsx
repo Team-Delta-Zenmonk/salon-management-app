@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import React, { useEffect, useRef } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import { useMediaQuery } from "../hooks/use-media-query";
 import Sidebar from "../components/sidebar";
 import Topbar from "../components/topbar";
@@ -11,6 +11,14 @@ const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = React.useState(false);
+  const location = useLocation();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [location.pathname, location.search]);
 
   const handleToggleSidebar = () => {
     if (isDesktop) {
@@ -32,7 +40,7 @@ const Layout = () => {
 
       <main className="flex flex-col flex-1 h-full min-h-0 min-w-0 overflow-hidden">
         <Topbar onMenuClick={handleToggleSidebar} />
-        <div id="main-content-scroll" className="flex-1 min-h-0 overflow-y-auto">
+        <div id="main-content-scroll" ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto">
           <div className="w-full mx-auto py-3.5 sm:py-6 lg:py-8 flex flex-col min-h-full pl-4 pr-[calc(1rem-6px)] sm:pl-6 sm:pr-[calc(1.5rem-6px)] lg:pl-8 lg:pr-[calc(2rem-6px)]">
             <Outlet />
           </div>

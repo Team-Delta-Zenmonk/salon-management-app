@@ -25,6 +25,7 @@ const DatePicker = <T extends FieldValues>({
   disablePast,
   disabled,
   minDate,
+  maxDate,
   handleChange,
   rules,
 }: CustomDatePickerProps<T>) => {
@@ -114,6 +115,7 @@ const DatePicker = <T extends FieldValues>({
                       if (disableFuture && djsDate.isAfter(dayjs(), 'day')) isDisabled = true;
                       if (disablePast && djsDate.isBefore(dayjs(), 'day')) isDisabled = true;
                       if (minDate && djsDate.isBefore(minDate, 'day')) isDisabled = true;
+                      if (maxDate && djsDate.isAfter(maxDate, 'day')) isDisabled = true;
                       
                       return isDisabled;
                     }}

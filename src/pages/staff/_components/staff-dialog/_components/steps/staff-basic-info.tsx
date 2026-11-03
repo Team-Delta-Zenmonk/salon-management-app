@@ -1,4 +1,5 @@
 import type { Control } from "react-hook-form";
+import dayjs from "dayjs";
 import type { StaffForm } from "../../../schema/staff.schema";
 import TextField from "../../../../../../components/form/textfield";
 import DatePicker from "../../../../../../components/form/date-picker";
@@ -59,6 +60,7 @@ export default function StaffBasicInformation({ control, disabled }: Readonly<{ 
             identifier="staff-dob"
             format="DD-MM-YYYY"
             disableFuture
+            maxDate={dayjs().subtract(18, "years")}
             disabled={disabled}
             label="DOB"
           />

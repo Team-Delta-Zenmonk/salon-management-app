@@ -281,6 +281,15 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
 
     if (mode === "create") {
       setInitialValues(null);
+      const initialDiscount =
+        !isParentFree && parentService?.discount != null && Number(parentService.discount) > 0
+          ? String(parentService.discount)
+          : undefined;
+      const initialDiscountType =
+        !isParentFree && initialDiscount
+          ? (parentService?.discount_type ?? undefined)
+          : undefined;
+
       reset({
         name: "",
         description: "",
@@ -302,8 +311,8 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
             : isParentFrom && parentService?.price != null
               ? String(parentService.price)
               : "",
-        discount: undefined,
-        discount_type: undefined,
+        discount: initialDiscount,
+        discount_type: initialDiscountType,
         is_active: true,
         is_popular: false,
       });

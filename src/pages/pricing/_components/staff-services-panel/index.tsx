@@ -114,14 +114,26 @@ export default function StaffServicesPanel({ selectedStaffUuid }: Readonly<Staff
 
     const serviceIdMap = new Map<number, Service>(allServices.map((s: Service) => [s.id, s]));
 
+    const assignedParentIds = new Set<number>();
+    assignedServices.forEach((r) => {
+      const s = serviceIdMap.get(r.service_id) || r.service;
+      if (s?.parent_id) {
+        assignedParentIds.add(Number(s.parent_id));
+      }
+    });
+
     const groups = new Map<number, { parent: Service; services: (Service & { pricing: StaffPricingType })[] }>();
 
     assignedServices.forEach((pricingRow) => {
       const service = serviceIdMap.get(pricingRow.service_id) || pricingRow.service;
       if (!service) return;
 
-      const hasChildren = allServices.some((s: Service) => s.parent_id && String(s.parent_id) === String(service.id));
-      if (hasChildren && !service.parent_id) {
+      const hasSubServices =
+        Number(service.sub_services_count ?? 0) > 0 ||
+        assignedParentIds.has(Number(service.id)) ||
+        allServices.some((s: Service) => s.parent_id && String(s.parent_id) === String(service.id));
+
+      if (!service.parent_id && hasSubServices) {
         return;
       }
 

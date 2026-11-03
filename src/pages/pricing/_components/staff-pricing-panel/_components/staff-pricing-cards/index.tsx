@@ -6,10 +6,9 @@ import type { RootState } from "../../../../../../store/store";
 import { listServiceStaff } from "../../../../../../features/service/list-staff/list-staff.service";
 import { callSnack } from "../../../../../../components/snackbar";
 import { assignStaffToService } from "../../../../../../features/staff-service/staff-service.service";
-import { unassignStaffFromService } from "../../../../../../features/staff-service/unassign-staff-service.service";
 import StaffServicePricingDialog from "../../../staff-service-pricing-dialog";
 import AssignStaffDialog from "../../../../../services/_components/assign-staff-dialog";
-import { Edit2, Trash2, User, UserPlus, Plus, Loader2 } from "lucide-react";
+import { Edit2, User, UserPlus, Plus, Loader2 } from "lucide-react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Button } from "../../../../../../components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../../../../../components/ui/avatar";
@@ -51,7 +50,6 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
   const [dialogContext, setDialogContext] = useState<DialogContext | null>(null);
 
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadServiceStaffs = useCallback(async () => {
     if (servicesToShow.length === 0 || !salonUUID) {
@@ -236,32 +234,6 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     }
   };
 
-  const handleRemove = async (service_uuid: string, staffServiceUuid: string) => {
-    if (deletingId) return;
-    try {
-      setDeletingId(staffServiceUuid);
-      setServiceStaffsMap((prev) => {
-        const currentRows = prev[service_uuid] || [];
-        return {
-          ...prev,
-          [service_uuid]: currentRows.filter((r) => r.uuid !== staffServiceUuid),
-        };
-      });
-
-      await unassignStaffFromService({ staff_services: [staffServiceUuid], cascade: false });
-      await loadServiceStaffs();
-      callSnack("Staff unassigned successfully", "success");
-    } catch (e: unknown) {
-      const err = e as any;
-      const responseData = err?.response?.data;
-      const msg = typeof responseData === "string" ? responseData : responseData?.message || responseData?.error;
-      callSnack(msg || err?.message || "Failed to unassign staff", "error");
-      await loadServiceStaffs();
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   if (initialLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-3">
@@ -412,20 +384,6 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                                 title="Edit Custom Pricing"
                               >
                                 <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleRemove(service.uuid, staffServiceRow.uuid!)}
-                                disabled={deletingId === staffServiceRow.uuid}
-                                className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all disabled:opacity-50"
-                                title="Unassign Staff"
-                              >
-                                {deletingId === staffServiceRow.uuid ? (
-                                  <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                )}
                               </Button>
                             </div>
                           </div>

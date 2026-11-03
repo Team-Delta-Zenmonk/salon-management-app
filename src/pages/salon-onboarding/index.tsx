@@ -1,5 +1,5 @@
 import { APP_NAME } from "@/constants/app";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { FormProvider, useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -62,6 +62,13 @@ export default function SalonOnboarding() {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { salon } = useAppSelector((state) => state.auth);
+  const stepContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (stepContentRef.current) {
+      stepContentRef.current.scrollTop = 0;
+    }
+  }, [activeStep]);
 
   const intendedPlan: "monthly" | "yearly" | undefined =
     location.state?.plan === "yearly" || location.state?.plan === "monthly"
@@ -401,7 +408,7 @@ export default function SalonOnboarding() {
                 </motion.div>
               </div>
 
-              <div className="px-6 py-4 flex-1 overflow-y-auto min-h-0">
+              <div ref={stepContentRef} className="px-6 py-4 flex-1 overflow-y-auto min-h-0">
                 {isFetchingData ? (
                   <div className="h-full flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
                     <Loader2 className="w-7 h-7 animate-spin text-primary" />

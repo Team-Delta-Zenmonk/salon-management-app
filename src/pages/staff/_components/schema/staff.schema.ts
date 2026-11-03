@@ -88,10 +88,10 @@ export const StaffSchema = z.object({
         return (
           date.isValid() &&
           date.year() >= 1900 &&
-          !date.isAfter(dayjs().endOf("day"), "day")
+          !date.isAfter(dayjs().subtract(18, "years").endOf("day"), "day")
         );
       },
-      { message: "Invalid date" }
+      { message: "Staff must be at least 18 years old" }
     ),
   title: z.string({ message: "Required" }).min(1, { message: "Required" }).max(FIELD_LIMITS.TITLE, { message: `Max ${FIELD_LIMITS.TITLE} characters` }).regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Only alphabets with numbers and special characters are allowed" }),
   joining_date: z
