@@ -36,6 +36,10 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     return children.length > 0 ? children : [selectedService];
   }, [selectedService]);
 
+  const serviceUuidsKey = useMemo(() => {
+    return servicesToShow.map((s) => s.uuid).join(",");
+  }, [servicesToShow]);
+
   const [serviceStaffsMap, setServiceStaffsMap] = useState<Record<string, StaffPricingType[]>>({});
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -63,7 +67,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     await Promise.allSettled(
       servicesToShow.map(async (svc) => {
         try {
-          const res = await listServiceStaff(svc.uuid, salonUUID, { page: 1, limit: pageSize, include_parent: true });
+          const res = await listServiceStaff(svc.uuid, salonUUID, { page: 1, limit: pageSize, include_parent: false });
           const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
           const total = typeof res?.total === "number" ? res.total : rows.length;
           initialStaffsMap[svc.uuid] = rows;
@@ -81,7 +85,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
     setPageMap(initialPageMap);
     setHasMoreMap(initialHasMoreMap);
     setInitialLoading(false);
-  }, [selectedService.uuid, salonUUID, pageSize]);
+  }, [serviceUuidsKey, salonUUID, pageSize]);
 
   useEffect(() => {
     if (!salonUUID || initialLoading) return;
@@ -91,7 +95,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
 
     uninitializedServices.forEach(async (svc) => {
       try {
-        const res = await listServiceStaff(svc.uuid, salonUUID, { page: 1, limit: pageSize, include_parent: true });
+        const res = await listServiceStaff(svc.uuid, salonUUID, { page: 1, limit: pageSize, include_parent: false });
         const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
         const total = typeof res?.total === "number" ? res.total : rows.length;
 
@@ -128,7 +132,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
           const currentPage = pageMap[svc.uuid] || 1;
           const nextPage = currentPage + 1;
           try {
-            const res = await listServiceStaff(svc.uuid, salonUUID, { page: nextPage, limit: pageSize, include_parent: true });
+            const res = await listServiceStaff(svc.uuid, salonUUID, { page: nextPage, limit: pageSize, include_parent: false });
             const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.data ?? res?.rows ?? []);
             const total = typeof res?.total === "number" ? res.total : rows.length;
 
@@ -216,7 +220,7 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
           },
         ],
       });
-      const res = await listServiceStaff(service_uuid, salonUUID, { include_parent: true });
+      const res = await listServiceStaff(service_uuid, salonUUID, { include_parent: false });
       const rows: StaffPricingType[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
       setServiceStaffsMap((p) => ({ ...p, [service_uuid]: rows }));
 
@@ -409,6 +413,20 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
                               >
                                 <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemove(service.uuid, staffServiceRow.uuid!)}
+                                disabled={deletingId === staffServiceRow.uuid}
+                                className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all disabled:opacity-50"
+                                title="Unassign Staff"
+                              >
+                                {deletingId === staffServiceRow.uuid ? (
+                                  <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                )}
+                              </Button>
                             </div>
                           </div>
 
@@ -462,9 +480,10 @@ export default function StaffPricingCards({ selectedService }: Readonly<{ select
           onClose={() => setAssignDialogOpen(false)}
           serviceUuid={selectedService.uuid}
           service={{
+            parent_id: selectedService.parent_id,
             price_type: selectedService.price_type ?? "fixed",
             price: selectedService.price ?? 0,
-            duration: selectedService.duration ?? 0,
+            duration: selectedService.duration ?? 0
           }}
           onStaffAssigned={loadServiceStaffs}
         />

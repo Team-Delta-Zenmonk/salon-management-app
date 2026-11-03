@@ -4,6 +4,7 @@ export type ServiceType = {
   id?: number;
   uuid: string;
   name: string;
+  parent_id?: number | null;
   price_type?: PriceType;
   price?: number;
   duration?: number;
