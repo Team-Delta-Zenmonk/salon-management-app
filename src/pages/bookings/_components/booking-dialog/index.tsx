@@ -306,7 +306,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
       const defaults = {
         customer_name: booking.customer_name || booking.customer?.name || booking.admin_booking?.name || "",
-        customer_phone: booking.customer_phone || booking.customer?.phone || booking.admin_booking?.phone || "",
+        customer_phone: booking.customer_phone || booking.customer?.phone_number || booking.customer?.phone || booking.admin_booking?.phone || "",
         services: bookingServices,
         booking_date: booking.booking_date ? dayjs(booking.booking_date).format("DD-MM-YYYY") : "",
         booking_start_time: `${hh}:${mm}`,

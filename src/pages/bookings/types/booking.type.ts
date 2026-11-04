@@ -34,6 +34,7 @@ export type RawBooking = {
     name?: string;
     email?: string;
     phone?: string;
+    phone_number?: string;
   } | null;
   admin_booking?: {
     name?: string;
@@ -71,6 +72,7 @@ export type Booking = {
     name?: string;
     email?: string;
     phone?: string;
+    phone_number?: string;
   } | null;
   [key: string]: any;
 };

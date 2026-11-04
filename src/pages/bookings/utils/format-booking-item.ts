@@ -12,7 +12,7 @@ export const formatBookingItem = (booking: RawBooking): Booking => {
 
   const customerEmail = isCustomerBooking ? booking.customer?.email || "" : "";
   const customerPhone = isCustomerBooking
-    ? booking.customer?.phone || ""
+    ? booking.customer?.phone_number || booking.customer?.phone || ""
     : booking.admin_booking?.phone || "";
 
   const serviceNames = bookingServices
