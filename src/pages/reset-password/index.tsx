@@ -9,11 +9,14 @@ import PasswordField from "../../components/form/password-field";
 import { resetPassword } from "../../features/auth/reset-password/reset-password.service";
 import { callSnack } from "../../components/snackbar";
 import { Button } from "../../components/ui/button";
+import { FIELD_LIMITS } from "@/common/field-limits";
 import { motion } from "framer-motion";
 
 export default function ResetPassword() {
   const methods = useForm<ResetPasswordForm>({
     resolver: zodResolver(ResetPasswordSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
   const { handleSubmit, control } = methods;
@@ -152,6 +155,7 @@ export default function ResetPassword() {
                     identifier="reset-password"
                     disabled={isLoading}
                     placeholder="••••••••"
+                    maxLength={FIELD_LIMITS.PASSWORD}
                   />
                 </motion.div>
                 <motion.div
@@ -166,6 +170,7 @@ export default function ResetPassword() {
                     identifier="reset-confirm-password"
                     disabled={isLoading}
                     placeholder="••••••••"
+                    maxLength={FIELD_LIMITS.PASSWORD}
                   />
                 </motion.div>
                 <motion.div

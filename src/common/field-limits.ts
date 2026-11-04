@@ -10,7 +10,7 @@ export const FIELD_LIMITS = {
   ITEM_NAME: 150,
   DESCRIPTION: 300,
   CODE: 50,
-  PASSWORD: 50,
+  PASSWORD: 20,
   SLUG: 50,
   URL: 500,
   SKU: 50,

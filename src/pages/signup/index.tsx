@@ -26,6 +26,8 @@ const benefits = [
 export default function SignUp() {
   const methods = useForm<SignUpForm>({
     resolver: zodResolver(SignUpSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
   const { handleSubmit, control } = methods;

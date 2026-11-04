@@ -25,6 +25,8 @@ const features = [
 export default function Login() {
   const methods = useForm<LoginForm>({
     resolver: zodResolver(LoginSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
   const { handleSubmit, control } = methods;

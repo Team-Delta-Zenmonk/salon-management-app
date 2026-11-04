@@ -11,6 +11,7 @@ export const SignUpSchema = z
       .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, { message: "Only alphabets, numbers, and allowed characters are allowed" }),
     email: z
       .string({ message: "Required" })
+      .min(1, { message: "Required" })
       .email({ message: "Invalid Email" })
       .regex(VALIDATE_PATTERN.email, { message: "Invalid Email" })
       .max(FIELD_LIMITS.EMAIL, { message: "Email Max Length Exceeded" }),
@@ -20,6 +21,7 @@ export const SignUpSchema = z
       .max(FIELD_LIMITS.PASSWORD, { message: "Password Max Length Exceeded" })
       .regex(VALIDATE_PATTERN.uppercase, { message: "Need 1 uppercase letter" })
       .regex(VALIDATE_PATTERN.lowercase, { message: "Need 1 lowercase letter" })
+      .regex(VALIDATE_PATTERN.digit, { message: "Need 1 number" })
       .regex(VALIDATE_PATTERN.specialChar, { message: "Need 1 special character" }),
     confirm_password: z.string({ message: "Required" }).min(1, { message: "Required" }),
   })

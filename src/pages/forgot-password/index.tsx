@@ -15,6 +15,8 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function ForgotPassword() {
   const methods = useForm<ForgotPasswordForm>({
     resolver: zodResolver(ForgotPasswordSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
   const { handleSubmit, control } = methods;

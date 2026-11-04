@@ -7,6 +7,7 @@ export const VALIDATE_PATTERN = {
   alphaNumericSpecialWithSpace: /^(?!.* {2})[A-Za-zÀ-ÖØ-öø-ÿĀ-žƀ-ƶǍ-ǰȀ-ȳẽẼṅṄǹǸẏẎ0-9@#$%^&*()_+\-={}|\\:;"'<>,.?/!`~ ]*$/,
   uppercase: /[A-Z]/,
   lowercase: /[a-z]/,
+  digit: /\d/,
   specialChar: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
   alphabetWithSpecial: /^(?!.* {2})[A-Za-zÀ-ÖØ-öø-ÿĀ-žƀ-ƶǍ-ǰȀ-ȳẽẼṅṄǹǸẏẎ@#$%^&*()_+\-={}|\\:;"'<>,.?/!`~ ]*$/,
   email: /^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/,
