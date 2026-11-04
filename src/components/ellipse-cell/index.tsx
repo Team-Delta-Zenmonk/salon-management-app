@@ -21,6 +21,7 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   ...props
 }) => {
   const elementRef = useRef<HTMLSpanElement>(null);
+  const tooltipContainerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -30,12 +31,14 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
     left: number;
     placement: "top" | "bottom";
     arrowOffset: number;
+    maxHeight: number;
   }>({
     targetTop: 0,
     targetBottom: 0,
     left: 0,
     placement: "top",
     arrowOffset: 0,
+    maxHeight: 240,
   });
 
   const isCharTruncated = Boolean(maxChars && value && value.length > maxChars);
@@ -73,12 +76,29 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
     const inputTarget = element.querySelector("input, textarea") as HTMLElement | null;
     const rect = (inputTarget || element).getBoundingClientRect();
 
-    const placement: "top" | "bottom" = rect.top < 120 ? "bottom" : "top";
-    const targetCenter = rect.left + rect.width / 2;
+    const windowHeight = typeof window !== "undefined" ? window.innerHeight : 800;
     const windowWidth = typeof window !== "undefined" ? window.innerWidth : 1000;
-    const maxHalfWidth = 170; // half of max-w-[340px]
+
+    const spaceAbove = rect.top;
+    const spaceBelow = windowHeight - rect.bottom;
+
+    // Determine placement: prefer top if at least 180px available, or if more space above than below; otherwise flip to bottom
+    let placement: "top" | "bottom" = "top";
+    if (spaceAbove < 180 && spaceBelow > spaceAbove) {
+      placement = "bottom";
+    } else if (spaceAbove >= 180) {
+      placement = "top";
+    } else {
+      placement = spaceBelow >= spaceAbove ? "bottom" : "top";
+    }
+
+    const availableHeight = placement === "top" ? spaceAbove - 24 : spaceBelow - 24;
+    const maxHeight = Math.max(90, Math.min(260, availableHeight));
+
+    const targetCenter = rect.left + rect.width / 2;
+    const maxHalfWidth = 190; // half of max-w-[380px]
     const clampedLeft = Math.max(maxHalfWidth + 12, Math.min(windowWidth - maxHalfWidth - 12, targetCenter));
-    const arrowOffset = Math.max(-130, Math.min(130, targetCenter - clampedLeft));
+    const arrowOffset = Math.max(-150, Math.min(150, targetCenter - clampedLeft));
 
     setTooltipPos({
       targetTop: rect.top,
@@ -86,6 +106,7 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
       left: clampedLeft,
       placement,
       arrowOffset,
+      maxHeight,
     });
   };
 
@@ -104,6 +125,10 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   };
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
     const activeEl = document.activeElement;
     const isFocused = elementRef.current?.contains(activeEl);
     const overflowing = checkCurrentlyOverflowing();
@@ -116,7 +141,9 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLSpanElement>) => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    setShowTooltip(false);
+    timerRef.current = setTimeout(() => {
+      setShowTooltip(false);
+    }, 150);
     props.onMouseLeave?.(e);
   };
 
@@ -206,8 +233,12 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
         scrollTarget !== document &&
         scrollTarget !== document.documentElement &&
         scrollTarget !== document.body &&
-        !scrollTarget.contains(elementRef.current)
+        !scrollTarget.contains(elementRef.current) &&
+        !tooltipContainerRef.current?.contains(scrollTarget)
       ) {
+        return;
+      }
+      if (tooltipContainerRef.current?.contains(scrollTarget)) {
         return;
       }
       setShowTooltip(false);
@@ -226,7 +257,17 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
 
   const portalContent = showTooltip && Boolean(value) && typeof window !== "undefined" && (
     <div
-      className="fixed z-[99999] pointer-events-none"
+      ref={tooltipContainerRef}
+      className="fixed z-[99999] pointer-events-auto"
+      onMouseEnter={() => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+      }}
+      onMouseLeave={() => {
+        setShowTooltip(false);
+      }}
       style={{
         ...(tooltipPos.placement === "top"
           ? { bottom: `${Math.max(12, window.innerHeight - tooltipPos.targetTop + 8)}px` }
@@ -235,18 +276,23 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
         transform: "translateX(-50%)",
       }}
     >
-      <div
-        className={cn(
-          "relative px-3.5 py-2 bg-neutral-900/95 dark:bg-neutral-800/95 text-neutral-100 text-xs font-normal rounded-lg shadow-xl border border-neutral-700/60 max-w-[340px] sm:max-w-[420px] text-left leading-relaxed whitespace-normal break-all animate-in fade-in-0 zoom-in-95",
-          isCased.capitalize && "capitalize",
-          isCased.uppercase && "uppercase",
-          isCased.lowercase && "lowercase"
-        )}
-      >
-        {value}
+      <div className="relative">
+        <div
+          className={cn(
+            "px-3.5 py-2.5 bg-neutral-900/95 dark:bg-neutral-800/95 text-neutral-100 text-xs font-normal rounded-lg shadow-xl border border-neutral-700/60 w-max min-w-[180px] max-w-[320px] sm:max-w-[380px] text-left leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere] overflow-y-auto custom-scrollbar animate-in fade-in-0 zoom-in-95",
+            isCased.capitalize && "capitalize",
+            isCased.uppercase && "uppercase",
+            isCased.lowercase && "lowercase"
+          )}
+          style={{
+            maxHeight: tooltipPos.maxHeight ? `${tooltipPos.maxHeight}px` : "240px",
+          }}
+        >
+          {value}
+        </div>
         {tooltipPos.placement === "top" ? (
           <span
-            className="absolute -bottom-1.5 w-0 h-0 border-x-4 border-x-transparent border-t-[6px] border-t-neutral-900/95 dark:border-t-neutral-800/95"
+            className="absolute -bottom-1.5 w-0 h-0 border-x-4 border-x-transparent border-t-[6px] border-t-neutral-900/95 dark:border-t-neutral-800/95 pointer-events-none"
             style={{
               left: `calc(50% + ${tooltipPos.arrowOffset}px)`,
               transform: "translateX(-50%)",
@@ -254,7 +300,7 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
           />
         ) : (
           <span
-            className="absolute -top-1.5 w-0 h-0 border-x-4 border-x-transparent border-b-[6px] border-b-neutral-900/95 dark:border-b-neutral-800/95"
+            className="absolute -top-1.5 w-0 h-0 border-x-4 border-x-transparent border-b-[6px] border-b-neutral-900/95 dark:border-b-neutral-800/95 pointer-events-none"
             style={{
               left: `calc(50% + ${tooltipPos.arrowOffset}px)`,
               transform: "translateX(-50%)",
