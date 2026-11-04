@@ -14,6 +14,7 @@ const TextField = <T extends FieldValues>({
   handleChange,
   pattern,
   label,
+  labelRight,
   startAdornment,
   endAdornment,
   handleBlur,
@@ -203,18 +204,23 @@ const TextField = <T extends FieldValues>({
 
         return (
           <div className="flex flex-col gap-1.5 w-full" data-test-id={`textfield-${identifier}`}>
-            {label && (
-              <Label
-                htmlFor={inputId}
-                className={clsx(
-                  "text-sm font-medium",
-                  hasError ? "text-destructive" : "text-foreground",
-                  disabled && "opacity-50"
+            {(label || labelRight) && (
+              <div className="flex items-center justify-between">
+                {label && (
+                  <Label
+                    htmlFor={inputId}
+                    className={clsx(
+                      "text-sm font-medium",
+                      hasError ? "text-destructive" : "text-foreground",
+                      disabled && "opacity-50"
+                    )}
+                    data-test-id={`label-${identifier}`}
+                  >
+                    {label}
+                  </Label>
                 )}
-                data-test-id={`label-${identifier}`}
-              >
-                {label}
-              </Label>
+                {labelRight}
+              </div>
             )}
 
             {renderInput()}

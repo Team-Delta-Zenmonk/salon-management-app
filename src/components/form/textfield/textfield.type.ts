@@ -11,6 +11,7 @@ export type CustomTextFieldProps<T extends FieldValues> = {
   name: Path<T>;
   control: Control<T>;
   label?: string;
+  labelRight?: ReactElement;
   disabled?: boolean;
   maxLength?: number;
   rules?: any;

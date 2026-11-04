@@ -186,17 +186,16 @@ export default function Login() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.32 }}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-sm font-medium text-foreground">Password</label>
-                    <Link
-                      to="/forgot-password"
-                      className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
                   <PasswordField
-                    label=""
+                    label="Password"
+                    labelRight={
+                      <Link
+                        to="/forgot-password"
+                        className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                      >
+                        Forgot password?
+                      </Link>
+                    }
                     name="password"
                     control={control}
                     identifier="login-form-password"

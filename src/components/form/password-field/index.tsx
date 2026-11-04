@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import TextField from "../textfield/index";
 import clsx from "clsx";
 
 type PasswordFieldProps = {
   label: string;
+  labelRight?: ReactElement;
   name: string;
   control: any;
   identifier: string;
@@ -16,6 +17,7 @@ type PasswordFieldProps = {
 
 const PasswordField = ({
   label,
+  labelRight,
   name,
   control,
   identifier,
@@ -34,6 +36,7 @@ const PasswordField = ({
     <TextField
       type={showPassword ? "text" : "password"}
       label={label}
+      labelRight={labelRight}
       name={name}
       control={control}
       identifier={identifier}
