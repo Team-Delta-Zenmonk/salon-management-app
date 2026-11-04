@@ -6,7 +6,7 @@ export const ResetPasswordSchema = z
   .object({
     password: z
       .string({ message: "Required" })
-      .min(8, { message: "Min 8 characters" })
+      .min(8, { message: "Minimum 8 characters" })
       .max(FIELD_LIMITS.PASSWORD, { message: "Password Max Length Exceeded" })
       .regex(VALIDATE_PATTERN.uppercase, { message: "Need 1 uppercase letter" })
       .regex(VALIDATE_PATTERN.lowercase, { message: "Need 1 lowercase letter" })
