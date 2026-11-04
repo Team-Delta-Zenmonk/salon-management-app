@@ -6,9 +6,9 @@ import { X, UploadCloud, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-
 import { callSnack } from "../../snackbar";
 import type { FileMultiPickerProps } from "./multi-file-picke.type";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../common/utils/media.utils";
 import { uploadMultipleFiles } from "../../../features/upload-images/upload-images.service";
 import {
   validateUploadFiles,
@@ -226,7 +226,7 @@ const FileMultiPicker = <T extends FieldValues>({
                           </div>
                         ) : (
                           <img
-                            src={item.url}
+                            src={getOptimizedImageUrl(item.url, MEDIA_PRESETS.AVATAR)}
                             alt={item.filename || "Uploaded file"}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                           />

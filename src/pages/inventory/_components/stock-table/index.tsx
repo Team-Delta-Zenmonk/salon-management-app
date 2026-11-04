@@ -19,6 +19,7 @@ import type { InventoryItem } from "../../../../features/inventory/inventory-ite
 import { DecreaseStockModal } from "../decrease-stock-modal";
 import { EditProductModal } from "../edit-product-modal";
 import { EllipsisCell } from "@/components/ellipse-cell";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -103,7 +104,7 @@ const StockCard: React.FC<{
       <div className="relative">
         <div className="flex items-start gap-4">
           <Avatar className="w-14 h-14 rounded-2xl border border-border/50 shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-105">
-            <AvatarImage src={item.logo || ""} alt={item.name} />
+            <AvatarImage src={item.logo ? getOptimizedImageUrl(item.logo, MEDIA_PRESETS.AVATAR) : ""} alt={item.name} />
             <AvatarFallback className="rounded-2xl font-bold bg-primary/5 text-primary text-base">
               {item.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
@@ -207,7 +208,7 @@ const StockTableRow: React.FC<{
       <TableCell className="p-4 border-b border-border/30">
         <div className="flex items-center gap-3 min-w-0">
           <Avatar className="w-9 h-9 rounded-xl border border-border/50 shrink-0 shadow-sm">
-            <AvatarImage src={item.logo || ""} alt={item.name} />
+            <AvatarImage src={item.logo ? getOptimizedImageUrl(item.logo, MEDIA_PRESETS.AVATAR) : ""} alt={item.name} />
             <AvatarFallback className="rounded-xl font-bold bg-primary/5 text-primary text-xs">
               {item.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>

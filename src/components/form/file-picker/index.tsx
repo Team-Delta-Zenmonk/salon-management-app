@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import type { FilePickerProps } from "./file-picker.type";
 import { callSnack } from "../../snackbar";
 import { ALLOWED_IMAGE_TYPES } from "../../../common/allowed-images.type";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../common/utils/media.utils";
 import {
   validateUploadFile,
   extractUploadErrorMessage,
@@ -179,7 +180,7 @@ const FilePicker = <T extends FieldValues>({
                       </div>
                     ) : (
                       <img
-                        src={value.url}
+                        src={getOptimizedImageUrl(value.url, MEDIA_PRESETS.AVATAR)}
                         alt={value.filename || "Uploaded file"}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />

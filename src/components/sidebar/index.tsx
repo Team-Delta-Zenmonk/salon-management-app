@@ -4,11 +4,11 @@ import { Store, Loader2 } from "lucide-react";
 import { AccordionNavList } from "./_components/accordion-nav-list";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-
 import { useAppSelector } from "../../store/hooks";
 import type { RootState } from "../../store/store";
 import { EllipsisCell } from "../ellipse-cell";
 import { APP_NAME } from "@/constants/app";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../common/utils/media.utils";
 
 type SidebarProps = {
   drawerWidth: number;
@@ -40,7 +40,7 @@ const SalonLogo = ({
       <Store className="w-5 h-5 text-muted-foreground" />
       {logo && (
         <img
-          src={logo}
+          src={getOptimizedImageUrl(logo, MEDIA_PRESETS.AVATAR)}
           alt={name || "Salon Logo"}
           className="absolute inset-0 w-full h-full object-cover"
           onError={(e) => {

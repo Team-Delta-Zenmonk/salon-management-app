@@ -28,6 +28,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { motion, AnimatePresence } from "framer-motion";
 import { EllipsisCell } from "@/components/ellipse-cell";
 import { isStaffInactive } from "@/utils/staff-status";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 dayjs.extend(customParseFormat);
 
@@ -94,7 +95,7 @@ function StaffRow({
       <div className="relative shrink-0">
         <Avatar className={`w-10 h-10 rounded-xl ring-2 transition-all duration-200 ${selected ? "ring-primary/30" : "ring-border/30 group-hover:ring-primary/20"}`}>
           <AvatarImage
-            src={staff.photos?.url || undefined}
+            src={staff.photos?.url ? getOptimizedImageUrl(staff.photos.url, MEDIA_PRESETS.AVATAR) : undefined}
             alt={getFullName(staff)}
             className="object-cover"
           />

@@ -17,6 +17,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { motion, AnimatePresence } from "framer-motion";
 import { EllipsisCell } from "../../../../components/ellipse-cell";
 import { isStaffInactive } from "@/utils/staff-status";
+import { getOptimizedImageUrl, MEDIA_PRESETS } from "../../../../common/utils/media.utils";
 
 dayjs.extend(customParseFormat);
 
@@ -122,7 +123,7 @@ export default function StaffDetailsDialog({
           <div className="flex items-start gap-4">
             <Avatar className="w-14 h-14 rounded-2xl ring-2 ring-primary/10 shadow-md overflow-hidden shrink-0">
               <AvatarImage
-                src={staff.photos?.url}
+                src={staff.photos?.url ? getOptimizedImageUrl(staff.photos.url, MEDIA_PRESETS.AVATAR) : undefined}
                 alt={fullName}
                 className="object-cover"
               />
