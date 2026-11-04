@@ -131,13 +131,12 @@ export default function ListCategories({
                 <div className="min-w-0 flex-1 flex flex-col gap-1">
                   <EllipsisCell
                     value={category.name}
-                    forceTooltip={true}
                     className="font-bold text-foreground text-base sm:text-lg leading-tight group-hover:text-primary transition-colors block capitalize cursor-default"
                   />
                   {category.description ? (
                     <EllipsisCell
                       value={category.description}
-                      forceTooltip={true}
+                      maxLines={1}
                       className="text-muted-foreground text-xs leading-relaxed line-clamp-2 mt-0.5 cursor-default"
                     />
                   ) : (
