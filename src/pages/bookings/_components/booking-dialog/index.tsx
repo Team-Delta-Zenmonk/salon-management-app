@@ -675,13 +675,13 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                 <div
                   className={cn(
                     "rounded-xl p-3 text-xs font-medium flex items-center gap-2.5 transition-colors",
-                    timingNotice.type === "midnight"
+                    timingNotice.isBlocking
                       ? "bg-destructive/10 border border-destructive/30 text-destructive"
                       : "bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400"
                   )}
                 >
                   <span className="text-sm shrink-0">
-                    {timingNotice.type === "midnight" ? "❌" : "⚠️"}
+                    {timingNotice.isBlocking ? "❌" : "⚠️"}
                   </span>
                   <span>{timingNotice.message}</span>
                 </div>
@@ -751,7 +751,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading || isDownloadingInvoice || (mode === "update" && !isChanged) || timingNotice?.type === "midnight"}
+                disabled={isLoading || isDownloadingInvoice || (mode === "update" && !isChanged) || Boolean(timingNotice?.isBlocking)}
                 className="rounded-full px-6 shadow-md hover:shadow-lg transition-shadow"
               >
                 {isLoading ? (

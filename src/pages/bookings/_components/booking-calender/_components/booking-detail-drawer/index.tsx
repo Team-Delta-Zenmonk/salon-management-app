@@ -211,7 +211,7 @@ export default function BookingDetailsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent className="w-[95vw] sm:max-w-[480px] max-h-[90vh] p-0 gap-0 flex flex-col overflow-hidden border-border/50 shadow-2xl rounded-2xl [&>button]:hidden">
+        <DialogContent className="w-[95vw] sm:max-w-[680px] max-h-[90vh] p-0 gap-0 flex flex-col overflow-hidden border-border/50 shadow-2xl rounded-2xl [&>button]:hidden">
           <DialogDescription className="sr-only">Booking Details Modal</DialogDescription>
           <AnimatePresence>
             {open && booking && (

@@ -12,7 +12,7 @@ import DeleteDialog from "../../../../components/delete-dialog";
 import { ServiceCard } from "./service-card";
 import { SubServicesDrawer } from "./sub-services-drawer";
 import { motion } from "framer-motion";
-import type { Service } from "../../../../features/service/service.slice";
+import { updateSubServicesCount, type Service } from "../../../../features/service/service.slice";
 
 interface ListServicesProps {
   searchQuery: string;
@@ -97,7 +97,14 @@ export default function ListServices({
       await deleteServiceService(deletingService.uuid);
 
       if (deletingSubServiceParent) {
+        dispatch(
+          updateSubServicesCount({
+            parentUuid: deletingSubServiceParent,
+            delta: -1,
+          })
+        );
         triggerSubServiceRefresh(deletingSubServiceParent);
+        await refreshServices();
         callSnack("Sub-service deleted successfully", "success");
       } else {
         await refreshServices();

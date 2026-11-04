@@ -2,10 +2,12 @@ import dayjs from "dayjs";
 import { DAYS_MAP } from "../../my-profile/_components/constants/business-hours.constants";
 
 export interface BookingTimingNotice {
-  type: "midnight" | "overtime";
+  type: "midnight" | "closed" | "outside_hours" | "overtime";
+  isBlocking: boolean;
   message: string;
   endTimeFormatted: string;
   closingTimeFormatted?: string;
+  openingTimeFormatted?: string;
 }
 
 const formatMinutesTo12Hour = (totalM: number): string => {
@@ -34,6 +36,7 @@ export function evaluateBookingTiming(
   if (endMinutes > 1440) {
     return {
       type: "midnight",
+      isBlocking: true,
       message: `Appointment ends at ${endTimeFormatted} next day. Bookings cannot cross midnight into the next date.`,
       endTimeFormatted,
     };
@@ -51,29 +54,52 @@ export function evaluateBookingTiming(
       businessHours[String(dayOfWeek)] ||
       (dayName ? businessHours[dayName] : null);
 
-    if (daySchedule?.end_time) {
-      const [ch, cm] = daySchedule.end_time.split(":").map(Number);
-      if (!isNaN(ch) && !isNaN(cm)) {
-        const closingMinutes = ch * 60 + cm;
-        if (endMinutes > closingMinutes) {
-          const overtimeMins = endMinutes - closingMinutes;
-          const otH = Math.floor(overtimeMins / 60);
-          const otM = overtimeMins % 60;
-          const otStr =
-            otH > 0 && otM > 0
-              ? `${otH}h ${otM}m`
-              : otH > 0
-              ? `${otH} hour${otH > 1 ? "s" : ""}`
-              : `${otM} mins`;
-          const closingTimeFormatted = formatMinutesTo12Hour(closingMinutes);
-          return {
-            type: "overtime",
-            message: `Appointment ends at ${endTimeFormatted} (${otStr} after salon closing time of ${closingTimeFormatted}). Will be booked as overtime.`,
-            endTimeFormatted,
-            closingTimeFormatted,
-          };
-        }
-      }
+    if (
+      !daySchedule ||
+      daySchedule.is_closed ||
+      !daySchedule.start_time ||
+      !daySchedule.end_time
+    ) {
+      return {
+        type: "closed",
+        isBlocking: true,
+        message: "The salon is closed or has no operating hours set on this day.",
+        endTimeFormatted,
+      };
+    }
+
+    const [oh, om] = daySchedule.start_time.split(":").map(Number);
+    const [ch, cm] = daySchedule.end_time.split(":").map(Number);
+
+    if (isNaN(oh) || isNaN(om) || isNaN(ch) || isNaN(cm)) {
+      return null;
+    }
+
+    const openingMinutes = oh * 60 + om;
+    const closingMinutes = ch * 60 + cm;
+    const openingTimeFormatted = formatMinutesTo12Hour(openingMinutes);
+    const closingTimeFormatted = formatMinutesTo12Hour(closingMinutes);
+
+    if (startMinutes < openingMinutes) {
+      return {
+        type: "outside_hours",
+        isBlocking: true,
+        message: `Appointment starts at ${formatMinutesTo12Hour(startMinutes)}, which is before the salon opens at ${openingTimeFormatted}.`,
+        endTimeFormatted,
+        openingTimeFormatted,
+        closingTimeFormatted,
+      };
+    }
+
+    if (endMinutes > closingMinutes) {
+      return {
+        type: "outside_hours",
+        isBlocking: true,
+        message: `Appointment ends at ${endTimeFormatted}, which is after the salon closes at ${closingTimeFormatted}.`,
+        endTimeFormatted,
+        openingTimeFormatted,
+        closingTimeFormatted,
+      };
     }
   }
 

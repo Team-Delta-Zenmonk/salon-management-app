@@ -68,6 +68,24 @@ export const serviceSlice = createSlice({
       state.page = 1;
       state.hasMore = false;
     },
+    updateSubServicesCount(
+      state,
+      action: { payload: { parentUuid: string; count?: number; delta?: number } }
+    ) {
+      const { parentUuid, count, delta } = action.payload;
+      const index = state.data.findIndex((s) => s.uuid === parentUuid);
+      if (index !== -1) {
+        const currentCount = Number(state.data[index].sub_services_count ?? 0);
+        const nextCount =
+          count !== undefined
+            ? Math.max(0, count)
+            : Math.max(0, currentCount + (delta ?? 0));
+        state.data[index] = {
+          ...state.data[index],
+          sub_services_count: nextCount,
+        };
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(listServicesAction.pending, (state, { meta }) => {
@@ -110,5 +128,5 @@ export const serviceSlice = createSlice({
   },
 });
 
-export const { clearServices, resetServices } = serviceSlice.actions;
+export const { clearServices, resetServices, updateSubServicesCount } = serviceSlice.actions;
 export default serviceSlice.reducer;
