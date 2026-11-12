@@ -8,7 +8,7 @@ export const inventoryLogSchema = z.object({
   ordered_quantity: z.coerce.number().min(1, "Required atleast 1").max(50000, "Value must be less than or equal to 50000"),
   received_quantity: z.coerce.number().min(0, "Required").max(50000, "Value must be less than or equal to 50000"),
   damaged_quantity: z.coerce.number().min(0, "Required").max(50000, "Value must be less than or equal to 50000"),
-  returned_quantity: z.coerce.number().min(0, "Required").max(50000, "V alue must be less than or equal to 50000"),
+  returned_quantity: z.coerce.number().min(0, "Required").max(50000, "Value must be less than or equal to 50000"),
   bill_amount: z.coerce.number().min(0, "Required").max(50000, "Value must be less than or equal to 50000"),
 }).superRefine((data, ctx) => {
   if (data.ordered_date && data.received_date) {

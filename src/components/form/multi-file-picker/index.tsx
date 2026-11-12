@@ -26,6 +26,7 @@ const FileMultiPicker = <T extends FieldValues>({
   maxFiles = 10,
   uploadMultipleFn,
   placeholder,
+  allowedTypes,
 }: FileMultiPickerProps<T>) => {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -50,16 +51,7 @@ const FileMultiPicker = <T extends FieldValues>({
       return;
     }
 
-    const isPdfOrImage = (type: string) => type === "application/pdf" || type.startsWith("image/");
-    const invalidFile = Array.from(files).find((file) => !isPdfOrImage(file.type));
-
-    if (invalidFile) {
-      callSnack("Invalid file type. Only images and PDF are allowed.", "error");
-      if (inputRef.current) inputRef.current.value = "";
-      return;
-    }
-
-    const validation = validateUploadFiles(files, { maxSizeBytes });
+    const validation = validateUploadFiles(files, { maxSizeBytes, allowedTypes });
     if (!validation.valid) {
       callSnack(validation.error!, "error");
       if (inputRef.current) inputRef.current.value = "";
@@ -72,7 +64,11 @@ const FileMultiPicker = <T extends FieldValues>({
       const fileList = Array.from(files);
       const uploadedData = uploadMultipleFn
         ? await uploadMultipleFn(fileList)
-        : await uploadMultipleFiles(fileList);
+        : await uploadMultipleFiles(
+            fileList,
+            undefined,
+            allowedTypes?.includes("application/pdf") ? "any" : "image"
+          );
 
       const formattedUploadedData = uploadedData.map((file) => ({
         ...file,

@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { CloudinaryFileSchema } from "../../../../common/cloudinary.schema";
+import { CloudinaryImageSchema, CloudinaryDocSchema } from "../../../../common/cloudinary.schema";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -129,8 +129,8 @@ export const StaffSchema = z.object({
   gender: z.enum(Object.values(GENDER), {
     message: "Required",
   }),
-  photos: CloudinaryFileSchema.nullable().optional(),
-  staff_docs: z.array(CloudinaryFileSchema).nullable().optional(),
+  photos: CloudinaryImageSchema.nullable().optional(),
+  staff_docs: z.array(CloudinaryDocSchema).nullable().optional(),
   active_hours: ActiveHoursSchema.optional(),
 }).refine(
   (data) => {

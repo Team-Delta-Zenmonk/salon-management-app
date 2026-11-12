@@ -6,6 +6,7 @@ import DatePicker from "../../../../../../components/form/date-picker";
 import FilePicker from "../../../../../../components/form/file-picker";
 import FileMultiPicker from "../../../../../../components/form/multi-file-picker";
 import { uploadImages } from "../../../../../../features/upload-images/upload-images.service";
+import { ALLOWED_STAFF_DOC_TYPES } from "../../../../../../features/upload-images/upload-images.utils";
 import { VALIDATE_PATTERN } from "../../../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../../../common/field-limits";
 
@@ -61,6 +62,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
             control={control}
             identifier="staff-photo"
             label="Photo"
+            accept="image/jpeg,image/png,image/webp"
             uploadFn={uploadImages}
             disabled={disabled}
             placeholder="Select photo (optional)"
@@ -75,6 +77,7 @@ export default function StaffEmployment({ control, disabled }: Readonly<{ contro
           identifier="staff-docs"
           label="Staff Documents (Images & PDFs)"
           accept="image/*,application/pdf"
+          allowedTypes={ALLOWED_STAFF_DOC_TYPES}
           maxFiles={Number(import.meta.env.VITE_MAX_STAFF_DOCS_LIMIT) || 10}
           uploadFn={uploadImages}
           disabled={disabled}

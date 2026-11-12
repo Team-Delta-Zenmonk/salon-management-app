@@ -7,6 +7,7 @@ export interface PresignedUrlItem {
   filename?: string;
   filetype: string;
   folder?: string;
+  category?: "image" | "document" | "any";
 }
 
 export interface PresignedUrlResponse {
@@ -35,6 +36,7 @@ export const getPresignedUrls = async (
     filename: f.filename,
     filetype: f.filetype,
     folder: f.folder || folder,
+    category: f.category,
   }));
 
   try {
@@ -52,13 +54,14 @@ export const getPresignedUrls = async (
 };
 
 export const uploadImages = async (file: File): Promise<CloudinaryFile> => {
-  const results = await uploadMultipleFiles([file]);
+  const results = await uploadMultipleFiles([file], undefined, "image");
   return results[0];
 };
 
 export const uploadMultipleFiles = async (
   files: File[],
-  folderName?: string
+  folderName?: string,
+  category?: "image" | "document" | "any"
 ): Promise<CloudinaryFile[]> => {
   if (!files.length) return [];
 
@@ -67,6 +70,7 @@ export const uploadMultipleFiles = async (
       filename: file.name,
       filetype: file.type,
       folder: folderName,
+      category,
     }))
   );
 

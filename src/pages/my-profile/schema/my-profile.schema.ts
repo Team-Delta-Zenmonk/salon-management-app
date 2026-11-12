@@ -1,7 +1,7 @@
 import * as z from "zod";
 import { VALIDATE_PATTERN } from "../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../common/field-limits";
-import { CloudinaryFileSchema } from "../../../common/cloudinary.schema";
+import { CloudinaryFileSchema, CloudinaryImageSchema } from "../../../common/cloudinary.schema";
 
 const BusinessDaySchema = z.object({
   start_time: z.string().min(1, "Required"),
@@ -46,8 +46,17 @@ export const MyProfileSchema = z.object({
     state: z.string().max(FIELD_LIMITS.CITY_STATE, `Max ${FIELD_LIMITS.CITY_STATE} characters`).regex(VALIDATE_PATTERN.alphabet, "Only alphabets are allowed").optional().or(z.literal("")),
     pincode: z.string().max(FIELD_LIMITS.PINCODE, `Max ${FIELD_LIMITS.PINCODE} digits`).regex(VALIDATE_PATTERN.number, "Only numbers allowed").optional().or(z.literal("")),
   }),
-  logo: z.any().nullable(),
-  photos: z.array(CloudinaryFileSchema).max(4, "Maximum 4 photos allowed"),
+  logo: z
+    .union([
+      CloudinaryImageSchema,
+      z.object({
+        url: z.string().min(1, "Image URL is required"),
+        filename: z.string().optional(),
+      }),
+    ])
+    .nullable()
+    .optional(),
+  photos: z.array(CloudinaryImageSchema).max(4, "Maximum 4 photos allowed"),
   business_hours: z.object({
     monday: BusinessDaySchema,
     tuesday: BusinessDaySchema,

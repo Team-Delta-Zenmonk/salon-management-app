@@ -1,6 +1,7 @@
 import * as z from "zod";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
+import { CloudinaryImageSchema } from "../../../../common/cloudinary.schema";
 
 export const inventoryItemSchema = z.object({
   name: z
@@ -17,7 +18,16 @@ export const inventoryItemSchema = z.object({
     .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, "Only alphanumeric, spaces, hyphens, apostrophes, and dots allowed"),
   item_type: z.string().min(1, "Required"),
   category_id: z.string({ message: "Required" }).trim().min(1, "Required"),
-  logo: z.any().optional().nullable(),
+  logo: z
+    .union([
+      CloudinaryImageSchema,
+      z.object({
+        url: z.string().min(1, "Image URL is required"),
+        filename: z.string().optional(),
+      }),
+    ])
+    .optional()
+    .nullable(),
   variant_name: z
     .string()
     .trim()

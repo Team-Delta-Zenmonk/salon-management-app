@@ -25,7 +25,8 @@ const FilePicker = <T extends FieldValues>({
   accept = "image/*",
   maxSizeBytes = 5 * 1024 * 1024,
   uploadFn,
-  placeholder
+  placeholder,
+  allowedTypes,
 }: FilePickerProps<T>) => {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -45,7 +46,7 @@ const FilePicker = <T extends FieldValues>({
 
     const validation = validateUploadFile(file, {
       maxSizeBytes,
-      allowedTypes: ALLOWED_IMAGE_TYPES,
+      allowedTypes: allowedTypes ?? ALLOWED_IMAGE_TYPES,
     });
 
     if (!validation.valid) {

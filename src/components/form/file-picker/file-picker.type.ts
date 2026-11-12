@@ -9,6 +9,7 @@ export type FilePickerProps<T extends FieldValues> = {
   disabled?: boolean;
   accept?: string;
   maxSizeBytes?: number;
+  allowedTypes?: readonly string[];
   uploadFn: (file: File) => Promise<CloudinaryFile>;
   placeholder?: string;
 };

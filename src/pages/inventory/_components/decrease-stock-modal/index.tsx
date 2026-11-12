@@ -20,6 +20,7 @@ import {
   getDecreaseStockSchema,
   type DecreaseStockForm,
 } from "../schema/decrease-stock.schema";
+import EllipsisCell from "@/components/ellipse-cell";
 
 interface DecreaseStockModalProps {
   open: boolean;
@@ -86,8 +87,9 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col flex-1 overflow-hidden min-h-0">
           <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
-            <div className="text-sm text-muted-foreground font-medium">
-              Enter the quantity you want to subtract from <strong className="font-semibold text-foreground">{inventoryItem?.name}</strong>.
+            <div className="text-sm text-muted-foreground font-medium flex flex-row flex-wrap gap-1">
+              Enter the quantity you want to subtract from
+              <EllipsisCell value={inventoryItem?.name ?? ""} className="font-semibold text-foreground" maxChars={20} />.
             </div>
             <div className="text-sm text-muted-foreground font-medium mb-2">
               Current stock: <strong className="font-semibold text-foreground">{inventoryItem?.current_stock} units</strong>
@@ -125,6 +127,6 @@ export const DecreaseStockModal: React.FC<DecreaseStockModalProps> = ({
           </DialogFooter>
         </form>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   );
 };

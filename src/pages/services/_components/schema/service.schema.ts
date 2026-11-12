@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { CloudinaryFileSchema } from "../../../../common/cloudinary.schema";
+import { CloudinaryImageSchema } from "../../../../common/cloudinary.schema";
 import { SERVICE_GENDER } from "../../../../common/enums/service-gender.enum";
 import { PRICE_TYPE } from "../../../../common/enums/price-type.enum";
 import { DISCOUNT_TYPE } from "../../../../common/enums/discount-type.enum";
@@ -29,7 +29,7 @@ export const getServiceSchema = (
         .regex(VALIDATE_PATTERN.alphaNumericSpecialWithSpace, {
           message: "Only alphabets, numbers, and allowed characters are allowed",
         }),
-      logo: CloudinaryFileSchema.nullable().optional(),
+      logo: CloudinaryImageSchema.nullable().optional(),
       category_id: isSubService
         ? z.string().optional().nullable()
         : z

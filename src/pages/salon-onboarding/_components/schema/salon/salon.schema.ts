@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { CloudinaryFileSchema } from "../../../../../common/cloudinary.schema";
+import { CloudinaryImageSchema } from "../../../../../common/cloudinary.schema";
 import { FIELD_LIMITS } from "../../../../../common/field-limits";
 
 export const SalonSchema = z.object({
@@ -12,11 +12,11 @@ export const SalonSchema = z.object({
       "Use lowercase letters, numbers, and single hyphens"
     ),
   type: z.string().min(1, "Required"),
-  logo: CloudinaryFileSchema.nullable().refine((val) => val !== null, {
+  logo: CloudinaryImageSchema.nullable().refine((val) => val !== null, {
     message: "Salon logo is required",
   }),
   photos: z
-    .array(CloudinaryFileSchema)
+    .array(CloudinaryImageSchema)
     .min(1, "At least one salon photo is required")
     .max(4, "Maximum 4 photos allowed")
     .nonempty("At least one salon photo is required"),

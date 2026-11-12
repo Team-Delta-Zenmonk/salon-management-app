@@ -10,6 +10,7 @@ import {
   validateUploadFile,
   validateUploadFiles,
   extractUploadErrorMessage,
+  ALLOWED_IMAGE_TYPES,
 } from "../../../../features/upload-images/upload-images.utils";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
@@ -77,7 +78,10 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
       );
     }
 
-    const validation = validateUploadFiles(filesToUpload);
+    const validation = validateUploadFiles(filesToUpload, {
+      maxSizeBytes: 5 * 1024 * 1024,
+      allowedTypes: ALLOWED_IMAGE_TYPES,
+    });
     if (!validation.valid) {
       callSnack(validation.error!, "error");
       e.target.value = "";
@@ -159,13 +163,16 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
             <input 
               ref={logoInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               className="hidden"
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
 
-                const validation = validateUploadFile(file);
+                const validation = validateUploadFile(file, {
+                  maxSizeBytes: 5 * 1024 * 1024,
+                  allowedTypes: ALLOWED_IMAGE_TYPES,
+                });
                 if (!validation.valid) {
                   callSnack(validation.error!, "error");
                   e.target.value = "";
@@ -373,7 +380,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({
           <input
             ref={photoInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             multiple
             className="hidden"
             onChange={handlePhotoUpload}

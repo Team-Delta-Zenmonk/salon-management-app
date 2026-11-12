@@ -1,5 +1,27 @@
 export const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+export const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
+export const ALLOWED_IMAGE_FORMATS = [
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+] as const;
+
+export const ALLOWED_DOC_TYPES = [
+  "application/pdf",
+] as const;
+
+export const ALLOWED_STAFF_DOC_TYPES = [
+  ...ALLOWED_IMAGE_TYPES,
+  ...ALLOWED_DOC_TYPES,
+] as const;
+
 export function formatFileSize(bytes: number): string {
   const mb = bytes / (1024 * 1024);
   return Number.isInteger(mb) ? `${mb} MB` : `${mb.toFixed(1)} MB`;
@@ -28,8 +50,10 @@ export function validateUploadFile(
     };
   }
 
-  if (options?.allowedTypes && options.allowedTypes.length > 0) {
-    const isAllowed = options.allowedTypes.some((t) => {
+  const effectiveAllowedTypes = options?.allowedTypes ?? ALLOWED_IMAGE_TYPES;
+
+  if (effectiveAllowedTypes && effectiveAllowedTypes.length > 0) {
+    const isAllowed = effectiveAllowedTypes.some((t) => {
       if (t.endsWith("/*")) {
         const prefix = t.slice(0, -1);
         return file.type.startsWith(prefix);
@@ -38,9 +62,12 @@ export function validateUploadFile(
     });
 
     if (!isAllowed) {
+      const allowsDocs = effectiveAllowedTypes.includes("application/pdf");
       return {
         valid: false,
-        error: "Invalid file type. Only images are allowed.",
+        error: allowsDocs
+          ? "Invalid file type. Only images (JPG, PNG, WebP) and PDF documents are allowed."
+          : "Invalid file type. Only images (JPG, PNG, WebP) are allowed.",
       };
     }
   }
