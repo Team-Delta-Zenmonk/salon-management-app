@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { SUBSCRIPTION_STATUS } from "../common/enums/subscription-status.enum";
 import { getSalonProfileAction } from "../features/auth/profile/get-salon-profile/getSalonProfile.action";
+import { setSalonSuspended } from "../features/auth/auth.slice";
 import { APP_NAME } from "../constants/app";
 import { setAppSuspended } from "../components/snackbar";
 
@@ -21,23 +22,21 @@ const ProtectedRoute = () => {
   }, [isSuspended]);
 
   useEffect(() => {
-    if (isAuthenticated && salon?.uuid && !isSuspended) {
+    if (isAuthenticated && salon?.uuid) {
       dispatch(getSalonProfileAction(salon.uuid));
     }
-  }, [dispatch, isAuthenticated, salon?.uuid, isSuspended]);
+  }, [dispatch, isAuthenticated, salon?.uuid]);
 
   useEffect(() => {
     const handleAccountSuspended = () => {
       setAppSuspended(true);
-      if (salon?.uuid && !isSuspended) {
-        dispatch(getSalonProfileAction(salon.uuid));
-      }
+      dispatch(setSalonSuspended());
     };
     window.addEventListener(`${appName}:account-suspended`, handleAccountSuspended);
     return () => {
       window.removeEventListener(`${appName}:account-suspended`, handleAccountSuspended);
     };
-  }, [dispatch, appName, salon?.uuid, isSuspended]);
+  }, [dispatch, appName]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

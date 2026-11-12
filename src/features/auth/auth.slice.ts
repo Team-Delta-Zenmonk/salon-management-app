@@ -79,6 +79,12 @@ export const authSlice = createSlice({
         state.salon = { ...state.salon, ...payload, is_onboarded: true };
       }
     },
+    setSalonSuspended(state) {
+      if (state.salon) {
+        state.salon.subscription_status = "suspended" as SubscriptionStatus;
+        state.salon.is_active = false;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(loginSalonAction.fulfilled, (state, { payload }) => {
@@ -114,5 +120,5 @@ export const authSlice = createSlice({
   },
 });
 
-export const { logout, setsalon, completeOnboarding } = authSlice.actions;
+export const { logout, setsalon, completeOnboarding, setSalonSuspended } = authSlice.actions;
 export default authSlice.reducer;

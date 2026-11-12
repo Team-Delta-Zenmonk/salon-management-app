@@ -76,9 +76,13 @@ axiosInstance.interceptors.response.use(
       status === 403 &&
       (code === "ACCOUNT_SUSPENDED" ||
         code === "SUBSCRIPTION_SUSPENDED" ||
+        code === "ACCOUNT_INACTIVE" ||
         String(code || "").toLowerCase().includes("suspended") ||
+        String(code || "").toLowerCase().includes("inactive") ||
         String(error?.response?.data?.message || "").toLowerCase().includes("suspended") ||
-        String(error?.response?.data?.error || "").toLowerCase().includes("suspended"));
+        String(error?.response?.data?.message || "").toLowerCase().includes("inactive") ||
+        String(error?.response?.data?.error || "").toLowerCase().includes("suspended") ||
+        String(error?.response?.data?.error || "").toLowerCase().includes("inactive"));
 
     if (isSuspensionError) {
       error.isSuspended = true;
@@ -89,9 +93,7 @@ axiosInstance.interceptors.response.use(
       } catch {
       }
 
-      const isProfileRequest = originalRequest?.url?.includes("/salons/");
-
-      if (typeof window !== "undefined" && !isProfileRequest) {
+      if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent(`${appName.toLowerCase()}:account-suspended`, {
             detail: {

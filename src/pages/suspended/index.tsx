@@ -1,21 +1,42 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, RefreshCw } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { RootState } from "@/store/store";
 import { APP_NAME, ADMIN_EMAIL } from "@/constants/app";
 import LogoutButton from "@/components/logout";
+import { Button } from "@/components/ui/button";
 import { closeSnackbar, setAppSuspended } from "@/components/snackbar";
+import { getSalonProfileAction } from "@/features/auth/profile/get-salon-profile/getSalonProfile.action";
 
 export default function SuspendedPage() {
   const { salon } = useAppSelector((state: RootState) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [isChecking, setIsChecking] = useState(false);
+
+  const checkStatus = async () => {
+    if (!salon?.uuid) return;
+    setIsChecking(true);
+    try {
+      const updated = await dispatch(getSalonProfileAction(salon.uuid)).unwrap();
+      if (updated && updated.is_active !== false && updated.subscription_status !== "suspended") {
+        setAppSuspended(false);
+        navigate("/dashboard", { replace: true });
+      }
+    } catch {
+    } finally {
+      setIsChecking(false);
+    }
+  };
 
   useEffect(() => {
     setAppSuspended(true);
     closeSnackbar();
-  }, []);
+    if (salon?.uuid) {
+      dispatch(getSalonProfileAction(salon.uuid));
+    }
+  }, [dispatch, salon?.uuid]);
 
   useEffect(() => {
     if (salon && salon.is_active !== false && salon.subscription_status !== "suspended") {
@@ -54,8 +75,18 @@ export default function SuspendedPage() {
             </a>
           </div>
 
-          <div className="flex justify-center pt-2">
-            <div className="w-full max-w-[200px]">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={checkStatus}
+              disabled={isChecking}
+              className="w-full sm:w-auto flex items-center justify-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isChecking ? "animate-spin" : ""}`} />
+              {isChecking ? "Checking Status..." : "Check Status"}
+            </Button>
+            <div className="w-full sm:w-auto">
               <LogoutButton />
             </div>
           </div>
@@ -68,4 +99,3 @@ export default function SuspendedPage() {
     </div>
   );
 }
-
