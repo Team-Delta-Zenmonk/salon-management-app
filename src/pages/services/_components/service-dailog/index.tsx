@@ -65,7 +65,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     : ServiceGenderOptions;
 
   const isCreatingSubService = mode === "create" && Boolean(parentService);
-  const isEditingSubService = mode === "update" && Boolean(service?.parent_id);
+  const isEditingSubService = mode === "update" && Boolean(service?.parent_id || parentService || service?.parent);
   const effectiveParent = parentService || service?.parent;
   const isParentFree = Boolean(effectiveParent && effectiveParent.price_type === PRICE_TYPE.FREE);
   const isParentFixed = Boolean(effectiveParent && effectiveParent.price_type === PRICE_TYPE.FIXED);
@@ -172,7 +172,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     try {
       setIsLoading(true);
       await dispatch(updateServiceAction({ uuid: service!.uuid, body: payload })).unwrap();
-      callSnack("Service updated successfully", "success");
+      callSnack(isEditingSubService ? "Sub-service updated successfully" : "Service updated successfully", "success");
       setConfirmSubSyncOpen(false);
       setPendingPayload(null);
       onCreated?.();
@@ -180,7 +180,7 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: { message: string }[] } } };
       callSnack(
-        error?.response?.data?.errors?.[0]?.message || "Service Update Failed",
+        error?.response?.data?.errors?.[0]?.message || (isEditingSubService ? "Sub-service Update Failed" : "Service Update Failed"),
         "error"
       );
     } finally {
@@ -251,7 +251,14 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: { message: string }[] } } };
       callSnack(
-        error?.response?.data?.errors?.[0]?.message || (mode === "create" ? "Service Creation Failed" : "Service Update Failed"),
+        error?.response?.data?.errors?.[0]?.message ||
+          (mode === "create"
+            ? isCreatingSubService
+              ? "Sub-service Creation Failed"
+              : "Service Creation Failed"
+            : isEditingSubService
+            ? "Sub-service Update Failed"
+            : "Service Update Failed"),
         "error"
       );
     } finally {
@@ -371,7 +378,13 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
       <DialogContent className="sm:max-w-[550px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
         <DialogHeader className="px-6 py-5 border-b bg-muted/20">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
-            {mode === "create" ? (isCreatingSubService ? "Create Sub-service" : "Create Service") : "Update Service"}
+            {mode === "create"
+              ? isCreatingSubService
+                ? "Create Sub-service"
+                : "Create Service"
+              : isEditingSubService
+              ? "Update Sub-service"
+              : "Update Service"}
           </DialogTitle>
         </DialogHeader>
 
