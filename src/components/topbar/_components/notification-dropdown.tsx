@@ -9,10 +9,12 @@ import {
 } from "../../../features/notification/notification-utils";
 import { NOTIFICATION_PAGINATION } from "../../../features/notification/notification.constants";
 import { cn } from "@/lib/utils";
+import useScrollLock from "@/hooks/use-scroll-lock";
 
 export const NotificationDropdown: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  useScrollLock(open);
   const {
     notifications,
     unreadCount,
@@ -47,7 +49,7 @@ export const NotificationDropdown: React.FC = () => {
   );
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger
         className="relative inline-flex items-center justify-center h-9 w-9 rounded-full text-muted-foreground hover:bg-accent/60 hover:text-foreground cursor-pointer shrink-0 transition-colors outline-none"
         title="Notifications"

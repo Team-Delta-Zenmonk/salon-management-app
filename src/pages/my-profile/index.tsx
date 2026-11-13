@@ -18,6 +18,7 @@ import { ImagePlus } from "lucide-react";
 import { GeneralInfoSection, BrandingSection } from "./_components/general-tab/index";
 import { LocationSection, ContactSection } from "./_components/location-tab/index";
 import { HoursSection } from "./_components/hours-tab/index";
+import { parseAddress, compileAddress } from "../../utils/address.util";
 import PaymentPolicyCard from "./_components/payment-policy-card/index";
 import { UnsavedChangesBanner } from "../../components/unsaved-changes-banner";
 import { EllipsisCell } from "../../components/ellipse-cell";
@@ -85,40 +86,13 @@ const MyProfile = () => {
   };
 
   const getMappedInitialAddress = () => {
-    const fullAddr = salon?.address || "";
-    let street = "";
-    let city = "";
-    let state = "";
-    let pincode = "";
-
-    if (fullAddr) {
-      const parts = fullAddr.split(",").map((p) => p.trim()).filter(Boolean);
-      if (parts.length >= 4) {
-        street = parts.slice(0, parts.length - 3).join(", ");
-        city = parts[parts.length - 3];
-        state = parts[parts.length - 2];
-        pincode = parts[parts.length - 1];
-      } else if (parts.length === 3) {
-        street = parts[0];
-        city = parts[1];
-        state = parts[2];
-      } else if (parts.length === 2) {
-        street = parts[0];
-        city = parts[1];
-      } else {
-        street = fullAddr;
-      }
-    }
-
+    const parsed = parseAddress(salon?.address);
     return {
-      address: fullAddr,
+      ...parsed,
+      address: parsed.formatted_address,
       map_link: salon?.map_link || "",
       latitude: salon?.latitude?.toString() || "",
       longitude: salon?.longitude?.toString() || "",
-      street,
-      city,
-      state,
-      pincode
     };
   };
 
@@ -158,10 +132,23 @@ const MyProfile = () => {
     setIsSaving(true);
     try {
       const { logo, address } = data;
-      const compiledAddress = [address.street, address.city, address.state, address.pincode]
-        .filter(Boolean)
-        .join(", ");
-      const finalAddress = (compiledAddress || address.address || "").trim();
+      const street = address.street ? address.street.trim() : null;
+      const city = address.city ? address.city.trim() : null;
+      const state = address.state ? address.state.trim() : null;
+      const pincode = address.pincode ? address.pincode.trim() : null;
+      const compiled = compileAddress(street, city, state, pincode);
+      const formatted = (address.address || "").trim() || compiled || null;
+
+      const addressPayload =
+        street || city || state || pincode || formatted
+          ? {
+              street,
+              city,
+              state,
+              pincode,
+              formatted_address: formatted,
+            }
+          : null;
 
       const payload = {
         name: data.name.trim(),
@@ -171,10 +158,10 @@ const MyProfile = () => {
         type: data.type ? data.type.trim() : "",
         photos: data.photos,
         business_hours: data.business_hours,
-        address: finalAddress,
+        address: addressPayload,
         map_link: address.map_link ? address.map_link.trim() : null,
-        latitude: address.latitude?.toString().trim() || null,
-        longitude: address.longitude?.toString().trim() || null,
+        latitude: address.latitude ? String(address.latitude).trim() : null,
+        longitude: address.longitude ? String(address.longitude).trim() : null,
         logo: logo?.url || null,
         allowed_payment_policies: data.allowed_payment_policies,
         deposit_percentage: data.allowed_payment_policies.includes("partial_deposit") ? Number(data.deposit_percentage) : null,

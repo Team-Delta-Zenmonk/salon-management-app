@@ -804,6 +804,7 @@ export default function PlanAndBillingPage() {
               const isYearlyPlan = planCode === "yearly";
               const isCurrentPlan = isUserOnTrial ? planCode === "trial" : currentPlan === planCode;
               const isRecommendedPlan = isYearlyPlan && !isCurrentPlan;
+              const badgeLabel = plan.badge || (isRecommendedPlan ? "Recommended" : null);
 
               const featuresMap: Record<string, string[]> = {
                 monthly: [
@@ -833,7 +834,7 @@ export default function PlanAndBillingPage() {
                   key={plan.uuid || plan.id}
                   variants={itemVariants}
                   className={`rounded-2xl bg-card p-4 sm:p-6 flex flex-col justify-between shadow-xs relative flex-1 min-w-[260px] max-w-full min-w-0 overflow-visible ${
-                    isYearlyPlan || isCurrentPlan
+                    isYearlyPlan || isCurrentPlan || Boolean(plan.badge)
                       ? "border-2 border-primary shadow-xl shadow-primary/10"
                       : "border-2 border-border/80"
                   }`}
@@ -843,9 +844,9 @@ export default function PlanAndBillingPage() {
                       Current Plan
                     </div>
                   )}
-                  {isRecommendedPlan && (
+                  {!isCurrentPlan && badgeLabel && (
                     <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-xs z-10">
-                      Recommended
+                      {badgeLabel}
                     </div>
                   )}
 

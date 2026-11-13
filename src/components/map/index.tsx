@@ -2,6 +2,7 @@ import { Controller } from "react-hook-form";
 import type { LatLngValue } from "./_components/location-map";
 import MapPicker from "./_components/location-map";
 import { reverseGeocode } from "../../features/maps/mapbox-geocode.service";
+import { normalizeCoordinates } from "../../utils/address.util";
 
 type LocationMapProps = {
   control: any;
@@ -14,22 +15,45 @@ type LocationMapProps = {
   height?: number | string;
 };
 
-export default function LocationMap({ control, latitude, longitude, label, disabled, setValue, clearErrors, height = "100%" }: Readonly<LocationMapProps>) {
+export default function LocationMap({
+  control,
+  latitude,
+  longitude,
+  label,
+  disabled,
+  setValue,
+  clearErrors,
+  height = "100%",
+}: Readonly<LocationMapProps>) {
   const handleLocationChange = async (
-    coords: LatLngValue,
+    rawCoords: LatLngValue,
     latFieldOnChange: (v: any) => void,
     lngFieldOnChange: (v: any) => void
   ) => {
-    const { lat, lng } = coords;
-
-    latFieldOnChange(lat);
-    lngFieldOnChange(lng);
-    const result = await reverseGeocode(lat, lng);
-    if (result?.formattedAddress) {
-      setValue("address.address", result.formattedAddress);
-      setValue("address.map_link", `https://www.google.com/maps?q=${lat},${lng}`);
-      clearErrors?.("address.address");
+    const coords = normalizeCoordinates(rawCoords.lat, rawCoords.lng);
+    latFieldOnChange(coords.lat);
+    lngFieldOnChange(coords.lng);
+    const result = await reverseGeocode(coords.lat, coords.lng);
+    if (result) {
+      if (result.formattedAddress) {
+        setValue("address.address", result.formattedAddress, { shouldDirty: true });
+        clearErrors?.("address.address");
+      }
+      setValue("address.map_link", `https://www.google.com/maps?q=${coords.lat},${coords.lng}`, { shouldDirty: true });
       clearErrors?.("address.map_link");
+
+      if (result.street !== undefined) {
+        setValue("address.street", result.street, { shouldDirty: true });
+        setValue("address.city", result.city, { shouldDirty: true });
+        setValue("address.state", result.state, { shouldDirty: true });
+        setValue("address.pincode", result.pincode, { shouldDirty: true });
+        clearErrors?.([
+          "address.street",
+          "address.city",
+          "address.state",
+          "address.pincode",
+        ]);
+      }
     }
   };
   return (

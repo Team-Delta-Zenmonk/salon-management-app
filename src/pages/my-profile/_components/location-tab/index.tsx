@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import type { Control, UseFormSetValue, UseFormClearErrors } from "react-hook-form";
-import { useWatch } from "react-hook-form";
 import type { SalonProfileForm } from "../../schema/my-profile.schema";
 import TextField from "../../../../components/form/textfield";
 import LocationMap from "../../../../components/map";
@@ -8,6 +7,7 @@ import { Phone, MapPin, Search, Loader2, CheckCircle2 } from "lucide-react";
 import { Badge } from "../../../../components/ui/badge";
 import { VALIDATE_PATTERN } from "@/common/validate-pattern";
 import { FIELD_LIMITS } from "@/common/field-limits";
+import { extractNominatimAddress, normalizeCoordinates } from "../../../../utils/address.util";
 
 interface NominatimPlace {
   place_id: number;
@@ -22,7 +22,12 @@ interface NominatimPlace {
     town?: string;
     village?: string;
     municipality?: string;
+    city_district?: string;
+    district?: string;
+    county?: string;
+    state_district?: string;
     state?: string;
+    province?: string;
     postcode?: string;
   };
 }
@@ -99,49 +104,6 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
   const [searchLoading, setSearchLoading] = useState(false);
 
   const searchRef = React.useRef<HTMLDivElement | null>(null);
-  const justSelectedRef = React.useRef(false);
-
-  const latVal = useWatch({ control, name: "address.latitude" });
-  const lngVal = useWatch({ control, name: "address.longitude" });
-
-  useEffect(() => {
-    if (!latVal || !lngVal) return;
-
-    if (justSelectedRef.current) {
-      justSelectedRef.current = false;
-      return;
-    }
-
-    const fetchStructuredAddress = async () => {
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latVal}&lon=${lngVal}&addressdetails=1`
-        );
-        const data = await response.json();
-        if (data && data.address) {
-          const addr = data.address;
-          const streetName = [
-            addr.road,
-            addr.suburb,
-            addr.neighbourhood
-          ].filter(Boolean).join(", ") || data.display_name.split(",")[0] || "";
-
-          const cityName = addr.city || addr.town || addr.village || addr.municipality || "";
-          const stateName = addr.state || "";
-          const pincodeValue = addr.postcode || "";
-
-          setValue("address.street", streetName);
-          setValue("address.city", cityName);
-          setValue("address.state", stateName);
-          setValue("address.pincode", pincodeValue);
-        }
-      } catch (error) {
-        console.error("Reverse geocoding error:", error);
-      }
-    };
-
-    fetchStructuredAddress();
-  }, [latVal, lngVal, setValue]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -180,32 +142,28 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
   }, [searchQuery]);
 
   const handleSelectSuggestion = (place: NominatimPlace) => {
-    const lat = parseFloat(place.lat);
-    const lon = parseFloat(place.lon);
+    const coords = normalizeCoordinates(parseFloat(place.lat), parseFloat(place.lon));
+    const parsed = extractNominatimAddress(place);
 
-    justSelectedRef.current = true;
-
-    setValue("address.latitude", lat, { shouldDirty: true });
-    setValue("address.longitude", lon, { shouldDirty: true });
-
-    const addr = place.address || {};
-    const streetName = [
-      addr.road,
-      addr.suburb,
-      addr.neighbourhood
-    ].filter(Boolean).join(", ") || place.display_name.split(",")[0] || "";
-
-    const cityName = addr.city || addr.town || addr.village || addr.municipality || "";
-    const stateName = addr.state || "";
-    const pincodeValue = addr.postcode || "";
-
-    setValue("address.street", streetName, { shouldDirty: true });
-    setValue("address.city", cityName, { shouldDirty: true });
-    setValue("address.state", stateName, { shouldDirty: true });
-    setValue("address.pincode", pincodeValue, { shouldDirty: true });
-
-    setValue("address.map_link", `https://www.google.com/maps?q=${lat},${lon}`, { shouldDirty: true, shouldValidate: true });
-    clearErrors?.("address.map_link");
+    setValue("address.latitude", coords.lat, { shouldDirty: true });
+    setValue("address.longitude", coords.lng, { shouldDirty: true });
+    setValue("address.street", parsed.street, { shouldDirty: true });
+    setValue("address.city", parsed.city, { shouldDirty: true });
+    setValue("address.state", parsed.state, { shouldDirty: true });
+    setValue("address.pincode", parsed.pincode, { shouldDirty: true });
+    setValue("address.address", place.display_name, { shouldDirty: true });
+    setValue("address.map_link", `https://www.google.com/maps?q=${coords.lat},${coords.lng}`, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    clearErrors?.([
+      "address.street",
+      "address.city",
+      "address.state",
+      "address.pincode",
+      "address.map_link",
+      "address.address",
+    ]);
 
     setShowSuggestions(false);
     setSearchQuery("");

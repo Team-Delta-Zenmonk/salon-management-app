@@ -15,6 +15,7 @@ export interface BackendPlan {
   description: string;
   duration_days: number;
   is_active?: boolean;
+  badge?: string | null;
 }
 
 export interface PlansState {
