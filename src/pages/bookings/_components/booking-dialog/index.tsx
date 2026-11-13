@@ -524,7 +524,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
       }}
     >
       <DialogContent className="sm:max-w-[680px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-2xl">
-        <DialogHeader className="px-6 py-5 border-b bg-muted/20">
+        <DialogHeader className="px-4 sm:px-6 py-4 sm:py-5 border-b bg-muted/20">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
             {mode === "create" ? "Create Booking" : "Update Booking"}
           </DialogTitle>
@@ -532,14 +532,14 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit as any)}>
-            <div className="flex flex-col py-5 px-6 gap-5 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
+            <div className="flex flex-col py-4 sm:py-5 px-4 sm:px-6 gap-4 sm:gap-5 max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
               <Controller
                 name="is_walk_in"
                 control={control}
                 render={({ field }) => (
                   <div className="flex flex-col gap-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Booking Type</span>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                       <button
                         type="button"
                         onClick={() => field.onChange(false)}
@@ -572,7 +572,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <TextField
                   type="text"
                   name="customer_name"
@@ -652,7 +652,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
 
               <Separator className="my-1 border-border/50" />
 
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <DatePicker
                   name="booking_date"
                   label="Booking Date"
@@ -723,7 +723,7 @@ export default function BookingDialog({ open, onClose, mode, booking }: Readonly
               )}
             </div>
 
-            <DialogFooter className="m-0 px-6 py-4 border-t bg-muted/10 gap-3 sm:gap-3 flex-row justify-end items-center">
+            <DialogFooter className="m-0 px-4 sm:px-6 py-3 sm:py-4 border-t bg-muted/10 gap-2 sm:gap-3 flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center">
               {mode === "update" && (booking?.id || booking?.uuid) && isBookingFullyPaid(booking) && (
                 <Button
                   type="button"

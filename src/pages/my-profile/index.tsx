@@ -137,7 +137,7 @@ const MyProfile = () => {
       const state = address.state ? address.state.trim() : null;
       const pincode = address.pincode ? address.pincode.trim() : null;
       const compiled = compileAddress(street, city, state, pincode);
-      const formatted = (address.address || "").trim() || compiled || null;
+      const formatted = compiled || (address.address || "").trim() || null;
 
       const addressPayload =
         street || city || state || pincode || formatted

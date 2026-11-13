@@ -100,8 +100,8 @@ const TimePicker = <T extends FieldValues>({
             {label && (
               <Label
                 className={cn(
-                  "text-xs font-semibold tracking-wide text-foreground",
-                  hasError && "text-destructive",
+                  "text-sm font-medium",
+                  hasError ? "text-destructive" : "text-foreground",
                   disabled && "opacity-50"
                 )}
                 data-test-id={`label-${identifier}`}

@@ -267,6 +267,7 @@ export default function Inventory() {
     } finally {
       setLoadingLogUuid(null);
     }
+    setCreatedItemForTransaction(null);
     setIsLogTransactionOpen(true);
   };
 
@@ -373,7 +374,11 @@ export default function Inventory() {
         </div>
         <div className="shrink-0 flex gap-2">
           <Button
-            onClick={() => setIsLogTransactionOpen(true)}
+            onClick={() => {
+              setSelectedTransactionItem(null);
+              setCreatedItemForTransaction(null);
+              setIsLogTransactionOpen(true);
+            }}
             className="font-medium gap-2 rounded-full px-5 h-10 shadow-md hover:shadow-lg transition-all duration-300"
           >
             <ClipboardPlus className="w-4 h-4" />
@@ -539,11 +544,7 @@ export default function Inventory() {
 
       <LogTransactionModal
         open={isLogTransactionOpen}
-        onClose={() => {
-          setIsLogTransactionOpen(false);
-          setSelectedTransactionItem(null);
-          setCreatedItemForTransaction(null);
-        }}
+        onClose={() => setIsLogTransactionOpen(false)}
         onSuccess={handleTransactionLogged}
         transactionToEdit={selectedTransactionItem}
         createdItem={createdItemForTransaction}

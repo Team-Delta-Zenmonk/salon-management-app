@@ -76,7 +76,7 @@ const DatePicker = <T extends FieldValues>({
                   disabled={disabled}
                   ref={ref as any}
                   className={cn(
-                    "flex w-full min-w-0 rounded-lg border bg-input-bg px-3 py-2 text-sm shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 hover:border-input-border-hover disabled:hover:border-input-border disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50 resize-none h-[40px] items-center justify-between",
+                    "flex w-full min-w-0 rounded-lg border bg-input-bg px-3 py-2 text-sm shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 hover:border-input-border-hover disabled:hover:border-input-border disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50 resize-none h-10 items-center justify-between",
                     hasError ? "border-input-border-error focus-visible:border-input-border-error focus-visible:ring-2 focus-visible:ring-input-ring-error" : "border-input-border",
                     !dateValue && "text-muted-foreground"
                   )}
