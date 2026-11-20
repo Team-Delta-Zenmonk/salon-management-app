@@ -31,7 +31,7 @@ const LOG_SORT_OPTIONS = [
 ];
 
 const ITEM_TYPE_OPTIONS = [
-  { value: "", label: "All Types" },
+  { value: "all", label: "All Types" },
   { value: "product", label: "Product" },
   { value: "equipment", label: "Equipment" },
 ];
@@ -61,13 +61,13 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
 }) => {
   const [filterModalOpen, setFilterModalOpen] = useState(false);
 
-  const { control, watch, setValue, reset } = useForm({
+  const { control, watch, setValue } = useForm({
     defaultValues: {
-      categoryUuid: categoryUuid || "",
-      itemType: itemType || "",
+      categoryUuid: categoryUuid || "all",
+      itemType: itemType || "all",
       sortBy: sortBy || "newest",
-      desktopCategory: categoryUuid || "",
-      desktopItemType: itemType || "",
+      desktopCategory: categoryUuid || "all",
+      desktopItemType: itemType || "all",
       desktopSortBy: sortBy || "newest",
     },
   });
@@ -76,59 +76,36 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
   const wType = watch("itemType");
   const wSort = watch("sortBy");
 
-  const wDesktopCategory = watch("desktopCategory");
-  const wDesktopType = watch("desktopItemType");
-  const wDesktopSort = watch("desktopSortBy");
-
   useEffect(() => {
-    setValue("desktopCategory", categoryUuid || "");
-    setValue("categoryUuid", categoryUuid || "");
+    const val = categoryUuid || "";
+    setValue("desktopCategory", val);
+    setValue("categoryUuid", val);
   }, [categoryUuid, setValue]);
 
   useEffect(() => {
-    setValue("desktopItemType", itemType || "");
-    setValue("itemType", itemType || "");
+    const val = itemType || "";
+    setValue("desktopItemType", val);
+    setValue("itemType", val);
   }, [itemType, setValue]);
 
   useEffect(() => {
-    setValue("desktopSortBy", sortBy || "newest");
-    setValue("sortBy", sortBy || "newest");
+    const val = sortBy || "";
+    setValue("desktopSortBy", val);
+    setValue("sortBy", val);
   }, [sortBy, setValue]);
 
-  useEffect(() => {
-    if (wDesktopCategory !== undefined && wDesktopCategory !== categoryUuid) {
-      onCategoryChange(wDesktopCategory || "");
-    }
-  }, [wDesktopCategory, categoryUuid, onCategoryChange]);
-
-  useEffect(() => {
-    if (wDesktopType !== undefined && wDesktopType !== itemType) {
-      onItemTypeChange(wDesktopType || "");
-    }
-  }, [wDesktopType, itemType, onItemTypeChange]);
-
-  useEffect(() => {
-    if (wDesktopSort !== undefined && wDesktopSort !== sortBy) {
-      onSortChange(wDesktopSort || "newest");
-    }
-  }, [wDesktopSort, sortBy, onSortChange]);
-
   const handleOpenModal = () => {
-    reset({
-      categoryUuid: categoryUuid || "",
-      itemType: itemType || "",
-      sortBy: sortBy || "newest",
-    });
+    setValue("categoryUuid", categoryUuid || "");
+    setValue("itemType", itemType || "");
+    setValue("sortBy", sortBy || "");
     setFilterModalOpen(true);
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      reset({
-        categoryUuid: categoryUuid || "",
-        itemType: itemType || "",
-        sortBy: sortBy || "newest",
-      });
+    if (open) {
+      setValue("categoryUuid", categoryUuid || "");
+      setValue("itemType", itemType || "");
+      setValue("sortBy", sortBy || "");
     }
     setFilterModalOpen(open);
   };
@@ -136,7 +113,7 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
   const handleApply = () => {
     const finalCategory = wCategory || "";
     const finalType = wType || "";
-    const finalSort = wSort || "newest";
+    const finalSort = wSort || "";
 
     if (finalCategory !== categoryUuid) onCategoryChange(finalCategory);
     if (finalType !== itemType) onItemTypeChange(finalType);
@@ -148,13 +125,13 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
   const handleResetDraft = () => {
     setValue("categoryUuid", "");
     setValue("itemType", "");
-    setValue("sortBy", "newest");
+    setValue("sortBy", "");
   };
 
   const sortOptions = activeTab === 1 ? STOCK_SORT_OPTIONS : LOG_SORT_OPTIONS;
 
   const categoryOptions = [
-    { value: "", label: "All Categories" },
+    { value: "all", label: "All Categories" },
     ...(categories || [])
       .filter((cat) => cat && cat.uuid)
       .map((cat) => {
@@ -170,11 +147,14 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
   ];
 
   const activeFilterCount =
-    (activeTab === 1 && categoryUuid ? 1 : 0) +
-    (activeTab === 1 && itemType ? 1 : 0) +
+    (activeTab === 1 && categoryUuid && categoryUuid !== "all" ? 1 : 0) +
+    (activeTab === 1 && itemType && itemType !== "all" ? 1 : 0) +
     (sortBy && sortBy !== "newest" ? 1 : 0);
 
-  const isDraftDirty = Boolean((activeTab === 1 && (wCategory || wType)) || (wSort && wSort !== "newest"));
+  const isDraftDirty = Boolean(
+    (activeTab === 1 && ((wCategory && wCategory !== "all") || (wType && wType !== "all"))) ||
+    (wSort && wSort !== "newest")
+  );
 
   return (
     <div className="flex items-center justify-between gap-3 w-full">
@@ -210,6 +190,7 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
                 identifier="desktop-category"
                 options={categoryOptions}
                 triggerClassName="capitalize h-10 rounded-xl bg-card/60 border-border/50"
+                onChange={(val) => onCategoryChange(val || "")}
               />
             </div>
             <div className="w-56">
@@ -220,6 +201,7 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
                 identifier="desktop-type"
                 options={ITEM_TYPE_OPTIONS}
                 triggerClassName="h-10 rounded-xl bg-card/60 border-border/50"
+                onChange={(val) => onItemTypeChange(val || "")}
               />
             </div>
           </>
@@ -228,10 +210,11 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
           <Select
             name="desktopSortBy"
             control={control}
-            placeholder="Sort By"
+            placeholder="Default (Newest)"
             identifier="desktop-sort"
             options={sortOptionsWithDefault}
             triggerClassName="h-10 rounded-xl bg-card/60 border-border/50"
+            onChange={(val) => onSortChange(val || "")}
           />
         </div>
       </div>
@@ -251,7 +234,7 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
                 <Select
                   name="categoryUuid"
                   control={control}
-                  placeholder="Select Category"
+                  placeholder="All Categories"
                   identifier="filter-category"
                   label="Category"
                   options={categoryOptions}
@@ -261,7 +244,7 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
                 <Select
                   name="itemType"
                   control={control}
-                  placeholder="Select Item Type"
+                  placeholder="All Types"
                   identifier="filter-type"
                   label="Item Type"
                   options={ITEM_TYPE_OPTIONS}
@@ -272,34 +255,34 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
             <Select
               name="sortBy"
               control={control}
-              placeholder="Select Sort Order"
+              placeholder="Default (Newest)"
               identifier="filter-sort"
               label="Sort By"
               options={sortOptionsWithDefault}
             />
           </div>
 
-              <DialogFooter className="m-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t bg-muted/10 gap-2.5 sm:gap-3 flex flex-row items-center justify-between shrink-0">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleResetDraft}
-                  disabled={!isDraftDirty}
-                  className="rounded-full px-4 font-semibold text-xs gap-1.5 border-border/50 text-muted-foreground hover:text-foreground"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  Reset Filters
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleApply}
-                  className="rounded-full px-6 font-semibold shadow-md hover:shadow-lg transition-all"
-                >
-                  Done
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <DialogFooter className="m-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t bg-muted/10 gap-2.5 sm:gap-3 flex flex-row items-center justify-between shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleResetDraft}
+              disabled={!isDraftDirty}
+              className="rounded-full px-4 font-semibold text-xs gap-1.5 border-border/50 text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset Filters
+            </Button>
+            <Button
+              type="button"
+              onClick={handleApply}
+              className="rounded-full px-6 font-semibold shadow-md hover:shadow-lg transition-all"
+            >
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

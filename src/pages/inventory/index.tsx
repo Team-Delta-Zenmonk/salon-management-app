@@ -100,7 +100,9 @@ const getSortParams = (sortValue: string) => {
     amount_high_low: { sort_by: "bill_amount", sort_order: "DESC" },
     amount_low_high: { sort_by: "bill_amount", sort_order: "ASC" },
   };
-  return sortMap[sortValue] || {};
+  return (!sortValue || sortValue === "newest" || !sortMap[sortValue])
+    ? { sort_by: "newest" }
+    : sortMap[sortValue];
 };
 
 export default function Inventory() {
@@ -137,8 +139,8 @@ export default function Inventory() {
   const [transactionLoading, setTransactionLoading] = useState(false);
 
   const [sortBy, setSortBy] = useState<string>("newest");
-  const [categoryUuid, setCategoryUuid] = useState<string>("");
-  const [itemType, setItemType] = useState<string>("");
+  const [categoryUuid, setCategoryUuid] = useState<string>("all");
+  const [itemType, setItemType] = useState<string>("all");
 
   const [loadingLogUuid, setLoadingLogUuid] = useState<string | null>(null);
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
@@ -146,22 +148,26 @@ export default function Inventory() {
   const categories = useAppSelector((state) => state.itemsCategory.data) ?? [];
 
   useEffect(() => {
-    dispatch(fetchItemCategoriesAction({ limit: 10 }));
-  }, [dispatch]);
+    if (activeTab === 1) {
+      dispatch(fetchItemCategoriesAction({ limit: 10 }));
+    }
+  }, [dispatch, activeTab]);
 
   useEffect(() => {
+    if (activeTab !== 1) return;
     setStockLoading(true);
     dispatch(listInventoryItemsAction({
       page: 1,
       limit: PAGE_LIMIT,
       search: debouncedSearch,
       ...getSortParams(sortBy),
-      category_id: categoryUuid || undefined,
-      item_type: itemType || undefined,
+      category_id: categoryUuid && categoryUuid !== "all" ? categoryUuid : undefined,
+      item_type: itemType && itemType !== "all" ? itemType : undefined,
     })).finally(() => setStockLoading(false));
-  }, [dispatch, debouncedSearch, sortBy, categoryUuid, itemType]);
+  }, [dispatch, activeTab, debouncedSearch, sortBy, categoryUuid, itemType]);
 
   useEffect(() => {
+    if (activeTab !== 0) return;
     setTransactionLoading(true);
     dispatch(listInventoryLogsAction({
       page: 1,
@@ -169,7 +175,7 @@ export default function Inventory() {
       search: debouncedSearch,
       ...getSortParams(sortBy),
     })).finally(() => setTransactionLoading(false));
-  }, [dispatch, debouncedSearch, sortBy]);
+  }, [dispatch, activeTab, debouncedSearch, sortBy]);
 
   const fetchMoreStock = async () => {
     if (stockLoading) return;
@@ -181,8 +187,8 @@ export default function Inventory() {
         limit: PAGE_LIMIT,
         search: debouncedSearch,
         ...getSortParams(sortBy),
-        category_id: categoryUuid || undefined,
-        item_type: itemType || undefined,
+        category_id: categoryUuid && categoryUuid !== "all" ? categoryUuid : undefined,
+        item_type: itemType && itemType !== "all" ? itemType : undefined,
       })).unwrap();
     } catch (error) {
       console.error("Error fetching more stock:", error);
@@ -231,18 +237,24 @@ export default function Inventory() {
   };
 
   const handleTransactionLogged = async () => {
-    setTransactionLoading(true);
-    setStockLoading(true);
-    try {
-      await Promise.all([
-        dispatch(listInventoryLogsAction({ page: 1, limit: PAGE_LIMIT, search: debouncedSearch, ...getSortParams(sortBy) })).unwrap(),
-        dispatch(listInventoryItemsAction({ page: 1, limit: PAGE_LIMIT, search: debouncedSearch, ...getSortParams(sortBy), category_id: categoryUuid || undefined, item_type: itemType || undefined })).unwrap(),
-      ]);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setTransactionLoading(false);
-      setStockLoading(false);
+    if (activeTab === 1) {
+      setStockLoading(true);
+      try {
+        await dispatch(listInventoryItemsAction({ page: 1, limit: PAGE_LIMIT, search: debouncedSearch, ...getSortParams(sortBy), category_id: categoryUuid && categoryUuid !== "all" ? categoryUuid : undefined, item_type: itemType && itemType !== "all" ? itemType : undefined })).unwrap();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setStockLoading(false);
+      }
+    } else {
+      setTransactionLoading(true);
+      try {
+        await dispatch(listInventoryLogsAction({ page: 1, limit: PAGE_LIMIT, search: debouncedSearch, ...getSortParams(sortBy) })).unwrap();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setTransactionLoading(false);
+      }
     }
   };
 

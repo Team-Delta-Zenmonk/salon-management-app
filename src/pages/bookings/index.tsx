@@ -92,9 +92,9 @@ export default function BookingPage() {
         page: statePage,
         limit: 10,
         view: "calendar",
-        payment_policy: selectedPayment !== "ALL" ? selectedPayment : undefined,
-        staff_uuid: selectedStaff !== ALL_STAFF_VALUE ? selectedStaff : undefined,
-        service_uuid: selectedService !== ALL_SERVICES_VALUE ? selectedService : undefined,
+        payment_policy: selectedPayment && selectedPayment !== "ALL" ? selectedPayment : undefined,
+        staff_uuid: selectedStaff && selectedStaff !== ALL_STAFF_VALUE ? selectedStaff : undefined,
+        service_uuid: selectedService && selectedService !== ALL_SERVICES_VALUE ? selectedService : undefined,
       })
     );
   }, [dispatch, startDateStr, endDateStr, statePage, selectedPayment, selectedStaff, selectedService]);
@@ -175,11 +175,11 @@ export default function BookingPage() {
     return mappedBookings.filter((booking: any) => {
       const services = booking.booking_services ?? [];
       const matchesStaff =
-        selectedStaff === ALL_STAFF_VALUE || services.some((bs: any) => bs.staff?.uuid === selectedStaff);
+        !selectedStaff || selectedStaff === ALL_STAFF_VALUE || services.some((bs: any) => bs.staff?.uuid === selectedStaff);
       const matchesService =
-        selectedService === ALL_SERVICES_VALUE || services.some((bs: any) => bs.service?.uuid === selectedService);
+        !selectedService || selectedService === ALL_SERVICES_VALUE || services.some((bs: any) => bs.service?.uuid === selectedService);
       const matchesPayment =
-        selectedPayment === "ALL" || booking.payment_policy === selectedPayment;
+        !selectedPayment || selectedPayment === "ALL" || booking.payment_policy === selectedPayment;
 
       return matchesStaff && matchesService && matchesPayment;
     });

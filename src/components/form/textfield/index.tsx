@@ -38,6 +38,9 @@ const TextField = <T extends FieldValues>({
   const generatedId = useId();
   const inputId = identifier || generatedId;
 
+  const effectiveMin = min ?? (type === "number" ? 0 : undefined);
+  const effectiveMax = max ?? (maxLength ? Number("9".repeat(Math.min(maxLength, 15))) : undefined);
+
   const handleNumberChange = (evt: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (
       !/\d/.test(evt.key) &&
@@ -92,7 +95,14 @@ const TextField = <T extends FieldValues>({
         };
 
         const handleChangeInternal = (e: any) => {
-          const newValue = e.target.value;
+          let newValue = e.target.value;
+          if (type === "number" && newValue !== "") {
+            const num = Number(newValue);
+            if (!isNaN(num)) {
+              if (effectiveMin !== undefined && num < effectiveMin) newValue = String(effectiveMin);
+              if (effectiveMax !== undefined && num > effectiveMax) newValue = String(effectiveMax);
+            }
+          }
           if (handleChange) {
             return handleChange(e);
           }
@@ -146,8 +156,8 @@ const TextField = <T extends FieldValues>({
                 placeholder={placeholder}
                 disabled={disabled}
                 maxLength={maxLength}
-                min={min}
-                max={max}
+                min={effectiveMin}
+                max={effectiveMax}
                 onInput={handleInput}
                 onKeyDown={(evt) => type === "number" && handleNumberChange(evt as any)}
                 onBeforeInput={handleBeforeInput}
@@ -170,8 +180,8 @@ const TextField = <T extends FieldValues>({
                       value={value}
                       error={error}
                       identifier={identifier}
-                      min={min}
-                      max={max}
+                      min={effectiveMin}
+                      max={effectiveMax}
                       disabled={disabled}
                     />
                   ) : onEndAdornmentClick ? (

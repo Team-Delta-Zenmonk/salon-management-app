@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { navigationSections, type NavGroup, type NavSubItem, type NavSection } from "@/layouts/nav-sections";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type AccordionNavListProps = {
   isDesktop: boolean;
@@ -19,7 +20,6 @@ export const AccordionNavList: React.FC<AccordionNavListProps> = ({
   const location = useLocation();
   const currentPathWithSearch = location.pathname + location.search;
 
-  // Auto-expand group that contains active sub-path
   const findInitialOpenGroup = (): Record<string, boolean> => {
     const map: Record<string, boolean> = {};
     for (const section of navigationSections) {
@@ -38,6 +38,13 @@ export const AccordionNavList: React.FC<AccordionNavListProps> = ({
   };
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(findInitialOpenGroup);
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!desktopCollapsed) {
+      setOpenPopoverId(null);
+    }
+  }, [desktopCollapsed]);
 
   const toggleGroup = (id: string) => {
     setOpenGroups((prev) => ({
@@ -76,7 +83,6 @@ export const AccordionNavList: React.FC<AccordionNavListProps> = ({
             const isOpen = Boolean(openGroups[item.id]);
             const isGroupActive = isParentActive(item);
 
-            // Direct link without children
             if (!hasChildren && item.path) {
               const isActive = location.pathname === item.path;
               return (
@@ -101,16 +107,88 @@ export const AccordionNavList: React.FC<AccordionNavListProps> = ({
               );
             }
 
-            // Accordion collapsible parent
+            if (desktopCollapsed) {
+              const isPopoverOpen = openPopoverId === item.id;
+              return (
+                <Popover
+                  key={item.id}
+                  open={isPopoverOpen}
+                  onOpenChange={(open) => {
+                    setOpenPopoverId(open ? item.id : null);
+                  }}
+                  modal={true}
+                >
+                  <PopoverTrigger
+                    className={cn(
+                      "flex items-center justify-center rounded-xl transition-all w-full text-xs font-semibold overflow-hidden group cursor-pointer py-2.5 px-0 outline-none",
+                      isGroupActive || isPopoverOpen
+                        ? "bg-primary/10 text-primary font-bold"
+                        : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                    )}
+                    title={item.name}
+                  >
+                    <Icon
+                      className={cn(
+                        "h-4 w-4 shrink-0 transition-transform group-hover:scale-105",
+                        isGroupActive || isPopoverOpen
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-foreground"
+                      )}
+                    />
+                  </PopoverTrigger>
+
+                  <PopoverContent
+                    side="right"
+                    align="start"
+                    sideOffset={12}
+                    className="w-[190px] p-1.5 overflow-hidden rounded-xl border border-border shadow-2xl bg-popover z-50 text-foreground"
+                  >
+                    <div className="flex flex-col gap-0.5">
+                      {item.children?.map((subItem: NavSubItem) => {
+                        const SubIcon = subItem.icon;
+                        const isSubActive = isSubItemActive(subItem);
+
+                        return (
+                          <Link
+                            key={subItem.path}
+                            to={subItem.path}
+                            onClick={() => {
+                              setOpenPopoverId(null);
+                              if (!isDesktop && onItemClick) onItemClick();
+                            }}
+                            className={cn(
+                              "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all group",
+                              isSubActive
+                                ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            )}
+                          >
+                            {SubIcon && (
+                              <SubIcon
+                                className={cn(
+                                  "h-3.5 w-3.5 shrink-0 transition-transform group-hover:scale-105",
+                                  isSubActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
+                                )}
+                              />
+                            )}
+                            <span className="truncate flex-1">{subItem.name}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+
             return (
               <div key={item.id} className="flex flex-col">
                 <button
                   type="button"
                   onClick={() => toggleGroup(item.id)}
-                  title={desktopCollapsed ? item.name : undefined}
+                  title={item.name}
                   className={cn(
-                    "flex items-center rounded-xl transition-all w-full text-xs font-semibold overflow-hidden group cursor-pointer",
-                    desktopCollapsed ? "justify-center py-2.5 px-0" : "gap-2.5 px-3 py-2 justify-between",
+                    "flex items-center rounded-xl transition-all w-full text-xs font-semibold overflow-hidden group cursor-pointer gap-2.5 px-3 py-2 justify-between",
                     isGroupActive
                       ? "bg-primary/10 text-primary font-bold"
                       : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
@@ -118,59 +196,52 @@ export const AccordionNavList: React.FC<AccordionNavListProps> = ({
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Icon className={cn("h-4 w-4 shrink-0", isGroupActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
-                    {!desktopCollapsed && (
-                      <span className="whitespace-nowrap overflow-hidden text-ellipsis">{item.name}</span>
-                    )}
+                    <span className="whitespace-nowrap overflow-hidden text-ellipsis">{item.name}</span>
                   </div>
 
-                  {!desktopCollapsed && (
-                    <ChevronDown
-                      className={cn(
-                        "h-3.5 w-3.5 shrink-0 transition-transform duration-200 text-muted-foreground",
-                        isOpen && "rotate-180 text-foreground"
-                      )}
-                    />
-                  )}
+                  <ChevronDown
+                    className={cn(
+                      "h-3.5 w-3.5 shrink-0 transition-transform duration-200 text-muted-foreground",
+                      isOpen && "rotate-180 text-foreground"
+                    )}
+                  />
                 </button>
 
-                {/* Sub items collapsible */}
-                {!desktopCollapsed && (
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <div className="relative pl-6 pr-1 py-1.5 flex flex-col gap-1 ml-3 border-l-2 border-border/60">
-                          {item.children?.map((subItem: NavSubItem) => {
-                            const SubIcon = subItem.icon;
-                            const isSubActive = isSubItemActive(subItem);
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="relative pl-6 pr-1 py-1.5 flex flex-col gap-1 ml-3 border-l-2 border-border/60">
+                        {item.children?.map((subItem: NavSubItem) => {
+                          const SubIcon = subItem.icon;
+                          const isSubActive = isSubItemActive(subItem);
 
-                            return (
-                              <Link
-                                key={subItem.path}
-                                to={subItem.path}
-                                onClick={isDesktop ? undefined : onItemClick}
-                                className={cn(
-                                  "flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all group relative",
-                                  isSubActive
-                                    ? "bg-primary text-primary-foreground font-semibold shadow-xs"
-                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                                )}
-                              >
-                                {SubIcon && <SubIcon className={cn("h-3.5 w-3.5 shrink-0", isSubActive ? "text-primary-foreground" : "text-muted-foreground/70 group-hover:text-foreground")} />}
-                                <span className="truncate">{subItem.name}</span>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                )}
+                          return (
+                            <Link
+                              key={subItem.path}
+                              to={subItem.path}
+                              onClick={isDesktop ? undefined : onItemClick}
+                              className={cn(
+                                "flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all group relative",
+                                isSubActive
+                                  ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                              )}
+                            >
+                              {SubIcon && <SubIcon className={cn("h-3.5 w-3.5 shrink-0", isSubActive ? "text-primary-foreground" : "text-muted-foreground/70 group-hover:text-foreground")} />}
+                              <span className="truncate">{subItem.name}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}
