@@ -35,13 +35,20 @@ const rootReducer = combineSlices({
 
 export type RootState = ReturnType<typeof rootReducer>;
 
+const appReducer = (state: RootState | undefined, action: Action) => {
+  if (action.type === "auth/logout") {
+    state = undefined;
+  }
+  return rootReducer(state, action);
+};
+
 const persistConfig = {
   key: "root",
   storage,
   whitelist: ["auth"],
 };
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const persistedReducer = persistReducer(persistConfig, appReducer as unknown as typeof rootReducer);
 
 export const makeStore = () => {
   return configureStore({

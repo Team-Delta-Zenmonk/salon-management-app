@@ -261,7 +261,7 @@ export default function AssignServicesDialog({
 
         if (hasSubServices && (!subInfo || subInfo.hasMore)) {
           try {
-            const res = await listSubServicesService(parentUuid, { page: 1, limit: 100 });
+            const res = await listSubServicesService(parentUuid, { page: 1, limit: 10 });
             const rows: Service[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
             if (rows.length > 0) {
               setSubServicesMap((prev) => {
@@ -311,7 +311,7 @@ export default function AssignServicesDialog({
 
         if (hasSubServices && (!subInfo || subInfo.hasMore)) {
           try {
-            const res = await listSubServicesService(parentUuid, { page: 1, limit: 100 });
+            const res = await listSubServicesService(parentUuid, { page: 1, limit: 10 });
             const rows: Service[] = Array.isArray(res) ? res : (res?.rows ?? res?.data ?? []);
             if (rows.length > 0) {
               setSubServicesMap((prev) => {

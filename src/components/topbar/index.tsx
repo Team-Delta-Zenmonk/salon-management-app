@@ -24,10 +24,10 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      persistor.purge();
+      await persistor.purge();
       dispatch(logout());
       navigate("/login", { replace: true });
     } catch {

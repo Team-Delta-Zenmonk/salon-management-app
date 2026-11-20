@@ -51,7 +51,7 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        await dispatch(listCategoriesAction({ page: 1, limit: 100 })).unwrap();
+        await dispatch(listCategoriesAction({ page: 1, limit: 10 })).unwrap();
       } catch (err: unknown) {
         const errorObj = err as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
         if (!errorObj?.isSuspended && !errorObj?.isHandledGlobally) {

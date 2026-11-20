@@ -67,7 +67,7 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
 
     setLoading(true);
     try {
-      await dispatch(fetchItemCategoriesAction({ page: 1, limit: 100 })).unwrap();
+      await dispatch(fetchItemCategoriesAction({ page: 1, limit: 10 })).unwrap();
     } catch (error) {
       console.error("Failed to refresh categories", error);
     } finally {
@@ -76,10 +76,8 @@ export const CategorySelectionSection: React.FC<CategorySelectionSectionProps> =
   };
 
   useEffect(() => {
-    if (categories.length === 0) {
-      fetchCategories(1);
-    }
-  }, [categories.length, fetchCategories]);
+    fetchCategories(1);
+  }, [fetchCategories]);
 
   const handleLoadMore = () => {
     if (categories.length < total) {

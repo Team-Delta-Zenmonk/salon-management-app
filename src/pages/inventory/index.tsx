@@ -146,10 +146,8 @@ export default function Inventory() {
   const categories = useAppSelector((state) => state.itemsCategory.data) ?? [];
 
   useEffect(() => {
-    if (categories.length === 0) {
-      dispatch(fetchItemCategoriesAction({ limit: 100 }));
-    }
-  }, [dispatch, categories.length]);
+    dispatch(fetchItemCategoriesAction({ limit: 10 }));
+  }, [dispatch]);
 
   useEffect(() => {
     setStockLoading(true);
