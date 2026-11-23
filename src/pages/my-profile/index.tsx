@@ -142,12 +142,12 @@ const MyProfile = () => {
       const addressPayload =
         street || city || state || pincode || formatted
           ? {
-              street,
-              city,
-              state,
-              pincode,
-              formatted_address: formatted,
-            }
+            street,
+            city,
+            state,
+            pincode,
+            formatted_address: formatted,
+          }
           : null;
 
       const payload = {
@@ -336,6 +336,7 @@ const MyProfile = () => {
                         <EllipsisCell
                           value={activeName || "Your Salon"}
                           maxChars={20}
+                          align="left"
                           className={cn(
                             "text-lg sm:text-xl md:text-2xl font-black tracking-tight capitalize block min-w-0",
                             activePhotos.length > 0 ? "text-white drop-shadow-md" : "text-foreground"

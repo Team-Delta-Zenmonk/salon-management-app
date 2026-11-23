@@ -9,6 +9,9 @@ export interface EllipsisCellProps extends React.HTMLAttributes<HTMLSpanElement>
   className?: string;
   forceTooltip?: boolean;
   children?: React.ReactNode;
+  align?: "left" | "center" | "right" | "start" | "end";
+  side?: "top" | "bottom" | "left" | "right";
+  placement?: "top" | "bottom" | "left" | "right";
 }
 
 export const EllipsisCell: React.FC<EllipsisCellProps> = ({
@@ -18,6 +21,9 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   className,
   forceTooltip = false,
   children,
+  align = "center",
+  side,
+  placement,
   ...props
 }) => {
   const elementRef = useRef<HTMLSpanElement>(null);
@@ -26,19 +32,23 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   const [showTooltip, setShowTooltip] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [tooltipPos, setTooltipPos] = useState<{
-    targetTop: number;
-    targetBottom: number;
+    top?: number;
+    bottom?: number;
     left: number;
-    placement: "top" | "bottom";
+    placement: "top" | "bottom" | "left" | "right";
     arrowOffset: number;
+    arrowOffsetY: number;
     maxHeight: number;
+    align: "left" | "center" | "right";
   }>({
-    targetTop: 0,
-    targetBottom: 0,
+    top: undefined,
+    bottom: undefined,
     left: 0,
     placement: "top",
     arrowOffset: 0,
+    arrowOffsetY: 0,
     maxHeight: 240,
+    align: "left",
   });
 
   const isCharTruncated = Boolean(maxChars && value && value.length > maxChars);
@@ -79,34 +89,95 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
     const windowHeight = typeof window !== "undefined" ? window.innerHeight : 800;
     const windowWidth = typeof window !== "undefined" ? window.innerWidth : 1000;
 
+    const rawSide = side || placement;
+    const normalizedAlign: "left" | "center" | "right" =
+      align === "center" ? "center" : align === "right" || align === "end" ? "right" : "left";
+
+    const tooltipEl = tooltipContainerRef.current;
+    const tooltipWidth = tooltipEl?.offsetWidth || 240;
+    const tooltipHeight = tooltipEl?.offsetHeight || 60;
+
+    if (rawSide === "left" || rawSide === "right") {
+      const spaceLeft = rect.left;
+      const spaceRight = windowWidth - rect.right;
+      let resolvedPlacement: "left" | "right" = "left";
+
+      if (rawSide === "left") {
+        resolvedPlacement = spaceLeft < tooltipWidth + 16 && spaceRight > spaceLeft ? "right" : "left";
+      } else {
+        resolvedPlacement = spaceRight < tooltipWidth + 16 && spaceLeft > spaceRight ? "left" : "right";
+      }
+
+      const targetCenterY = rect.top + rect.height / 2;
+      const clampedY = Math.max(16, Math.min(windowHeight - 16, targetCenterY));
+      const arrowOffsetY = Math.max(
+        -Math.max(16, tooltipHeight / 2 - 12),
+        Math.min(Math.max(16, tooltipHeight / 2 - 12), targetCenterY - clampedY)
+      );
+      const left = resolvedPlacement === "left" ? rect.left - 8 : rect.right + 8;
+      const maxHeight = Math.max(90, Math.min(260, windowHeight - 32));
+
+      setTooltipPos({
+        top: clampedY,
+        bottom: undefined,
+        left,
+        placement: resolvedPlacement,
+        arrowOffset: 0,
+        arrowOffsetY,
+        maxHeight,
+        align: normalizedAlign,
+      });
+      return;
+    }
+
     const spaceAbove = rect.top;
     const spaceBelow = windowHeight - rect.bottom;
 
-    // Determine placement: prefer top if at least 180px available, or if more space above than below; otherwise flip to bottom
-    let placement: "top" | "bottom" = "top";
-    if (spaceAbove < 180 && spaceBelow > spaceAbove) {
-      placement = "bottom";
-    } else if (spaceAbove >= 180) {
-      placement = "top";
+    let resolvedPlacement: "top" | "bottom" = "top";
+    if (rawSide === "bottom") {
+      resolvedPlacement = spaceBelow < 180 && spaceAbove > spaceBelow ? "top" : "bottom";
+    } else if (rawSide === "top") {
+      resolvedPlacement = spaceAbove < 180 && spaceBelow > spaceAbove ? "bottom" : "top";
     } else {
-      placement = spaceBelow >= spaceAbove ? "bottom" : "top";
+      if (spaceAbove < 180 && spaceBelow > spaceAbove) {
+        resolvedPlacement = "bottom";
+      } else if (spaceAbove >= 180) {
+        resolvedPlacement = "top";
+      } else {
+        resolvedPlacement = spaceBelow >= spaceAbove ? "bottom" : "top";
+      }
     }
 
-    const availableHeight = placement === "top" ? spaceAbove - 24 : spaceBelow - 24;
+    const availableHeight = resolvedPlacement === "top" ? spaceAbove - 24 : spaceBelow - 24;
     const maxHeight = Math.max(90, Math.min(260, availableHeight));
 
-    const targetCenter = rect.left + rect.width / 2;
-    const maxHalfWidth = 190; // half of max-w-[380px]
-    const clampedLeft = Math.max(maxHalfWidth + 12, Math.min(windowWidth - maxHalfWidth - 12, targetCenter));
-    const arrowOffset = Math.max(-150, Math.min(150, targetCenter - clampedLeft));
+    let clampedLeft = 0;
+    let arrowOffset = 0;
+
+    if (normalizedAlign === "center") {
+      const targetCenter = rect.left + rect.width / 2;
+      const maxHalfWidth = tooltipWidth / 2;
+      clampedLeft = Math.max(maxHalfWidth + 12, Math.min(windowWidth - maxHalfWidth - 12, targetCenter));
+      arrowOffset = Math.max(-maxHalfWidth + 16, Math.min(maxHalfWidth - 16, targetCenter - clampedLeft));
+    } else if (normalizedAlign === "right") {
+      const targetArrowX = rect.right - Math.min(20, Math.max(10, rect.width / 2));
+      clampedLeft = Math.max(12, Math.min(windowWidth - tooltipWidth - 12, rect.right - tooltipWidth));
+      arrowOffset = Math.max(14, Math.min(tooltipWidth - 14, targetArrowX - clampedLeft));
+    } else {
+      const targetArrowX = rect.left + Math.min(20, Math.max(10, rect.width / 2));
+      clampedLeft = Math.max(12, Math.min(windowWidth - tooltipWidth - 12, rect.left));
+      arrowOffset = Math.max(14, Math.min(tooltipWidth - 14, targetArrowX - clampedLeft));
+    }
 
     setTooltipPos({
-      targetTop: rect.top,
-      targetBottom: rect.bottom,
+      top: rect.bottom + 8,
+      bottom: Math.max(12, windowHeight - rect.top + 8),
       left: clampedLeft,
-      placement,
+      placement: resolvedPlacement,
       arrowOffset,
+      arrowOffsetY: 0,
       maxHeight,
+      align: normalizedAlign,
     });
   };
 
@@ -225,6 +296,12 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
   }, []);
 
   useEffect(() => {
+    if (showTooltip) {
+      updatePosition();
+    }
+  }, [showTooltip, align, side, placement]);
+
+  useEffect(() => {
     if (!showTooltip) return;
     const handleScroll = (e: Event) => {
       const scrollTarget = e.target as Node | null;
@@ -255,6 +332,28 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
     lowercase: Boolean(className && /\blowercase\b/.test(className)),
   };
 
+  const portalStyle: React.CSSProperties = {
+    left: `${tooltipPos.left}px`,
+  };
+
+  if (tooltipPos.placement === "top") {
+    portalStyle.bottom = `${tooltipPos.bottom ?? 12}px`;
+    if (tooltipPos.align === "center") {
+      portalStyle.transform = "translateX(-50%)";
+    }
+  } else if (tooltipPos.placement === "bottom") {
+    portalStyle.top = `${tooltipPos.top ?? 0}px`;
+    if (tooltipPos.align === "center") {
+      portalStyle.transform = "translateX(-50%)";
+    }
+  } else if (tooltipPos.placement === "left") {
+    portalStyle.top = `${tooltipPos.top ?? 0}px`;
+    portalStyle.transform = "translateX(-100%) translateY(-50%)";
+  } else if (tooltipPos.placement === "right") {
+    portalStyle.top = `${tooltipPos.top ?? 0}px`;
+    portalStyle.transform = "translateY(-50%)";
+  }
+
   const portalContent = showTooltip && Boolean(value) && typeof window !== "undefined" && (
     <div
       ref={tooltipContainerRef}
@@ -268,13 +367,7 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
       onMouseLeave={() => {
         setShowTooltip(false);
       }}
-      style={{
-        ...(tooltipPos.placement === "top"
-          ? { bottom: `${Math.max(12, window.innerHeight - tooltipPos.targetTop + 8)}px` }
-          : { top: `${tooltipPos.targetBottom + 8}px` }),
-        left: `${tooltipPos.left}px`,
-        transform: "translateX(-50%)",
-      }}
+      style={portalStyle}
     >
       <div className="relative">
         <div
@@ -294,16 +387,38 @@ export const EllipsisCell: React.FC<EllipsisCellProps> = ({
           <span
             className="absolute -bottom-1.5 w-0 h-0 border-x-4 border-x-transparent border-t-[6px] border-t-neutral-900/95 dark:border-t-neutral-800/95 pointer-events-none"
             style={{
-              left: `calc(50% + ${tooltipPos.arrowOffset}px)`,
+              left:
+                tooltipPos.align === "center"
+                  ? `calc(50% + ${tooltipPos.arrowOffset}px)`
+                  : `${tooltipPos.arrowOffset}px`,
               transform: "translateX(-50%)",
+            }}
+          />
+        ) : tooltipPos.placement === "bottom" ? (
+          <span
+            className="absolute -top-1.5 w-0 h-0 border-x-4 border-x-transparent border-b-[6px] border-b-neutral-900/95 dark:border-b-neutral-800/95 pointer-events-none"
+            style={{
+              left:
+                tooltipPos.align === "center"
+                  ? `calc(50% + ${tooltipPos.arrowOffset}px)`
+                  : `${tooltipPos.arrowOffset}px`,
+              transform: "translateX(-50%)",
+            }}
+          />
+        ) : tooltipPos.placement === "left" ? (
+          <span
+            className="absolute -right-1.5 w-0 h-0 border-y-4 border-y-transparent border-l-[6px] border-l-neutral-900/95 dark:border-l-neutral-800/95 pointer-events-none"
+            style={{
+              top: `calc(50% + ${tooltipPos.arrowOffsetY}px)`,
+              transform: "translateY(-50%)",
             }}
           />
         ) : (
           <span
-            className="absolute -top-1.5 w-0 h-0 border-x-4 border-x-transparent border-b-[6px] border-b-neutral-900/95 dark:border-b-neutral-800/95 pointer-events-none"
+            className="absolute -left-1.5 w-0 h-0 border-y-4 border-y-transparent border-r-[6px] border-r-neutral-900/95 dark:border-r-neutral-800/95 pointer-events-none"
             style={{
-              left: `calc(50% + ${tooltipPos.arrowOffset}px)`,
-              transform: "translateX(-50%)",
+              top: `calc(50% + ${tooltipPos.arrowOffsetY}px)`,
+              transform: "translateY(-50%)",
             }}
           />
         )}
