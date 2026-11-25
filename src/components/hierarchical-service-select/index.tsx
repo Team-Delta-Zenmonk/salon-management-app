@@ -115,11 +115,6 @@ export default function HierarchicalServiceSelect({
     return null;
   }, [value, rootServices, localCache, allowClearOption]);
 
-  const effectivePlaceholder =
-    placeholder !== "Select Service"
-      ? placeholder
-      : (allowClearOption?.label || placeholder);
-
   const handleRootScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (isLoadingRootServices) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
@@ -223,11 +218,11 @@ export default function HierarchicalServiceSelect({
           triggerClassName
         )}
       >
-        <span className={cn("truncate flex-1 flex items-center min-w-0 leading-normal", !selectedLabel && !allowClearOption && "text-muted-foreground")}>
+        <span className={cn("truncate flex-1 flex items-center min-w-0 leading-normal", selectedLabel ? "text-foreground" : "text-muted-foreground")}>
           {selectedLabel ? (
             <EllipsisCell value={selectedLabel} maxChars={35} className="truncate" />
           ) : (
-            effectivePlaceholder
+            placeholder
           )}
         </span>
         {isClearable !== false && Boolean(value) && !disabled && (
@@ -349,7 +344,7 @@ export default function HierarchicalServiceSelect({
                   onClick={handleSelectClearOption}
                   className={cn(
                     "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between gap-2 font-medium",
-                    String(value) === String(allowClearOption.value) || !value
+                    Boolean(value) && String(value) === String(allowClearOption.value)
                       ? "bg-primary text-primary-foreground font-semibold"
                       : "hover:bg-muted text-foreground"
                   )}
@@ -357,7 +352,7 @@ export default function HierarchicalServiceSelect({
                   <span className="truncate flex-1 text-xs">
                     {allowClearOption.label}
                   </span>
-                  {(String(value) === String(allowClearOption.value) || !value) && (
+                  {Boolean(value) && String(value) === String(allowClearOption.value) && (
                     <Check className="h-3.5 w-3.5 shrink-0" />
                   )}
                 </button>
