@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
@@ -33,12 +33,14 @@ export default function BookingPage() {
   const dispatch = useAppDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const { data: staff } = useAppSelector((state) => state.staff);
+  const { data: staff, hasMore: hasMoreStaff, loading: isStaffLoading } = useAppSelector((state) => state.staff);
   const { data: services, hasMore: hasMoreServices, loading: isLoadingServices } = useAppSelector((state) => state.service);
   const rootServices = useMemo(() => {
     return (services || []).filter((s) => s.parent_id === null || s.parent_id === undefined);
   }, [services]);
   const [servicePage, setServicePage] = useState(1);
+  const [staffPage, setStaffPage] = useState(1);
+  const [isStaffRefreshing, setIsStaffRefreshing] = useState(false);
   const { data: bookings, loading, updatingBookingUuid } = useAppSelector((state) => state.booking);
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -68,9 +70,36 @@ export default function BookingPage() {
   const selectedPayment = watch("payment");
 
   useEffect(() => {
-    dispatch(listStaffAction({ page: 1, limit: 10 }));
     dispatch(listServicesAction({ page: 1, limit: 10 }));
   }, [dispatch]);
+
+  const fetchFreshStaff = useCallback(async () => {
+    setIsStaffRefreshing(true);
+    setStaffPage(1);
+    try {
+      await dispatch(listStaffAction({ page: 1, limit: 10 })).unwrap();
+    } catch (err) {
+      console.error("Failed to fetch staff on open", err);
+    } finally {
+      setIsStaffRefreshing(false);
+    }
+  }, [dispatch]);
+
+  const handleFetchMoreStaff = useCallback(() => {
+    if (!hasMoreStaff || isStaffLoading || isStaffRefreshing) return;
+    const nextPage = staffPage + 1;
+    setStaffPage(nextPage);
+    dispatch(listStaffAction({ page: nextPage, limit: 10 }));
+  }, [hasMoreStaff, isStaffLoading, isStaffRefreshing, staffPage, dispatch]);
+
+  const handleStaffOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        fetchFreshStaff();
+      }
+    },
+    [fetchFreshStaff]
+  );
 
   const handleFetchMoreServices = () => {
     if (!hasMoreServices || isLoadingServices) return;
@@ -234,9 +263,10 @@ export default function BookingPage() {
               staffOptions={staffOptions}
               paymentOptions={paymentOptions}
               statusLegend={statusLegend}
-              rootServices={rootServices}
-              isLoadingRootServices={isLoadingServices}
-              onRootScrollEnd={handleFetchMoreServices}
+              onStaffOpenChange={handleStaffOpenChange}
+              onStaffScrollEnd={handleFetchMoreStaff}
+              isLoadingStaff={isStaffRefreshing}
+              isLoadingMoreStaff={isStaffLoading && staffPage > 1}
             />
           </div>
           <CreateBooking />
@@ -258,7 +288,11 @@ export default function BookingPage() {
               options={staffOptions}
               identifier="booking-staff-filter"
               translate={false}
-              disabled={staffOptions.length === 1}
+              onOpenChange={handleStaffOpenChange}
+              onScrollEnd={handleFetchMoreStaff}
+              isLoading={isStaffRefreshing}
+              isLoadingMore={isStaffLoading && staffPage > 1}
+              loadingText="Loading staff..."
             />
           </div>
           <div className="w-[195px] min-w-[160px]">
@@ -270,6 +304,7 @@ export default function BookingPage() {
                   value={value}
                   onChange={onChange}
                   valueMode="uuid"
+                  placeholder="All Services"
                   allowClearOption={{
                     label: "All Services",
                     value: ALL_SERVICES_VALUE,

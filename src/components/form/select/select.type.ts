@@ -27,6 +27,8 @@ export type CustomSelectProps<T extends FieldValues> = {
   onChange?: (value: string | null) => void;
   onOpenChange?: (open: boolean) => void;
   onScrollEnd?: () => void;
+  isLoading?: boolean;
   isLoadingMore?: boolean;
+  loadingText?: string;
   renderOption?: (option: any) => ReactNode;
 };

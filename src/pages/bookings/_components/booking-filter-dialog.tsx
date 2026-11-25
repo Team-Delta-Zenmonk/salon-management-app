@@ -33,9 +33,10 @@ interface BookingFilterDialogProps {
   paymentOptions: SelectOption[];
   statusLegend?: LegendItem[];
   hasActiveFilters?: boolean;
-  rootServices?: Service[];
-  isLoadingRootServices?: boolean;
-  onRootScrollEnd?: () => void;
+  onStaffOpenChange?: (open: boolean) => void;
+  onStaffScrollEnd?: () => void;
+  isLoadingStaff?: boolean;
+  isLoadingMoreStaff?: boolean;
 }
 
 export default function BookingFilterDialog({
@@ -43,25 +44,33 @@ export default function BookingFilterDialog({
   staffOptions,
   paymentOptions,
   statusLegend = [],
-  rootServices = [],
-  isLoadingRootServices = false,
-  onRootScrollEnd,
+  onStaffOpenChange,
+  onStaffScrollEnd,
+  isLoadingStaff = false,
+  isLoadingMoreStaff = false,
 }: Readonly<BookingFilterDialogProps>) {
   const [open, setOpen] = useState(false);
+
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen) {
+      onStaffOpenChange?.(true);
+    }
+  };
 
   return (
     <>
       <Button
         type="button"
         variant="outline"
-        onClick={() => setOpen(true)}
+        onClick={() => handleDialogOpenChange(true)}
         className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl border-border/50 bg-card/60 backdrop-blur-md text-foreground font-bold text-xs shadow-sm hover:bg-card/80 transition-all shrink-0"
       >
         <SlidersHorizontal className="w-3.5 h-3.5 text-primary" />
         <span>Filters</span>
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="w-[92vw] max-w-sm rounded-2xl border-border/50 bg-card p-5 shadow-2xl [&>button]:hidden">
           <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/50">
             <div className="flex items-center gap-2">
@@ -99,7 +108,11 @@ export default function BookingFilterDialog({
                   options={staffOptions}
                   identifier="booking-staff-filter-modal"
                   translate={false}
-                  disabled={staffOptions.length === 1}
+                  onOpenChange={onStaffOpenChange}
+                  onScrollEnd={onStaffScrollEnd}
+                  isLoading={isLoadingStaff}
+                  isLoadingMore={isLoadingMoreStaff}
+                  loadingText="Loading staff..."
                 />
               </div>
             </div>
@@ -117,6 +130,7 @@ export default function BookingFilterDialog({
                       value={value}
                       onChange={onChange}
                       valueMode="uuid"
+                      placeholder="All Services"
                       allowClearOption={{
                         label: "All Services",
                         value: ALL_SERVICES_VALUE,

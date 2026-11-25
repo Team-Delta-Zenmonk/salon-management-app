@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { isFormChanged } from "../../../../common/utils/is-form-changed";
 import {
   Dialog,
@@ -11,7 +11,8 @@ import { Button } from "../../../../components/ui/button";
 import { Loader2 } from "lucide-react";
 import { callSnack } from "../../../../components/snackbar";
 import { createInventoryLogService as logTransaction } from "../../../../features/inventory/create-inventory-log/create-inventory-log.service";
-import { useAppSelector } from "../../../../store/hooks";
+import { useAppSelector, useAppDispatch } from "../../../../store/hooks";
+import { listInventoryItemsAction } from "../../../../features/inventory/list-inventory-items/list-inventory-items.action";
 import { updateInventoryLogService as updateTransaction } from "../../../../features/inventory/update.inventory-log.ts/update.inventory-log.service";
 import type { InventoryItem } from "../../../../features/inventory/inventory-item.slice";
 import type { InventoryTransaction } from "../../../../features/inventory/inventory-log.slice";
@@ -36,7 +37,32 @@ interface LogTransactionModalProps {
 export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, onClose, onSuccess, transactionToEdit, createdItem, onAddNewItem }) => {
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] = useState<InventoryLogForm | null>(null);
+  const dispatch = useAppDispatch();
   const stockItems = useAppSelector((state) => state.inventoryItem.data);
+  const hasMoreItems = useAppSelector((state) => state.inventoryItem.hasMore);
+  const [itemPage, setItemPage] = useState(1);
+  const [isItemsLoading, setIsItemsLoading] = useState(false);
+  const [isLoadingMoreItems, setIsLoadingMoreItems] = useState(false);
+
+  const handleItemsOpenChange = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      setItemPage(1);
+      setIsItemsLoading(true);
+      dispatch(listInventoryItemsAction({ page: 1, limit: 10 }))
+        .unwrap()
+        .finally(() => setIsItemsLoading(false));
+    }
+  }, [dispatch]);
+
+  const handleItemsScrollEnd = useCallback(() => {
+    if (!hasMoreItems || isLoadingMoreItems || isItemsLoading) return;
+    const nextPage = itemPage + 1;
+    setItemPage(nextPage);
+    setIsLoadingMoreItems(true);
+    dispatch(listInventoryItemsAction({ page: nextPage, limit: 10 }))
+      .unwrap()
+      .finally(() => setIsLoadingMoreItems(false));
+  }, [hasMoreItems, isLoadingMoreItems, isItemsLoading, itemPage, dispatch]);
 
   const { control, handleSubmit, reset, watch, trigger } = useForm<InventoryLogForm>({
     resolver: zodResolver(inventoryLogSchema) as unknown as Resolver<InventoryLogForm>,
@@ -76,6 +102,7 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
 
   useEffect(() => {
     if (open) {
+      handleItemsOpenChange(true);
       if (transactionToEdit) {
         const defaults: InventoryLogForm = {
           item_uuid: transactionToEdit.item.uuid,
@@ -172,6 +199,11 @@ export const LogTransactionModal: React.FC<LogTransactionModalProps> = ({ open, 
                   options={options}
                   disabled={false}
                   triggerClassName="capitalize"
+                  onOpenChange={handleItemsOpenChange}
+                  onScrollEnd={handleItemsScrollEnd}
+                  isLoading={isItemsLoading}
+                  isLoadingMore={isLoadingMoreItems}
+                  loadingText="Loading items..."
                 />
               </div>
               {!transactionToEdit && (

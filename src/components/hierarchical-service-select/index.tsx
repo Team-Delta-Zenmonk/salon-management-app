@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronRight, ChevronLeft, Loader2, Check, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronLeft, Loader2, Check, ChevronDown, X } from "lucide-react";
 import { listSubServicesService } from "@/features/service/list-sub-services/list-sub-services.service";
 import { listServicesAction } from "@/features/service/list-services/list-service.action";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -22,6 +22,7 @@ export interface HierarchicalServiceSelectProps {
     value: string;
   };
   triggerClassName?: string;
+  isClearable?: boolean;
 }
 
 export default function HierarchicalServiceSelect({
@@ -35,6 +36,7 @@ export default function HierarchicalServiceSelect({
   valueMode = "id",
   allowClearOption,
   triggerClassName,
+  isClearable = true,
 }: Readonly<HierarchicalServiceSelectProps>) {
   const dispatch = useAppDispatch();
   const reduxServiceState = useAppSelector((state) => state.service);
@@ -112,6 +114,11 @@ export default function HierarchicalServiceSelect({
 
     return null;
   }, [value, rootServices, localCache, allowClearOption]);
+
+  const effectivePlaceholder =
+    placeholder !== "Select Service"
+      ? placeholder
+      : (allowClearOption?.label || placeholder);
 
   const handleRootScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (isLoadingRootServices) return;
@@ -216,14 +223,32 @@ export default function HierarchicalServiceSelect({
           triggerClassName
         )}
       >
-        <span className={cn("truncate flex-1 flex items-center min-w-0 leading-normal", !selectedLabel && "text-muted-foreground")}>
+        <span className={cn("truncate flex-1 flex items-center min-w-0 leading-normal", !selectedLabel && !allowClearOption && "text-muted-foreground")}>
           {selectedLabel ? (
             <EllipsisCell value={selectedLabel} maxChars={35} className="truncate" />
           ) : (
-            placeholder
+            effectivePlaceholder
           )}
         </span>
-        <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+        {isClearable !== false && Boolean(value) && !disabled && (
+          <div
+            role="button"
+            tabIndex={0}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onChange("", undefined);
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="mr-1 flex items-center justify-center rounded-full p-0.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 cursor-pointer pointer-events-auto"
+          >
+            <X className="h-3.5 w-3.5" />
+          </div>
+        )}
+        <ChevronDown className="h-4 w-4 opacity-50 shrink-0 pointer-events-none" />
       </PopoverTrigger>
 
       <PopoverContent
@@ -324,7 +349,7 @@ export default function HierarchicalServiceSelect({
                   onClick={handleSelectClearOption}
                   className={cn(
                     "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between gap-2 font-medium",
-                    String(value) === String(allowClearOption.value)
+                    String(value) === String(allowClearOption.value) || !value
                       ? "bg-primary text-primary-foreground font-semibold"
                       : "hover:bg-muted text-foreground"
                   )}
@@ -332,7 +357,7 @@ export default function HierarchicalServiceSelect({
                   <span className="truncate flex-1 text-xs">
                     {allowClearOption.label}
                   </span>
-                  {String(value) === String(allowClearOption.value) && (
+                  {(String(value) === String(allowClearOption.value) || !value) && (
                     <Check className="h-3.5 w-3.5 shrink-0" />
                   )}
                 </button>

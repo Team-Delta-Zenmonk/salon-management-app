@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { isFormChanged } from "../../../../common/utils/is-form-changed";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { callSnack } from "../../../../components/snackbar";
@@ -53,6 +53,36 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   const [pendingPayload, setPendingPayload] = useState<CreateServicePayload | null>(null);
 
   const categories = useAppSelector((state: RootState) => state.category.data) ?? [];
+  const hasMoreCategories = useAppSelector((state: RootState) => state.category.hasMore);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  const [isLoadingMoreCategories, setIsLoadingMoreCategories] = useState(false);
+
+  const handleCategoryOpenChange = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      setCategoryPage(1);
+      setIsCategoryLoading(true);
+      dispatch(listCategoriesAction({ page: 1, limit: 10 }))
+        .unwrap()
+        .catch((err: unknown) => {
+          const errorObj = err as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
+          if (!errorObj?.isSuspended && !errorObj?.isHandledGlobally) {
+            callSnack("Failed to fetch categories", "error");
+          }
+        })
+        .finally(() => setIsCategoryLoading(false));
+    }
+  }, [dispatch]);
+
+  const handleCategoryScrollEnd = useCallback(() => {
+    if (!hasMoreCategories || isLoadingMoreCategories || isCategoryLoading) return;
+    const nextPage = categoryPage + 1;
+    setCategoryPage(nextPage);
+    setIsLoadingMoreCategories(true);
+    dispatch(listCategoriesAction({ page: nextPage, limit: 10 }))
+      .unwrap()
+      .finally(() => setIsLoadingMoreCategories(false));
+  }, [hasMoreCategories, isLoadingMoreCategories, isCategoryLoading, categoryPage, dispatch]);
   const salon = useAppSelector((state: RootState) => state.auth.salon);
   const salonUUID = salon?.uuid ?? "";
 
@@ -267,23 +297,6 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
   });
 
   useEffect(() => {
-    if (!open || categories.length > 0) return;
-
-    const fetchCategories = async () => {
-      try {
-        await dispatch(listCategoriesAction({ page: 1, limit: 100 })).unwrap();
-      } catch (err: unknown) {
-        const errorObj = err as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
-        if (!errorObj?.isSuspended && !errorObj?.isHandledGlobally) {
-          callSnack("Failed to fetch categories", "error");
-        }
-      }
-    };
-
-    fetchCategories();
-  }, [open, categories.length, dispatch]);
-
-  useEffect(() => {
     if (!open) return;
 
     if (mode === "create") {
@@ -441,6 +454,11 @@ export default function ServiceDialog({ open, onClose, mode, service, parentServ
                   identifier="service-category"
                   options={categories.map((c) => ({ label: c.name, value: c.uuid }))}
                   disabled={isLoading}
+                  onOpenChange={handleCategoryOpenChange}
+                  onScrollEnd={handleCategoryScrollEnd}
+                  isLoading={isCategoryLoading}
+                  isLoadingMore={isLoadingMoreCategories}
+                  loadingText="Loading categories..."
                 />
               )}
 

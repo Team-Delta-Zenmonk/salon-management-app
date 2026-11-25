@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { isFormChanged } from "../../../../common/utils/is-form-changed";
 import {
   Dialog,
@@ -19,7 +19,8 @@ import FilePicker from "../../../../components/form/file-picker";
 import { uploadImages } from "../../../../features/upload-images/upload-images.service";
 import type { InventoryItem } from "../../../../features/inventory/inventory-item.slice";
 import Select from "../../../../components/form/select";
-import { useAppSelector } from "../../../../store/hooks";
+import { useAppSelector, useAppDispatch } from "../../../../store/hooks";
+import { fetchItemCategoriesAction } from "../../../../features/inventory/list-inventory-items-category/list-inventory-items-category.action";
 import { inventoryItemSchema, type InventoryItemForm } from "../schema/inventory-item.schema";
 import { FIELD_LIMITS } from "../../../../common/field-limits";
 import { VALIDATE_PATTERN } from "../../../../common/validate-pattern";
@@ -45,7 +46,33 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
   const [loading, setLoading] = useState(false);
   const [itemDetails, setItemDetails] = useState<InventoryItem | null>(null);
   const [initialValues, setInitialValues] = useState<InventoryItemForm | null>(null);
+  const dispatch = useAppDispatch();
   const categories = useAppSelector((state) => state.itemsCategory.data) ?? [];
+  const totalCategories = useAppSelector((state) => state.itemsCategory.total);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  const [isLoadingMoreCategories, setIsLoadingMoreCategories] = useState(false);
+  const hasMoreCategories = categories.length < totalCategories;
+
+  const handleCategoryOpenChange = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      setCategoryPage(1);
+      setIsCategoryLoading(true);
+      dispatch(fetchItemCategoriesAction({ page: 1, limit: 10 }))
+        .unwrap()
+        .finally(() => setIsCategoryLoading(false));
+    }
+  }, [dispatch]);
+
+  const handleCategoryScrollEnd = useCallback(() => {
+    if (!hasMoreCategories || isLoadingMoreCategories || isCategoryLoading) return;
+    const nextPage = categoryPage + 1;
+    setCategoryPage(nextPage);
+    setIsLoadingMoreCategories(true);
+    dispatch(fetchItemCategoriesAction({ page: nextPage, limit: 10 }))
+      .unwrap()
+      .finally(() => setIsLoadingMoreCategories(false));
+  }, [hasMoreCategories, isLoadingMoreCategories, isCategoryLoading, categoryPage, dispatch]);
 
   const { control, handleSubmit, reset, watch } = useForm<InventoryItemForm>({
     resolver: zodResolver(inventoryItemSchema) as unknown as Resolver<InventoryItemForm>,
@@ -96,9 +123,10 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
 
   useEffect(() => {
     if (open && inventoryItem) {
+      handleCategoryOpenChange(true);
       fetchItemDetails(inventoryItem.uuid);
     }
-  }, [open, inventoryItem, fetchItemDetails]);
+  }, [open, inventoryItem, fetchItemDetails, handleCategoryOpenChange]);
 
   const onSubmit = async (data: InventoryItemForm) => {
     if (!inventoryItem || !isChanged) return;
@@ -202,6 +230,11 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ open, onClos
                       })}
                     disabled={loading}
                     triggerClassName="capitalize"
+                    onOpenChange={handleCategoryOpenChange}
+                    onScrollEnd={handleCategoryScrollEnd}
+                    isLoading={isCategoryLoading}
+                    isLoadingMore={isLoadingMoreCategories}
+                    loadingText="Loading categories..."
                   />
                 </div>
               </div>

@@ -32,6 +32,36 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const categories = useAppSelector((state: RootState) => state.category.data);
+  const hasMoreCategories = useAppSelector((state: RootState) => state.category.hasMore);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  const [isLoadingMoreCategories, setIsLoadingMoreCategories] = useState(false);
+
+  const handleCategoryOpenChange = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      setCategoryPage(1);
+      setIsCategoryLoading(true);
+      dispatch(listCategoriesAction({ page: 1, limit: 10 }))
+        .unwrap()
+        .catch((err: unknown) => {
+          const errorObj = err as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
+          if (!errorObj?.isSuspended && !errorObj?.isHandledGlobally) {
+            callSnack("Failed to fetch categories", "error");
+          }
+        })
+        .finally(() => setIsCategoryLoading(false));
+    }
+  }, [dispatch]);
+
+  const handleCategoryScrollEnd = useCallback(() => {
+    if (!hasMoreCategories || isLoadingMoreCategories || isCategoryLoading) return;
+    const nextPage = categoryPage + 1;
+    setCategoryPage(nextPage);
+    setIsLoadingMoreCategories(true);
+    dispatch(listCategoriesAction({ page: nextPage, limit: 10 }))
+      .unwrap()
+      .finally(() => setIsLoadingMoreCategories(false));
+  }, [hasMoreCategories, isLoadingMoreCategories, isCategoryLoading, categoryPage, dispatch]);
   const serviceState = useAppSelector((state: RootState) => state.service);
   const data = serviceState?.data ?? [];
   const total = serviceState?.total ?? 0;
@@ -47,20 +77,6 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
 
   const { control, watch } = methods;
   const watchedCategoryUuid = watch("category_uuid");
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        await dispatch(listCategoriesAction({ page: 1, limit: 10 })).unwrap();
-      } catch (err: unknown) {
-        const errorObj = err as { isSuspended?: boolean; isHandledGlobally?: boolean } | null;
-        if (!errorObj?.isSuspended && !errorObj?.isHandledGlobally) {
-          callSnack("Failed to fetch categories", "error");
-        }
-      }
-    };
-    fetchCategories();
-  }, [dispatch]);
 
   const categoryOptions = useMemo(
     () => [
@@ -172,7 +188,11 @@ const SearchService = ({ selectedCategoryUuid, onCategoryChange, refreshServices
                 placeholder="All Categories"
                 identifier="service-category-filter"
                 options={categoryOptions}
-                disabled={categoryOptions.length === 0}
+                onOpenChange={handleCategoryOpenChange}
+                onScrollEnd={handleCategoryScrollEnd}
+                isLoading={isCategoryLoading}
+                isLoadingMore={isLoadingMoreCategories}
+                loadingText="Loading categories..."
               />
             </div>
           </div>

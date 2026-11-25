@@ -30,6 +30,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowUpDown,
+  X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -298,8 +299,8 @@ export default function PlanAndBillingPage() {
 
   const [invoices, setInvoices] = useState<SubscriptionInvoice[]>([]);
   const [isLoadingInvoices, setIsLoadingInvoices] = useState(false);
-  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<"ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING">("ALL");
-  const [sortOrder, setSortOrder] = useState<"DESC" | "ASC">("DESC");
+  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<"ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING" | "">("ALL");
+  const [sortOrder, setSortOrder] = useState<"DESC" | "ASC" | "">("DESC");
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<InvoicesPagination | null>(null);
 
@@ -332,9 +333,9 @@ export default function PlanAndBillingPage() {
   const storefrontUrl = salon?.slug ? getStorefrontUrl(salon.slug) : null;
 
   const fetchInvoices = useCallback(async (
-    type: "ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING" = invoiceTypeFilter,
+    type: "ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING" | "" = invoiceTypeFilter,
     page: number = currentPage,
-    order: "DESC" | "ASC" = sortOrder
+    order: "DESC" | "ASC" | "" = sortOrder
   ) => {
     const requestId = ++fetchRequestIdRef.current;
     setIsLoadingInvoices(true);
@@ -345,11 +346,11 @@ export default function PlanAndBillingPage() {
 
     try {
       const res = await getInvoices({
-        type: type,
+        type: type && type !== "ALL" ? (type as any) : "ALL",
         page: page,
         limit: 10,
-        order: order,
-        sort: order,
+        order: order === "ASC" ? "ASC" : "DESC",
+        sort: order === "ASC" ? "ASC" : "DESC",
       });
 
       if (requestId !== fetchRequestIdRef.current) return;
@@ -394,11 +395,11 @@ export default function PlanAndBillingPage() {
     setIsLoadingMoreMobile(true);
     try {
       const res = await getInvoices({
-        type: invoiceTypeFilter,
+        type: invoiceTypeFilter && invoiceTypeFilter !== "ALL" ? invoiceTypeFilter : "ALL",
         page: nextPage,
         limit: 10,
-        order: sortOrder,
-        sort: sortOrder,
+        order: sortOrder === "ASC" ? "ASC" : "DESC",
+        sort: sortOrder === "ASC" ? "ASC" : "DESC",
       });
       let newInvoices = res.invoices || [];
       if (sortOrder === "ASC") {
@@ -431,14 +432,14 @@ export default function PlanAndBillingPage() {
     setSearchParams(nextParams, { replace: true });
   };
 
-  const handleFilterChange = (filter: "ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING") => {
+  const handleFilterChange = (filter: "ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING" | "") => {
     setInvoiceTypeFilter(filter);
     setCurrentPage(1);
     setMobilePage(1);
     setMobileInvoices([]);
   };
 
-  const handleSortChange = (order: "DESC" | "ASC") => {
+  const handleSortChange = (order: "DESC" | "ASC" | "") => {
     setSortOrder(order);
     setCurrentPage(1);
     setMobilePage(1);
@@ -1027,17 +1028,35 @@ export default function PlanAndBillingPage() {
                   onValueChange={(val) => handleFilterChange(val as "ALL" | "SUBSCRIPTION" | "THEME" | "BOOKING")}
                 >
                   <SelectTrigger className="h-9 text-xs bg-card border-border/80 rounded-xl cursor-pointer">
-                    <div className="flex items-center gap-1.5 truncate">
+                    <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
                       <SelectValue placeholder="All Invoices">
-                        {invoiceTypeFilter === "ALL"
-                          ? "All Invoices"
-                          : invoiceTypeFilter === "SUBSCRIPTION"
+                        {invoiceTypeFilter === "SUBSCRIPTION"
                           ? "Subscription Plans"
                           : invoiceTypeFilter === "THEME"
                           ? "Storefront Themes"
-                          : "Booking Invoices"}
+                          : invoiceTypeFilter === "BOOKING"
+                          ? "Booking Invoices"
+                          : "All Invoices"}
                       </SelectValue>
                     </div>
+                    {invoiceTypeFilter && (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleFilterChange("");
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        className="mr-1 flex items-center justify-center rounded-full p-0.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 cursor-pointer pointer-events-auto"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </div>
+                    )}
                   </SelectTrigger>
                   <SelectContent align="start" className="z-50 min-w-[185px] bg-card border border-border/80 shadow-md rounded-xl p-1">
                     <SelectItem value="ALL" className="text-xs cursor-pointer rounded-lg">All Invoices</SelectItem>
@@ -1054,12 +1073,30 @@ export default function PlanAndBillingPage() {
                   onValueChange={(val) => handleSortChange(val as "DESC" | "ASC")}
                 >
                   <SelectTrigger className="h-9 text-xs bg-card border-border/80 rounded-xl cursor-pointer">
-                    <div className="flex items-center gap-1.5 truncate">
+                    <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
                       <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                       <SelectValue placeholder="Newest First">
-                        {sortOrder === "DESC" ? "Newest First" : "Oldest First"}
+                        {sortOrder === "ASC" ? "Oldest First (Asc)" : "Newest First"}
                       </SelectValue>
                     </div>
+                    {sortOrder && (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleSortChange("");
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        className="mr-1 flex items-center justify-center rounded-full p-0.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 cursor-pointer pointer-events-auto"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </div>
+                    )}
                   </SelectTrigger>
                   <SelectContent align="start" className="z-50 min-w-[155px] bg-card border border-border/80 shadow-md rounded-xl p-1">
                     <SelectItem value="DESC" className="text-xs cursor-pointer rounded-lg">Newest First (Desc)</SelectItem>
@@ -1142,10 +1179,10 @@ export default function PlanAndBillingPage() {
                 <FileText className="w-6 h-6" />
               </div>
               <p className="text-sm font-semibold text-foreground">
-                {invoiceTypeFilter === "ALL" ? "No paid invoices yet" : `No ${invoiceTypeFilter.toLowerCase()} invoices`}
+                {invoiceTypeFilter === "ALL" || !invoiceTypeFilter ? "No paid invoices yet" : `No ${invoiceTypeFilter.toLowerCase()} invoices`}
               </p>
               <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                {invoiceTypeFilter === "ALL"
+                {invoiceTypeFilter === "ALL" || !invoiceTypeFilter
                   ? "Your GST receipts and Stripe transaction records will appear here after your first payment."
                   : `There are currently no ${invoiceTypeFilter.toLowerCase()} invoices recorded.`}
               </p>

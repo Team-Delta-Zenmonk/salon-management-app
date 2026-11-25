@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import SearchBar from "../../../../components/searchbar";
 import Select from "../../../../components/form/select";
@@ -13,6 +13,8 @@ import {
 } from "../../../../components/ui/dialog";
 import { SlidersHorizontal, RotateCcw, Filter } from "lucide-react";
 import type { ItemCategory } from "../../../../features/inventory/types/category.type";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { fetchItemCategoriesAction } from "../../../../features/inventory/list-inventory-items-category/list-inventory-items-category.action";
 
 const STOCK_SORT_OPTIONS = [
   { value: "name_asc", label: "Name: A to Z" },
@@ -60,6 +62,32 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
   categories,
 }) => {
   const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const dispatch = useAppDispatch();
+  const totalCategories = useAppSelector((state) => state.itemsCategory.total);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  const [isLoadingMoreCategories, setIsLoadingMoreCategories] = useState(false);
+  const hasMoreCategories = categories.length < totalCategories;
+
+  const handleCategoryOpenChange = useCallback((open: boolean) => {
+    if (open) {
+      setCategoryPage(1);
+      setIsCategoryLoading(true);
+      dispatch(fetchItemCategoriesAction({ page: 1, limit: 10 }))
+        .unwrap()
+        .finally(() => setIsCategoryLoading(false));
+    }
+  }, [dispatch]);
+
+  const handleCategoryScrollEnd = useCallback(() => {
+    if (!hasMoreCategories || isLoadingMoreCategories || isCategoryLoading) return;
+    const nextPage = categoryPage + 1;
+    setCategoryPage(nextPage);
+    setIsLoadingMoreCategories(true);
+    dispatch(fetchItemCategoriesAction({ page: nextPage, limit: 10 }))
+      .unwrap()
+      .finally(() => setIsLoadingMoreCategories(false));
+  }, [hasMoreCategories, isLoadingMoreCategories, isCategoryLoading, categoryPage, dispatch]);
 
   const { control, watch, setValue } = useForm({
     defaultValues: {
@@ -99,6 +127,7 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
     setValue("itemType", itemType || "");
     setValue("sortBy", sortBy || "");
     setFilterModalOpen(true);
+    handleCategoryOpenChange(true);
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -106,6 +135,7 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
       setValue("categoryUuid", categoryUuid || "");
       setValue("itemType", itemType || "");
       setValue("sortBy", sortBy || "");
+      handleCategoryOpenChange(true);
     }
     setFilterModalOpen(open);
   };
@@ -191,6 +221,11 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
                 options={categoryOptions}
                 triggerClassName="capitalize h-10 rounded-xl bg-card/60 border-border/50"
                 onChange={(val) => onCategoryChange(val || "")}
+                onOpenChange={handleCategoryOpenChange}
+                onScrollEnd={handleCategoryScrollEnd}
+                isLoading={isCategoryLoading}
+                isLoadingMore={isLoadingMoreCategories}
+                loadingText="Loading categories..."
               />
             </div>
             <div className="w-56">
@@ -239,6 +274,11 @@ export const InventoryFilters: React.FC<InventoryFiltersProps> = ({
                   label="Category"
                   options={categoryOptions}
                   triggerClassName="capitalize"
+                  onOpenChange={handleCategoryOpenChange}
+                  onScrollEnd={handleCategoryScrollEnd}
+                  isLoading={isCategoryLoading}
+                  isLoadingMore={isLoadingMoreCategories}
+                  loadingText="Loading categories..."
                 />
 
                 <Select
